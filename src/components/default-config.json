@@ -1,0 +1,67 @@
+{
+    "name": "lake",
+    "bpm": 120,
+    "timeSignature": 4,
+    "elements": [
+        {
+            "groupName": "Percussion",
+            "polyphony": -1,
+            "voices": [
+                {
+                    "name": "kick-snare-1",
+                    "fileName": "kick-snare-1.mp3",
+                    "length": "4m",
+                    "quantizeLength": "4m"
+                }
+            ]
+        },
+        {
+            "groupName": "Atmosphere",
+            "polyphony": -1,
+            "voices": [
+                {
+                    "name": "synth-atmosphere-1",
+                    "fileName": "synth-atmosphere-1.mp3",
+                    "length": "16m",
+                    "quantizeLength": "4m"
+                }
+            ]
+        },
+        {
+            "groupName": "Leads",
+            "polyphony": 1,
+            "voices": [
+                {
+                    "name": "piano-lead-1",
+                    "fileName": "piano-lead-1.mp3",
+                    "length": "4m",
+                    "quantizeLength": "4m"
+                }
+            ]
+        },
+        {
+            "groupName": "Harmony",
+            "polyphony": -1,
+            "voices": [
+                {
+                    "name": "rhodes-1",
+                    "fileName": "rhodes-1.mp3",
+                    "length": "4m",
+                    "quantizeLength": "4m"
+                }
+            ]
+        },
+        {
+            "groupName": "Bass",
+            "polyphony": 1,
+            "voices": [
+                {
+                    "name": "sub-1",
+                    "fileName": "sub-1.mp3",
+                    "length": "8m",
+                    "quantizeLength": "4m"
+                }
+            ]
+        }
+    ]      
+}
