@@ -1,10 +1,12 @@
 import { createStore, combineReducers } from 'redux';
-import SongReducer from '../reducers/songs';
+import SongsReducer from '../reducers/songsReducer';
+import ActiveSongReducer from '../reducers/activeSongReducer';
 
 const ConfigureStore = () => {
     const store = createStore(
         combineReducers({
-            songs: SongReducer
+            songs: SongsReducer,
+            activeSong: ActiveSongReducer
         }),
         window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
     );

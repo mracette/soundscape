@@ -14,14 +14,6 @@ import './styles/styles.scss';
 
 const store = ConfigureStore();
 
-// const audioManager = new AudioManager();
-// audioManager.loadPlayers().then(() => {
-//     console.log('success loading players');
-//     audioManager.setSongState();
-// }).catch((err) => {
-//     console.error(err);
-// });
-
 const jsx = (
     <Provider store = {store}>
         <AppRouter />

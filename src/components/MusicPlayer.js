@@ -1,29 +1,58 @@
 import React from 'react';
+import Tone from 'tone';
 import ToggleVoiceButtonGroup from './ToggleVoiceButtonGroup';
-import AudioManager from './AudioManager';
+import { initToneObjects } from '../actions/activeSongActions';
 import { connect } from 'react-redux';
-import { loadNewSong } from '../actions/songActions';
+
+// window.Tone = require('tone');
 
 class MusicPlayer extends React.Component {
     constructor(props) {
         super(props);
-        console.log(props.song);
+
+        const transport = Tone.Transport;
+
+        console.log(props.activeSong.timeSignature);
+        console.log(props.activeSong.bpm);
+
+        transport.timeSignature = props.activeSong.timeSignature;
+        transport.bpm.value = props.activeSong.bpm;
+        transport.start('+0.1');
+
+        const context = Tone.context;
+        context.latencyHint = 'fastest';
+        
+        const state = transport.state;
+
+        let playersLoaded = 0;
+        let totalPlayers = this.countPlayers();
+
+        const playersLoadedProgress = playersLoaded / totalPlayers;
+
+        props.dispatch( initToneObjects({transport, context, state, playersLoaded, totalPlayers, playersLoadedProgress}));
+
     }
+
+    countPlayers() {
+        let totalPlayers = 0;
+        for(let i = 0; i < this.props.activeSong.groups.length; i++) {
+            let e = this.props.activeSong.groups[i];
+            totalPlayers += e.voices.length;
+        }
+        return totalPlayers;
+    }
+
     render() {
         return (
             <div>
-                <h1>Header</h1>
-                <h2>{this.props.song.name}</h2>
-                <h2>{this.props.song.bpm}</h2>
-                <AudioManager />
-                {/* <canvas id={'canvas-viz'}></canvas> */}
-                {this.props.song.groups.map((group) => {
-                    console.log({group: group});
+                <h2>{this.props.activeSong.name}</h2>
+                <h2>{this.props.activeSong.bpm}</h2>
+                {this.props.activeSong.groups.map((group) => {
                     return (
                         <ToggleVoiceButtonGroup
-                            key = {group.name}
-                            id = {group.name}
-                            voices = {group.players}
+                            key = {group.groupName}
+                            className = {`${group.groupName}-button-group`}
+                            voices = {group.voices}
                         />
                     )
                 })}
@@ -34,7 +63,7 @@ class MusicPlayer extends React.Component {
 
 const mapStateToProps = (state) => {
     return {
-        song: state.songs
+        activeSong: state.activeSong
     }
 }
 

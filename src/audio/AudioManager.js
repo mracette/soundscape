@@ -1,5 +1,6 @@
 import Tone from 'tone';
 import { loadNewSong } from '../actions/songs';
+import { initToneObjects } from '../actions/activeSongActions';
 
 const defaultConfig = require('./default-config.json');
 
@@ -10,18 +11,22 @@ export default class AudioManager {
 
         this.name = configFile.name;
 
-        this.transport = Tone.Transport;
-        this.transport.timeSignature = configFile.timeSignature;
-        this.transport.bpm.value = configFile.bpm;
+        const transport = Tone.Transport;
+        transport.timeSignature = configFile.timeSignature;
+        transport.bpm.value = configFile.bpm;
 
-        this.context = Tone.context;
-        this.context.latencyHint = 'fastest';
-
-        this.groups = [];
+        const context = Tone.context;
+        context.latencyHint = 'fastest';
         
-        this.playersLoaded = 0;
-        this.totalPlayers = 0;
+        const state = transport.state;
+
+        let playersLoaded = 0;
+        let totalPlayers = 0;
         this.countPlayers();
+
+        const playersLoadedProgress = playersLoaded / totalPlayers;
+
+        props.dispatch( initToneObjects({transport, context, state, playersLoadedProgress}));
 
     }
 

@@ -5,12 +5,13 @@ const ToggleVoiceButtonGroup = (props) => {
     return (
         <div>
             {props.voices.map((voice) => {
-                console.log(props);
                 return (
                     <ToggleVoiceButton
                         key = {voice.name}
                         id = {voice.name}
-                        player = {voice.player}
+                        fileName = {voice.fileName}
+                        length = {voice.length}
+                        quantizeLength = {voice.quantizeLength}
                     />
                 )
             })}
