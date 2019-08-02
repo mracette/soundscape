@@ -14,12 +14,6 @@ body {
     overflow: hidden;
 }
 
-.button-group {
-    position: absolute;
-    padding: $s-size;
-    bottom: 0rem;
-}
-
 #canvas-viz {
     z-index: -999;
 }

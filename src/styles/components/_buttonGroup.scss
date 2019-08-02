@@ -1,0 +1,19 @@
+.button-section {
+    display: flex;
+    align-content: bottom;
+    position: absolute;
+
+    width: 100vw;
+    bottom: 0px;
+}
+
+.button-group {
+    text-align: center;
+    flex-grow: 1;
+    font-size: $m-size;
+  }
+
+// .button-group {
+//     display: flex;
+
+// }

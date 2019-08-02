@@ -1,55 +1,25 @@
 import React from 'react';
-import { Link }  from 'react-router-dom';
-import { connect } from 'react-redux';
-import { loadSongList } from '../actions/songsActions';
-import { loadNewSong } from '../actions/activeSongActions';
-import MusicPlayer from './MusicPlayer';
+import { Link } from 'react-router-dom';
 
-class NavigationPanel extends React.Component {
-
+export default class NavigationPanel extends React.Component {
     constructor(props) {
         super(props);
-        this.loadSongList();
-    }
+        this.state = {
 
-    loadSongList() {
-        this.props.dispatch( loadSongList(require('./songs-meta-data.json')) );
+        }
     }
-
-    loadNewSong(name, bpm, timeSignature, groups) {
-        this.props.dispatch( loadNewSong({name, bpm, timeSignature, groups}) );
-    }
-
     render() {
         return (
             <div>
-                {this.props.activeSong.name !== '' && (
-                    <MusicPlayer />
-                )}
-                {
-                    this.props.activeSong.name === '' && this.props.songs.songsMetaData.map((song) => {
-                        return (
-                            <button
-                                key={song.name}
-                                onClick = {() => {
-                                    this.loadNewSong(song.name, song.bpm, song.timeSignature, song.groups)
-                                }}
-                            >
-                                {song.name}
-                            </button>
-                        );
-                    })
-                }
+                <h1>Navigation Panel</h1>
+                {this.props.config.map((song) => {
+                    return (
+                        <div key = {song.name}>
+                            <Link to={`/play/${song.name}`} >{song.name}</Link>
+                        </div>
+                    )
+                })}
             </div>
         )
     }
 }
-
-const mapStateToProps = (state) => {
-    return {
-        songs: state.songs,
-        activeSong: state.activeSong
-    };
-}
-
-export default connect(mapStateToProps)(NavigationPanel);

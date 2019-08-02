@@ -1,6 +1,4 @@
-const Tone = require('tone');
-
-class Analyser {
+export default class Analyser {
     constructor(context, source, params){
         const defaults = {
             type: 'fft',
@@ -60,5 +58,3 @@ class Analyser {
     }
 
 }
-
-module.exports = Analyser;

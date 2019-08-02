@@ -1,0 +1,17 @@
+.toggle-button {
+    width: 20vw;
+    padding: $s-size;
+}
+
+.pending-toggle-button {
+    background: yellow;
+}
+
+.active-toggle-button {
+    background: green;
+}
+
+.stopped-toggle-button {
+    background: red;
+}
+

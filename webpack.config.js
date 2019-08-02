@@ -8,6 +8,11 @@ module.exports = {
     },
     module: {
         rules: [
+            {
+                test: /\.mp3$/,
+                include: /src\/audio/,
+                loader: 'file-loader'
+            },
             { 
                 test: /\.js$/, 
                 exclude: /node_modules/, 
@@ -21,12 +26,11 @@ module.exports = {
                     'sass-loader'
                 ]
             }
-
         ]
     },
     devtool: 'cheap-module-eval-source-map',
     devServer: {
         contentBase: path.join(__dirname, 'public'),
         historyApiFallback: true
-    }
+    },
 }
