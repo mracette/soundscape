@@ -12,20 +12,13 @@ export default class MusicPlayer extends React.Component {
             name: this.props.songConfig.name,
             bpm: this.props.songConfig.bpm,
             timeSignature: this.props.songConfig.timeSignature,
+            tone: Tone,
             transport: undefined,
             context: undefined,
-            players: []
+            players: [],
+            totalPlayerCount: undefined,
+            playersLoaded: 0
         }
-        
-        const transport = Tone.Transport;
-        transport.bpm.value = this.state.bpm;
-        transport.timeSignature = this.state.timeSignature;
-        transport.start();
-        this.state.transport = transport;
-
-        const context = Tone.Context;
-        context.latencyHint = 'fastest';
-        this.state.context = context;
 
         this.handleAddPlayer = this.handleAddPlayer.bind(this);
 
@@ -33,28 +26,68 @@ export default class MusicPlayer extends React.Component {
 
     handleAddPlayer(player) {
         this.setState((prevState) => {
-            console.log(prevState);
-           return {
-               players: prevState.players.concat(player)
-           };
+            return {
+                players: prevState.players.concat(player),
+                playersLoaded: prevState.playersLoaded + 1
+            };
         });
+    }
+
+    componentDidMount() {
+
+        // find total player count
+        let count = 0;
+        for(let i = 0; i < this.state.songConfig.groups.length; i++) {
+            const group = this.state.songConfig.groups[i];
+            count += group.voices.length;
+            this.setState(() => {
+                return {totalPlayerCount: count};
+            })
+        }
+
+        // initialize transport
+        const transport = Tone.Transport;
+        transport.bpm.value = this.state.bpm;
+        transport.timeSignature = this.state.timeSignature;
+        transport.start();
+
+        this.setState(() => {
+            return {transport};
+        })
+
+        // initialize context
+        const context = Tone.context;
+        context.latencyHint = 'fastest';
+
+        this.setState(() => {
+            return {context}
+        })
     }
 
     render() {
         return (
             <div>
                 <h1>Music Player</h1> 
-                <CanvasViz/>
+                <CanvasViz
+                    context = {this.state.context}
+                    players = {this.state.players}
+                    flagPlayersLoaded = {this.state.playersLoaded / this.state.totalPlayerCount === 1}
+                    // TODO: players load progress
+                />
                 <div className = 'button-section'>
                     {this.state.songConfig.groups.map((group) => {
                         return <ToggleButtonGroup
-                        key = {group.groupName}
-                        groupName = {group.groupName}
+
                         songName = {this.state.name}
-                        voices = {group.voices}
+                        tone = {this.state.tone}
                         transport = {this.state.transport}
                         handleAddPlayer = {this.handleAddPlayer}
-                        // polyphony
+
+                        key = {group.groupName}
+                        groupName = {group.groupName}
+                        voices = {group.voices}
+                        // TODO: polyphony
+
                         />
                     })}
                 </div>

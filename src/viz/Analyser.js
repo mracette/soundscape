@@ -35,8 +35,7 @@ export default class Analyser {
         // bind the bin indices
         this.minBinIndex = minIndex;
         this.maxBinIndex = maxIndex
-        this.numBands = this.analyser.frequencyBinCount - minIndex
-            - (this.analyser.frequencyBinCount - maxIndex - 1);
+        this.numBands = this.maxBinIndex - this.minBinIndex + 1;
 
         // create containers for frequency and time data
         this.fftData = new Uint8Array(this.analyser.frequencyBinCount);

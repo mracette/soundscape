@@ -1,35 +1,34 @@
 import * as THREE from 'three';
+import FirstPersonControls from './controls/FirstPersonControls';
 
 export default class SceneManager {
-    constructor(canvas){
+    constructor(canvas, analyserArray){
 
         const $this = this;
+        this.that = this;
+
+        this.analyserArray = analyserArray;
 
         this.canvas = canvas;
-        console.log(this.canvas);
         this.clock = new THREE.Clock(true);
+
         this.screenDimensions = {
-            width: this.canvas.width,
-            height: this.canvas.height
+            width: window.innerWidth,
+            height: window.innerHeight
         }
+
         this.worldDimensions = {
             width: 1000,
             height: 1000,
             depth: 1000
         };
 
-        function animateLoop() {
-            requestAnimationFrame(animateLoop);
-            $this.render()
-        }
-
-        this.init().then(() => {
-            animateLoop();
-        })
+        this.animate = this.animate.bind(this);
+        this.render = this.render.bind(this);
 
     }
 
-    init() {
+    init(scene) {
         return new Promise((resolve, reject) => {
             try {
                 // lights, camera, action
@@ -39,6 +38,7 @@ export default class SceneManager {
                 this.lights = this.initLights();
                 this.controls = this.initControls();
                 this.helpers = this.initHelpers();
+                this.subjects = this.initSubjects(scene);
                 resolve();
             } catch(e) {
                 console.error(e);
@@ -48,14 +48,13 @@ export default class SceneManager {
     }
 
     animate() {
-        requestAnimationFrame(this.animate().bind(this));
+        requestAnimationFrame(this.animate);
+        this.helpers.fpc.update(this.clock.getDelta());
         this.render();
     }
 
     render() {
-        let d = this.clock.getDelta();
-        let e = this.clock.getElapsedTime();
-        this.renderer.render(this.scene, this.camera);
+        // overridden by child class
     }
 
     initScene() {
@@ -84,7 +83,7 @@ export default class SceneManager {
         const fieldOfView = 60;
         const nearPlane = 1;
         const farPlane = 1000; 
-        const aspect = this.canvas.width / this.canvas.height;
+        const aspect = this.screenDimensions.width / this.screenDimensions.height;
         let camera;
         
         switch(type || 'perspective') {
@@ -97,7 +96,8 @@ export default class SceneManager {
                 break;
         }
         
-        camera.position.set(0, 0, 50);
+        camera.position.set(0, 10, 100);
+        camera.lookAt(new THREE.Vector3(0,0,0));
         return camera;
     }
 
@@ -109,9 +109,11 @@ export default class SceneManager {
         return lights;
     }
 
-    initSubjects(){
+    initSubjects(scene){
         const subjects = {
         };
+        const axesHelper = new THREE.AxesHelper( 500 );
+        this.scene.add( axesHelper );
         return subjects;
     }
 
@@ -124,16 +126,20 @@ export default class SceneManager {
 
     initHelpers() {
         const helpers = {
-
+            fpc: new FirstPersonControls(this.camera)
         }
         return helpers;
+    }
+
+    addSubjectToScene() {
+
     }
 
     onWindowResize(newWidth, newHeight){
         this.screenDimensions.width = newWidth;
         this.screenDimensions.height = newHeight;
-        this.camera.aspect = this.screenDimensions.width / this.screenDimensions.height;
+        this.camera.aspect = newWidth / newHeight;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
+        this.renderer.setSize(newWidth, newHeight);
     }
 };

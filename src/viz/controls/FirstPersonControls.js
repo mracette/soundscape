@@ -1,4 +1,6 @@
-class FirstPersonControls {
+import * as THREE from 'three';
+
+export default class FirstPersonControls {
 	constructor(object, domElement) {
 		this.object = object;
 		this.target = new THREE.Vector3( 0, 0, 0);
@@ -14,7 +16,7 @@ class FirstPersonControls {
 
 		this.activeLook = true;
 
-		this.heightLock = true;
+		this.heightLock = false;
 
 		this.constrainVertical = true;
 		this.verticalMin = 0;
@@ -120,5 +122,3 @@ class FirstPersonControls {
 		};
 	}
 }
-
-module.exports = FirstPersonControls;

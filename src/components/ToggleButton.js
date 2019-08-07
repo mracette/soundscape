@@ -1,26 +1,20 @@
 import React from 'react';
-import Tone from 'tone';
 
 export default class ToggleButton extends React.Component {
 
     constructor(props){
         super(props);
 
-        const player = new Tone.Player(`/audio/${props.songName}/${props.fileName}`,  
-            () => {
-                props.dispatch( incrementPlayersLoaded() );
-            }).toMaster();
+        const Tone = props.tone;
 
+        const player = new Tone.Player(`/audio/${props.songName}/${props.fileName}`).toMaster();
         player.loop = true;
         player.loopEnd = props.length;
 
-        // let newPlayer = []
-        // newPlayer.push({
-        //     id: props.id,
-        //     player 
-        // })
-
-        // props.handleAddPlayer(newPlayer);
+        this.props.handleAddPlayer([{
+            id: this.props.id,
+            player: player
+        }]);
 
         this.state = {
             player,

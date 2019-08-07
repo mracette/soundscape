@@ -8,14 +8,18 @@ const ToggleButtonGroup = (props) => {
             {props.voices.map((voice) => {
                 return (
                     <ToggleButton
+
                         key = {voice.name}
                         id = {voice.name}
-                        songName = {props.songName}
                         fileName = {voice.fileName}
                         length = {voice.length}
                         quantizeLength = {voice.quantizeLength}
+
+                        songName = {props.songName}
+                        tone = {props.tone}
                         transport = {props.transport}
                         handleAddPlayer = {props.handleAddPlayer}
+                        
                     />
                 )
             })}
