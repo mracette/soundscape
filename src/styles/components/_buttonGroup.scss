@@ -1,19 +1,38 @@
 .button-section {
-    display: flex;
-    align-content: bottom;
-    position: absolute;
 
-    width: 100vw;
-    bottom: 0px;
+  // opacity: 0;
+  transition-duration: 200ms;
+  padding: 2vw;
+  position: absolute;
+  height: 100vh;
+  top: 0px;
+  left: 0px;
+  color: white;
+}
+
+.button-section:hover {
+  opacity: 1;
+  transition-duration: 200ms;
+}
+
+.button-group-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.button-group-header {
+  padding-left: 0.8vw;
+  width: 100%
 }
 
 .button-group {
-    text-align: center;
-    flex-grow: 1;
-    font-size: $m-size;
-  }
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: space-around;
+  align-items: center;
+}
 
-// .button-group {
-//     display: flex;
-
-// }
+.button-group div:hover {
+  left: 0;
+}

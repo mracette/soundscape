@@ -1,17 +1,24 @@
 .toggle-button {
-    width: 20vw;
-    padding: $s-size;
+    width: 4vw;
+    height: 4vw;
+    border-radius: 2vw;
+    margin: 0.5vw;
+    color: inherit;
+    overflow-wrap: break-word;
+}
+
+.toggle-button:focus {
+    outline: none;
 }
 
 .pending-toggle-button {
-    background: yellow;
+    background: rgba(249,243,168,0.5);
 }
 
 .active-toggle-button {
-    background: green;
+    background: rgba(149,219,177, 0.5);
 }
 
 .stopped-toggle-button {
-    background: red;
+    background: rgba(255, 255, 255, 0);
 }
-
