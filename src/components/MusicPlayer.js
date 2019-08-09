@@ -16,15 +16,20 @@ export default class MusicPlayer extends React.Component {
             transport: undefined,
             context: undefined,
             players: [],
+            playerGroups: {},
             totalPlayerCount: undefined,
-            playersLoaded: 0
+            playersLoaded: 0,
+            musicPlayerState: 'stopped',
+            devMode: true
         }
 
         this.handleAddPlayer = this.handleAddPlayer.bind(this);
+        this.handleChangeState = this.handleChangeState.bind(this);
+        this.handleAddGroupNode = this.handleAddGroupNode.bind(this);
 
     }
 
-    handleAddPlayer(player) {
+    handleAddPlayer(player, groupName) {
         this.setState((prevState) => {
             return {
                 players: prevState.players.concat(player),
@@ -33,17 +38,44 @@ export default class MusicPlayer extends React.Component {
         });
     }
 
+    handleChangeState(newState) {
+        this.setState((prevState) => {
+            if(newState === 'started' && prevState.musicPlayerState === 'stopped') {
+                return {musicPlayerState: 'started'};
+            } else {
+                return {musicPlayerState: prevState.musicPlayerState};
+            }
+        })
+    }
+
+    handleAddGroupNode(groupNode, groupName) {
+        this.setState((prevState) => {
+            const obj = {...prevState.playerGroups};
+            obj[groupName] = groupNode;
+            return {
+                playerGroups: obj
+            };
+        })
+    }
+
     componentDidMount() {
 
         // find total player count
         let count = 0;
+        let obj = {};
         for(let i = 0; i < this.state.songConfig.groups.length; i++) {
             const group = this.state.songConfig.groups[i];
             count += group.voices.length;
-            this.setState(() => {
-                return {totalPlayerCount: count};
-            })
+            // populate the playerGroups object with an undefined property for each group
+            obj[group.groupName] = undefined;
         }
+
+        this.setState((prevState) => {
+            return {
+                totalPlayerCount: count,
+                playerGroups: obj
+            };
+        })
 
         // initialize transport
         const transport = Tone.Transport;
@@ -67,10 +99,11 @@ export default class MusicPlayer extends React.Component {
     render() {
         return (
             <div>
-                <h1>Music Player</h1> 
                 <CanvasViz
                     context = {this.state.context}
                     players = {this.state.players}
+                    playerGroups = {this.state.playerGroups}
+                    handleAddGroupNode = {this.handleAddGroupNode}
                     flagPlayersLoaded = {this.state.playersLoaded / this.state.totalPlayerCount === 1}
                     // TODO: players load progress
                 />
@@ -82,6 +115,9 @@ export default class MusicPlayer extends React.Component {
                         tone = {this.state.tone}
                         transport = {this.state.transport}
                         handleAddPlayer = {this.handleAddPlayer}
+                        handleChangeState = {this.handleChangeState}
+                        musicPlayerState = {this.state.musicPlayerState}
+                        devMode = {this.state.devMode}
 
                         key = {group.groupName}
                         groupName = {group.groupName}

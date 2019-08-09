@@ -6,7 +6,7 @@ import MusicPlayer from '../components/MusicPlayer';
 const AppRouter = (props) => {
     return (
         <BrowserRouter>
-                <Route path="/" render = {(routeProps) => {
+                <Route exact path="/" render = {(routeProps) => {
                     return (
                     <NavigationPanel
                         {...routeProps}

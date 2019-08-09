@@ -11,7 +11,6 @@ export default class NavigationPanel extends React.Component {
     render() {
         return (
             <div>
-                <h1>Navigation Panel</h1>
                 {this.props.config.map((song) => {
                     return (
                         <div key = {song.name}>

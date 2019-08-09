@@ -1,0 +1,129 @@
+[
+    {
+        "name": "lake",
+        "bpm": 120,
+        "timeSignature": 4,
+        "groups": [
+            {
+                "groupName": "rhythm",
+                "polyphony": -1,
+                "voices": [
+                    {
+                        "name": "kick-snare[4]",
+                        "length": "4m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "percs[4]",
+                        "length": "4m",
+                        "quantizeLength": "2m"
+                    },
+                    {
+                        "name": "rides[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "echo-hats[2]",
+                        "length": "2m",
+                        "quantizeLength": "2m"
+                    },
+                    {
+                        "name": "fast-hats[2]",
+                        "length": "2m",
+                        "quantizeLength": "2m"
+                    }
+                ]
+            },
+            {
+                "groupName": "atmosphere",
+                "polyphony": 2,
+                "voices": [
+                    {
+                        "name": "atmo-swirl[16]",
+                        "length": "16m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "atmo-crunch[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "atmo-beeps[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "atmo-water[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    }
+                ]
+            },
+            {
+                "groupName": "melody",
+                "polyphony": 1,
+                "voices": [
+                    {
+                        "name": "melody-trance[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "melody-chordy[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "melody-bluesy[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    }
+                ]
+            },
+            {
+                "groupName": "harmony",
+                "polyphony": -1,
+                "voices": [
+                    {
+                        "name": "rhodes-arps[4]",
+                        "length": "4m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "rhodes-chords[4]",
+                        "length": "4m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "rhodes-runs[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    }
+                ]
+            },
+            {
+                "groupName": "bass",
+                "polyphony": 1,
+                "voices": [
+                    {
+                        "name": "sub-desc[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "sub-simple[4]",
+                        "length": "4m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "bass-rhythmic[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    }
+                ]
+            }
+        ]      
+    }
+]
