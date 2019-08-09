@@ -1,10 +1,12 @@
+import * as THREE from 'three';
+
 /**
  * Creates a set of 'stars' using an efficient buffer geometry implementation. 
  * The stars move together in orbit around a center point.
  * @module Stars
  */
 
-class Stars {
+export default class Stars {
     /**
     * @param {object} scene - the THREE.js scene
     * @param {object} center - Vector3: the center of the star field (which is a sphere)
@@ -118,11 +120,8 @@ class Stars {
        return starField;
    }
 
-   update(delta, cyclePosition) {
-       let c = (cyclePosition !== undefined) ? cyclePosition : 0;
+   update(delta) {
        this.group.rotateOnAxis(this.rotateVector.normalize(), (delta*this.orbitSpeed*2*Math.PI)/60);
-       let intensity = this.getIntensity(c);
-       this.starField.material.opacity = intensity;
    }
 
    getIntensity(cyclePosition) {
@@ -151,4 +150,3 @@ class Stars {
    }
 
 }
-module.exports = Stars;

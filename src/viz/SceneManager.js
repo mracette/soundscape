@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import FirstPersonControls from './controls/FirstPersonControls';
+import GLTFLoader from './helpers/GLTFLoader';
+import Stats from 'stats.js';
 
 export default class SceneManager {
     constructor(canvas, analyserArray){
@@ -25,20 +27,21 @@ export default class SceneManager {
 
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
+        this.onWindowResize = this.onWindowResize.bind(this);
 
     }
 
-    init(scene) {
+    init() {
         return new Promise((resolve, reject) => {
             try {
                 // lights, camera, action
                 this.scene = this.initScene();
                 this.renderer = this.initRender();
                 this.camera = this.initCamera('perspective');
-                this.lights = this.initLights();
                 this.controls = this.initControls();
+                this.subjects = {};
+                this.lights = this.initLights();
                 this.helpers = this.initHelpers();
-                this.subjects = this.initSubjects(scene);
                 resolve();
             } catch(e) {
                 console.error(e);
@@ -48,9 +51,10 @@ export default class SceneManager {
     }
 
     animate() {
-        requestAnimationFrame(this.animate);
-        this.helpers.fpc.update(this.clock.getDelta());
+        this.helpers.stats.begin();
         this.render();
+        this.helpers.stats.end();
+        requestAnimationFrame(this.animate);
     }
 
     render() {
@@ -71,8 +75,7 @@ export default class SceneManager {
         } );
         const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
 
-        renderer.setSize(this.canvas.width, this.canvas.height);
-        renderer.setClearColor( 0xffffff, 1 );
+        renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
         renderer.setPixelRatio( DPR );
 
         return renderer;
@@ -96,43 +99,44 @@ export default class SceneManager {
                 break;
         }
         
-        camera.position.set(0, 10, 100);
+        camera.aspect = aspect;
+        camera.position.set(0, 10, 115);
         camera.lookAt(new THREE.Vector3(0,0,0));
+        camera.updateProjectionMatrix();
         return camera;
-    }
-
-    initLights(){
-        const lights = {
-            ambient: new THREE.AmbientLight(0xffffff, 0.3),
-        };
-        this.scene.add(lights.ambient);
-        return lights;
-    }
-
-    initSubjects(scene){
-        const subjects = {
-        };
-        const axesHelper = new THREE.AxesHelper( 500 );
-        this.scene.add( axesHelper );
-        return subjects;
     }
 
     initControls() {
         const controls = {
+            fpc: new FirstPersonControls(this.camera)
         };
 
         return controls;
     }
 
-    initHelpers() {
-        const helpers = {
-            fpc: new FirstPersonControls(this.camera)
+    initLights() {
+        const lights = {
+            ambient: new THREE.AmbientLight(0xffffff, 1)
         }
-        return helpers;
+        this.scene.add(lights.ambient);
+        this.lights = lights;
     }
 
-    addSubjectToScene() {
+    initHelpers() {
+        //const axesHelper = new THREE.AxesHelper( 500 );
+        //this.scene.add( axesHelper );
 
+        const stats = new Stats();
+        stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+        stats.dom.style.left = null;
+        stats.dom.style.right = '0px';
+        document.body.appendChild( stats.dom );
+
+        const helpers = {
+            stats: stats,
+            gltfLoader: new THREE.GLTFLoader()
+        }
+        return helpers;
     }
 
     onWindowResize(newWidth, newHeight){
