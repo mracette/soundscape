@@ -1,10 +1,23 @@
+.toggle-svg {
+    fill-opacity: 0;
+    //margin: 0.5vw;
+    stroke: white;
+    stroke-width: 0.04vw;
+    stroke-dasharray: 12.56vw;
+    stroke-linecap: round;
+    transform-origin: 50% 50%;
+}
+
 .toggle-button {
     width: 4vw;
     height: 4vw;
     border-radius: 2vw;
     margin: 0.5vw;
+    padding: 0;
     color: inherit;
+    border: none;
     overflow-wrap: break-word;
+    background-color: rgba(0,0,0,0);
 }
 
 .toggle-button:focus {
