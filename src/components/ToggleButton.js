@@ -1,9 +1,12 @@
 import React from 'react';
+import anime from 'animejs/lib/anime.es.js';
 
 export default class ToggleButton extends React.Component {
 
     constructor(props){
         super(props);
+
+        this.myRef = React.createRef();
 
         const Tone = props.tone;
 
@@ -14,7 +17,8 @@ export default class ToggleButton extends React.Component {
         this.state = {
             player,
             playerState: 'stopped',
-            eventId: undefined
+            eventId: undefined,
+            currentAnimation: undefined
         }
     }
 
@@ -26,78 +30,125 @@ export default class ToggleButton extends React.Component {
         }]);
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        console.log(prevState);
-        console.log(this.state);
+    componentDidUpdate() {
+        if(this.props.override === true) {
+            this.stopPlayer(true);
+            this.props.handleUpdateOverride(this.props.id, false);
+        }
+    }
+
+    startPlayer() {
+        this.props.handleUpdatePolyphony(1, this.props.id);
+        this.setState(() => ({playerState: 'pending-start'}));
+
+        const quantizedStartAction = this.props.devMode ? `@4n`: `@${this.props.quantizeLength}`;
+
+        // time until scheduled transport event
+        const duration = (this.props.transport.nextSubdivision(quantizedStartAction) - this.props.context.now()) * 1000;
+
+        anime({
+            targets: this.myRef.current.children[0], //svg
+            strokeDashoffset: [0, '12.56vw'],
+            duration: duration,
+            easing: 'linear'
+        });
+
+        anime({
+            targets: this.myRef.current,
+            backgroundColor: 'rgba(255,255,255, 0.3)',
+            duration: duration,
+            easing: 'easeInCubic'
+        });
+    
+
+        let startEventId = this.props.transport.schedule(() => {
+            this.state.player.start();
+            this.setState(() => ({playerState: 'active'}));
+        }, quantizedStartAction);
+        
+        this.setState(() => ({eventId: startEventId}));
+    }
+
+    stopPlayer(override) {
+        this.props.handleUpdatePolyphony(override ? 0 : -1, this.props.id);
+        this.setState(() => ({playerState: 'pending-stop'}));
+
+        const quantizedStartAction = this.props.devMode ? `@4n`: `@${this.props.quantizeLength}`;
+
+        // time until scheduled transport event
+        const duration = (this.props.transport.nextSubdivision(quantizedStartAction) - this.props.context.now()) * 1000;
+
+        anime({
+            targets: this.myRef.current.children[0], //svg
+            strokeDashoffset: [0, '12.56vw'],
+            duration: duration,
+            direction: 'reverse',
+            easing: 'linear'
+            });
+
+        anime({
+            targets: this.myRef.current,
+            backgroundColor: 'rgba(0,0,0,0)',
+            duration: duration,
+            easing: 'easeInCubic'
+        });
+        
+        let stopEventId = this.props.transport.schedule(() => {
+            this.state.player.stop();
+            this.setState(() => ({playerState: 'stopped'}));
+        }, quantizedStartAction);
+
+        this.setState(() => ({eventId: stopEventId}));
+    }
+
+    pendingStart() {
+        // button cancels the pending stop and changes state to 'pending-start'
+        // (schedules 'start')
+        this.props.transport.clear(this.state.eventId);
+        this.setState(() => ({playerState: 'pending-start'}));
+
+        let pendingStartEventId = this.props.transport.schedule(() => {
+            this.state.player.start();
+            this.setState(() => ({playerState: 'active'}));
+        }, quantizedStartAction);
+
+        this.setState(() => ({eventId: pendingStartEventId}));
+    }
+    
+    pendingStop() {
+        // button cancels the pending start and changes state to 'pending-stop'
+        // (schedules 'stop')
+        this.props.transport.clear(this.state.eventId);
+        this.setState(() => ({playerState: 'pending-stop'}));
+    
+        let pendingStopEventId = this.props.transport.schedule(() => {
+            this.state.player.stop();
+            this.setState(() => ({playerState: 'stopped'}));
+        }, quantizedStartAction);
+    
+        this.setState(() => ({eventId: pendingStopEventId}));
     }
 
     render() {
         return (
-                <button
-                    className = {`${this.state.playerState}-toggle-button toggle-button`}
-                    // className = {`toggle-button`}
-                    id = {this.props.id}
-                    onClick = {() => {
-                        const quantizedStartAction = this.props.devMode ? `@4n`: `@${this.props.quantizeLength}`;
-                        switch(this.state.playerState) {
-                            case 'stopped':
-                            // button starts player and changes state to 'active'
-                                this.setState(() => ({playerState: 'pending-start'}));
-                                this.props.handleChangeState('started');
-
-                                let startEventId = this.props.transport.schedule(() => {
-                                    this.state.player.start();
-                                    this.setState(() => ({playerState: 'active'}));
-                                }, quantizedStartAction);
-                                
-                                this.setState(() => ({eventId: startEventId}));
-
-                                break;
-                            case 'active': 
-                            // button stops player and changes state to 'stopped'
-                                this.setState(() => ({playerState: 'pending-stop'}));
-                                
-                                let stopEventId = this.props.transport.schedule(() => {
-                                    this.state.player.stop();
-                                    this.setState(() => ({playerState: 'stopped'}));
-                                }, quantizedStartAction);
-
-                                this.setState(() => ({eventId: stopEventId}));
-
-                                break;
-                            case 'pending-start':
-                            // button cancels the pending start and changes state to 'pending-stop'
-                            // (schedules 'stop')
-                                this.props.transport.clear(this.state.eventId);
-                                this.setState(() => ({playerState: 'pending-stop'}));
-
-                                let pendingStopEventId = this.props.transport.schedule(() => {
-                                    this.state.player.stop();
-                                    this.setState(() => ({playerState: 'stopped'}));
-                                }, quantizedStartAction);
-
-                                this.setState(() => ({eventId: pendingStopEventId}));
-
-                                break;
-                            case 'pending-stop':
-                            // button cancels the pending stop and changes state to 'pending-start'
-                            // (schedules 'start')
-                                this.props.transport.clear(this.state.eventId);
-                                this.setState(() => ({playerState: 'pending-start'}));
-
-                                let pendingStartEventId = this.props.transport.schedule(() => {
-                                    this.state.player.start();
-                                    this.setState(() => ({playerState: 'active'}));
-                                }, quantizedStartAction);
-
-                                this.setState(() => ({eventId: pendingStartEventId}));
-
-                                break;
-                        }
-                    }}
-                >
-                {/* {this.props.id} */}
-                </button>
+            <button
+                className = {'toggle-button'}
+                ref = {this.myRef}
+                onClick = {() => {
+                    switch(this.state.playerState) {
+                        case 'stopped': this.startPlayer(); break;
+                        case 'active': this.stopPlayer(); break;
+                        case 'pending-start': this.pendingStop(); break;
+                        case 'pending-stop': this.pendingStart(); break;
+                    }
+                }}
+            >
+                <svg width={"4vw"} height={"4vw"}>
+                    <circle 
+                        className={'toggle-svg'} r={"1.96vw"} cx={'1.98vw'} cy={'1.98vw'}
+                    />
+                </svg>
+            </button>
         )
     }
 };

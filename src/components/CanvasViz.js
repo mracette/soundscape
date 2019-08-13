@@ -36,19 +36,21 @@ export default class CanvasViz extends React.Component {
 
             // TODO: move analyser params to config file           
                 const rhythm = new Analyser(this.props.context, groupPlayersArray.rhythm, {
-                    power: 7
+                    power: 7,
+                    smoothingTimeConstant: .5
                 });
                 const atmosphere = new Analyser(this.props.context, groupPlayersArray.atmosphere, {
                     split: true,
                     smoothingTimeConstant: 0.2,
                     power: 5,
-                    minFrequency: 200,
-                    maxFrequency: 10500
+                    minDecibels: -100,
+                    maxDecibels: -30
                 });
                 const melody = new Analyser(this.props.context, groupPlayersArray.melody, {
                     power: 5,
-                    minFrequency: 200,
-                    maxFrequency: 10500
+                    minDecibels: -40,
+                    maxDecibels: -5,
+                    smoothingTimeConstant: 0.5
                 });
                 const harmony = new Analyser(this.props.context, groupPlayersArray.harmony, {
                     power: 9,
@@ -56,8 +58,7 @@ export default class CanvasViz extends React.Component {
                 });
                 const bass = new Analyser(this.props.context, groupPlayersArray.bass, {
                     power: 5,
-                    minFrequency: 25,
-                    maxFrequency: 500
+                    smoothingTimeConstant: .5
                 });
 
                 const analyserArray = [];

@@ -19,12 +19,10 @@ export default class MusicPlayer extends React.Component {
             playerGroups: {},
             totalPlayerCount: undefined,
             playersLoaded: 0,
-            musicPlayerState: 'stopped',
             devMode: true
         }
 
         this.handleAddPlayer = this.handleAddPlayer.bind(this);
-        this.handleChangeState = this.handleChangeState.bind(this);
         this.handleAddGroupNode = this.handleAddGroupNode.bind(this);
 
     }
@@ -36,16 +34,6 @@ export default class MusicPlayer extends React.Component {
                 playersLoaded: prevState.playersLoaded + 1
             };
         });
-    }
-
-    handleChangeState(newState) {
-        this.setState((prevState) => {
-            if(newState === 'started' && prevState.musicPlayerState === 'stopped') {
-                return {musicPlayerState: 'started'};
-            } else {
-                return {musicPlayerState: prevState.musicPlayerState};
-            }
-        })
     }
 
     handleAddGroupNode(groupNode, groupName) {
@@ -114,15 +102,14 @@ export default class MusicPlayer extends React.Component {
                         songName = {this.state.name}
                         tone = {this.state.tone}
                         transport = {this.state.transport}
+                        context = {this.state.context}
                         handleAddPlayer = {this.handleAddPlayer}
-                        handleChangeState = {this.handleChangeState}
-                        musicPlayerState = {this.state.musicPlayerState}
                         devMode = {this.state.devMode}
 
                         key = {group.groupName}
                         groupName = {group.groupName}
                         voices = {group.voices}
-                        // TODO: polyphony
+                        polyphony = {group.polyphony}
 
                         />
                     })}
