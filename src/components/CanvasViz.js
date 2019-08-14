@@ -58,7 +58,7 @@ export default class CanvasViz extends React.Component {
                 });
                 const bass = new Analyser(this.props.context, groupPlayersArray.bass, {
                     power: 5,
-                    smoothingTimeConstant: .5
+                    smoothingTimeConstant: .7
                 });
 
                 const analyserArray = [];

@@ -18,7 +18,8 @@ export default class ToggleButton extends React.Component {
             player,
             playerState: 'stopped',
             eventId: undefined,
-            currentAnimation: undefined
+            currentSVGAnimation: undefined,
+            currentButtonAnimation: undefined
         }
     }
 
@@ -46,27 +47,30 @@ export default class ToggleButton extends React.Component {
         // time until scheduled transport event
         const duration = (this.props.transport.nextSubdivision(quantizedStartAction) - this.props.context.now()) * 1000;
 
-        anime({
+        const currentSVGAnimation = anime({
             targets: this.myRef.current.children[0], //svg
             strokeDashoffset: [0, '12.56vw'],
             duration: duration,
             easing: 'linear'
         });
 
-        anime({
-            targets: this.myRef.current,
+        const currentButtonAnimation = anime({
+            targets: this.myRef.current, // button
             backgroundColor: 'rgba(255,255,255, 0.3)',
             duration: duration,
             easing: 'easeInCubic'
         });
-    
 
         let startEventId = this.props.transport.schedule(() => {
             this.state.player.start();
             this.setState(() => ({playerState: 'active'}));
         }, quantizedStartAction);
         
-        this.setState(() => ({eventId: startEventId}));
+        this.setState(() => ({
+            eventId: startEventId,
+            currentButtonAnimation,
+            currentSVGAnimation
+        }));
     }
 
     stopPlayer(override) {
@@ -78,7 +82,7 @@ export default class ToggleButton extends React.Component {
         // time until scheduled transport event
         const duration = (this.props.transport.nextSubdivision(quantizedStartAction) - this.props.context.now()) * 1000;
 
-        anime({
+        const currentSVGAnimation = anime({
             targets: this.myRef.current.children[0], //svg
             strokeDashoffset: [0, '12.56vw'],
             duration: duration,
@@ -86,7 +90,7 @@ export default class ToggleButton extends React.Component {
             easing: 'linear'
             });
 
-        anime({
+            const currentButtonAnimation = anime({
             targets: this.myRef.current,
             backgroundColor: 'rgba(0,0,0,0)',
             duration: duration,
@@ -98,17 +102,26 @@ export default class ToggleButton extends React.Component {
             this.setState(() => ({playerState: 'stopped'}));
         }, quantizedStartAction);
 
-        this.setState(() => ({eventId: stopEventId}));
+        this.setState(() => ({
+            eventId: stopEventId,
+            currentButtonAnimation,
+            currentSVGAnimation
+        }));
     }
 
     pendingStart() {
         // button cancels the pending stop and changes state to 'pending-start'
         // (schedules 'start')
-        this.props.transport.clear(this.state.eventId);
+        this.props.handleUpdatePolyphony(1, this.props.id);
         this.setState(() => ({playerState: 'pending-start'}));
 
+        const quantizedStartAction = this.props.devMode ? `@4n`: `@${this.props.quantizeLength}`;
+
+        this.props.transport.clear(this.state.eventId);
+        this.state.currentSVGAnimation.reverse();
+        this.state.currentButtonAnimation.reverse();
+
         let pendingStartEventId = this.props.transport.schedule(() => {
-            this.state.player.start();
             this.setState(() => ({playerState: 'active'}));
         }, quantizedStartAction);
 
@@ -118,8 +131,14 @@ export default class ToggleButton extends React.Component {
     pendingStop() {
         // button cancels the pending start and changes state to 'pending-stop'
         // (schedules 'stop')
-        this.props.transport.clear(this.state.eventId);
+        this.props.handleUpdatePolyphony(-1, this.props.id);
         this.setState(() => ({playerState: 'pending-stop'}));
+
+        const quantizedStartAction = this.props.devMode ? `@4n`: `@${this.props.quantizeLength}`;
+
+        this.props.transport.clear(this.state.eventId);
+        this.state.currentSVGAnimation.reverse();
+        this.state.currentButtonAnimation.reverse();
     
         let pendingStopEventId = this.props.transport.schedule(() => {
             this.state.player.stop();

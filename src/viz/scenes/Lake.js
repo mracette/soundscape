@@ -4,6 +4,7 @@ import * as d3Chromatic from 'd3-scale-chromatic';
 import {regularPolygon, linToLog} from '../../utils/threeUtils';
 import StarQuandrants from '../subjects/StarQuandrants';
 
+
 export default class Lake extends SceneManager {
     constructor(canvas, analyserArray) {
         super(canvas, analyserArray);
@@ -31,9 +32,10 @@ export default class Lake extends SceneManager {
             lilyBlue: 0x00c5ff,
             lilyPink: 0xFF8DA1,
             rockGrey: 0x9d978e,
+            lightning: 0xEEE6AB,
 
             // moon
-            moonYellow: 0xEEE6AB,
+            moonYellow: 0xf6f2d5,
 
             // greens
             funGreen: new THREE.Color(0x95DBB1),
@@ -66,7 +68,8 @@ export default class Lake extends SceneManager {
             window.addEventListener('resize', () => {
                 this.onWindowResize(window.innerWidth, window.innerHeight)
             });
-            this.scene.fog = new THREE.Fog(0xffffff, 10, 600);
+            this.scene.fog = new THREE.Fog(0xffffff, 10, 470);
+            this.scene.background = new THREE.Color('#1F262F').lerp(new THREE.Color(0x000000), 0.2);
             Promise.all([
                 this.initLakeTrees(),
                 this.initLakeScene(),
@@ -85,6 +88,7 @@ export default class Lake extends SceneManager {
     initLakeScene() {
         return new Promise((resolve, reject) => {
             try {
+
                 // hexagon shape for the lake body
                 const lakeShapePoints = regularPolygon(6, 110, 0, 0, true, false, true);
                 const lakeShapeVectors = []
@@ -101,10 +105,10 @@ export default class Lake extends SceneManager {
                 });
                 const lakeMesh = new THREE.Mesh(lakeGeo, lakeMat);
                 this.subjects.lake = lakeMesh;
-                this.scene.add(lakeMesh);
+                this.scene.add(lakeMesh);                
     
                 // basic rectangle for the ground
-                const groundGeo = new THREE.PlaneBufferGeometry(550, 150);
+                const groundGeo = new THREE.PlaneBufferGeometry(550, 350);
                 groundGeo.rotateX(-Math.PI / 2);
                 groundGeo.translate(0,-1,0);
                 const groundMat = new THREE.MeshBasicMaterial({
@@ -116,19 +120,58 @@ export default class Lake extends SceneManager {
                 this.subjects.ground = groundMesh;
                 this.scene.add(groundMesh);
 
+                const moonGuard = new THREE.Mesh(new THREE.PlaneBufferGeometry(60, 30), groundMat);
+                moonGuard.translateZ(-79);
+                
+                this.scene.add(moonGuard);
+
                 // directional light
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.2);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
                 directionalLight.position.set(0,10,0);
                 this.scene.add(directionalLight);
 
-                // add some rocks
-                const rockGeo = new THREE.DodecahedronBufferGeometry(3,0);
-                const rockMat = new THREE.MeshToonMaterial({color: this.palette.rockGrey});
-                const rockMesh = new THREE.Mesh(rockGeo, rockMat);
-                rockMesh.rotateY(Math.random());
-                rockMesh.position.set(0,0,-15);
+                // point light fireflies
+                const fireflyCount = 16;
+                const fireFlyGroup = new THREE.Group();
+                for(let i = 0; i < fireflyCount; i++) {
+                    const g = new THREE.Group();
+                    g.add(new THREE.PointLight(this.palette.moonYellow, 0.5));
 
-                //this.scene.add(rockMesh)
+                    const sphereGeo = new THREE.SphereBufferGeometry(0.25);
+                    const sphereMat = new THREE.MeshBasicMaterial({
+                        color: this.palette.lightning,
+                        fog: false,
+                        transparent: true
+                    });
+                    
+                    g.add(new THREE.Mesh(sphereGeo, sphereMat));
+
+                    g.position.set(
+                        -70 + Math.random() * 140, 
+                        5 + Math.random() * 15, 
+                        40 - Math.random() * 70
+                    );
+
+                    g.userData.cycle = 0;
+                    g.userData.state = 'off';
+                    fireFlyGroup.add(g);
+                }
+
+                this.subjects.fireflies = fireFlyGroup;
+                this.scene.add(fireFlyGroup);
+
+                // add some rocks
+                this.helpers.gltfLoader.load('/models/landscape.gltf', (model) => {
+                    this.subjects.rocks = model.scene.children.find((e) => e.name = 'rockGroup');
+                    this.subjects.rocks.children.map((rock) => {rock.material.color.setRGB(0.06, 0.06, 0.06)});
+                    this.scene.add(this.subjects.rocks);
+
+                    this.subjects.bushes = model.scene.children.find((e) => e.name = 'bushGroup');
+                    this.subjects.bushes.children.map((bush) => {bush.material.color.lerp(new THREE.Color(0x000000), 0.75)});
+                    this.scene.add(this.subjects.bushes);
+                }, undefined, (err) => {
+                    if(err) {reject(err)}
+                })
 
                 resolve();
 
@@ -146,14 +189,14 @@ export default class Lake extends SceneManager {
                 const numVertices = this.bassAnalyser.fftSize;
 
                 const moonGeo = new THREE.CircleBufferGeometry(moonRadius,numVertices,numVertices);
-                const moonMat = new THREE.MeshToonMaterial({
+                const moonMat = new THREE.MeshBasicMaterial({
                     color: this.palette.moonYellow,
                     fog: false
                 });
 
                 const moonMesh = new THREE.Mesh(moonGeo, moonMat);
                 moonMesh.userData.radius = moonRadius;
-                moonMesh.position.set(0, 45, -80);
+                moonMesh.position.set(0, 35, -80);
 
                 this.subjects.moon = moonMesh;
                 this.scene.add(moonMesh);
@@ -174,12 +217,12 @@ export default class Lake extends SceneManager {
                     }
     
                     moonBeamGeo.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-                    moonBeamGeo.translate(0,45,-81);
+                    moonBeamGeo.translate(0,35,-81);
     
                     const moonBeamMat = new THREE.PointsMaterial({
                         color: this.palette.moonYellow,
                         transparent: true,
-                        opacity: 0.1 + (j/7)
+                        opacity: 0
                     });
                     
                     const moonBeam = new THREE.Points(moonBeamGeo, moonBeamMat);
@@ -227,7 +270,9 @@ export default class Lake extends SceneManager {
                     
                     const clone = basePineTree.clone();
                     const scale = 1 - (scaleNoise * Math.random());
-                    clone.children[0].material = new THREE.MeshBasicMaterial()
+                    clone.children[0].material = new THREE.MeshBasicMaterial({
+                        color: this.palette.tropicalGreen.clone().lerp(new THREE.Color(this.palette.white), -1.5)
+                    })
                     clone.position.copy(new THREE.Vector3(x, -2, z + 70));
                     clone.scale.copy(new THREE.Vector3(scale, scale, scale));
                     clone.rotateY(Math.random() * 2 * Math.PI);
@@ -266,12 +311,12 @@ export default class Lake extends SceneManager {
                     geo.translate(0, 1, 70);
 
                     // add to group
-                    baseGeoGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({color: this.palette.mythicPurple, transparent: true})));
+                    baseGeoGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
+                        color: this.palette.mythicPurple, 
+                        transparent: true, 
+                        opacity: 0})));
                     
                 }
-
-                // hide first line for aesthetic purposes
-                // baseGeoGroup.children[0].visible = false;
 
                 // bind subject and add to scene
                 this.subjects.ripples = baseGeoGroup;
@@ -287,7 +332,7 @@ export default class Lake extends SceneManager {
     initLakeStars() {
         return new Promise((resolve, reject) => {
             try{
-                this.subjects.stars = new StarQuandrants(this.scene, 8, {
+                this.subjects.stars = new StarQuandrants(this.scene, 8, this.scene.background, {
                     count: 100,
                     width: 500,
                     height: 150,
@@ -342,10 +387,6 @@ export default class Lake extends SceneManager {
                     lowerPetalGroup.add(lowerClone);
                 }
 
-
-                // baseLily.children.find((child) => {return child.name === 'upperPetalGroup'}).children[0].children[0].material.color.set(0xff0000);
-                // baseLily.children.find((child) => {return child.name === 'upperPetalGroup'}).children[0].children[0].material.needsUpdate = true;
-
                 const numLilies = 16;
                 const lilyGroup = new THREE.Group();
 
@@ -396,87 +437,138 @@ export default class Lake extends SceneManager {
         
         this.controls.fpc.update(this.clock.getDelta());
         
-        // ripples
-        this.rhythmAnalyser.getFrequencyData().map((d, i) => {
-            const damping = 100 * (i / this.rhythmAnalyser.frequencyBinCount);
-            this.subjects.ripples.children[i].material.opacity = ((d - damping) / 255);
-            this.subjects.ripples.children[i].material.needsUpdate = true;
-        });
-
-        // stars
-        const atmosphereFreqDataLeft = this.atmosphereAnalyser.getFrequencyData('left');
-        const atmosphereFreqDataRight = this.atmosphereAnalyser.getFrequencyData('right');
-
-        atmosphereFreqDataLeft.slice(2,10).map((d, i) => {
-            this.subjects.stars.leftGroup.children[i].material.opacity = (d / 200);
-            this.subjects.stars.leftGroup.children[i].material.needsUpdate = true;
-        })
-
-        atmosphereFreqDataRight.slice(2,10).map((d, i) => {
-            this.subjects.stars.rightGroup.children[i].material.opacity = (d / 200);
-            this.subjects.stars.rightGroup.children[i].material.needsUpdate = true;
-        })
-
-        // trees
-        const harmonyFreqData = this.harmonyAnalyser.getFrequencyData();
-        this.subjects.pineTrees.children.map((child, i) => {
-
-            const freqIndex = Math.floor(i/8);
-            const rawData = harmonyFreqData.slice([2+freqIndex])[0];
-            const tranformedData = Math.pow(rawData,6) / (Math.pow(255,6) * 0.07);
-
-            const color = this.palette.tropicalGreen.clone();
-            color.lerp(this.palette.white, -1.5 + (tranformedData));// * ((freqIndex + 1 )/ 3));
-
-            child.children[0].material.color.set(color);
-            child.children[0].material.needsUpdate = true;
-
-        })
-
-        // moon
-        const bassVol = this.bassAnalyser.getFrequencyData().reduce((a, b) => {return a+b;})/this.bassAnalyser.frequencyBinCount;
-        const radius = this.subjects.moon.userData.radius;
-
-        this.subjects.moonBeams.children.map((moonBeam, beamIndex) => {
-
-            for (let count = 0; count < moonBeam.geometry.attributes.position.count; count ++) {
-                const adj = (1/(0.25 * (beamIndex+1)));
-                moonBeam.geometry.attributes.position.array[count*3] = (radius - 7 + (bassVol/3) * adj) * Math.cos(2 * Math.PI * (count/this.bassAnalyser.fftSize));
-                moonBeam.geometry.attributes.position.array[count*3+1] = (radius - 7 + (bassVol/3) * adj) * Math.sin(2 * Math.PI * (count/this.bassAnalyser.fftSize)) + this.subjects.moon.position.y;
-            };
-            
-            moonBeam.geometry.attributes.position.needsUpdate = true;
-        });
-
-        // lilies
-        
-        const melodyFreqData = this.melodyAnalyser.getFrequencyData();//.slice(5);
-        
-        let melodyVolume = 0;
-        let melodyCount = 0;
-                
-        for(let i = 0; i < melodyFreqData.length; i++) {
-            melodyVolume += melodyFreqData[i];
-            melodyCount ++;
+        // only render when sources are on
+        if(this.rhythmAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
+            // ripples
+            this.rhythmAnalyser.getFrequencyData().map((d, i) => {
+                const damping = 100 * (i / this.rhythmAnalyser.frequencyBinCount);
+                this.subjects.ripples.children[i].material.opacity = ((d - damping) / 255);
+                this.subjects.ripples.children[i].material.needsUpdate = true;
+            });
         }
-        
-        const avgMelodyVolume = melodyVolume/melodyCount;
-        
-        this.subjects.lilies.children.map((lily, i) => {
 
-            const upperPetalGroup = lily.children.find((child) => {return child.name === 'upperPetalGroup'});
-            const lowerPetalGroup = lily.children.find((child) => {return child.name === 'lowerPetalGroup'});
+        // only render when sources are on
+        if(this.atmosphereAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
+            // stars
+            const atmosphereFreqDataLeft = this.atmosphereAnalyser.getFrequencyData('left');
+            const atmosphereFreqDataRight = this.atmosphereAnalyser.getFrequencyData('right');
 
-            if(avgMelodyVolume != 0 && avgMelodyVolume >= 1.25 * (this.prevMelodyVolume) && Math.random() >= 0.7) {
-                upperPetalGroup.children[0].children[0].material.color.set(this.palette.white);
-                lowerPetalGroup.children[0].children[0].material.color.set(this.palette.white);
-            } else {
-                upperPetalGroup.children[0].children[0].material.color.lerp(new THREE.Color(lily.userData.color), 0.055);
-                lowerPetalGroup.children[0].children[0].material.color.lerp(new THREE.Color(lily.userData.color), 0.055);
+            atmosphereFreqDataLeft.slice(0,8).map((d, i) => {
+                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 150);
+                this.subjects.stars.leftGroup.children[i].material.needsUpdate = true;
+            })
+
+            atmosphereFreqDataRight.slice(0,8).map((d, i) => {
+                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 150);
+                this.subjects.stars.rightGroup.children[i].material.needsUpdate = true;
+            })
+        }
+
+        // only render when sources are on
+        if(this.harmonyAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
+            // trees
+            const harmonyFreqData = this.harmonyAnalyser.getFrequencyData();
+            this.subjects.pineTrees.children.map((child, i) => {
+                const freqIndex = Math.floor(i/8);
+                const rawData = harmonyFreqData.slice([1+freqIndex])[0];
+                const tranformedData = Math.pow(rawData,6) / (Math.pow(255,6) * 0.060);
+
+                const color = this.palette.tropicalGreen.clone();
+                color.lerp(this.palette.white, -1.5 + (tranformedData));
+
+                child.children[0].material.color.set(color);
+                child.children[0].material.needsUpdate = true;
+            });
+        }
+
+        // only render when sources are on
+        if(this.bassAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
+            // moon
+            const bassVol = this.bassAnalyser.getFrequencyData().reduce((a, b) => {return a+b;})/this.bassAnalyser.frequencyBinCount;
+            const radius = this.subjects.moon.userData.radius;
+
+            this.subjects.moonBeams.children.map((moonBeam, beamIndex) => {
+
+                moonBeam.material.opacity = 0.1 + (beamIndex/7);
+
+                for (let count = 0; count < moonBeam.geometry.attributes.position.count; count ++) {
+                    const adj = (1/(0.25 * (beamIndex+1)));
+                    moonBeam.geometry.attributes.position.array[count*3] = (radius - 7 + (bassVol/3) * adj) * Math.cos(2 * Math.PI * (count/this.bassAnalyser.fftSize));
+                    moonBeam.geometry.attributes.position.array[count*3+1] = (radius - 7 + (bassVol/3) * adj) * Math.sin(2 * Math.PI * (count/this.bassAnalyser.fftSize)) + this.subjects.moon.position.y;
+                };
+                
+                moonBeam.geometry.attributes.position.needsUpdate = true;
+            });
+        } else {
+            this.subjects.moonBeams.children.map((moonBeam) => {moonBeam.material.opacity = 0;})
+        }
+
+        // only render when sources are on
+        if(this.melodyAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
+            // lilies
+            const melodyFreqData = this.melodyAnalyser.getFrequencyData();//.slice(5);
+            
+            let melodyVolume = 0;
+            let melodyCount = 0;
+                    
+            for(let i = 0; i < melodyFreqData.length; i++) {
+                melodyVolume += melodyFreqData[i];
+                melodyCount ++;
             }
-        })
+            
+            const avgMelodyVolume = melodyVolume/melodyCount;
+            
+            this.subjects.lilies.children.map((lily, i) => {
 
-        this.prevMelodyVolume = avgMelodyVolume;
+                const upperPetalGroup = lily.children.find((child) => {return child.name === 'upperPetalGroup'});
+                const lowerPetalGroup = lily.children.find((child) => {return child.name === 'lowerPetalGroup'});
+
+                if(avgMelodyVolume != 0 && avgMelodyVolume >= 1.25 * (this.prevMelodyVolume) && Math.random() >= 0.7) {
+                    upperPetalGroup.children[0].children[0].material.color.set(this.palette.white);
+                    lowerPetalGroup.children[0].children[0].material.color.set(this.palette.white);
+                } else {
+                    upperPetalGroup.children[0].children[0].material.color.lerp(new THREE.Color(lily.userData.color), 0.055);
+                    lowerPetalGroup.children[0].children[0].material.color.lerp(new THREE.Color(lily.userData.color), 0.055);
+                }
+            })
+
+            this.prevMelodyVolume = avgMelodyVolume;
+        }
+
+        // fireflies
+        const flyAmount = .3;
+        const flightNoise = 0.01;
+        this.subjects.fireflies.children.map((fly) => {
+            if(fly.userData.state === 'off' && Math.random() < 0.0005) {
+                fly.userData.state = 'lighting';
+                fly.userData.flightPath = new THREE.Vector3(-0.5 + Math.random(), -0.5 + Math.random(), -0.5 + Math.random());
+            }
+
+            if(fly.userData.state === 'lighting') {
+                fly.userData.cycle += 0.1;
+                if(fly.userData.cycle >= 1) {
+                    fly.userData.state = 'dimming';
+                }
+            }
+            
+            if(fly.userData.state === 'dimming') {
+                fly.userData.cycle -= 0.025;
+                if(fly.userData.cycle <= 0) {
+                    fly.userData.state = 'off';
+                }
+            }
+
+            if(fly.userData.state === 'dimming' || fly.userData.state === 'lighting') {
+                const newX = Math.min(Math.max(fly.position.x + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, -70), 140);
+                const newY = Math.min(Math.max(fly.position.y + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, 5), 20);
+                const newZ = Math.min(Math.max(fly.position.z + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, -20), 70);
+                fly.position.set(newX, newY, newZ);
+            }
+            
+            fly.children[0].intensity = fly.userData.cycle / 2;
+            fly.children[1].material.opacity = fly.userData.cycle;
+
+        })
 
         this.renderer.render(this.scene, this.camera);
     }

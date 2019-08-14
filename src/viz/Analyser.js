@@ -15,6 +15,8 @@ export default class Analyser {
             this[prop] = properties[prop];
         })
 
+        this.sources = sources;
+
         // if split === true, this.analyser is an obj with 'left' and 'right' properties
         // channel data is received by passing 'left' or 'right' into this class' getter functions
         if (this.split) {

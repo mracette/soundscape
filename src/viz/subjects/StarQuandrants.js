@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 export default class StarQuandrants {
 
-    constructor(scene, levels, params) {
+    constructor(scene, levels, skyColor, params) {
 
         this.levels = levels;
 
@@ -17,8 +17,8 @@ export default class StarQuandrants {
         this.group = new THREE.Group();
 
         for (let i = 0; i < levels; i++) {
-            this.createStars(params.count, 'left', i);
-            this.createStars(params.count, 'right', i);
+            this.createStars(params.count, 'left', i, skyColor);
+            this.createStars(params.count, 'right', i, skyColor);
         }
 
         this.group.add(this.leftGroup);
@@ -28,7 +28,7 @@ export default class StarQuandrants {
 
     }
 
-    createStars(n, channel, level) {
+    createStars(n, channel, level, skyColor) {
 
         let geometry = new THREE.BufferGeometry();
         let positions = [];
@@ -48,6 +48,10 @@ export default class StarQuandrants {
 
             color = new THREE.Color(this.colorPalette(y / this.height));
 
+            const distanceFromMoon = Math.sqrt(x*x + (y-15)*(y-15));
+
+            color.lerp(skyColor, 1/(distanceFromMoon/75));
+
             colors.push(color.r, color.g, color.b);
         }
  
@@ -58,7 +62,7 @@ export default class StarQuandrants {
         let material = new THREE.PointsMaterial({
             vertexColors: THREE.VertexColors,
             transparent: true,
-            opacity: 1,
+            opacity: 0,
             fog: false
         });
  

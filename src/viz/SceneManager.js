@@ -63,7 +63,6 @@ export default class SceneManager {
 
     initScene() {
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color('#1F262F');
         return scene;
     }
 

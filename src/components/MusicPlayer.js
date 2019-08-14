@@ -19,7 +19,7 @@ export default class MusicPlayer extends React.Component {
             playerGroups: {},
             totalPlayerCount: undefined,
             playersLoaded: 0,
-            devMode: true
+            devMode: false
         }
 
         this.handleAddPlayer = this.handleAddPlayer.bind(this);
