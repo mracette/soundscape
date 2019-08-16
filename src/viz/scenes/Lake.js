@@ -163,7 +163,7 @@ export default class Lake extends SceneManager {
                 this.scene.add(fireFlyGroup);
 
                 // add some rocks
-                this.helpers.gltfLoader.load('/models/landscape.gltf', (model) => {
+                this.helpers.gltfLoader.load('./models/landscape.gltf', (model) => {
                     this.subjects.rocks = model.scene.children.find((e) => e.name = 'rockGroup');
                     this.subjects.rocks.children.map((rock) => {rock.material.color.setRGB(0.06, 0.06, 0.06)});
                     this.scene.add(this.subjects.rocks);
@@ -245,7 +245,7 @@ export default class Lake extends SceneManager {
     initLakeTrees() {
         return new Promise((resolve, reject) => {
             // load gltf tree models
-            this.helpers.gltfLoader.load('/models/pine-tree.gltf', (model) => {
+            this.helpers.gltfLoader.load('./models/pine-tree.gltf', (model) => {
                 const basePineTree = model.scenes[0].children[0];
                 
                 // generate simple tree formation
@@ -352,7 +352,7 @@ export default class Lake extends SceneManager {
     initLakeLilies() {
         return new Promise((resolve, reject) => {
             // load gltf lily models
-            this.helpers.gltfLoader.load('/models/lily.gltf', (gltf) => {
+            this.helpers.gltfLoader.load('./models/lily.gltf', (gltf) => {
 
                 const model = gltf.scene.children[1];
                 
