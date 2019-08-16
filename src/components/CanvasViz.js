@@ -24,70 +24,57 @@ export default class CanvasViz extends React.Component {
         // ensures that the following runs only when all the players are loaded
         if(this.props.flagPlayersLoaded && !this.state.flagCanvasLoaded) {
 
-            // create a deep copy of the groupPlayers obj
-            const groupPlayersArray = JSON.parse(JSON.stringify(this.props.playerGroups));
-
-            // this should only run once per song load
-            for (let i = 0; i < this.props.players.length; i++) {
-                const player = this.props.players[i];
-                if(groupPlayersArray[player.groupName] === undefined) {groupPlayersArray[player.groupName] = [];}
-                groupPlayersArray[player.groupName].push(player.player)
-            }
-
             // TODO: move analyser params to config file           
-                const rhythm = new Analyser(this.props.context, groupPlayersArray.rhythm, {
-                    power: 7,
-                    smoothingTimeConstant: .5
-                });
-                const atmosphere = new Analyser(this.props.context, groupPlayersArray.atmosphere, {
+
+            // vizConfig is an extension of props.playerGroups that includes analysers and players, which are required by the scene manager
+            const vizConfig = {...this.props.playerGroups};
+
+            vizConfig.rhythm.analyser =  new Analyser(this.props.context, this.props.playerGroups.rhythm.effectsChainExit, {
+                effectsChain: this.props.effectsChain,
+                power: 7,
+                smoothingTimeConstant: .5
+            });
+
+            vizConfig.atmosphere.analyser = new Analyser(this.props.context, this.props.playerGroups.atmosphere.effectsChainExit, {
                     split: true,
+                    effectsChain: this.props.effectsChain,
                     smoothingTimeConstant: 0.2,
                     power: 5,
                     minDecibels: -100,
                     maxDecibels: -30
-                });
-                const melody = new Analyser(this.props.context, groupPlayersArray.melody, {
-                    power: 5,
-                    minDecibels: -40,
-                    maxDecibels: -5,
-                    smoothingTimeConstant: 0.5
-                });
-                const harmony = new Analyser(this.props.context, groupPlayersArray.harmony, {
-                    power: 9,
-                    smoothingTimeConstant: 0.95
-                });
-                const bass = new Analyser(this.props.context, groupPlayersArray.bass, {
-                    power: 5,
-                    smoothingTimeConstant: .7
-                });
+            });
 
-                const analyserArray = [];
-                analyserArray.push({
-                    id: 'rhythm',
-                    analyser: rhythm
-                },
-                {
-                    id: 'atmosphere',
-                    analyser: atmosphere
-                },
-                {
-                    id: 'melody',
-                    analyser: melody
-                },
-                {
-                    id: 'harmony',
-                    analyser: harmony
-                },
-                {
-                    id: 'bass',
-                    analyser: bass
-                })
+            vizConfig.melody.analyser = new Analyser(this.props.context, this.props.playerGroups.melody.effectsChainExit, {
+                effectsChain: this.props.effectsChain,
+                power: 5,
+                minDecibels: -40,
+                maxDecibels: -5,
+                smoothingTimeConstant: 0.5
+            });
 
-                const manager = new Lake(this.state.canvas, analyserArray);
+            vizConfig.harmony.analyser = new Analyser(this.props.context, this.props.playerGroups.harmony.effectsChainExit, {
+                effectsChain: this.props.effectsChain,
+                power: 9,
+                smoothingTimeConstant: 0.95
+            });
 
-                this.setState(() => {
-                    return {manager, flagCanvasLoaded: true};
-                })
+            vizConfig.bass.analyser = new Analyser(this.props.context, this.props.playerGroups.bass.effectsChainExit, {
+                effectsChain: this.props.effectsChain,
+                power: 5,
+                smoothingTimeConstant: .70
+            });
+
+            vizConfig.rhythm.players = this.props.players.filter((player) => {return player.groupName === 'rhythm'});
+            vizConfig.atmosphere.players = this.props.players.filter((player) => {return player.groupName === 'atmosphere'});
+            vizConfig.melody.players = this.props.players.filter((player) => {return player.groupName === 'melody'});
+            vizConfig.harmony.players = this.props.players.filter((player) => {return player.groupName === 'harmony'});
+            vizConfig.bass.players = this.props.players.filter((player) => {return player.groupName === 'bass'});
+
+            const manager = new Lake(this.state.canvas, vizConfig);
+
+            this.setState(() => {
+                return {manager, flagCanvasLoaded: true};
+            })
         }
     }
 

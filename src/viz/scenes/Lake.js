@@ -6,18 +6,20 @@ import StarQuandrants from '../subjects/StarQuandrants';
 
 
 export default class Lake extends SceneManager {
-    constructor(canvas, analyserArray) {
-        super(canvas, analyserArray);
+    constructor(canvas, vizConfig) {
+        super(canvas, vizConfig);
 
         // https://www.colourlovers.com/palette/126030/Cruel_Water_at_Night
         // https://www.colourlovers.com/palette/60028/Night_Sky
         // https://www.colourlovers.com/palette/3325270/Barbibaus_Garden
 
-        this.rhythmAnalyser = this.analyserArray.find((e) => {return e.id === 'rhythm'}).analyser;
-        this.atmosphereAnalyser = this.analyserArray.find((e) => {return e.id === 'atmosphere'}).analyser;
-        this.harmonyAnalyser = this.analyserArray.find((e) => {return e.id === 'harmony'}).analyser;
-        this.melodyAnalyser = this.analyserArray.find((e) => {return e.id === 'melody'}).analyser;
-        this.bassAnalyser = this.analyserArray.find((e) => {return e.id === 'bass'}).analyser;
+        this.vizConfig = vizConfig;
+
+        this.rhythmAnalyser = vizConfig.rhythm.analyser;
+        this.atmosphereAnalyser = vizConfig.atmosphere.analyser;
+        this.harmonyAnalyser = vizConfig.harmony.analyser;
+        this.melodyAnalyser = vizConfig.melody.analyser;
+        this.bassAnalyser = vizConfig.bass.analyser;
 
         this.palette = {
 
@@ -334,10 +336,10 @@ export default class Lake extends SceneManager {
             try{
                 this.subjects.stars = new StarQuandrants(this.scene, 8, this.scene.background, {
                     count: 100,
-                    width: 500,
+                    width: 350,
                     height: 150,
                     depth: 250,
-                    center: new THREE.Vector3(0, 0, -335),
+                    center: new THREE.Vector3(0, -13, -335),
                     colorPalette: d3Chromatic.interpolateCool
                 });
                 resolve();
@@ -437,9 +439,12 @@ export default class Lake extends SceneManager {
         
         this.controls.fpc.update(this.clock.getDelta());
         
+        /* 
+         * RIPPLES
+         */
+
         // only render when sources are on
-        if(this.rhythmAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
-            // ripples
+        if(this.vizConfig.rhythm.players.filter((player) => {return (player.player.state) === 'started';}).length > 0) {
             this.rhythmAnalyser.getFrequencyData().map((d, i) => {
                 const damping = 100 * (i / this.rhythmAnalyser.frequencyBinCount);
                 this.subjects.ripples.children[i].material.opacity = ((d - damping) / 255);
@@ -447,26 +452,33 @@ export default class Lake extends SceneManager {
             });
         }
 
+        /* 
+         * STARS
+         */
+
         // only render when sources are on
-        if(this.atmosphereAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
-            // stars
+        if(this.vizConfig.atmosphere.players.filter((player) => {return (player.player.state) === 'started';}).length > 0) {
+
             const atmosphereFreqDataLeft = this.atmosphereAnalyser.getFrequencyData('left');
             const atmosphereFreqDataRight = this.atmosphereAnalyser.getFrequencyData('right');
 
             atmosphereFreqDataLeft.slice(0,8).map((d, i) => {
-                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 150);
+                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 170);
                 this.subjects.stars.leftGroup.children[i].material.needsUpdate = true;
             })
 
             atmosphereFreqDataRight.slice(0,8).map((d, i) => {
-                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 150);
+                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 170);
                 this.subjects.stars.rightGroup.children[i].material.needsUpdate = true;
             })
         }
 
+        /* 
+         * TREES
+         */
+
         // only render when sources are on
-        if(this.harmonyAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
-            // trees
+        if(this.vizConfig.harmony.players.filter((player) => {return (player.player.state) === 'started';}).length > 0) {
             const harmonyFreqData = this.harmonyAnalyser.getFrequencyData();
             this.subjects.pineTrees.children.map((child, i) => {
                 const freqIndex = Math.floor(i/8);
@@ -481,10 +493,14 @@ export default class Lake extends SceneManager {
             });
         }
 
+        /* 
+         * MOON
+         */
+
         // only render when sources are on
-        if(this.bassAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
-            // moon
+        if(this.vizConfig.bass.players.filter((player) => {return (player.player.state) === 'started';}).length > 0) {
             const bassVol = this.bassAnalyser.getFrequencyData().reduce((a, b) => {return a+b;})/this.bassAnalyser.frequencyBinCount;
+            const bassFrequencies = this.bassAnalyser.getFrequencyData().slice(0,this.subjects.moonBeams.length);
             const radius = this.subjects.moon.userData.radius;
 
             this.subjects.moonBeams.children.map((moonBeam, beamIndex) => {
@@ -493,8 +509,9 @@ export default class Lake extends SceneManager {
 
                 for (let count = 0; count < moonBeam.geometry.attributes.position.count; count ++) {
                     const adj = (1/(0.25 * (beamIndex+1)));
-                    moonBeam.geometry.attributes.position.array[count*3] = (radius - 7 + (bassVol/3) * adj) * Math.cos(2 * Math.PI * (count/this.bassAnalyser.fftSize));
-                    moonBeam.geometry.attributes.position.array[count*3+1] = (radius - 7 + (bassVol/3) * adj) * Math.sin(2 * Math.PI * (count/this.bassAnalyser.fftSize)) + this.subjects.moon.position.y;
+                    const rot = bassFrequencies[beamIndex] / 255;
+                    moonBeam.geometry.attributes.position.array[count*3] = (radius - 7 + (bassVol/3) * adj) * Math.cos(2 * Math.PI * (count/this.bassAnalyser.fftSize + rot/2));
+                    moonBeam.geometry.attributes.position.array[count*3+1] = (radius - 7 + (bassVol/3) * adj) * Math.sin(2 * Math.PI * (count/this.bassAnalyser.fftSize + rot/6)) + this.subjects.moon.position.y;
                 };
                 
                 moonBeam.geometry.attributes.position.needsUpdate = true;
@@ -503,9 +520,12 @@ export default class Lake extends SceneManager {
             this.subjects.moonBeams.children.map((moonBeam) => {moonBeam.material.opacity = 0;})
         }
 
+        /* 
+         * LILIES
+         */
+
         // only render when sources are on
-        if(this.melodyAnalyser.sources.filter((source) => {return (source.state) === 'started';}).length > 0) {
-            // lilies
+        if(this.vizConfig.melody.players.filter((player) => {return (player.player.state) === 'started';}).length > 0) {
             const melodyFreqData = this.melodyAnalyser.getFrequencyData();//.slice(5);
             
             let melodyVolume = 0;
@@ -535,7 +555,10 @@ export default class Lake extends SceneManager {
             this.prevMelodyVolume = avgMelodyVolume;
         }
 
-        // fireflies
+        /* 
+         * FIREFLIES
+         */
+
         const flyAmount = .3;
         const flightNoise = 0.01;
         this.subjects.fireflies.children.map((fly) => {

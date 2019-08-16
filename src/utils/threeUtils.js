@@ -16,6 +16,17 @@ const regularPolygon = (nSides, size = 1, cx = 0, cy = 0, closedLoop = true, rot
     return points;
 }
 
+const solveExpEquation = (x0, y0, x1, y1) => {
+
+    // solve the system of equations ...
+    // a*b^(x0) = y0
+    // a*b^(x1) = y1
+
+    const b = Math.pow((y1/y0), (1/(x1-x0)));
+    const a = y0/Math.pow(b, x0);
+    return {a, b}; // to be used y = ab^x
+}
+
 
 const linToLog = (w) => {
     /* 
@@ -40,4 +51,4 @@ const linToLog = (w) => {
 }
 
 
-export {regularPolygon, linToLog};
+export {regularPolygon, linToLog, solveExpEquation};

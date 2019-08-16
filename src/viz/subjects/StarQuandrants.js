@@ -36,8 +36,8 @@ export default class StarQuandrants {
         let colors = [];
  
         for(let i = 0; i < n; i++){
-            const xBound = channel === 'left' ? this.width / -2 : this.width / 2;
-            const x = xBound * Math.random();
+            const xBound = channel === 'left' ? (this.width / -2) * 1.35: this.width / 2 * 1.35;
+            const x = xBound * Math.random() ;
 
             const yMin = level * this.height / this.levels;
             const y = yMin + Math.random() * (this.height / this.levels);

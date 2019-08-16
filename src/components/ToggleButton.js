@@ -1,16 +1,15 @@
 import React from 'react';
 import anime from 'animejs/lib/anime.es.js';
+import styles from '../styles/styles.scss';
 
 export default class ToggleButton extends React.Component {
 
     constructor(props){
         super(props);
 
-        this.myRef = React.createRef();
+        this.buttonRef = React.createRef();
 
-        const Tone = props.tone;
-
-        const player = new Tone.Player(`/audio/${props.songName}/${props.id}.mp3`).toMaster();
+        const player = new props.tone.Player(`/audio/${props.songName}/${props.id}.mp3`);
         player.loop = true;
         player.loopEnd = props.length;
 
@@ -24,11 +23,13 @@ export default class ToggleButton extends React.Component {
     }
 
     componentDidMount() {
-        this.props.handleAddPlayer([{
+        this.props.handleAddPlayer({
             id: this.props.id,
             player: this.state.player,
+            paused: false,
+            ref: this,
             groupName: this.props.groupName
-        }]);
+        });
     }
 
     componentDidUpdate() {
@@ -48,14 +49,14 @@ export default class ToggleButton extends React.Component {
         const duration = (this.props.transport.nextSubdivision(quantizedStartAction) - this.props.context.now()) * 1000;
 
         const currentSVGAnimation = anime({
-            targets: this.myRef.current.children[0], //svg
-            strokeDashoffset: [0, '12.56vw'],
+            targets: this.buttonRef.current.children[0], //svg
+            strokeDashoffset: [0, `${2 * Math.PI * (parseFloat(styles.toggleButtonRadius) - parseFloat(styles.toggleButtonBorder))}vh`],
             duration: duration,
             easing: 'linear'
         });
 
         const currentButtonAnimation = anime({
-            targets: this.myRef.current, // button
+            targets: this.buttonRef.current, // button
             backgroundColor: 'rgba(255,255,255, 0.3)',
             duration: duration,
             easing: 'easeInCubic'
@@ -83,15 +84,15 @@ export default class ToggleButton extends React.Component {
         const duration = (this.props.transport.nextSubdivision(quantizedStartAction) - this.props.context.now()) * 1000;
 
         const currentSVGAnimation = anime({
-            targets: this.myRef.current.children[0], //svg
-            strokeDashoffset: [0, '12.56vw'],
+            targets: this.buttonRef.current.children[0], //svg
+            strokeDashoffset: [0, `${2 * Math.PI * (parseFloat(styles.toggleButtonRadius) - parseFloat(styles.toggleButtonBorder))}vh`],
             duration: duration,
             direction: 'reverse',
             easing: 'linear'
             });
 
             const currentButtonAnimation = anime({
-            targets: this.myRef.current,
+            targets: this.buttonRef.current,
             backgroundColor: 'rgba(0,0,0,0)',
             duration: duration,
             easing: 'easeInCubic'
@@ -152,7 +153,7 @@ export default class ToggleButton extends React.Component {
         return (
             <button
                 className = {'toggle-button'}
-                ref = {this.myRef}
+                ref = {this.buttonRef}
                 onClick = {() => {
                     switch(this.state.playerState) {
                         case 'stopped': this.startPlayer(); break;
@@ -162,9 +163,12 @@ export default class ToggleButton extends React.Component {
                     }
                 }}
             >
-                <svg width={"4vw"} height={"4vw"}>
+                <svg width={`${parseFloat(styles.toggleButtonRadius) * 2}vh`} height={`${parseFloat(styles.toggleButtonRadius) * 2}vh`}>
                     <circle 
-                        className={'toggle-svg'} r={"1.96vw"} cx={'1.98vw'} cy={'1.98vw'}
+                        className={'toggle-svg'} 
+                        r={`${parseFloat(styles.toggleButtonRadius) - parseFloat(styles.toggleButtonBorder)}vh`} 
+                        cx={`${parseFloat(styles.toggleButtonRadius)}vh`} 
+                        cy={`${parseFloat(styles.toggleButtonRadius)}vh`}
                     />
                 </svg>
             </button>

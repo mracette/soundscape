@@ -1,9 +1,12 @@
 import React from 'react';
 import ToggleButton from './ToggleButton';
+import * as d3Chromatic from 'd3-scale-chromatic';
 
 export default class ToggleButtonGroup extends React.Component {
     constructor(props) {
         super(props);
+
+        this.ref = React.createRef();
 
         this.state = {
             currentPolyphony: 0,
@@ -55,12 +58,11 @@ export default class ToggleButtonGroup extends React.Component {
 
     render() {
         return (
-            <div className={'button-group'}>
-            <div className={'button-group-table'}>
-                <div className={'button-group-header'}>
+            <div>
+                <h3>
                     {this.props.groupName} ({this.state.currentPolyphony}/{this.props.polyphony === -1 ? this.props.voices.length : this.props.polyphony})
-                </div>
-                <div>
+                </h3>
+                <div className={'control-panel__row'}>
                 {this.props.voices.map((voice) => {
                     return (
                         <ToggleButton
@@ -72,7 +74,8 @@ export default class ToggleButtonGroup extends React.Component {
                         quantizeLength = {voice.quantizeLength}
 
                         override = {this.state.overrides.indexOf(voice.name) === -1 ? false : true}
-                        
+                        ref = {this.ref}
+
                         groupName = {this.props.groupName}
                         songName = {this.props.songName}
                         tone = {this.props.tone}
@@ -89,7 +92,6 @@ export default class ToggleButtonGroup extends React.Component {
                     })}
                 </div>
             </div>
-        </div>
         )
     }
 };

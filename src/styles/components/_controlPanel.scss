@@ -1,0 +1,128 @@
+.control-panel {
+    opacity: 0; // comment for dev mode
+    transition-duration: 200ms;
+    padding: 3vh;
+    position: absolute;
+    height: 100vh;
+    top: 0px;
+    left: 0px;
+    color: white;
+}
+
+.control-panel:hover {
+    opacity: 1;
+    background-color: rgba(0,0,0,0.3);
+    transition-duration: 200ms;
+}
+
+.control-panel-section {
+    position: absolute;
+}
+
+.control-panel h2 {
+    font-size: 2.5vh;
+    margin: 1vh 0 1vh 0;
+}
+
+.control-panel h3 {
+    font-size: 1.75vh;
+    margin: 1vh 0 1vh 0;
+    font-weight: normal;
+}
+
+.control-panel__section {
+    margin: 0 0 3vh 0;
+}
+
+.control-panel__col {
+    display: flex;
+    flex-direction: column;
+}
+
+.control-panel__row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-content: space-around;
+    align-items: center;
+}
+
+.control-panel__hide-button {
+    background: rgba(255,255,255,0.15);
+    color: inherit;
+    position: absolute;
+    font-size: 1vh;
+    top: 0;
+    right: 0;
+    width: $toggle-button-radius;
+    height: $toggle-button-radius;
+    margin: $toggle-button-radius / 2;
+    border-radius: $toggle-button-radius / 2;
+}
+
+.control-panel__hide-button:hover {
+    cursor: pointer;
+}
+
+.control-panel__hide-button:focus {
+    outline: none;
+}
+
+.control-panel__button {
+    background: rgba(255,255,255,0.15);
+    color: inherit;
+    padding: 0.5vh;
+    font-size: 1.5vh;
+    width: $toggle-button-radius * 4 + $toggle-button-radius / 4;
+    margin: 0 $toggle-button-radius/4 $toggle-button-radius/4 0;
+}
+
+.control-panel__button:focus {
+    outline: none;
+}
+
+.control-panel__button:hover {
+    cursor: pointer;
+}
+
+.control-panel__dropdown-button {
+    opacity: 1;
+    background: rgba(255,255,255,0);
+    width: $toggle-button-radius * 3;
+    height: $toggle-button-radius * 2;
+    border-radius: 0 $toggle-button-radius $toggle-button-radius 0;
+    border: $toggle-button-border solid;
+    border-left-style: none;
+    margin-top: 3vh;
+    color: white;
+    font-size: 1.75vh;
+    text-align: center;
+    padding: 0;
+    position: absolute;
+    left: -$toggle-button-radius / 10;
+    top: 0
+}
+
+.control-panel__dropdown-button:hover {
+    cursor: pointer;
+}
+
+// triggered for mobile sizes
+@media (max-width: $desktop-breakpoint) {
+    .control-panel {
+        visibility: hidden;
+        transition-duration: 0ms;
+        opacity: 1;
+    }
+    .control-panel:hover {
+        transition-duration: 0ms;
+    }
+}
+
+// triggered for desktop sizes
+@media (min-width: $desktop-breakpoint) {
+    .control-panel__dropdown-button {
+        visibility: hidden;
+    }
+}

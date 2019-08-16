@@ -1,7 +1,8 @@
 export default class Analyser {
-    constructor(context, sources, params){
+    constructor(context, input, params){
         const defaults = {
             split: false,
+            routeTo: context.destination,
             type: 'fft',
             power: 13,
             minDecibels: -100,
@@ -15,15 +16,16 @@ export default class Analyser {
             this[prop] = properties[prop];
         })
 
-        this.sources = sources;
+        this.input = input;
 
         // if split === true, this.analyser is an obj with 'left' and 'right' properties
         // channel data is received by passing 'left' or 'right' into this class' getter functions
         if (this.split) {
+
             const splitter = context.createChannelSplitter(2);
 
-            // connect all of the players in the sources array to the splitter
-            sources.map((source) => source.connect(splitter));
+            // feed in the input
+            this.input.connect(splitter);
 
             this.analyser = {};
             this.analyser.left = context.createAnalyser();
@@ -52,6 +54,9 @@ export default class Analyser {
             this.analyser.minDecibels = this.minDecibels;
             this.analyser.maxDecibels = this.maxDecibels;
             this.analyser.smoothingTimeConstant = this.smoothingTimeConstant;
+
+            // feed in the input
+            this.input.connect(this.analyser);
         }
 
         // bind the bin count and fftSize
@@ -73,14 +78,21 @@ export default class Analyser {
 
         // set routing
         if(this.split) {
-            const merger = context.createChannelMerger(2);
-            this.analyser.left.connect(merger, 0, 0);
-            this.analyser.right.connect(merger, 0, 1);
-            merger.connect(context.destination);
+            this.merger = context.createChannelMerger(2);
+            this.analyser.left.connect(this.merger, 0, 0);
+            this.analyser.right.connect(this.merger, 0, 1);
+            this.merger.connect(this.routeTo);
+        } else {          
+            this.analyser.connect(this.routeTo);
+        }
+    }
+
+    connect(route) {
+        if(this.split) {
+            this.analyser.left.connect(route);
+            this.analyser.right.connect(route);
         } else {
-            // connect all of the players in the sources array to this analyser
-            sources.map((source) => {source.connect(this.analyser)});
-            this.analyser.connect(context.destination);
+            this.analyser.connect(route);
         }
     }
 

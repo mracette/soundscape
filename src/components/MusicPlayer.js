@@ -1,11 +1,40 @@
 import React from 'react';
 import Tone from 'tone';
 import ToggleButtonGroup from './ToggleButtonGroup';
+import Sliders from './Sliders';
 import CanvasViz from './CanvasViz';
+import { solveExpEquation } from '../utils/threeUtils';
 
 export default class MusicPlayer extends React.Component {
     constructor(props) {
         super(props);
+
+        const playerGroupsObj = {};
+        this.props.songConfig.groups.map((group) => {
+            
+            // each group needs its own effects chain
+            const lpFilter = new Tone.Filter(20000, "lowpass", -12);
+            const hpFilter = new Tone.Filter(20, "highpass", -12);
+            const reverb = new Tone.JCReverb(0.1);
+            reverb.wet.value = 0;
+            const effectsChainEntry = new Tone.Gain();
+            const effectsChainExit = new Tone.Gain();
+
+            effectsChainEntry.connect(lpFilter);
+            lpFilter.connect(hpFilter);
+            hpFilter.connect(reverb);
+            reverb.connect(effectsChainExit);
+
+            playerGroupsObj[group.groupName] = {
+                lpFilter,
+                hpFilter,
+                reverb,
+                effectsChainEntry,
+                effectsChainExit
+            };
+        });
+
+        this.ref = React.createRef();
 
         this.state = {
             songConfig: this.props.songConfig,
@@ -13,21 +42,58 @@ export default class MusicPlayer extends React.Component {
             bpm: this.props.songConfig.bpm,
             timeSignature: this.props.songConfig.timeSignature,
             tone: Tone,
-            transport: undefined,
-            context: undefined,
+            transport: Tone.Transport,
+            context: Tone.context,
             players: [],
-            playerGroups: {},
-            totalPlayerCount: undefined,
+            playerGroups: playerGroupsObj,
+            totalPlayerCount: this.props.songConfig.groups.map((group) => group.voices.length).reduce((a,b) => a+b),
             playersLoaded: 0,
-            devMode: false
+            muted: false,
+            devMode: true
+        }
+
+        // initialize transport
+        this.state.transport.bpm.value = this.state.bpm;
+        this.state.transport.timeSignature = this.state.timeSignature;
+        this.state.transport.start();
+
+        // initialize context
+        this.state.context.latencyHint = 'fastest';
+
+        this.effectParams = {
+            lpFilter: {
+                minFreq: 320,
+                maxFreq: 20000,
+                minQ: 0.71,
+                maxQ: 3,
+                expFreqParams: solveExpEquation(1, 320, 100, 20000),
+                expQParams: solveExpEquation(1, 0.71, 100, 3)
+            },
+            hpFilter: {
+                minFreq: 20,
+                maxFreq: 4500,
+                minQ: 0.71,
+                maxQ: 1.5,
+                expFreqParams: solveExpEquation(1, 20, 100, 6500),
+                expQParams: solveExpEquation(1, 0.71, 100, 1.5)
+            },
+            ambience: {
+                minRoomSize: 0.1,
+                maxRoomSize: 0.3,
+                minWet: 0,
+                maxWet: 0.4
+            }
         }
 
         this.handleAddPlayer = this.handleAddPlayer.bind(this);
-        this.handleAddGroupNode = this.handleAddGroupNode.bind(this);
+        this.handleChangeHP = this.handleChangeHP.bind(this);
+        this.handleChangeLP = this.handleChangeLP.bind(this);
+        this.handleChangeAmbience = this.handleChangeAmbience.bind(this);
 
     }
 
-    handleAddPlayer(player, groupName) {
+    handleAddPlayer(player) {
+        player.player.connect(this.state.playerGroups[player.groupName].effectsChainEntry);
         this.setState((prevState) => {
             return {
                 players: prevState.players.concat(player),
@@ -36,51 +102,30 @@ export default class MusicPlayer extends React.Component {
         });
     }
 
-    handleAddGroupNode(groupNode, groupName) {
-        this.setState((prevState) => {
-            const obj = {...prevState.playerGroups};
-            obj[groupName] = groupNode;
-            return {
-                playerGroups: obj
-            };
+    handleChangeLP(newValue) {
+        const freqParams = this.effectParams.lpFilter.expFreqParams;
+        const QParams = this.effectParams.lpFilter.expQParams;
+
+        Object.keys(this.state.playerGroups).forEach((group) => {
+            this.state.playerGroups[group].lpFilter.frequency.value = freqParams.a * Math.pow(freqParams.b, newValue);
+            this.state.playerGroups[group].lpFilter.Q.value = QParams.a * Math.pow(QParams.b, newValue);
         })
     }
 
-    componentDidMount() {
+    handleChangeHP(newValue) {
+        const freqParams = this.effectParams.hpFilter.expFreqParams;
+        const QParams = this.effectParams.hpFilter.expQParams;
 
-        // find total player count
-        let count = 0;
-        let obj = {};
-        for(let i = 0; i < this.state.songConfig.groups.length; i++) {
-            const group = this.state.songConfig.groups[i];
-            count += group.voices.length;
-            // populate the playerGroups object with an undefined property for each group
-            obj[group.groupName] = undefined;
-        }
-
-        this.setState((prevState) => {
-            return {
-                totalPlayerCount: count,
-                playerGroups: obj
-            };
+        Object.keys(this.state.playerGroups).forEach((group) => {
+            this.state.playerGroups[group].hpFilter.frequency.value = freqParams.a * Math.pow(freqParams.b, newValue);
+            this.state.playerGroups[group].hpFilter.Q.value = QParams.a * Math.pow(QParams.b, newValue);
         })
+    }
 
-        // initialize transport
-        const transport = Tone.Transport;
-        transport.bpm.value = this.state.bpm;
-        transport.timeSignature = this.state.timeSignature;
-        transport.start();
-
-        this.setState(() => {
-            return {transport};
-        })
-
-        // initialize context
-        const context = Tone.context;
-        context.latencyHint = 'fastest';
-
-        this.setState(() => {
-            return {context}
+    handleChangeAmbience(newValue) {
+        Object.keys(this.state.playerGroups).forEach((group) => {
+            this.state.playerGroups[group].reverb.roomSize.value = this.effectParams.ambience.minRoomSize + (newValue - 1)/100 * this.effectParams.ambience.maxRoomSize;
+            this.state.playerGroups[group].reverb.wet.value = this.effectParams.ambience.minWet + (newValue - 1)/100 * this.effectParams.ambience.maxWet;
         })
     }
 
@@ -89,32 +134,114 @@ export default class MusicPlayer extends React.Component {
             <div>
                 <CanvasViz
                     context = {this.state.context}
+                    effectsChain = {this.state.effectsChain}
                     players = {this.state.players}
                     playerGroups = {this.state.playerGroups}
                     handleAddGroupNode = {this.handleAddGroupNode}
                     flagPlayersLoaded = {this.state.playersLoaded / this.state.totalPlayerCount === 1}
                     // TODO: players load progress
                 />
-                <div className = 'button-section'>
-                    {this.state.songConfig.groups.map((group) => {
-                        return <ToggleButtonGroup
+                    <button 
+                        className = 'control-panel__dropdown-button'
+                        id = 'dropdown-button'
+                        onClick = {() => {
+                            document.getElementById('control-panel').style.visibility = 'visible';
+                            document.getElementById('dropdown-button').style.visibility = 'hidden';
+                        }}
+                        >
+                        Controls
+                    </button>
+                    <div className = 'control-panel' id = 'control-panel'>
+                        <button 
+                            className = 'control-panel__hide-button'
+                            onClick = {() => {
+                                document.getElementById('control-panel').style.visibility = 'hidden';
+                                document.getElementById('dropdown-button').style.visibility = 'visible';
+                            }}
+                            >
+                            &#10005;
+                        </button>
+                        <h2>Voices</h2>
+                            <div className = 'control-panel__section'>
+                                <div className = 'control-panel__row'>
+                                    <button 
+                                        className = 'control-panel__button'
+                                        onClick = {() => {
+                                            this.state.players.map((player) => {
+                                                console.log(player);
+                                                if(player.player.state === 'started') {
+                                                    player.ref.stopPlayer();
+                                                }
+                                            });
+                                        }}
+                                        >
+                                        Reset
+                                    </button>
+                                    <button 
+                                        className = 'control-panel__button'
+                                        onClick = {() => {
+                                            if(this.state.muted) {
+                                                this.state.tone.Master.mute = false;
+                                                this.setState(() => ({muted: false}))
+                                            } else {
+                                                this.state.tone.Master.mute = true;
+                                                this.setState(() => ({muted: true}))
+                                            }
+                                        }}
+                                        >
+                                        {this.state.muted ? 'Unmute' : 'Mute'}
+                                    </button>
+                                </div>
+                                <div className = 'control-panel__col'>
+                                    {this.state.songConfig.groups.map((group, index) => {
+                                        return <ToggleButtonGroup
 
-                        songName = {this.state.name}
-                        tone = {this.state.tone}
-                        transport = {this.state.transport}
-                        context = {this.state.context}
-                        handleAddPlayer = {this.handleAddPlayer}
-                        devMode = {this.state.devMode}
+                                        songName = {this.state.name}
+                                        tone = {this.state.tone}
+                                        transport = {this.state.transport}
+                                        context = {this.state.context}
+                                        handleAddPlayer = {this.handleAddPlayer}
+                                        devMode = {this.state.devMode}
 
-                        key = {group.groupName}
-                        groupName = {group.groupName}
-                        voices = {group.voices}
-                        polyphony = {group.polyphony}
+                                        key = {group.groupName}
+                                        groupName = {group.groupName}
+                                        voices = {group.voices}
+                                        polyphony = {group.polyphony}
 
-                        />
-                    })}
+                                        index = {index}
+                                        total = {this.state.songConfig.groups.length}
+                                    />
+                                    })}
+                                </div>
+                            </div>
+                        <h2>Effects</h2>
+                        <div className = 'control-panel__section'>
+                            <div className = 'control-panel__table'>
+                            <div className = 'control-panel__row'>
+                                <button 
+                                    className = 'control-panel__button'
+                                    onClick = {() => {
+                                        this.handleChangeHP(0);
+                                        this.handleChangeLP(100);
+                                        this.handleChangeAmbience(0);
+                                        document.getElementById('hp-slider').value = 1;
+                                        document.getElementById('lp-slider').value = 100;
+                                        document.getElementById('ambience-slider').value = 1;
+                                    }}
+                                    >
+                                    Reset
+                                </button>
+                            </div>
+                                <Sliders
+                                    handleChangeHP = {this.handleChangeHP}
+                                    handleChangeLP = {this.handleChangeLP}
+                                    handleChangeAmbience = {this.handleChangeAmbience}
+                                    total = {this.state.songConfig.groups.length}
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
         );
     }
 }

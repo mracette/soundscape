@@ -1,4 +1,10 @@
 @import './base/settings';
 @import './base/base';
-@import './components/buttonGroup';
 @import './components/toggleButton';
+@import './components/sliders';
+@import './components/controlPanel';
+
+:export {
+    toggleButtonRadius: $toggle-button-radius;
+    toggleButtonBorder: $toggle-button-border;
+}
