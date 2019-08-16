@@ -1,10 +1,13 @@
 {
   "name": "be-the-music",
+  "homepage": "https://mracette.github.io/be-the-music/",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d public",
     "build": "webpack --mode development",
     "dev-server": "webpack-dev-server"
   },
@@ -14,6 +17,7 @@
     "@babel/preset-react": "^7.0.0",
     "animejs": "^3.1.0",
     "d3-scale-chromatic": "^1.3.3",
+    "gh-pages": "^2.1.1",
     "normalize.css": "^8.0.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
