@@ -6,9 +6,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "predeploy": "npm run build",
+    "predeploy": "npm run build:prod",
     "deploy": "gh-pages -d public",
-    "build": "webpack --mode development",
+    "build:dev": "webpack --mode development",
+    "build:prod": "webpack -p --env production",
     "dev-server": "webpack-dev-server"
   },
   "author": "Mark Racette",
@@ -24,6 +25,7 @@
     "react-router-dom": "^5.0.1",
     "stats.js": "^0.17.0",
     "three": "^0.107.0",
+    "three-gltf-loader": "^1.107.0",
     "tone": "^13.4.9"
   },
   "devDependencies": {
@@ -32,6 +34,7 @@
     "babel-loader": "^8.0.6",
     "css-loader": "^3.1.0",
     "file-loader": "^4.1.0",
+    "mini-css-extract-plugin": "^0.8.0",
     "sass-loader": "^7.1.0",
     "styles-loader": "^1.0.2",
     "webpack": "^4.38.0",
