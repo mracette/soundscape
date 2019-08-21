@@ -15,7 +15,8 @@ export default class CanvasViz extends React.Component {
 
     componentDidMount() {
         this.setState(() => {
-            return {canvas: document.getElementById('canvas-viz')};
+            const canvas = document.getElementById('canvas-viz');
+            return {canvas};
         })
     }
     
@@ -32,7 +33,7 @@ export default class CanvasViz extends React.Component {
             vizConfig.rhythm.analyser =  new Analyser(this.props.context, this.props.playerGroups.rhythm.effectsChainExit, {
                 effectsChain: this.props.effectsChain,
                 power: 7,
-                smoothingTimeConstant: .5
+                smoothingTimeConstant: .3
             });
 
             vizConfig.atmosphere.analyser = new Analyser(this.props.context, this.props.playerGroups.atmosphere.effectsChainExit, {
@@ -41,15 +42,15 @@ export default class CanvasViz extends React.Component {
                     smoothingTimeConstant: 0.2,
                     power: 5,
                     minDecibels: -100,
-                    maxDecibels: -30
+                    maxDecibels: 0
             });
 
             vizConfig.melody.analyser = new Analyser(this.props.context, this.props.playerGroups.melody.effectsChainExit, {
                 effectsChain: this.props.effectsChain,
                 power: 5,
-                minDecibels: -40,
-                maxDecibels: -5,
-                smoothingTimeConstant: 0.5
+                minDecibels: -120,
+                maxDecibels: 0,
+                smoothingTimeConstant: 0
             });
 
             vizConfig.harmony.analyser = new Analyser(this.props.context, this.props.playerGroups.harmony.effectsChainExit, {
@@ -79,6 +80,16 @@ export default class CanvasViz extends React.Component {
     }
 
     render() {
-        return <canvas id = 'canvas-viz'/>
+        return <canvas id = 'canvas-viz'
+            onClick = {() => {
+                const panel = document.getElementById('control-panel');
+                console.log(panel);
+                if(panel.classList.contains('control-panel-visible')) {
+                    panel.classList.remove('control-panel-visible');
+                    panel.classList.add('control-panel-hidden');
+                    document.getElementById('arrow').style.transform = "rotate(0deg)";
+                }
+            }}
+        />
     }
 }
