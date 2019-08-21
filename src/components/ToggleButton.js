@@ -9,7 +9,9 @@ export default class ToggleButton extends React.Component {
 
         this.buttonRef = React.createRef();
 
-        const player = new props.tone.Player(`./audio/${props.songName}/${props.id}.mp3`);
+        const audio = require(`../audio/${props.songName}/${props.id}.mp3`);
+
+        const player = new props.tone.Player(audio);
         player.loop = true;
         player.loopEnd = props.length;
 

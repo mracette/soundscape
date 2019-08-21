@@ -1,6 +1,5 @@
 import React from 'react';
 import ToggleButton from './ToggleButton';
-import * as d3Chromatic from 'd3-scale-chromatic';
 
 export default class ToggleButtonGroup extends React.Component {
     constructor(props) {
