@@ -7,7 +7,6 @@ import ReactDOM from 'react-dom';
 import AppContainer from './components/AppContainer';
 
 // Styles
-import 'normalize.css/normalize.css';
 import './styles/styles.scss';
 
 const jsx = (
