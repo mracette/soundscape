@@ -1,12 +1,11 @@
 import * as THREE from 'three';
+import GLTFLoader from 'three-gltf-loader';
 import FirstPersonControls from './controls/FirstPersonControls';
-import GLTFLoader from './helpers/GLTFLoader';
 import Stats from 'stats.js';
 
 export default class SceneManager {
     constructor(canvas, analyserArray){
 
-        const $this = this;
         this.that = this;
 
         this.analyserArray = analyserArray;
@@ -122,9 +121,6 @@ export default class SceneManager {
     }
 
     initHelpers() {
-        //const axesHelper = new THREE.AxesHelper( 500 );
-        //this.scene.add( axesHelper );
-
         const stats = new Stats();
         stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
         stats.dom.style.left = null;
@@ -133,7 +129,7 @@ export default class SceneManager {
 
         const helpers = {
             stats: stats,
-            gltfLoader: new THREE.GLTFLoader()
+            gltfLoader: new GLTFLoader()
         }
         return helpers;
     }
