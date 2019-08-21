@@ -49,7 +49,7 @@ export default class MusicPlayer extends React.Component {
             totalPlayerCount: this.props.songConfig.groups.map((group) => group.voices.length).reduce((a,b) => a+b),
             playersLoaded: 0,
             muted: false,
-            devMode: true
+            devMode: false
         }
 
         // initialize transport
@@ -90,6 +90,12 @@ export default class MusicPlayer extends React.Component {
         this.handleChangeLP = this.handleChangeLP.bind(this);
         this.handleChangeAmbience = this.handleChangeAmbience.bind(this);
 
+    }
+
+    componentDidUpdate() {
+        if(!!this.state.context && this.props.userGesture) {
+            this.state.context.resume();
+        }
     }
 
     handleAddPlayer(player) {
@@ -141,26 +147,42 @@ export default class MusicPlayer extends React.Component {
                     flagPlayersLoaded = {this.state.playersLoaded / this.state.totalPlayerCount === 1}
                     // TODO: players load progress
                 />
-                    <button 
-                        className = 'control-panel__dropdown-button'
-                        id = 'dropdown-button'
-                        onClick = {() => {
-                            document.getElementById('control-panel').style.visibility = 'visible';
-                            document.getElementById('dropdown-button').style.visibility = 'hidden';
-                        }}
-                        >
-                        Controls
-                    </button>
-                    <div className = 'control-panel' id = 'control-panel'>
-                        <button 
-                            className = 'control-panel__hide-button'
-                            onClick = {() => {
-                                document.getElementById('control-panel').style.visibility = 'hidden';
-                                document.getElementById('dropdown-button').style.visibility = 'visible';
+                    <div id = 'expand-control-panel-container'>
+                            <h4 className = 'expand-control-panel' id = 'arrow'> &#10139;</h4>
+                            <h4 className = 'expand-control-panel'
+                            onClick = {(e) => {
+                                e.preventDefault();
+                                const panel = document.getElementById('control-panel');
+                                if(panel.classList.contains('control-panel-visible')) {
+                                    document.getElementById('control-panel').classList.remove('control-panel-visible');
+                                    document.getElementById('control-panel').classList.add('control-panel-hidden');
+                                    document.getElementById('arrow').style.transform = 'rotate(0deg)';
+                                } else {
+                                    document.getElementById('control-panel').classList.add('control-panel-visible');
+                                    document.getElementById('control-panel').classList.remove('control-panel-hidden');
+                                    document.getElementById('arrow').style.transform = 'rotate(90deg)';
+                                }
                             }}
                             >
-                            &#10005;
-                        </button>
+                                &nbsp;control panel
+                            </h4>
+                    </div>
+                    <div className = 'control-panel control-panel-hidden' id = 'control-panel'
+                        onMouseEnter = {() => {
+                            document.getElementById('arrow').style.transform = 'rotate(90deg)';
+                        }}
+                        onMouseLeave = {() => {
+                            document.getElementById('arrow').style.transform = 'rotate(0deg)';
+                        }}
+                    >
+                    <button id = 'hide-control-panel'
+                        onClick = {(e) => {
+                            document.getElementById('control-panel').classList.remove('control-panel-visible');
+                            document.getElementById('control-panel').classList.add('control-panel-hidden');
+                        }}
+                        >
+                        &#10005;
+                    </button>
                         <h2>Voices</h2>
                             <div className = 'control-panel__section'>
                                 <div className = 'control-panel__row'>
@@ -169,8 +191,10 @@ export default class MusicPlayer extends React.Component {
                                         onClick = {() => {
                                             this.state.players.map((player) => {
                                                 console.log(player);
-                                                if(player.player.state === 'started') {
+                                                if(player.ref.state.playerState === 'active') {
                                                     player.ref.stopPlayer();
+                                                } else if(player.ref.state.playerState === 'pending-start') {
+                                                    player.ref.pendingStop();
                                                 }
                                             });
                                         }}
