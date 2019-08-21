@@ -1,3 +1,9 @@
+.slider-label {
+  font-size: 1.75vh;
+  margin: .75vh 0 .75vh 0;
+  display: block;
+}
+
 .slider {
   -webkit-appearance: none;
   width: 65%;
@@ -16,7 +22,7 @@
   appearance: none;
   width: 1.5vh;
   height: 1.5vh;
-  border-radius: 50%; 
+  border-radius: .75vh; 
   background: $white;
   cursor: pointer;
 }
@@ -24,7 +30,7 @@
 .slider::-moz-range-thumb {
   width: 1.5vh;
   height: 1.5vh;
-  border-radius: 50%;
+  border-radius: .75vh;
   background: $white;
   cursor: pointer;
 }

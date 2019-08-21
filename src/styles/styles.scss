@@ -1,8 +1,10 @@
+@import '../../node_modules/normalize.css';
 @import './base/settings';
 @import './base/base';
 @import './components/toggleButton';
 @import './components/sliders';
 @import './components/controlPanel';
+@import './components/songLandingPage';
 
 :export {
     toggleButtonRadius: $toggle-button-radius;
