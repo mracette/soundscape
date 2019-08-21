@@ -203,7 +203,7 @@ export default class Lake extends SceneManager {
 
                 const moonMesh = new THREE.Mesh(moonGeo, moonMat);
                 moonMesh.userData.radius = moonRadius;
-                moonMesh.position.set(0, 45, -80);
+                moonMesh.position.set(0, 35, -80);
 
                 this.subjects.moon = moonMesh;
                 this.scene.add(moonMesh);
@@ -230,7 +230,7 @@ export default class Lake extends SceneManager {
 
                 for(let k = 0; k < 8; k++) {
                     const newMoonRings = moonRings.clone();
-                    newMoonRings.translateY(45);
+                    newMoonRings.translateY(moonMesh.position.y);
                     newMoonRings.rotateZ(2 * Math.PI * (k/16));
                     moonBeams.add(newMoonRings);
                 }
