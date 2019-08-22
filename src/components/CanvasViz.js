@@ -83,12 +83,9 @@ export default class CanvasViz extends React.Component {
         return <canvas id = 'canvas-viz'
             onClick = {() => {
                 const panel = document.getElementById('control-panel');
-                console.log(panel);
-                if(panel.classList.contains('control-panel-visible')) {
-                    panel.classList.remove('control-panel-visible');
-                    panel.classList.add('control-panel-hidden');
-                    document.getElementById('arrow').style.transform = "rotate(0deg)";
-                }
+                panel.classList.remove('control-panel-visible');
+                panel.classList.add('control-panel-hidden');
+                document.getElementById('arrow').style.transform = "rotate(0deg)";
             }}
         />
     }

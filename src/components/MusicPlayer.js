@@ -180,6 +180,7 @@ export default class MusicPlayer extends React.Component {
                         onClick = {(e) => {
                             document.getElementById('control-panel').classList.remove('control-panel-visible');
                             document.getElementById('control-panel').classList.add('control-panel-hidden');
+                            document.getElementById('arrow').style.transform = 'rotate(0deg)';
                         }}
                         >
                         &#10005;
