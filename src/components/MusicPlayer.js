@@ -59,6 +59,7 @@ export default class MusicPlayer extends React.Component {
 
         // initialize context
         this.state.context.latencyHint = 'fastest';
+        this.state.context.lookAhead = 0;
 
         this.effectParams = {
             lpFilter: {
