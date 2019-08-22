@@ -1,6 +1,7 @@
 import React from 'react';
 import anime from 'animejs/lib/anime.es.js';
 import styles from '../styles/styles.scss';
+import {vh, vw} from '../utils/utils';
 
 export default class ToggleButton extends React.Component {
 
@@ -52,7 +53,7 @@ export default class ToggleButton extends React.Component {
 
         const currentSVGAnimation = anime({
             targets: this.buttonRef.current.children[0], //svg
-            strokeDashoffset: [0, `${2 * Math.PI * (parseFloat(styles.toggleButtonRadius) - parseFloat(styles.toggleButtonBorder))}vh`],
+            strokeDashoffset: [0, `${2 * Math.PI * vh(styles.toggleButtonRadius - styles.toggleButtonBorder)}px`],
             duration: duration,
             easing: 'linear'
         });
@@ -87,7 +88,7 @@ export default class ToggleButton extends React.Component {
 
         const currentSVGAnimation = anime({
             targets: this.buttonRef.current.children[0], //svg
-            strokeDashoffset: [0, `${2 * Math.PI * (parseFloat(styles.toggleButtonRadius) - parseFloat(styles.toggleButtonBorder))}vh`],
+            strokeDashoffset: [0, `${2 * Math.PI * vh(styles.toggleButtonRadius - styles.toggleButtonBorder)}px`],
             duration: duration,
             direction: 'reverse',
             easing: 'linear'
@@ -147,7 +148,7 @@ export default class ToggleButton extends React.Component {
             this.state.player.stop();
             this.setState(() => ({playerState: 'stopped'}));
         }, quantizedStartAction);
-    
+
         this.setState(() => ({eventId: pendingStopEventId}));
     }
 
@@ -165,12 +166,13 @@ export default class ToggleButton extends React.Component {
                     }
                 }}
             >
-                <svg width={`${parseFloat(styles.toggleButtonRadius) * 2}vh`} height={`${parseFloat(styles.toggleButtonRadius) * 2}vh`}>
-                    <circle 
-                        className={'toggle-svg'} 
-                        r={`${parseFloat(styles.toggleButtonRadius) - parseFloat(styles.toggleButtonBorder)}vh`} 
-                        cx={`${parseFloat(styles.toggleButtonRadius)}vh`} 
-                        cy={`${parseFloat(styles.toggleButtonRadius)}vh`}
+                <svg className={'svg'} 
+                    width = {2 * vh(styles.toggleButtonRadius)+'px'}
+                    height = {2 * vh(styles.toggleButtonRadius)+'px'}>
+                    <circle className={'toggle-svg'} 
+                        cx = {vh(styles.toggleButtonRadius)+'px'}
+                        cy = {vh(styles.toggleButtonRadius)+'px'}
+                        r = {vh(styles.toggleButtonRadius - styles.toggleButtonBorder)+'px'}
                     />
                 </svg>
             </button>

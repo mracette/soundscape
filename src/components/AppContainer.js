@@ -10,7 +10,48 @@ export default class AppContainer extends React.Component {
             config: require('../app-config.json'),
             userGesture: false
         }
+
         this.handleUpdateUserGesture = this.handleUpdateUserGesture.bind(this);
+        this.setViewportVars = this.setViewportVars.bind(this);
+
+        // in order to support browser compatibility and mobile, the app uses
+        // a calculated version of the vh and vw units that is based on the 
+        // window's innerwidth and innerheight at a given time.
+        this.setViewportVars();
+
+        // make sure that the --vw and --vh vars update on window resize
+        window.addEventListener('resize', this.setViewportVars);
+
+        // this means that the svg attributes that can't be set in CSS will
+        // also require updating
+        window.addEventListener('resize', this.setSvgAttrs);
+
+
+    }
+
+    setViewportVars() {
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        document.documentElement.style.setProperty('--vh', `${viewportHeight/100}px`);
+        document.documentElement.style.setProperty('--vw', `${viewportWidth/100}px`);
+    }
+
+    setSvgAttrs() {
+        const svgList = document.getElementsByClassName('svg');
+        const svgCircleList = document.getElementsByClassName('toggle-svg');
+
+        for(let i = 0; i < svgList.length; i++) {
+            const svg = svgList[i];
+            svg.setAttribute('width',  (3 * 2 * (window.innerHeight / 100))+'px');
+            svg.setAttribute('height', (3 * 2 * (window.innerHeight / 100))+'px');
+        }
+
+        for(let j = 0; j < svgCircleList.length; j++) {
+            const circle = svgCircleList[j];
+            circle.setAttribute('cx', (3 * (window.innerHeight / 100))+'px');
+            circle.setAttribute('cy', (3 * (window.innerHeight / 100))+'px');
+            circle.setAttribute('r', ((3 - 0.1) * (window.innerHeight / 100))+'px');
+        }
     }
 
     handleUpdateUserGesture(bool) {

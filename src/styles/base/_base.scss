@@ -1,5 +1,10 @@
-// @import url('https://fonts.googleapis.com/css?family=Bilbo&display=swap');
-// @import url('https://fonts.googleapis.com/css?family=Lato&display=swap');
+@function vh($quantity) {
+    @return calc(var(--vh, 1vh) * #{$quantity});
+}
+
+@function vw($quantity) {
+    @return calc(var(--vw, 1vw) * #{$quantity});
+}
 
 /* lato-regular - latin */
 @font-face {
@@ -40,20 +45,20 @@ h2, h3, h4 {
 body {
     font-family: 'Lato';
     overflow: hidden;
-    width: 100%;
-    height: 100%;
-}
-
-.cursive {
-    font-family: 'Satisfy';
-    text-transform: none;
+    width: vw(100);
+    height: vh(100);
 }
 
 #canvas-viz {
     position: absolute;
     top: 0;
-    width: 100%;
-    height: 100%;
     margin: 0;
+    width: vw(100);
+    width: vh(100);
     z-index: -999;
+}
+
+.cursive {
+    font-family: 'Satisfy';
+    text-transform: none;
 }

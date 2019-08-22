@@ -1,7 +1,7 @@
 import SceneManager from '../SceneManager';
 import * as THREE from 'three';
 import * as d3Chromatic from 'd3-scale-chromatic';
-import {regularPolygon, linToLog} from '../../utils/threeUtils';
+import {regularPolygon, linToLog} from '../../utils/utils';
 import StarQuandrants from '../subjects/StarQuandrants';
 import lilyModel from '../../models/lily.gltf';
 import landscapeModel from '../../models/landscape.gltf';

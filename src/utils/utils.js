@@ -50,5 +50,12 @@ const linToLog = (w) => {
     return {a,b};
 }
 
+const vh = (n) => {
+    return window.innerHeight * n / 100;
+}
 
-export {regularPolygon, linToLog, solveExpEquation};
+const vw = (n) => {
+    return window.innerWidth * n / 100;
+}
+
+export {regularPolygon, linToLog, solveExpEquation, vh, vw};

@@ -3,7 +3,7 @@ import Tone from 'tone';
 import ToggleButtonGroup from './ToggleButtonGroup';
 import Sliders from './Sliders';
 import CanvasViz from './CanvasViz';
-import { solveExpEquation } from '../utils/threeUtils';
+import { solveExpEquation } from '../utils/utils';
 
 export default class MusicPlayer extends React.Component {
     constructor(props) {

@@ -4,9 +4,9 @@ Control panel itself
 
 .control-panel {
     transition-duration: 200ms;
-    padding: 4vh;
+    padding: vh(4);
     position: absolute;
-    height: 100%;
+    height: vh(100);
     top: 0;
     left: 0;
     color: white;
@@ -24,13 +24,13 @@ Control panel itself
 }
 
 .control-panel h2 {
-    font-size: 3.25vh;
-    margin: .75vh 0 .75vh 0;
+    font-size: vh(3.25);
+    margin: vh(.75) 0 vh(.75) 0;
 }
 
 .control-panel h3 {
-    font-size: 1.75vh;
-    margin: .75vh 0 .75vh 0;
+    font-size: vh(1.75);
+    margin: vh(.75) 0 vh(.75) 0;
 }
 
 /* 
@@ -38,7 +38,7 @@ Individual control panel sections
 */
 
 .control-panel__section {
-    margin-bottom: 3vh;
+    margin-bottom: vh(3);
 }
 
 .control-panel__col {
@@ -63,17 +63,16 @@ Hide button
     background: rgba(255,255,255,0.15);
     color: inherit;
     position: absolute;
-    font-size: 1vh;
+    font-size: vh(1);
     vertical-align: middle;
     text-align: center;
     top: 0;
     right: 0;
-    width: $toggle-button-radius;
-    height: $toggle-button-radius;
-    // padding: $toggle-button-radius / 2;
+    width: vh($toggle-button-radius);
+    height: vh($toggle-button-radius);
     padding: 0;
-    margin: 1vh;
-    border-radius: $toggle-button-radius / 2;
+    margin: vh(1);
+    border-radius: vh($toggle-button-radius) / 2;
     border: $toggle-button-border solid white;
 }
 
@@ -92,10 +91,10 @@ Hide button
 .control-panel__button {
     background: rgba(255,255,255,0.15);
     color: inherit;
-    padding: 0.75vh;
-    font-size: 1.75vh;
-    width: $toggle-button-radius * 4 + $toggle-button-radius / 4;
-    margin: 0 $toggle-button-radius/4 $toggle-button-radius/4 0;
+    padding: vh(.75);
+    font-size: vh(1.75);
+    width: calc(var(--vh, 1vh) * #{$toggle-button-radius} * 4 + --vh * #{$toggle-button-radius} * 0.25);
+    margin: 0 calc(var(--vh, 1vh) * #{$toggle-button-radius} * 0.25) calc(var(--vh, 1vh) * #{$toggle-button-radius} * 0.25) 0;
 }
 
 .control-panel__button:focus {
@@ -115,8 +114,8 @@ Expand controls
     position: absolute;
     top: 0;
     left: 0;
-    margin: 0.5vh;
-    padding: 1vh;
+    margin: vh(0.5);
+    padding: vh(1);
     z-index: 1;
 }
 
@@ -128,7 +127,7 @@ Expand controls
     opacity: 1;
     color: white;
     display: inline-block;
-    font-size: 1.5vh;
+    font-size: vh(1.5);
     padding: 0;
     margin: 0;
     transition-duration: 200ms;
@@ -136,7 +135,7 @@ Expand controls
 
 .expand-control-panel #arrow {
     opacity: 1;
-    font-size: 1.5vh;
+    font-size: vh(1.5);
     transition-duration: 200ms;
     transform-origin: 50% 50%;
     transform: rotate(0deg);

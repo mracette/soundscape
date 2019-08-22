@@ -1,10 +1,10 @@
 #song-landing-page-title {
-    font-size: 9vh;
+    font-size: vh(9);
     margin-bottom: 0;
 }
 
 #song-landing-page-subtitle {
-    font-size: 4vh;
+    font-size: vh(4);
 }
 
 .song-landing-page {
@@ -16,7 +16,7 @@
     width: 100%;
     height: 100%;
     margin: 0;
-    padding-top: 12vh;
+    padding-top: vh(12);
     display: flex;
     flex-direction: column;
     align-content: center;
@@ -25,18 +25,18 @@
 }
 
 .song-landing-page p {
-    font-size: 1.5vh;
-    margin: 0.5vh;
+    font-size: vh(1.5);
+    margin: vh(0.5);
     text-align: center;
 }
 
 .song-landing-page button {
-    font-size: 1.75vh;
+    font-size: vh(1.75);
     width: $toggle-button-radius * 4;
     height: $toggle-button-radius * 2;
     border: $toggle-button-border white solid;
-    padding: 0;
-    margin-top: 1vh;
+    padding: vh(1.5);
+    margin-top: vh(1);
     color: inherit;
     overflow-wrap: break-word;
     background-color: rgba(255,255,255,0);

@@ -1,6 +1,6 @@
 .slider-label {
-  font-size: 1.75vh;
-  margin: .75vh 0 .75vh 0;
+  font-size: vh(1.75);
+  margin: vh(.75) 0 vh(.75) 0;
   display: block;
 }
 
@@ -8,8 +8,8 @@
   -webkit-appearance: none;
   width: 65%;
   left: 0;
-  margin-bottom: 2vh;
-  height: 0.25vh;
+  margin-bottom: vh(2);
+  height: vh(0.25);
   background: $white;
   outline: none;
   opacity: 0.6;
@@ -20,17 +20,17 @@
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 1.5vh;
-  height: 1.5vh;
-  border-radius: .75vh; 
+  width: vh(1.5);
+  height: vh(1.5);
+  border-radius: vh(.75); 
   background: $white;
   cursor: pointer;
 }
 
 .slider::-moz-range-thumb {
-  width: 1.5vh;
-  height: 1.5vh;
-  border-radius: .75vh;
+  width: vh(1.5);
+  height: vh(1.5);
+  border-radius: vh(.75);
   background: $white;
   cursor: pointer;
 }
