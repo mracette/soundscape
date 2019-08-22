@@ -20,11 +20,14 @@ export default class AppContainer extends React.Component {
         this.setViewportVars();
 
         // make sure that the --vw and --vh vars update on window resize
+        // and orientation change
         window.addEventListener('resize', this.setViewportVars);
+        window.addEventListener('orientationchange', this.setViewportVars);
 
         // this means that the svg attributes that can't be set in CSS will
         // also require updating
         window.addEventListener('resize', this.setSvgAttrs);
+        window.addEventListener('orientationchange', this.setSvgAttrs);
 
 
     }
