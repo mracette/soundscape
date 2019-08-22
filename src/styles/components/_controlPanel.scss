@@ -158,7 +158,11 @@ Expand controls
 
     #hide-control-panel {
         display: none;
-    }    
+    }
+
+    #canvas-viz {
+        cursor: pointer;
+    }
 
 }
 

@@ -279,12 +279,10 @@ export default class Lake extends SceneManager {
                     const clone = basePineTree.clone();
                     const scale = 1 - (scaleNoise * Math.random());
                 
-                    if(i === 1) {
-                        treeMat = new THREE.MeshBasicMaterial({
-                            color: this.palette.tropicalGreen.clone().lerp(new THREE.Color(this.palette.white), -1.5)
-                        });
-                    }
-                    clone.children[0].material = treeMat;
+                    clone.children[0].material = new THREE.MeshBasicMaterial({
+                        color: this.palette.tropicalGreen.clone().lerp(new THREE.Color(this.palette.white), -1.5)
+                    });;
+
                     clone.position.copy(new THREE.Vector3(x, -2, z + 70));
                     clone.scale.copy(new THREE.Vector3(scale, scale, scale));
                     clone.rotateY(Math.random() * 2 * Math.PI);
@@ -348,8 +346,8 @@ export default class Lake extends SceneManager {
                     count: 100,
                     width: 350,
                     height: 150,
-                    depth: 250,
-                    center: new THREE.Vector3(0, -13, -335),
+                    depth: 200,
+                    center: new THREE.Vector3(0, -13, -300),
                     colorPalette: d3Chromatic.interpolateCool
                 });
                 resolve();
@@ -476,12 +474,12 @@ export default class Lake extends SceneManager {
             const atmosphereFreqDataLeft = this.atmosphereAnalyser.getFrequencyData('left');
             const atmosphereFreqDataRight = this.atmosphereAnalyser.getFrequencyData('right');
 
-            atmosphereFreqDataLeft.slice(0,8).map((d, i) => {
-                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 170);
+            atmosphereFreqDataLeft.slice(1,9).map((d, i) => {
+                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 155);
             })
 
-            atmosphereFreqDataRight.slice(0,8).map((d, i) => {
-                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 170);
+            atmosphereFreqDataRight.slice(1,9).map((d, i) => {
+                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 155);
             })
         }
 
@@ -495,7 +493,7 @@ export default class Lake extends SceneManager {
             this.subjects.pineTrees.children.map((child, i) => {
                 const freqIndex = Math.floor(i/8);
                 const rawData = harmonyFreqData.slice([1+freqIndex])[0];
-                const tranformedData = Math.pow(rawData,6) / (Math.pow(255,6) * 0.060);
+                const tranformedData = Math.pow(rawData,5) / (Math.pow(255,5) * 0.060);
 
                 const color = this.palette.tropicalGreen.clone();
                 color.lerp(this.palette.white, -1.5 + (tranformedData));
@@ -524,12 +522,12 @@ export default class Lake extends SceneManager {
                     const moonRing = this.subjects.moonBeams.children[0].children[moonRingIndex];
 
                     // TAKE 1: Really pretty shapes
-                    // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/2));
-                    // moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot));
+                    moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/2));
+                    moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot));
 
                     // TAKE 2: Outward fanning
-                    moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/12));
-                    moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/6));
+                    // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/12));
+                    // moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/6));
 
                     // TAKE 3: Beam like (original)
                     // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/6));

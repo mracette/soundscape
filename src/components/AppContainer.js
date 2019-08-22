@@ -8,7 +8,7 @@ export default class AppContainer extends React.Component {
         super(props);
         this.state = {
             config: require('../app-config.json'),
-            userGesture: false
+            userGesture: true
         }
 
         this.handleUpdateUserGesture = this.handleUpdateUserGesture.bind(this);
