@@ -17,7 +17,7 @@
     right: 0;
     margin: vh(0.5);
     padding: vh(1);
-    z-index: 1;
+    z-index: 4;
 }
 
 #expand-song-info-container:hover {
@@ -38,7 +38,7 @@
 
 .song-info h2 {
     font-size: vh(3.25);
-    margin: vh(3.75) 0 vh(.75) 0;
+    margin: vh(.75) 0 vh(.75) 0;
 }
 
 .song-info h3 {
@@ -66,6 +66,7 @@
     margin: vh(1);
     border-radius: 50%;
     border: $toggle-button-border solid white;
+    z-index: inherit;
 }
 
 #hide-song-info-panel:focus {
@@ -84,7 +85,7 @@
         visibility: visible;
         background-color: rgba(0,0,0,0.3);
         transition-duration: 200ms;
-        z-index: 2;
+        z-index: 5;
     }
 
     #song-info-panel {

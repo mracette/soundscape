@@ -60,6 +60,7 @@ export default class MusicPlayer extends React.Component {
             playerGroups: playerGroupsObj,
             totalPlayerCount: this.props.songConfig.groups.map((group) => group.voices.length).reduce((a,b) => a+b),
             playersLoaded: 0,
+            ambientPlayerLoaded: false,
             muted: false,
             devMode: false
         }
@@ -76,7 +77,9 @@ export default class MusicPlayer extends React.Component {
         // if song has an ambient track, load it
         const ambientTrack = require(`../audio/${this.state.name}/ambient-track.mp3`);
         if(this.state.songConfig.ambientTrack) {
-            this.ambientPlayer = new this.state.tone.Player(ambientTrack).toMaster();
+            this.ambientPlayer = new this.state.tone.Player(ambientTrack, () => {
+                this.setState(() => ({ambientPlayerLoaded: true}));
+            }).toMaster();
             this.ambientPlayer.loop = true;
             this.ambientPlayer.loopEnd = this.state.songConfig.ambientTrackLength;
         }
@@ -116,9 +119,9 @@ export default class MusicPlayer extends React.Component {
     componentDidUpdate() {
         if(!!this.state.context && this.props.userGesture) {
             this.state.context.resume();
-            if(this.state.songConfig.ambientTrack) {
-                //this.ambientPlayer.start();
-            }
+        }
+        if(!!this.state.context && this.props.userGesture && this.state.ambientPlayerLoaded) {
+            this.ambientPlayer.start();
         }
     }
 

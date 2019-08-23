@@ -21,8 +21,8 @@ export default class SongInfo extends React.Component {
 
                 <button id = 'hide-song-info-panel'
                     onClick = {(e) => {
-                        e.preventDefault();
                         const panel = document.getElementById('song-info-panel');
+                        console.log(panel);
                         panel.classList.remove('control-panel-visible');
                         panel.classList.add('control-panel-hidden');
                         document.getElementById(this.props.arrowId).style.transform = this.props.arrowOrientation;
@@ -30,7 +30,7 @@ export default class SongInfo extends React.Component {
                     >
                     &#10005;
                 </button>
-                <div className = 'song-info'>
+                <div className = 'song-info control-panel__section'>
                     <h2>Song</h2>
                     <h3>Title:&nbsp;</h3>{this.props.songName.charAt(0).toUpperCase() + this.props.songName.slice(1)}<br/>
                     <h3>BPM:&nbsp;</h3>{this.props.bpm}<br/>
@@ -46,7 +46,7 @@ export default class SongInfo extends React.Component {
                     <h3>Time Signature: {this.props.timeSignature}/4</h3>
                 </div> */}
 
-                <div className = 'song-info'>
+                <div className = 'song-info control-panel__section'>
                     <h2>App</h2>
                     <h3>Author:&nbsp;</h3>Mark Racette<br/>
                     <h3>Technologies:&nbsp;</h3>THREE.js, React, Tone.js<br/>

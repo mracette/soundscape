@@ -14,7 +14,7 @@ Control panel itself
 }
 
 .control-panel-visible {
-    z-index: 0;
+    z-index: 3;
     opacity: 1;
 }
 
@@ -116,7 +116,7 @@ Expand controls
     left: 0;
     margin: vh(0.5);
     padding: vh(1);
-    z-index: 1;
+    z-index: 4;
 }
 
 #expand-control-panel-container:hover {
@@ -149,7 +149,7 @@ Expand controls
         visibility: visible;
         background-color: rgba(0,0,0,0.3);
         transition-duration: 200ms;
-        z-index: 2;
+        z-index: 5;
     }
 
     .control-panel {
