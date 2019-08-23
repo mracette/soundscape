@@ -10,7 +10,7 @@
 .toggle-button {
     width: calc(var(--vh, 1vh) * #{$toggle-button-radius} * 2);
     height: calc(var(--vh, 1vh) * #{$toggle-button-radius} * 2);
-    border-radius: vh($toggle-button-radius);
+    border-radius: 50%;
     padding: 0;
     margin: 0 calc(var(--vh, 1vh) * #{$toggle-button-radius} * .25) 0 0;
     color: inherit;

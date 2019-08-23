@@ -22,7 +22,7 @@
   appearance: none;
   width: vh(1.5);
   height: vh(1.5);
-  border-radius: vh(.75); 
+  border-radius: 50%; 
   background: $white;
   cursor: pointer;
 }
@@ -30,7 +30,7 @@
 .slider::-moz-range-thumb {
   width: vh(1.5);
   height: vh(1.5);
-  border-radius: vh(.75);
+  border-radius: 50%;
   background: $white;
   cursor: pointer;
 }

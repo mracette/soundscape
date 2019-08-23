@@ -32,10 +32,10 @@
 
 .song-landing-page button {
     font-size: vh(1.75);
-    width: $toggle-button-radius * 4;
+    width: $toggle-button-radius * 6;
     height: $toggle-button-radius * 2;
     border: $toggle-button-border white solid;
-    padding: vh(1.5);
+    padding: vh(1.25) vh(2.5) vh(1.25) vh(2.5);
     margin-top: vh(1);
     color: inherit;
     overflow-wrap: break-word;

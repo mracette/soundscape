@@ -72,7 +72,7 @@ Hide button
     height: vh($toggle-button-radius);
     padding: 0;
     margin: vh(1);
-    border-radius: vh($toggle-button-radius) / 2;
+    border-radius: 50%;
     border: $toggle-button-border solid white;
 }
 
@@ -93,7 +93,7 @@ Hide button
     color: inherit;
     padding: vh(.75);
     font-size: vh(1.75);
-    width: calc(var(--vh, 1vh) * #{$toggle-button-radius} * 4 + --vh * #{$toggle-button-radius} * 0.25);
+    width: calc(var(--vh, 1vh) * #{$toggle-button-radius} * 4 + var(--vh, 1vh) * #{$toggle-button-radius} * 0.25);
     margin: 0 calc(var(--vh, 1vh) * #{$toggle-button-radius} * 0.25) calc(var(--vh, 1vh) * #{$toggle-button-radius} * 0.25) 0;
 }
 
@@ -165,4 +165,3 @@ Expand controls
     }
 
 }
-

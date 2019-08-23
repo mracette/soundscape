@@ -1,8 +1,11 @@
 [
     {
-        "name": "lake",
+        "name": "moonrise",
         "bpm": 120,
         "timeSignature": 4,
+        "keySignature": "G Minor",
+        "ambientTrack": true,
+        "ambientTrackLength": "8m",
         "groups": [
             {
                 "groupName": "rhythm",

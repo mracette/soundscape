@@ -11,10 +11,6 @@ export default class Lake extends SceneManager {
     constructor(canvas, vizConfig) {
         super(canvas, vizConfig);
 
-        // https://www.colourlovers.com/palette/126030/Cruel_Water_at_Night
-        // https://www.colourlovers.com/palette/60028/Night_Sky
-        // https://www.colourlovers.com/palette/3325270/Barbibaus_Garden
-
         this.vizConfig = vizConfig;
 
         this.rhythmAnalyser = vizConfig.rhythm.analyser;
@@ -23,48 +19,12 @@ export default class Lake extends SceneManager {
         this.melodyAnalyser = vizConfig.melody.analyser;
         this.bassAnalyser = vizConfig.bass.analyser;
 
-        this.flagRhythmActive = false;
-        this.flagAtmosphereActive = false;
-        this.flagHarmonyActive = false;
-        this.flagMelodyActive = false;
-        this.flagBassActive = false;
-
         this.palette = {
-
-            // utility
-            white: new THREE.Color(0xffffff),
-
-            // highlights
-            pink: 0xFE98AE,
-            orange: 0xF6C0B6,
-            yellow: 0xF2E5B9,
-            hibiscus: 0x8C4B5C,
-            lilyBlue: 0x00c5ff,
-            lilyPink: 0xFF8DA1,
+            white: 0xffffff,
             rockGrey: 0x9d978e,
             lightning: 0xEEE6AB,
-
-            // moon
             moonYellow: 0xf6f2d5,
-
-            // greens
-            funGreen: new THREE.Color(0x95DBB1),
-            tropicalGreen: new THREE.Color(0x70A491),
-            neonGreen: 0xDEFFB0,
-            deepForest: 0x022A1E,
-
-            // purples
-            darkBlueViolet: 0x301860,
-            mythicPurple: 0x66587C,
-            pansyPurple: 0x483078,
-            dustyViolet: new THREE.Color(0x604878),
-            brighterPurple: 0x906090,
-
-            // blues
-            inkyBlue: 0x20293F,
-            camiBlueDark: 0x272345,
-
-            // dark
+            tropicalGreen: 0x70A491,
             deepInk: 0x030C22
         };
 
@@ -261,7 +221,6 @@ export default class Lake extends SceneManager {
                 const xNoise = 5;
                 const zNoise = 10;
                 const scaleNoise = 0.3;
-                let treeMat = null;
                 
                 for(let i = 1; i <= numPineTrees; i++) {
                     const x = xMin + i/numPineTrees * (xMax - xMin) + (Math.random() * xNoise - xNoise/2);
@@ -280,7 +239,7 @@ export default class Lake extends SceneManager {
                     const scale = 1 - (scaleNoise * Math.random());
                 
                     clone.children[0].material = new THREE.MeshBasicMaterial({
-                        color: this.palette.tropicalGreen.clone().lerp(new THREE.Color(this.palette.white), -1.5)
+                        color: new THREE.Color(this.palette.tropicalGreen).lerp(new THREE.Color(this.palette.white), -1.5)
                     });;
 
                     clone.position.copy(new THREE.Vector3(x, -2, z + 70));
@@ -343,10 +302,10 @@ export default class Lake extends SceneManager {
         return new Promise((resolve, reject) => {
             try{
                 this.subjects.stars = new StarQuandrants(this.scene, 8, this.scene.background, {
-                    count: 100,
-                    width: 350,
-                    height: 150,
-                    depth: 200,
+                    count: 150,
+                    width: 600,
+                    height: 225,
+                    depth: 150,
                     center: new THREE.Vector3(0, -13, -300),
                     colorPalette: d3Chromatic.interpolateCool
                 });
@@ -450,7 +409,7 @@ export default class Lake extends SceneManager {
     
     render() {
         
-        // this.controls.fpc.update(this.clock.getDelta());
+        this.controls.fpc.update(this.clock.getDelta());
         
         /* 
          * RIPPLES
@@ -475,11 +434,11 @@ export default class Lake extends SceneManager {
             const atmosphereFreqDataRight = this.atmosphereAnalyser.getFrequencyData('right');
 
             atmosphereFreqDataLeft.slice(1,9).map((d, i) => {
-                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 155);
+                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 125);
             })
 
             atmosphereFreqDataRight.slice(1,9).map((d, i) => {
-                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 155);
+                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 125);
             })
         }
 
@@ -495,8 +454,8 @@ export default class Lake extends SceneManager {
                 const rawData = harmonyFreqData.slice([1+freqIndex])[0];
                 const tranformedData = Math.pow(rawData,5) / (Math.pow(255,5) * 0.060);
 
-                const color = this.palette.tropicalGreen.clone();
-                color.lerp(this.palette.white, -1.5 + (tranformedData));
+                const color = new THREE.Color(this.palette.tropicalGreen);
+                color.lerp(new THREE.Color(this.palette.white), -1.5 + (tranformedData));
 
                 child.children[0].material.color.set(color);
             });
@@ -512,22 +471,22 @@ export default class Lake extends SceneManager {
         if(avgBassVol > 0) {
             
             const bassFrequencies = this.bassAnalyser.getFrequencyData().slice(0,this.subjects.moonBeams.userData.numMoonRings);
-            const radius = this.subjects.moon.userData.radius;
+            const radius = this.subjects.moon.userData.radius * 0.5;
 
             // set just the first moon beam's geometry
             for(let moonRingIndex = 0; moonRingIndex < this.subjects.moonBeams.userData.numMoonRings; moonRingIndex++) {
                 for(let vertexCount = 0; vertexCount < this.subjects.moonBeams.userData.numVertices; vertexCount++) {
-                    const adj = (1/(0.25 * (moonRingIndex+1)));
+                    const adj = (1/(0.15 * (moonRingIndex+1)));
                     const rot = bassFrequencies[moonRingIndex] / 255;
                     const moonRing = this.subjects.moonBeams.children[0].children[moonRingIndex];
 
                     // TAKE 1: Really pretty shapes
-                    moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/2));
-                    moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot));
+                    // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/2));
+                    // moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot));
 
                     // TAKE 2: Outward fanning
-                    // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/12));
-                    // moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/6));
+                    moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/12));
+                    moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/6));
 
                     // TAKE 3: Beam like (original)
                     // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/6));
