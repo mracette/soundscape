@@ -36,9 +36,12 @@ export default class ToggleButton extends React.Component {
     }
 
     componentDidUpdate() {
-        if(this.props.override === true) {
+        if(this.props.override === true && this.state.playerState === 'active') {
             this.stopPlayer(true);
-            this.props.handleUpdateOverride(this.props.id, false);
+            // this.props.handleUpdateOverride(this.props.id, false);
+        } else if(this.props.override === true && this.state.playerState === 'pending-start') {
+            this.pendingStop(true);
+            // this.props.handleUpdateOverride(this.props.id, false);
         }
     }
 
@@ -94,7 +97,7 @@ export default class ToggleButton extends React.Component {
             easing: 'linear'
             });
 
-            const currentButtonAnimation = anime({
+        const currentButtonAnimation = anime({
             targets: this.buttonRef.current,
             backgroundColor: 'rgba(0,0,0,0)',
             duration: duration,
@@ -104,6 +107,7 @@ export default class ToggleButton extends React.Component {
         let stopEventId = this.props.transport.schedule(() => {
             this.state.player.stop();
             this.setState(() => ({playerState: 'stopped'}));
+            override && this.props.handleUpdateOverride(this.props.id, false);
         }, quantizedStartAction);
 
         this.setState(() => ({
@@ -132,10 +136,10 @@ export default class ToggleButton extends React.Component {
         this.setState(() => ({eventId: pendingStartEventId}));
     }
     
-    pendingStop() {
+    pendingStop(override) {
         // button cancels the pending start and changes state to 'pending-stop'
         // (schedules 'stop')
-        this.props.handleUpdatePolyphony(-1, this.props.id);
+        this.props.handleUpdatePolyphony(override ? 0 : -1, this.props.id);
         this.setState(() => ({playerState: 'pending-stop'}));
 
         const quantizedStartAction = this.props.devMode ? `@4n`: `@${this.props.quantizeLength}`;
@@ -147,6 +151,7 @@ export default class ToggleButton extends React.Component {
         let pendingStopEventId = this.props.transport.schedule(() => {
             this.state.player.stop();
             this.setState(() => ({playerState: 'stopped'}));
+            override && this.props.handleUpdateOverride(this.props.id, false);
         }, quantizedStartAction);
 
         this.setState(() => ({eventId: pendingStopEventId}));

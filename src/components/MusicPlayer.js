@@ -4,6 +4,7 @@ import ToggleButtonGroup from './ToggleButtonGroup';
 import Sliders from './Sliders';
 import CanvasViz from './CanvasViz';
 import { solveExpEquation } from '../utils/utils';
+import SongInfo from './SongInfo';
 
 export default class MusicPlayer extends React.Component {
     constructor(props) {
@@ -17,8 +18,19 @@ export default class MusicPlayer extends React.Component {
             const hpFilter = new Tone.Filter(20, "highpass", -12);
             const reverb = new Tone.JCReverb(0.1);
             reverb.wet.value = 0;
+
+            // all groups will exit to the compressor and limiter
+            const compressor = new Tone.Compressor(-6, 2);
+            compressor.knee.value = 12;
+            compressor.attack.value = .003;
+            compressor.release.value = .005;
+
+            const limiter = new Tone.Limiter(0);
+
+            compressor.connect(limiter);
+
             const effectsChainEntry = new Tone.Gain();
-            const effectsChainExit = new Tone.Gain();
+            const effectsChainExit = compressor;
 
             effectsChainEntry.connect(lpFilter);
             lpFilter.connect(hpFilter);
@@ -61,6 +73,14 @@ export default class MusicPlayer extends React.Component {
         this.state.context.latencyHint = 'fastest';
         this.state.context.lookAhead = 0;
 
+        // if song has an ambient track, load it
+        const ambientTrack = require(`../audio/${this.state.name}/ambient-track.mp3`);
+        if(this.state.songConfig.ambientTrack) {
+            this.ambientPlayer = new this.state.tone.Player(ambientTrack).toMaster();
+            this.ambientPlayer.loop = true;
+            this.ambientPlayer.loopEnd = this.state.songConfig.ambientTrackLength;
+        }
+
         this.effectParams = {
             lpFilter: {
                 minFreq: 320,
@@ -96,6 +116,9 @@ export default class MusicPlayer extends React.Component {
     componentDidUpdate() {
         if(!!this.state.context && this.props.userGesture) {
             this.state.context.resume();
+            if(this.state.songConfig.ambientTrack) {
+                //this.ambientPlayer.start();
+            }
         }
     }
 
@@ -148,27 +171,56 @@ export default class MusicPlayer extends React.Component {
                     flagPlayersLoaded = {this.state.playersLoaded / this.state.totalPlayerCount === 1}
                     // TODO: players load progress
                 />
-                    <div id = 'expand-control-panel-container'>
-                            <h4 className = 'expand-control-panel' id = 'arrow'> &#10139;</h4>
-                            <h4 className = 'expand-control-panel'
-                            onClick = {(e) => {
-                                e.preventDefault();
-                                const panel = document.getElementById('control-panel');
-                                if(panel.classList.contains('control-panel-visible')) {
-                                    document.getElementById('control-panel').classList.remove('control-panel-visible');
-                                    document.getElementById('control-panel').classList.add('control-panel-hidden');
-                                    document.getElementById('arrow').style.transform = 'rotate(0deg)';
-                                } else {
-                                    document.getElementById('control-panel').classList.add('control-panel-visible');
-                                    document.getElementById('control-panel').classList.remove('control-panel-hidden');
-                                    document.getElementById('arrow').style.transform = 'rotate(90deg)';
-                                }
-                            }}
-                            >
-                                &nbsp;control panel
-                            </h4>
-                    </div>
-                    <div className = 'control-panel control-panel-hidden' id = 'control-panel'
+                <div id = 'expand-song-info-container'>
+                        <h4 className = 'expand-control-panel'
+                        onClick = {(e) => {
+                            e.preventDefault();
+                            const panel = document.getElementById('song-info-panel');
+                            if(panel.classList.contains('control-panel-visible')) {
+                                panel.classList.remove('control-panel-visible');
+                                panel.classList.add('control-panel-hidden');
+                                document.getElementById('expand-song-info-arrow').style.transform = 'rotate(180deg)';
+                            } else {
+                                panel.classList.add('control-panel-visible');
+                                panel.classList.remove('control-panel-hidden');
+                                document.getElementById('expand-song-info-arrow').style.transform = 'rotate(90deg)';
+                            }
+                        }}
+                        >
+                            information&nbsp;
+                        </h4>
+                        <h4 className =  'expand-control-panel' id = 'expand-song-info-arrow'> &#10139;</h4>
+                </div>
+                <SongInfo
+                    visible = {true}
+                    songName = {this.state.name}
+                    bpm = {this.state.bpm}
+                    keySignature = {this.state.songConfig.keySignature}
+                    timeSignature = {this.state.songConfig.timeSignature}
+                    arrowId = 'expand-song-info-arrow'
+                    arrowOrientation = 'rotate(180deg)'
+                />
+                <div id = 'expand-control-panel-container'>
+                        <h4 className = 'expand-control-panel' id = 'arrow'> &#10139;</h4>
+                        <h4 className = 'expand-control-panel'
+                        onClick = {(e) => {
+                            e.preventDefault();
+                            const panel = document.getElementById('control-panel');
+                            if(panel.classList.contains('control-panel-visible')) {
+                                document.getElementById('control-panel').classList.remove('control-panel-visible');
+                                document.getElementById('control-panel').classList.add('control-panel-hidden');
+                                document.getElementById('arrow').style.transform = 'rotate(0deg)';
+                            } else {
+                                document.getElementById('control-panel').classList.add('control-panel-visible');
+                                document.getElementById('control-panel').classList.remove('control-panel-hidden');
+                                document.getElementById('arrow').style.transform = 'rotate(90deg)';
+                            }
+                        }}
+                        >
+                            &nbsp;control panel
+                        </h4>
+                </div>
+                <div className = 'control-panel control-panel-hidden' id = 'control-panel'
                         onMouseEnter = {() => {
                             document.getElementById('arrow').style.transform = 'rotate(90deg)';
                         }}
@@ -267,7 +319,7 @@ export default class MusicPlayer extends React.Component {
                             </div>
                         </div>
                     </div>
-                </div>
+            </div>
         );
     }
 }

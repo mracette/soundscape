@@ -1,6 +1,6 @@
 import React from 'react';
 import Analyser from '../viz/Analyser'
-import Lake from '../viz/scenes/Lake';
+import Moonrise from '../viz/scenes/Moonrise';
 
 export default class CanvasViz extends React.Component {
     constructor(props){
@@ -39,10 +39,8 @@ export default class CanvasViz extends React.Component {
             vizConfig.atmosphere.analyser = new Analyser(this.props.context, this.props.playerGroups.atmosphere.effectsChainExit, {
                     split: true,
                     effectsChain: this.props.effectsChain,
-                    smoothingTimeConstant: 0.2,
-                    power: 5,
-                    minDecibels: -100,
-                    maxDecibels: 0
+                    smoothingTimeConstant: 0.4,
+                    power: 5
             });
 
             vizConfig.melody.analyser = new Analyser(this.props.context, this.props.playerGroups.melody.effectsChainExit, {
@@ -62,7 +60,7 @@ export default class CanvasViz extends React.Component {
             vizConfig.bass.analyser = new Analyser(this.props.context, this.props.playerGroups.bass.effectsChainExit, {
                 effectsChain: this.props.effectsChain,
                 power: 5,
-                smoothingTimeConstant: .70
+                smoothingTimeConstant: .85
             });
 
             vizConfig.rhythm.players = this.props.players.filter((player) => {return player.groupName === 'rhythm'});
@@ -71,7 +69,7 @@ export default class CanvasViz extends React.Component {
             vizConfig.harmony.players = this.props.players.filter((player) => {return player.groupName === 'harmony'});
             vizConfig.bass.players = this.props.players.filter((player) => {return player.groupName === 'bass'});
 
-            const manager = new Lake(this.state.canvas, vizConfig);
+            const manager = new Moonrise(this.state.canvas, vizConfig);
 
             this.setState(() => {
                 return {manager, flagCanvasLoaded: true};
@@ -80,13 +78,6 @@ export default class CanvasViz extends React.Component {
     }
 
     render() {
-        return <canvas id = 'canvas-viz'
-            onClick = {() => {
-                const panel = document.getElementById('control-panel');
-                panel.classList.remove('control-panel-visible');
-                panel.classList.add('control-panel-hidden');
-                document.getElementById('arrow').style.transform = "rotate(0deg)";
-            }}
-        />
+        return <canvas id = 'canvas-viz'/>
     }
 }

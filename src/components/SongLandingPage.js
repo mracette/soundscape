@@ -20,10 +20,9 @@ export default class SongLandingPage extends React.Component {
     }
 
     render() {
-        return this.state.renderFlag ? (
+        return this.state.renderFlag && (
             <div className = 'song-landing-page' id='song-landing-page'>
                 <h1 className='cursive' id='song-landing-page-title'>Soundscape</h1>
-                <h2 className='cursive' id='song-landing-page-subtitle'>by Mark Racette</h2>
                 <p>This application uses audio.<br/>Use speakers or headphones for the best experience.</p>
                 <button
                     onClick = {() => {
@@ -31,7 +30,7 @@ export default class SongLandingPage extends React.Component {
                     }}
                 >Ready</button>
             </div>
-        ): null;
+        );
     }
 
 }
