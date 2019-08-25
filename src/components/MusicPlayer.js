@@ -11,27 +11,19 @@ export default class MusicPlayer extends React.Component {
         super(props);
 
         const playerGroupsObj = {};
+
+        // each group needs its own effects chain
         this.props.songConfig.groups.map((group) => {
             
-            // each group needs its own effects chain
             const lpFilter = new Tone.Filter(20000, "lowpass", -12);
             const hpFilter = new Tone.Filter(20, "highpass", -12);
             const reverb = new Tone.JCReverb(0.1);
             reverb.wet.value = 0;
 
-            // all groups will exit to the compressor and limiter
-            const compressor = new Tone.Compressor(-6, 2);
-            compressor.knee.value = 12;
-            compressor.attack.value = .003;
-            compressor.release.value = .005;
-
-            const limiter = new Tone.Limiter(0);
-
-            compressor.connect(limiter);
-
             const effectsChainEntry = new Tone.Gain();
-            const effectsChainExit = compressor;
+            const effectsChainExit = new Tone.Gain();
 
+            // link effects together
             effectsChainEntry.connect(lpFilter);
             lpFilter.connect(hpFilter);
             hpFilter.connect(reverb);
@@ -79,7 +71,8 @@ export default class MusicPlayer extends React.Component {
         if(this.state.songConfig.ambientTrack) {
             this.ambientPlayer = new this.state.tone.Player(ambientTrack, () => {
                 this.setState(() => ({ambientPlayerLoaded: true}));
-            }).toMaster();
+            });
+            this.ambientPlayer.toMaster();
             this.ambientPlayer.loop = true;
             this.ambientPlayer.loopEnd = this.state.songConfig.ambientTrackLength;
         }
@@ -117,6 +110,7 @@ export default class MusicPlayer extends React.Component {
     }
 
     componentDidUpdate() {
+        console.log('component did update');
         if(!!this.state.context && this.props.userGesture) {
             this.state.context.resume();
         }

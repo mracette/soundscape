@@ -305,7 +305,7 @@ export default class Lake extends SceneManager {
                     count: 150,
                     width: 600,
                     height: 225,
-                    depth: 150,
+                    depth: 190,
                     center: new THREE.Vector3(0, -13, -300),
                     colorPalette: d3Chromatic.interpolateCool
                 });
