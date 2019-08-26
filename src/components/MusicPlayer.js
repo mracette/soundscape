@@ -74,7 +74,6 @@ export default class MusicPlayer extends React.Component {
             });
             this.ambientPlayer.toMaster();
             this.ambientPlayer.loop = true;
-            this.ambientPlayer.loopEnd = this.state.songConfig.ambientTrackLength;
         }
 
         this.effectParams = {
@@ -110,7 +109,6 @@ export default class MusicPlayer extends React.Component {
     }
 
     componentDidUpdate() {
-        console.log('component did update');
         if(!!this.state.context && this.props.userGesture) {
             this.state.context.resume();
         }
@@ -241,7 +239,6 @@ export default class MusicPlayer extends React.Component {
                                         className = 'control-panel__button'
                                         onClick = {() => {
                                             this.state.players.map((player) => {
-                                                console.log(player);
                                                 if(player.ref.state.playerState === 'active') {
                                                     player.ref.stopPlayer();
                                                 } else if(player.ref.state.playerState === 'pending-start') {

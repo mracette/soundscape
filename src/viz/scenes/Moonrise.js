@@ -7,7 +7,7 @@ import lilyModel from '../../models/lily.gltf';
 import landscapeModel from '../../models/landscape.gltf';
 import pineTreeModel from '../../models/pine-tree.gltf';
 
-export default class Lake extends SceneManager {
+export default class Moonrise extends SceneManager {
     constructor(canvas, vizConfig) {
         super(canvas, vizConfig);
 
@@ -48,9 +48,7 @@ export default class Lake extends SceneManager {
                 this.initLakeLilies(),
                 this.initLakeMoon()
             ]).then(() => {
-                console.log(this);
                 super.animate();
-
             })
         })
     }
@@ -409,7 +407,7 @@ export default class Lake extends SceneManager {
     
     render() {
         
-        this.controls.fpc.update(this.clock.getDelta());
+        // this.controls.fpc.update(this.clock.getDelta());
         
         /* 
          * RIPPLES
