@@ -4,4 +4,4 @@ Interactive environmental music visualizer built with React/WebAudio/THREE.js
 
 Try it here: https://soundscape.world
 
-![Soundscape Preview](./preview/soundscape-preview.png)
+![Soundscape Preview](./preview/full-banner.png)
