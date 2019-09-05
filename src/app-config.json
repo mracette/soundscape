@@ -64,9 +64,9 @@
                         "quantizeLength": "4m"
                     },
                     {
-                        "name": "sub-simple[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
+                        "name": "sub-simple[8]",
+                        "length": "8m",
+                        "quantizeLength": "8m"
                     },
                     {
                         "name": "sub-bouncey[8]",
