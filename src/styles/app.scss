@@ -1,0 +1,19 @@
+@import './settings.scss';
+
+html {
+    font-size: 62.5%;
+}
+
+.fullscreen {
+    position: absolute;
+    overflow: hidden;
+    top: 0;
+    left: 0;
+    margin: 0;
+    width: vw(100);
+    height: vh(100);
+}
+
+#app-container {
+    background: $off-black;
+}

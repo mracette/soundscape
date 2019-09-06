@@ -1,0 +1,21 @@
+@import '../settings.scss';
+
+.menu-button {
+    position: relative;
+    display: inline-block;
+    height: auto;
+    width: auto;
+}
+
+.menu-button-parent {
+    position: relative;
+    border-radius: 50%;
+}
+
+.menu-button-parent:hover {
+    cursor: pointer;
+}
+
+.menu-button-parent:focus {
+    outline: none;
+}

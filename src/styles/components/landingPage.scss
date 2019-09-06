@@ -1,0 +1,29 @@
+@import '../settings.scss';
+
+#landing-page {
+    background-color: $off-black;
+}
+
+#song-selection-panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}
+
+.song-link {
+    color: white;
+    font-size: $l-size;
+    text-decoration: none;
+    text-align: center;
+    vertical-align: middle;
+    margin: $s-size 0 $s-size $s-size;
+    border: 0.1rem solid white;
+    flex-basis: 25rem;
+    line-height: 25rem;
+}
+
+.song-link:hover {
+    background-color: rgba(255,255,255,.2);
+    cursor: pointer;
+}

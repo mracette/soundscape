@@ -1,0 +1,28 @@
+
+// colors
+$light-grey: #d8d8d8;
+$off-black: #1f262f;
+$menu-content-color: rgba(255,255,255,0.2);
+
+// sizing
+$s-size: 0.8rem;
+$m-size: 1.6rem;
+$l-size: 3.2rem;
+$xl-size: 4.8rem;
+$xxl-size: 9.6rem;
+
+// mock viewport units for mobile corner cases
+// see https://css-tricks.com/the-trick-to-viewport-units-on-mobile/
+@function vh($quantity) {
+    @return calc(var(--vh, 1vh) * #{$quantity});
+}
+
+@function vw($quantity) {
+    @return calc(var(--vw, 1vw) * #{$quantity});
+}
+
+$toggle-button-radius: 3;
+$toggle-button-border: 0.1;
+
+// Constants
+$pi: 3.14159265358979;

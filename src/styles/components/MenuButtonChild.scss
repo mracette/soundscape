@@ -1,0 +1,29 @@
+@import '../settings.scss';
+
+.menu-button-child {
+    transition-duration: 250ms;
+    position: absolute;
+    border-radius: 50%;
+    height: 3rem;
+    width: 3rem;
+}
+
+.menu-button-child:hover {
+    cursor: pointer;
+}
+
+.menu-button-child:focus {
+    outline: none;
+}
+
+.arrow {
+    position: absolute;
+    width: 0; 
+    height: 0; 
+    border-left-color: transparent;
+    border-left-style: solid;
+    border-right-color: transparent;
+    border-right-style: solid;
+    border-bottom-color: $menu-content-color;
+    border-bottom-style: solid;
+  }
