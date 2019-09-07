@@ -5,15 +5,19 @@ import '../styles/components/ToggleButtonGroup.scss';
 const ToggleButtonGroup = (props) => {
 
         return (
-            <div id = 'toggle-button-group'>
+            <div class = 'toggle-button-group'>
 
                 <h3>{props.config.groupName}</h3>
 
-                {props.config.voices.map((voice) => (
-                    <ToggleButton 
-                        config = {voice}
-                    />
-                ))}
+                <div class = 'toggle-buttons'>
+
+                    {props.config.voices.map((voice) => (
+                        <ToggleButton 
+                            config = {voice}
+                        />
+                    ))}
+
+                </div>
 
             </div>
         );

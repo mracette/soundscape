@@ -4,7 +4,7 @@ import '../styles/components/ToggleButton.scss';
 const ToggleButton = (props) => {
 
         return (
-            <button>
+            <button className = 'toggle-button'>
                 {props.config.name}
             </button>
         );

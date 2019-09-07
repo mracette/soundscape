@@ -1,5 +1,13 @@
 @import '../settings.scss';
 
-#toggle-button-group {
+.toggle-button-group {
     display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.toggle-buttons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
 }
