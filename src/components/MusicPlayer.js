@@ -1,39 +1,39 @@
 import React from 'react';
 import MenuButtonParent from './MenuButtonParent';
+import Metronome from './Metronome';
 import ToggleButtonPanel from './ToggleButtonPanel';
+import '../styles/components/MusicPlayer.scss';
 
 function MusicPlayer(props) {
+
     return (
         <div>
-            <h3>Now Playing: {props.songConfig.name}</h3>
+            <h3 id = 'song-title'>Now Playing: {props.songConfig.name}</h3>
             
+            <Metronome />
+
             <MenuButtonParent 
                 name = 'Menu'
                 direction = 'right'
-                childrenProps = { [{
-                    id: 'toggles',
-                    icon: ''
-                }, {
-                    id: 'controls',
-                    icon: ''
-                }, {
-                    id: 'about',
-                    icon: ''
-                }] }
                 separation = '6rem'
                 parentSize = '5rem'
                 childSize = '3rem'
                 clickToOpen = { true }
-            >
-
-                {/* these children are sent down the chain into the menu and can be accessed using props.children */}
-                {/* they correspond to the MenuButtonParent childrenProps object, and must match its order */}
-                <ToggleButtonPanel config = {props.songConfig}/>
-                <ToggleButtonPanel config = {props.songConfig}/>
-                <ToggleButtonPanel config = {props.songConfig}/>
+                childButtonProps = { [{
+                    id: 'toggles',
+                    icon: '',
+                    content: <ToggleButtonPanel config = {props.songConfig}/>
+                }, {
+                    id: 'controls',
+                    icon: '',
+                    content: <ToggleButtonPanel config = {props.songConfig}/>
+                }, {
+                    id: 'about',
+                    icon: '',
+                    content: <ToggleButtonPanel config = {props.songConfig}/>
+                }] }
+            />
             
-            </ MenuButtonParent>
-
             {/* canvas viz */}
         </div>
     )
