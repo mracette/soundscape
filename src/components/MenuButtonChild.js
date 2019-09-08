@@ -91,12 +91,7 @@ const MenuButtonChild = (props) => {
                 ( ${props.parentSize} - ${props.size}) / -2 ) + 
                 ( ${props.size} / 2)
             )`}
-        >
-
-            {/* button content component passed as props.children */}
-            {props.children}
-
-        </MenuButtonContentWrapper>
+        />
 
         </>
     )

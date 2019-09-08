@@ -9,8 +9,6 @@ const MenuButtonContentWrapper = (props) => {
         [classPrefix]: true
     });
 
-    console.log(props.children);
-
     return (
         <div 
             className = {classNames}
@@ -21,8 +19,7 @@ const MenuButtonContentWrapper = (props) => {
             }}
             >
             
-            {props.children}
-
+            {props.content}
 
         </div>
     );

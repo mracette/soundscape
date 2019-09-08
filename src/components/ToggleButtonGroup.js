@@ -5,11 +5,11 @@ import '../styles/components/ToggleButtonGroup.scss';
 const ToggleButtonGroup = (props) => {
 
         return (
-            <div class = 'toggle-button-group'>
+            <div className = 'toggle-button-group'>
 
                 <h3>{props.config.groupName}</h3>
 
-                <div class = 'toggle-buttons'>
+                <div className = 'toggle-buttons'>
 
                     {props.config.voices.map((voice) => (
                         <ToggleButton 

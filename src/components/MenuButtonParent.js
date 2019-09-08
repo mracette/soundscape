@@ -11,6 +11,7 @@ const MenuButtonParent = (props) => {
     // set state
     const [isOpen, setIsOpen] = useState(false);
     const [openChildIndex, setOpenChildIndex] = useState(-1);
+    const numOfChildren = props.childButtonProps.length;
 
     // set classes
     const classPrefix = 'menu-button-parent';
@@ -52,7 +53,7 @@ const MenuButtonParent = (props) => {
             <button 
                 className = {classNames}
                 style = {{
-                    zIndex: props.children.length + 1,
+                    zIndex: numOfChildren + 1,
                     width: props.parentSize,
                     height: props.parentSize
                 }}
@@ -64,15 +65,14 @@ const MenuButtonParent = (props) => {
                 {props.name}
             </button>
 
-            {props.children.map((child, index) => (
+            {props.childButtonProps.map((child, index) => (
                 
                 <MenuButtonChild 
 
                     // button content
                     id = { child.id }
                     key = { child.id }
-                    content = { child.content }
-                    config = { child.config }
+                    content = { props.childButtonProps[index].content }
                     
                     // button appearance
                     icon = { child.icon }
@@ -80,19 +80,15 @@ const MenuButtonParent = (props) => {
                     index = { index + 1 }
                     openChildIndex = { openChildIndex }
                     setOpenChildIndex = { setOpenChildIndex }
-                    zIndex = { props.children.length - index }
+                    zIndex = { numOfChildren - index }
                     separation = { props.separation }
                     size = { props.childSize }
                     parentSize = { props.parentSize }
-                    parentWidth = { `calc(${props.parentSize} + ((${props.childSize} + ${props.separation}) * ${props.children.length - 1}))`}
+                    parentWidth = { `calc(${props.parentSize} + ((${props.childSize} + ${props.separation}) * ${numOfChildren - 1}))`}
                     parentIsOpen = { isOpen }
 
-                >
-
-                {/* button content component passed as props.children */}
-                { props.children[index] }
-
-                </MenuButtonChild>
+                />
+                
             ))}
             
         </div>
