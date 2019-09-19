@@ -1,3 +1,5 @@
+/* eslint-disable */ 
+
 import React, { useState, useEffect, useRef } from 'react';
 import ClassNames from 'classnames';
 import MenuButtonChild from './MenuButtonChild';
@@ -57,7 +59,8 @@ const MenuButtonParent = (props) => {
                     width: props.parentSize,
                     height: props.parentSize
                 }}
-                onClick = { () => {
+                onClick = { (e) => {
+                    e.preventDefault();
                     isOpen && setOpenChildIndex(-1);
                     props.clickToOpen && setIsOpen(!isOpen);
                 }}
@@ -88,7 +91,7 @@ const MenuButtonParent = (props) => {
                     parentIsOpen = { isOpen }
 
                 />
-                
+
             ))}
             
         </div>

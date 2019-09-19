@@ -1,0 +1,33 @@
+@import '../settings.scss';
+
+#metronome {
+    display: block
+}
+
+#beats {
+    display: flex;
+    flex-direction: row;
+}
+
+#bars {
+    display: flex;
+    flex-direction: row;
+}
+
+.beat {
+    height: 1rem;
+    width: 1rem;
+    margin: .25rem;
+    border-radius: 50%;
+    background: white;
+    opacity: 0.25;
+}
+
+.bar {
+    height: 1rem;
+    width: 1rem;
+    margin: .25rem;
+    border-radius: 50%;
+    background: white;
+    opacity: 0.25;
+}

@@ -1,3 +1,5 @@
+/* eslint-disable */ 
+
 import React, { useState, useEffect, useReducer } from 'react';
 import ClassNames from 'classnames';
 import MenuButtonContentWrapper from './MenuButtonContentWrapper';
@@ -31,7 +33,8 @@ const MenuButtonChild = (props) => {
         */}
         <button 
             className = { classNames }
-            onClick = { () => {
+            onClick = { (e) => {
+                e.preventDefault();
                 if(isOpen) {
                     // tell the parent that this button is closed
                     props.setOpenChildIndex(-1);

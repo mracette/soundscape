@@ -7,12 +7,13 @@ const ToggleButtonGroup = (props) => {
         return (
             <div className = 'toggle-button-group'>
 
-                <h3>{props.config.groupName}</h3>
+                <h3>{props.config.name}</h3>
 
                 <div className = 'toggle-buttons'>
 
                     {props.config.voices.map((voice) => (
-                        <ToggleButton 
+                        <ToggleButton
+                            key = {voice.name}
                             config = {voice}
                         />
                     ))}

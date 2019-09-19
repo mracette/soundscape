@@ -17,6 +17,10 @@ const ToggleButtonPanel = (props) => {
                         Reset
                     </button>
 
+                    <button id = 'toggle-button-panel-randomize'>
+                        Randomize
+                    </button>
+
                     <button id = 'toggle-button-panel-mute'>
                         Mute
                     </button>
@@ -24,6 +28,7 @@ const ToggleButtonPanel = (props) => {
 
                 {buttonGroupsConfig.map((group) => (
                     <ToggleButtonGroup 
+                        key = {group.name}
                         config = {group}
                     />
                 ))}

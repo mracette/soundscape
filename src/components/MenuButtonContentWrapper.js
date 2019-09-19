@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React from 'react';
 import ClassNames from 'classnames';
 import '../styles/components/MenuButtonContentWrapper.scss';
 
