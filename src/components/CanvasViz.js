@@ -4,6 +4,8 @@ import React, { useEffect, useRef } from 'react';
 //import Moonrise from '../viz/scenes/Moonrise';
 import Mornings from '../viz/scenes/Mornings';
 
+import '../styles/components/CanvasViz.scss';
+
 const CanvasViz = (props) => {
 
     useEffect(() => {

@@ -1,5 +1,5 @@
 // libs
-import React from 'react';
+import React, { useReducer } from 'react';
 import Tone from 'tone';
 
 // components
@@ -13,7 +13,8 @@ import SongInfoPanel from './SongInfoPanel';
 import ToggleButtonPanel from './ToggleButtonPanel';
 
 // contexts
-import { ApplicationAudioContext } from '../contexts/ApplicationAudioContext';
+import { MusicPlayerContext, PlayersContext } from '../contexts/MusicPlayerContext';
+import { PlayersReducer } from '../reducers/MusicPlayerReducer';
 
 // other
 import Analyser from '../viz/Analyser';
@@ -48,8 +49,8 @@ function MusicPlayer(props) {
 
     // if song has an ambient track, load it
     if(props.songConfig.ambientTrack) {
-        // const ambientTrack = require(`../audio/${props.songConfig.id}/melody-trance[4].mp3`)
-        // const ambientTrack = require(`../audio/${props.songConfig.id}/ambient-track.mp3`)
+        //const ambientTrack = require(`../audio/${props.songConfig.id}/melody-trance[4].mp3`)
+        const ambientTrack = require(`../audio/${props.songConfig.id}/ambient-track.mp3`)
         // const ambientPlayer = new Tone.Player(ambientTrack);
         // ambientPlayer.connect(premaster);
         // ambientPlayer.loop = true;
@@ -57,18 +58,23 @@ function MusicPlayer(props) {
     }
 
     // initialize music player state, which is shared with child components through the context API
-    const musicPlayerState = {
+    const [ players, dispatch ] = useReducer(PlayersReducer, []);
+        
+    const musicPlayerState =  {
+        songId: props.songConfig.id,
         tone: Tone,
         transport: Tone.Transport,
         context: Tone.context,
-        premaster
-    }
+        premaster,
+        devMode: false
+    };
 
     return (
         <div>
             <h3 id = 'song-title'>Now Playing: {props.songConfig.name}</h3>
             
-            <ApplicationAudioContext.Provider value={musicPlayerState}>
+            <PlayersContext.Provider value = {{ players, dispatch }}>
+            <MusicPlayerContext.Provider value = { musicPlayerState }>
 
                 <Metronome />
 
@@ -88,6 +94,7 @@ function MusicPlayer(props) {
                     childSize = '3rem'
                     clickToOpen = { true }
                     childButtonProps = { [{
+                        autoOpen: true,
                         id: 'toggles',
                         icon: '',
                         content: <ToggleButtonPanel config = {props.songConfig}/>
@@ -106,7 +113,8 @@ function MusicPlayer(props) {
                     config = {props.songConfig}
                 />
 
-            </ApplicationAudioContext.Provider>
+            </MusicPlayerContext.Provider>
+            </PlayersContext.Provider>
 
         </div>
     )

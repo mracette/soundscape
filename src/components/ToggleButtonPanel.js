@@ -29,7 +29,9 @@ const ToggleButtonPanel = (props) => {
                 {buttonGroupsConfig.map((group) => (
                     <ToggleButtonGroup 
                         key = {group.name}
-                        config = {group}
+                        name = {group.name}
+                        polyphony = {group.polyphony}
+                        voices = {group.voices}
                     />
                 ))}
 

@@ -1,1 +1,16 @@
 @import '../settings.scss';
+
+.toggle-button {
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    overflow-wrap: break-word;
+    background-color: rgba(255, 255, 255, 0);
+} 
+
+.svg-circle {
+    fill-opacity: 0;
+    stroke: white;
+    stroke-linecap: round;
+    transform-origin: 50% 50%;
+}

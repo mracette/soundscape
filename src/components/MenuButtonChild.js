@@ -13,6 +13,14 @@ const MenuButtonChild = (props) => {
     // if another button in the set is open, close this button
     useEffect(() => { props.openChildIndex !== props.index && setIsOpen(false) }, [props.openChildIndex])
 
+    // open button once if autoOpen === true
+    useEffect(() => {
+        if(props.autoOpen) {
+            props.setOpenChildIndex(props.index);
+            setIsOpen(!isOpen);
+        }
+    }, [])
+
     // calculate the margin needed to expand this child to its outward position
     const marginStyle = `calc(${props.separation} * ${props.index} + (${props.parentSize} - ${props.size}) / 2)`;
 

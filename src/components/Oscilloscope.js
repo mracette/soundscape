@@ -4,7 +4,7 @@
 import React, { useContext, useEffect, useRef } from 'react';
 
 // contexts
-import { ApplicationAudioContext } from '../contexts/ApplicationAudioContext';
+import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
 
 // styles
 import '../styles/components/Oscilloscope.scss';

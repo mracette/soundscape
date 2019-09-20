@@ -4,6 +4,10 @@ html {
     font-size: 62.5%;
 }
 
+button:hover {
+    cursor: pointer;
+}
+
 .fullscreen {
     position: absolute;
     overflow: hidden;

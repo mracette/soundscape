@@ -11,7 +11,7 @@ const MenuButtonParent = (props) => {
     const node = useRef();
 
     // set state
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(true);
     const [openChildIndex, setOpenChildIndex] = useState(-1);
     const numOfChildren = props.childButtonProps.length;
 
@@ -78,6 +78,7 @@ const MenuButtonParent = (props) => {
                     content = { props.childButtonProps[index].content }
                     
                     // button appearance
+                    autoOpen = { child.autoOpen }
                     icon = { child.icon }
                     direction = { props.direction }
                     index = { index + 1 }
