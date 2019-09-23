@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ToggleButtonGroup from './ToggleButtonGroup';
 import '../styles/components/ToggleButtonPanel.scss';
 

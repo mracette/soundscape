@@ -45,8 +45,6 @@ function MusicPlayer(props) {
         smoothingTimeConstanct: 0.85
     });
 
-    //Tone.connect(premasterAnalyser.output, Tone.context.destination);
-
     // if song has an ambient track, load it
     if(props.songConfig.ambientTrack) {
         //const ambientTrack = require(`../audio/${props.songConfig.id}/melody-trance[4].mp3`)
@@ -66,7 +64,7 @@ function MusicPlayer(props) {
         transport: Tone.Transport,
         context: Tone.context,
         premaster,
-        devMode: false
+        devMode: true
     };
 
     return (
