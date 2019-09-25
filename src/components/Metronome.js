@@ -12,7 +12,7 @@ import '../styles/components/Metronome.scss';
 
 const Metronome = () => {
 
-    const { transport } = useContext(MusicPlayerContext);
+    const { tone, transport } = useContext(MusicPlayerContext);
 
     const timeSignature = 4;
     const bpm = 92;
@@ -49,18 +49,26 @@ const Metronome = () => {
         let beatIndex = 0;
         let barIndex = 0;
 
-        transport.scheduleRepeat(() => {
-            const currentBeat = beatsRef.current.children[beatIndex];
-            anime(beatAnimation(currentBeat));
-            beatIndex = (beatIndex + 1) % timeSignature;
-        }, "0:1:0")
+        const beatLoop = transport.scheduleRepeat((time) => {
+            tone.Draw.schedule(() => {
+                const currentBeat = beatsRef.current.children[beatIndex];
+                anime(beatAnimation(currentBeat));
+                beatIndex = (beatIndex + 1) % timeSignature;
+            }, time)
+        }, "4n");
 
-        transport.scheduleRepeat(() => {
-            const currentBar = barsRef.current.children[barIndex];
-            anime(barAnimation(currentBar));
-            barIndex = (barIndex + 1) % 4;
-        }, "1:0:0")
+        const barLoop = transport.scheduleRepeat((time) => {
+            tone.Draw.schedule(() => {
+                const currentBar = barsRef.current.children[barIndex];
+                anime(barAnimation(currentBar));
+                barIndex = (barIndex + 1) % 4;
+            }, time)
+        }, "1:0:0");
 
+        return function(){
+            transport.clear(beatLoop);
+            transport.clear(barLoop);
+        }
 
     }, []);
 

@@ -1,6 +1,5 @@
 // libs
-import React, { useReducer } from 'react';
-import Tone from 'tone';
+import React from 'react';
 
 // components
 import CanvasViz from './CanvasViz';
@@ -13,109 +12,155 @@ import SongInfoPanel from './SongInfoPanel';
 import ToggleButtonPanel from './ToggleButtonPanel';
 
 // contexts
-import { MusicPlayerContext, PlayersContext } from '../contexts/MusicPlayerContext';
-import { PlayersReducer } from '../reducers/MusicPlayerReducer';
+import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
 
 // other
 import Analyser from '../viz/Analyser';
+import { createAudioPlayer, nextSubdivision } from '../utils/audioUtils';
+import { AudioLooper } from '../classes/AudioLooper';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
 
-function MusicPlayer(props) {
+class MusicPlayer extends React.Component {
 
-    // init transport
-    Tone.Transport.bpm.value = props.songConfig.bpm;
-    Tone.Transport.timeSignature = props.songConfig.timeSignature;
-    Tone.Transport.start();
+    constructor(props) {
+        super(props);
 
-    // init context
-    Tone.context.latencyHint = 60 / (props.songConfig.bpm * 8) 
-    Tone.context.lookAhead = 0;
-    Tone.context.resume();
+        this.devMode = false;
 
-    // init premaster
-    const premaster = new Tone.Gain().toMaster();
+        // init new audio context instance
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // init premaster analyser
-    const premasterAnalyser = new Analyser(Tone.context, premaster, {
-        power: 6,
-        minDecibels: -120,
-        maxDecibels: 0,
-        smoothingTimeConstanct: 0.85
-    });
+        // get the context time and resume it
+        this.audioCtx.resume();
+        this.audioCtxInitTime = this.audioCtx.currentTime;
 
-    // if song has an ambient track, load it
-    if(props.songConfig.ambientTrack) {
-        //const ambientTrack = require(`../audio/${props.songConfig.id}/melody-trance[4].mp3`)
-        const ambientTrack = require(`../audio/${props.songConfig.id}/ambient-track.mp3`)
-        // const ambientPlayer = new Tone.Player(ambientTrack);
-        // ambientPlayer.connect(premaster);
-        // ambientPlayer.loop = true;
-        // ambientPlayer.autostart = true;
+        // init premaster node
+        this.premaster = this.audioCtx.createGain();
+        this.premaster.connect(this.audioCtx.destination);
+
+        // init premaster analyser to power music player widgets
+        this.premasterAnalyser = new Analyser(this.audioCtx, this.premaster, {
+            power: 6,
+            minDecibels: -120,
+            maxDecibels: 0,
+            smoothingTimeConstanct: 0.85
+        });
+
+        this.state = {
+            playerReferences: []
+        };
+
+        this.handleAddPlayerReference = this.handleAddPlayerReference.bind(this);
+        this.handleRandomize = this.handleRandomize.bind(this);
+        this.handleReset = this.handleReset.bind(this);
+
     }
 
-    // initialize music player state, which is shared with child components through the context API
-    const [ players, dispatch ] = useReducer(PlayersReducer, []);
-        
-    const musicPlayerState =  {
-        songId: props.songConfig.id,
-        tone: Tone,
-        transport: Tone.Transport,
-        context: Tone.context,
-        premaster,
-        devMode: true
-    };
+    componentDidMount() {
+    
+        // if song has an ambient track, load it
+        if(this.context.ambientTrack) {
 
-    return (
-        <div>
-            <h3 id = 'song-title'>Now Playing: {props.songConfig.name}</h3>
-            
-            <PlayersContext.Provider value = {{ players, dispatch }}>
-            <MusicPlayerContext.Provider value = { musicPlayerState }>
+            const pathToAudio = require(`../audio/${this.context.id}/ambient-track.mp3`);
 
-                <Metronome />
+            createAudioPlayer(this.audioCtx, pathToAudio).then((audioPlayer) => {
 
-                <Oscilloscope 
-                    analyser = {premasterAnalyser}
-                />
+                this.ambientLoopPlayer = new AudioLooper(this.audioCtx, audioPlayer.buffer, {
+                    bpm: this.context.bpm,
+                    loopLengthBeats: this.ambientTrackLength * this.context.timeSignature,
+                    snapToGrid: false,
+                    fadeInTime: .00001,
+                    fadeOutTime: .00001,
+                    audioCtxInitTime: this.audioCtxInitTime,
+                    destination: this.premaster
+                });
 
-                <FreqBands 
-                    analyser = {premasterAnalyser}
-                />
+                this.ambientLoopPlayer.start()
 
-                <MenuButtonParent 
-                    name = 'Menu'
-                    direction = 'right'
-                    separation = '6rem'
-                    parentSize = '5rem'
-                    childSize = '3rem'
-                    clickToOpen = { true }
-                    childButtonProps = { [{
-                        autoOpen: true,
-                        id: 'toggles',
-                        icon: '',
-                        content: <ToggleButtonPanel config = {props.songConfig}/>
-                    }, {
-                        id: 'effects',
-                        icon: '',
-                        content: <EffectsPanel/>
-                    }, {
-                        id: 'song-info',
-                        icon: '',
-                        content: <SongInfoPanel config = {props.songConfig}/>
-                    }] }
-                />
+            });
 
-                <CanvasViz 
-                    config = {props.songConfig}
-                />
+        }
 
-            </MusicPlayerContext.Provider>
-            </PlayersContext.Provider>
+    }
 
-        </div>
-    )
+    handleAddPlayerReference(player) {
+        this.setState((prevState) => ({playerReferences: [...prevState.playerReferences, player]}));
+    }
+
+    // turns off all active players
+    handleReset() {
+        this.state.playerReferences.map((p) => {
+            if(p.instance.state.playerState === 'active') {p.instance.stopPlayer(false, true);}
+            if(p.instance.state.playerState === 'pending-start') {p.instance.pendingStop(false, true);}
+        })
+    }
+
+    handleRandomize() {
+
+    }
+
+    // cleanup by closing the audio context when the component unmounts
+    componentWillUnmount() {
+        !!this.ambientLoopPlayer && this.ambientLoopPlayer.stop();
+        this.audioCtx.close();
+    }
+
+    render() {
+        return (
+            <div>
+                <h3 id = 'song-title'>Now Playing: {this.context.name}</h3>
+                
+                    {/* <Metronome /> */}
+
+                    <Oscilloscope 
+                        analyser = {this.premasterAnalyser}
+                    />
+
+                    <FreqBands 
+                        analyser = {this.premasterAnalyser}
+                    />
+
+                    <MenuButtonParent 
+                        name = 'Menu'
+                        direction = 'right'
+                        separation = '6rem'
+                        parentSize = '5rem'
+                        childSize = '3rem'
+                        clickToOpen = { true }
+                        childButtonProps = { [{
+                            autoOpen: true,
+                            id: 'toggles',
+                            icon: '',
+                            content: <ToggleButtonPanel 
+                                devMode = {this.devMode}
+                                config = {this.context} 
+                                handleReset = {this.handleReset}
+                                handleRandomize = {this.handleRandomize}
+                                handleAddPlayerReference = {this.handleAddPlayerReference}
+                                audioCtx = {this.audioCtx}
+                                audioCtxInitTime = {this.audioCtxInitTime}
+                                premaster = {this.premaster}
+                            />
+                        }, {
+                            id: 'effects',
+                            icon: '',
+                            content: <EffectsPanel/>
+                        }, {
+                            id: 'song-info',
+                            icon: '',
+                            content: <SongInfoPanel/>
+                        }] }
+                    />
+
+                    <CanvasViz />
+
+            </div>
+        );
+    }
 }
+
+MusicPlayer.contextType = MusicPlayerContext;
 
 export default MusicPlayer;

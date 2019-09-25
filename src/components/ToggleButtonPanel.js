@@ -13,11 +13,17 @@ const ToggleButtonPanel = (props) => {
                 <h2>Voices</h2>
 
                 <div>
-                    <button id = 'toggle-button-panel-reset'>
+                    <button 
+                        id = 'toggle-button-panel-reset'
+                        onClick = {props.handleReset}
+                    >
                         Reset
                     </button>
 
-                    <button id = 'toggle-button-panel-randomize'>
+                    <button 
+                        id = 'toggle-button-panel-randomize'
+                        onClick = {props.handleRandomize}
+                    >
                         Randomize
                     </button>
 
@@ -28,10 +34,15 @@ const ToggleButtonPanel = (props) => {
 
                 {buttonGroupsConfig.map((group) => (
                     <ToggleButtonGroup 
+                        devMode = {props.devMode}
                         key = {group.name}
                         name = {group.name}
                         polyphony = {group.polyphony}
                         voices = {group.voices}
+                        handleAddPlayerReference = {props.handleAddPlayerReference}
+                        audioCtx = {props.audioCtx}
+                        audioCtxInitTime = {props.audioCtxInitTime}
+                        premaster = {props.premaster}
                     />
                 ))}
 

@@ -8,6 +8,8 @@ const ToggleButtonGroup = (props) => {
     const [ playerOrder, setPlayerOrder ] = useState([]);
     const [ playerOverrides, setPlayerOverrides ] = useState([]);
 
+    const handleResetPoly = () => setCurrentPoly(0);
+
     const handleUpdatePoly = (n, playerId) => {
 
         setCurrentPoly(currentPoly + n);
@@ -44,13 +46,20 @@ const ToggleButtonGroup = (props) => {
 
                     {props.voices.map((voice) => (
                         <ToggleButton
+                            devMode = {props.devMode}
                             key = {voice.name}
                             name = {voice.name}
+                            groupName = {props.name}
                             length = {voice.length}
                             quantizeLength = {voice.quantizeLength}
                             handleUpdatePoly = {handleUpdatePoly}
+                            handleResetPoly = {handleResetPoly}
                             handleUpdateOverrides = {handleUpdateOverrides}
+                            handleAddPlayerReference = {props.handleAddPlayerReference}
                             override = {playerOverrides.indexOf(voice.name) !== -1}
+                            premaster = {props.premaster}
+                            audioCtx = {props.audioCtx}
+                            audioCtxInitTime = {props.audioCtxInitTime}
                         />
                     ))}
 
