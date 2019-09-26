@@ -13,6 +13,7 @@ import { AudioLooper } from '../classes/AudioLooper';
 import Scheduler from '../classes/Sheduler';
 
 // styles
+import '../styles/components/Icon.scss';
 import '../styles/components/ToggleButton.scss';
 
 class ToggleButton extends React.Component {
@@ -32,6 +33,7 @@ class ToggleButton extends React.Component {
         this.state = {
             player: null,
             playerState: 'stopped',
+            iconRef: null,
             svgAnimation: null,
             buttonAnimation: null
         };
@@ -54,7 +56,7 @@ class ToggleButton extends React.Component {
                 loopLengthBeats: parseInt(this.props.length) * this.context.timeSignature,
                 snapToGrid: true,
                 audioCtxInitTime: this.props.audioCtxInitTime,
-                destination: this.props.premaster
+                destination: this.props.groupNode
             });
 
             this.setState(() => ({player}));
@@ -68,6 +70,15 @@ class ToggleButton extends React.Component {
             groupName: this.props.groupName
         });
 
+        // store the animation targets based on their position in the ref
+        this.animationTargets = {
+            button: this.buttonRef.current,
+            circleSvg: this.buttonRef.current.children[0],
+            iconDiv: this.buttonRef.current.children[1],
+            iconSvg: this.buttonRef.current.children[1].children[0],
+            iconPoly: this.buttonRef.current.children[1].children[0].children[0],
+        }
+
     }
 
     componentDidUpdate() {
@@ -76,11 +87,11 @@ class ToggleButton extends React.Component {
 
         // check if the player override is active (managed by the parent component)
         if(this.props.override && this.state.playerState === 'active') {
-            this.stopPlayer(true, false);
+            this.stopPlayer();
             // remove the player from the override list
             this.props.handleUpdateOverrides(this.props.name);
         } else if (this.props.override && this.state.playerState === 'pending-start') {
-            this.pendingStop(true, false);
+            this.pendingStop();
             // remove the player from the override list
             this.props.handleUpdateOverrides(this.props.name);
         }
@@ -88,7 +99,8 @@ class ToggleButton extends React.Component {
 
     componentWillUnmount() {
         // stop the player
-        // this.state.player.dispose();
+        this.state.player.stop();
+        this.scheduler.clear();
 
         // remove the targets from any active animations
         anime.remove(this.buttonRef.current);
@@ -97,13 +109,13 @@ class ToggleButton extends React.Component {
 
     startPlayer() {
         
-        // increment polyphony
-        this.props.handleUpdatePoly(1, this.props.name);
-
-        // set state to pending-start
+        // update current state
         this.setState(() => ({playerState: 'pending-start'}));
+
+        // handle polyphony updates
+        this.props.handleUpdatePoly(1, this.props.name);
         
-        // find the next quantized subdivision
+        // calculate time till next loop start
         const quantizedStartSeconds = nextSubdivision(
             this.props.audioCtx, 
             this.props.audioCtxInitTime,
@@ -111,121 +123,152 @@ class ToggleButton extends React.Component {
             this.quantizedStartBeats
         );
 
-        // convert to millis for animations
-        const quantizedStartMillis = (quantizedStartSeconds - this.props.audioCtx.currentTime) * 1000;
-
         // schedule a start and status change
-        this.state.player.start(quantizedStartSeconds);
         this.scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
-            console.log('scheduled active');
+            this.state.player.start();
             this.setState(() => ({playerState: 'active'}));
         });
 
-        const svgAnimation = anime({
-            targets: this.buttonRef.current.children[0], //svg
-            strokeDashoffset: [0, 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2) + this.buttonRadiusUnit],
-            duration: quantizedStartMillis,
+        // convert to millis for animations
+        const quantizedStartMillis = (quantizedStartSeconds - this.props.audioCtx.currentTime) * 1000;
+
+        // run new animations
+        this.runAnimation('start', quantizedStartMillis);
+            
+    }
+
+    stopPlayer(reset) {
+        
+        // update current state
+        this.setState(() => ({playerState: 'pending-stop'}));
+
+        // handle polyphony updates
+        if(reset) {
+            this.props.handleResetPoly();
+        } else {
+            this.props.handleUpdatePoly(-1, this.props.name);
+        }
+
+        // calculate time till next loop start
+        const quantizedStartSeconds = nextSubdivision(
+            this.props.audioCtx, 
+            this.props.audioCtxInitTime,
+            this.context.bpm,
+            this.quantizedStartBeats
+        );
+        
+        // schedule a stop and status change
+        this.scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
+            this.state.player.stop();
+            this.setState(() => ({playerState: 'stopped'}));
+        });
+
+        // convert to millis for animations
+        const quantizedStartMillis = (quantizedStartSeconds - this.props.audioCtx.currentTime) * 1000;
+
+        // run new animations
+        this.runAnimation('stop', quantizedStartMillis);
+
+    }
+
+    pendingStop(reset) {
+
+        // cancel previous start events
+        this.scheduler.clear();
+        this.state.player.stop();
+
+        // update current state
+        this.setState(() => ({playerState: 'pending-stop'}));
+
+        // handle polyphony changes
+        if(reset) {
+            this.props.handleResetPoly();
+        } else {
+            this.props.handleUpdatePoly(-1, this.props.name);
+        }
+
+        // calculate time till next loop start
+        const quantizedStartSeconds = nextSubdivision(
+            this.props.audioCtx, 
+            this.props.audioCtxInitTime,
+            this.context.bpm,
+            this.quantizedStartBeats
+        );
+
+        // schedule status change
+        this.scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
+            this.setState(() => ({playerState: 'stopped'}));
+        });
+
+        // remove the targets from any active animations
+        anime.remove(this.buttonRef.current);
+        anime.remove(this.buttonRef.current.children[0]);
+
+        // convert to millis for animation
+        const quantizedStartMillis = (quantizedStartSeconds - this.props.audioCtx.currentTime) * 1000;
+
+        // run new animations
+        this.runAnimation('stop', quantizedStartMillis);
+
+    }
+
+    runAnimation(type, duration) {
+
+        let strokeDashoffset, points, backgroundColor, rotateZ;
+
+        if(type === 'start') {
+
+            rotateZ = '-180';
+            backgroundColor = 'rgba(255, 255, 255, .3)';
+            strokeDashoffset = [0, 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2) + this.buttonRadiusUnit];
+            points = [{value: "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188"}]; 
+
+        } else if(type === 'stop') {
+
+            rotateZ = '0';
+            backgroundColor = 'rgba(255, 255, 255, 0)';
+            strokeDashoffset = [this.buttonRef.current.children[0].style.strokeDashoffset, 0];
+            points = [{value: "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100"}]; 
+
+        }
+
+        // run cirle animation
+        anime({
+            targets: this.animationTargets.circleSvg,
+            strokeDashoffset,
+            duration,
             easing: 'linear'
         });
 
-        const buttonAnimation = anime({
-            targets: this.buttonRef.current, // button
-            backgroundColor: 'rgba(255,255,255, 0.3)',
-            duration: quantizedStartMillis,
-            easing: 'easeInCubic'
+        // run icon animation
+        anime({
+            targets: this.animationTargets.iconPoly,
+            points,
+            duration,
+            easing: 'linear'
         });
 
-        this.setState(() => ({
-            svgAnimation,
-            buttonAnimation
-        }));
-            
-    }
+        // run rotate animation
+        anime({
+            targets: [this.animationTargets.iconDiv, this.animationTargets.iconDiv.children],
+            rotateZ,
+            duration,
+            easing: 'linear'
+        });
 
-    stopPlayer(override, reset) {
-        
-            this.setState(() => ({playerState: 'pending-stop'}));
-
-            if(reset) {
-                this.props.handleResetPoly();
-            } else {
-                this.props.handleUpdatePoly(-1, this.props.name);
-            }
-
-            const quantizedStartSeconds = nextSubdivision(
-                this.props.audioCtx, 
-                this.props.audioCtxInitTime,
-                this.context.bpm,
-                this.quantizedStartBeats
-            );
-    
-            const quantizedStartMillis = (quantizedStartSeconds - this.props.audioCtx.currentTime) * 1000;
-            
-            this.state.player.stop(quantizedStartSeconds);
-            this.scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
-                console.log('scheduled stopped (from stop)');
-                this.setState(() => ({playerState: 'stopped'}));
-            });
-
-            const svgAnimation = anime({
-                targets: this.buttonRef.current.children[0], //svg
-                strokeDashoffset: [0, 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2) + this.buttonRadiusUnit],
-                duration: quantizedStartMillis,
-                easing: 'linear',
-                direction: 'reverse'
-            });
-
-            const buttonAnimation = anime({
-                targets: this.buttonRef.current, // button
-                backgroundColor: 'rgba(255, 255, 255, 0)',
-                duration: quantizedStartMillis,
-                easing: 'easeInCubic'
-            });
-
-            this.setState(() => ({
-                svgAnimation,
-                buttonAnimation
-            }));
-
-    }
-
-    pendingStop(override, reset) {
-
-            // cancel previous start events
-            this.scheduler.clear();
-            this.state.player.stop();
-
-            this.setState(() => ({playerState: 'pending-stop'}));
-
-            if(reset) {
-                this.props.handleResetPoly();
-            } else {
-                this.props.handleUpdatePoly(-1, this.props.name);
-            }
-
-            const quantizedStartSeconds = nextSubdivision(
-                this.props.audioCtx, 
-                this.props.audioCtxInitTime,
-                this.context.bpm,
-                this.quantizedStartBeats
-            );
-
-            this.props.name === 'rhodes-arps[4]' && console.log('pending-stop event',quantizedStartSeconds);
-
-
-            // reverse the current animations
-            this.state.svgAnimation.reverse();
-            this.state.buttonAnimation.reverse();
-
-            this.scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
-                console.log('scheduled stopped (from pending)');
-                this.setState(() => ({playerState: 'stopped'}));
-            });
+        // run button animation
+        anime({
+            targets: this.animationTargets.button,
+            backgroundColor,
+            duration,
+            easing: 'easeInCubic'
+        });
 
     }
 
     render() {
         return (
+            
             <button 
                 type = 'button'
                 className = 'toggle-button'
@@ -245,11 +288,13 @@ class ToggleButton extends React.Component {
                     marginRight: this.buttonRadius / 4 + this.buttonRadiusUnit
                 }}
             >
+
                 <svg 
                     className = 'svg'
                     width = { 2 * this.buttonRadius + this.buttonRadiusUnit }
                     height = { 2 * this.buttonRadius + this.buttonRadiusUnit }
                 >
+
                     <circle 
                         className = 'svg-circle'
                         cx = { this.buttonRadius + this.buttonRadiusUnit }
@@ -259,9 +304,29 @@ class ToggleButton extends React.Component {
                             strokeWidth: this.buttonBorder + this.buttonRadiusUnit,
                             strokeDasharray: 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2) + this.buttonRadiusUnit
                         }}
-                    >
-                    </circle>
+                    />
+                    
                 </svg>
+
+                <div id = 'scale-div-morph' className = {`icon`}>
+
+                    <svg
+                        viewBox="0 0 100 100"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                        className={`icon icon-white`}
+                    >
+
+                    <polygon 
+                        id='icon-play3-poly' 
+                        className={`icon icon-white`}
+                        points="6.69872981 0 46.650635094 25 93.01270188 50 46.650635094 75 6.69872981 100" 
+                    />
+
+                    </svg>
+
+                </div>
+
             </button>
         );
     }

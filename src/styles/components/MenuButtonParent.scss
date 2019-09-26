@@ -1,7 +1,10 @@
 @import '../settings.scss';
 
 .menu-button {
-    position: relative;
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    margin: 2.5rem 0 0 2.5rem;
     display: inline-block;
     height: auto;
     width: auto;

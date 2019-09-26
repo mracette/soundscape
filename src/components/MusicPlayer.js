@@ -7,7 +7,6 @@ import EffectsPanel from './EffectsPanel';
 import FreqBands from './FreqBands';
 import MenuButtonParent from './MenuButtonParent';
 import Metronome from './Metronome';
-import Oscilloscope from './Oscilloscope';
 import SongInfoPanel from './SongInfoPanel';
 import ToggleButtonPanel from './ToggleButtonPanel';
 
@@ -18,6 +17,7 @@ import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
 import Analyser from '../viz/Analyser';
 import { createAudioPlayer, nextSubdivision } from '../utils/audioUtils';
 import { AudioLooper } from '../classes/AudioLooper';
+import Scheduler from '../classes/Sheduler';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
@@ -26,11 +26,14 @@ class MusicPlayer extends React.Component {
 
     constructor(props) {
         super(props);
-
-        this.devMode = false;
-
+        
+        this.devMode = true;
+        
         // init new audio context instance
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // init scheduler
+        this.scheduler = new Scheduler(this.audioCtx);
 
         // get the context time and resume it
         this.audioCtx.resume();
@@ -45,16 +48,20 @@ class MusicPlayer extends React.Component {
             power: 6,
             minDecibels: -120,
             maxDecibels: 0,
-            smoothingTimeConstanct: 0.85
+            smoothingTimeConstanct: 0.25
         });
 
         this.state = {
-            playerReferences: []
+            playerReferences: [],
+            mute: false,
+            randomize: false,
+            randomizeEventId: null
         };
 
         this.handleAddPlayerReference = this.handleAddPlayerReference.bind(this);
         this.handleRandomize = this.handleRandomize.bind(this);
         this.handleReset = this.handleReset.bind(this);
+        this.handleMute = this.handleMute.bind(this);
 
     }
 
@@ -77,7 +84,7 @@ class MusicPlayer extends React.Component {
                     destination: this.premaster
                 });
 
-                this.ambientLoopPlayer.start()
+                //this.ambientLoopPlayer.start()
 
             });
 
@@ -99,6 +106,68 @@ class MusicPlayer extends React.Component {
 
     handleRandomize() {
 
+        this.setState((prevState) => {
+
+            let randomizeEventId;
+
+            if(! prevState.randomize) {
+
+                randomizeEventId = this.scheduler.scheduleRepeating(
+                    this.audioCtx.currentTime + (60 / this.context.bpm), 
+                    (60 / this.context.bpm) * 32,
+                    () => {
+
+                        const playerMap = this.state.playerReferences.map((p) => p.instance.state.playerState === 'active' ? 1 : 0)
+                        const activePlayers = playerMap.reduce((a,b) => a + b);
+
+                        // trigger a random voice
+                        const random = Math.floor(Math.random() * this.state.playerReferences.length);
+                        const button = this.state.playerReferences[random].instance.buttonRef.current;
+                        button.click();
+
+                        // if less than half of the players are active, trigger an additional voice
+                        if(activePlayers < this.state.playerReferences.length / 2) {
+                            const random = Math.floor(Math.random() * this.state.playerReferences.length);
+                            const button = this.state.playerReferences[random].instance.buttonRef.current;
+                            button.click();
+                        }
+                        
+                    }
+                )
+
+            } else {
+
+                this.scheduler.cancel(this.state.randomizeEventId);
+                randomizeEventId = null;
+
+            }
+
+            return {
+                randomize: ! prevState.randomize,
+                randomizeEventId
+            }
+
+        });
+
+    }
+
+    handleMute() {
+
+        this.setState((prevState) => {
+
+            if(!prevState.mute) {
+
+                this.premaster.gain.value = 0;
+
+            } else {
+
+                this.premaster.gain.value = 1;
+            }
+
+            return {mute: !prevState.mute}
+
+        })
+
     }
 
     // cleanup by closing the audio context when the component unmounts
@@ -110,17 +179,18 @@ class MusicPlayer extends React.Component {
     render() {
         return (
             <div>
-                <h3 id = 'song-title'>Now Playing: {this.context.name}</h3>
+
+                {/* <div className = 'flex-row'> */}
+                    {/* <h1 id = 'song-title'>Now Playing: {this.context.name}</h1> */}
                 
                     {/* <Metronome /> */}
 
-                    <Oscilloscope 
-                        analyser = {this.premasterAnalyser}
-                    />
-
                     <FreqBands 
                         analyser = {this.premasterAnalyser}
+                        bpm = {this.context.bpm}
+                        timeSignature = {this.context.timeSignature}
                     />
+                    {/* </div> */}
 
                     <MenuButtonParent 
                         name = 'Menu'
@@ -133,15 +203,19 @@ class MusicPlayer extends React.Component {
                             autoOpen: true,
                             id: 'toggles',
                             icon: '',
-                            content: <ToggleButtonPanel 
+                            content: 
+                            <ToggleButtonPanel 
                                 devMode = {this.devMode}
                                 config = {this.context} 
                                 handleReset = {this.handleReset}
                                 handleRandomize = {this.handleRandomize}
+                                handleMute = {this.handleMute}
                                 handleAddPlayerReference = {this.handleAddPlayerReference}
                                 audioCtx = {this.audioCtx}
                                 audioCtxInitTime = {this.audioCtxInitTime}
                                 premaster = {this.premaster}
+                                randomize = {this.state.randomize}
+                                mute = {this.state.mute}
                             />
                         }, {
                             id: 'effects',

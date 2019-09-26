@@ -1,10 +1,7 @@
 /* eslint-disable */ 
 
 // libs
-import React, { useContext, useEffect, useRef } from 'react';
-
-// contexts
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import React, { useEffect, useRef } from 'react';
 
 // styles
 import '../styles/components/Oscilloscope.scss';

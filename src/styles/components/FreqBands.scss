@@ -1,6 +1,14 @@
 @import '../settings.scss';
 
+#freq-bands {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+}
+
 #freq-bands-canvas {
-    height: 5rem;
-    width: 5rem;
+    padding: 0;
+    margin: 0;
+    height: 10rem;
+    width: 10rem;
 }

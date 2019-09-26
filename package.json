@@ -11,8 +11,7 @@
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.1.1",
-    "three": "^0.108.0",
-    "tone": "^13.8.25"
+    "three": "^0.108.0"
   },
   "scripts": {
     "start": "react-scripts start",

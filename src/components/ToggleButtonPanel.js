@@ -12,8 +12,9 @@ const ToggleButtonPanel = (props) => {
 
                 <h2>Voices</h2>
 
-                <div>
+                <div className = 'flex-row'>
                     <button 
+                        className = 'button-white'
                         id = 'toggle-button-panel-reset'
                         onClick = {props.handleReset}
                     >
@@ -22,12 +23,17 @@ const ToggleButtonPanel = (props) => {
 
                     <button 
                         id = 'toggle-button-panel-randomize'
+                        className = {props.randomize ? 'button-active button-white' : 'button-white'}
                         onClick = {props.handleRandomize}
                     >
                         Randomize
                     </button>
 
-                    <button id = 'toggle-button-panel-mute'>
+                    <button 
+                        id = 'toggle-button-panel-mute'
+                        className = {props.mute ? 'button-active button-white' : 'button-white'}
+                        onClick = {props.handleMute}
+                    >
                         Mute
                     </button>
                 </div>

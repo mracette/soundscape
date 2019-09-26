@@ -133,7 +133,7 @@ export class AudioLooper {
             try {
 
                 // stop scheduling new events
-                !!this.intervalTimer && window.clearInterval(this.intervalTimer);
+                if(this.intervalTimer) { window.clearInterval(this.intervalTimer); }
 
                 // stop all events in both queues
                 this.queue.map((event) => {

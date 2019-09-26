@@ -1,12 +1,45 @@
-import React, { useState } from 'react';
+
+// libs
+import React, { useState, useEffect } from 'react';
+
+// components
 import ToggleButton from './ToggleButton';
+import Oscilloscope from './Oscilloscope';
+import FreqBands from './FreqBands';
+
+// other
+import Analyser from '../viz/Analyser';
+
+// styles
 import '../styles/components/ToggleButtonGroup.scss';
+import '../styles/components/Oscilloscope.scss';
 
 const ToggleButtonGroup = (props) => {
-
+    
+    const [ groupNode, setGroupNode ] = useState(null);
+    const [ groupAnalyser, setGroupAnalyser ] = useState(null);
     const [ currentPoly, setCurrentPoly ] = useState(0);
     const [ playerOrder, setPlayerOrder ] = useState([]);
     const [ playerOverrides, setPlayerOverrides ] = useState([]);
+
+    useEffect(() => {
+
+        // init group node
+        const groupNode = props.audioCtx.createGain();
+        groupNode.connect(props.premaster);
+        
+        const analyser = new Analyser(props.audioCtx, groupNode, {
+            power: 5,
+            minDecibels: -120,
+            maxDecibels: 0,
+            smoothingTimeConstant: 0
+        });
+
+        setGroupAnalyser(analyser);
+        setGroupNode(groupNode);
+        
+    }, [])
+
 
     const handleResetPoly = () => setCurrentPoly(0);
 
@@ -38,9 +71,29 @@ const ToggleButtonGroup = (props) => {
         return (
             <div className = 'toggle-button-group'>
 
-                <h3>{props.name} ({currentPoly} / {
-                    props.polyphony === -1 ? props.voices.length : props.polyphony
-                })</h3>
+                <div 
+                    style = {{
+                        display: 'flex',
+                        flexDirection: 'row'
+                    }}
+                    className = 'flex-row'>
+
+                    <button className = 'solo-button'>S</button>
+                    <button className = 'mute-button'>M</button>
+
+                    <h3>{props.name} ({currentPoly} / {
+                        props.polyphony === -1 ? props.voices.length : props.polyphony
+                    })</h3>
+
+                {groupAnalyser && groupNode && 
+                    <Oscilloscope 
+                        name = {props.name}
+                        analyser = {groupAnalyser} 
+                    />
+                }
+
+                </div>
+
 
                 <div className = 'toggle-buttons'>
 
@@ -57,7 +110,7 @@ const ToggleButtonGroup = (props) => {
                             handleUpdateOverrides = {handleUpdateOverrides}
                             handleAddPlayerReference = {props.handleAddPlayerReference}
                             override = {playerOverrides.indexOf(voice.name) !== -1}
-                            premaster = {props.premaster}
+                            groupNode = {groupNode}
                             audioCtx = {props.audioCtx}
                             audioCtxInitTime = {props.audioCtxInitTime}
                         />

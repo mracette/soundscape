@@ -1,5 +1,23 @@
 @import '../settings.scss';
 
+.solo-button, .mute-button {
+    color: white;
+    padding: 0;
+    height: 2rem;
+    width: 2rem;
+    border-color: white;
+    border-style: solid;
+    background-color: rgba(255, 255, 255, 0);
+}
+
+.solo-button {
+    border-width: .2rem .1rem .2rem .2rem;
+}
+
+.mute-button {
+    border-width: .2rem .2rem .2rem .1rem;
+}
+
 .toggle-button-group {
     display: flex;
     flex-direction: column;

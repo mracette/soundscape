@@ -1,0 +1,39 @@
+@import '../settings.scss';
+
+.icon svg {
+    position: absolute; 
+    height: 100%; 
+    width: 100%; 
+    left: 0; 
+    top: 0;
+}
+
+#scale-div {
+    display: inline-block;
+    position: absolute; 
+    top: 0%;
+    left: 0%;
+    height: 100%;
+    width: 100%;
+    margin: auto;
+}
+
+#scale-div-morph {
+    display: inline-block;
+    position: absolute; 
+    transform-origin: 50% 50%;
+    top: 37.5%;
+    left: 37.5%;
+    height: 25%;
+    width: 25%;
+    margin: auto;
+}
+
+#icon-play3-poly {
+    transform-origin: 50% 50%;
+}
+
+.icon-white {
+    fill: white;
+    stroke: white;
+}

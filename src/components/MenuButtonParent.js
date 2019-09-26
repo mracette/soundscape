@@ -1,8 +1,13 @@
 /* eslint-disable */ 
 
+// libs
 import React, { useState, useEffect, useRef } from 'react';
 import ClassNames from 'classnames';
+
+// components
 import MenuButtonChild from './MenuButtonChild';
+
+// styles
 import '../styles/components/MenuButtonParent.scss';
 
 const MenuButtonParent = (props) => {
@@ -64,8 +69,7 @@ const MenuButtonParent = (props) => {
                     isOpen && setOpenChildIndex(-1);
                     props.clickToOpen && setIsOpen(!isOpen);
                 }}
-                >
-                {props.name}
+                >                
             </button>
 
             {props.childButtonProps.map((child, index) => (

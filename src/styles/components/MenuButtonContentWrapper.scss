@@ -1,8 +1,10 @@
 @import '../settings.scss';
 
 .menu-button-content {
+    border-radius: 3rem 3rem;
     position: absolute;
     height: auto;
     width: auto;
     background: rgba(255, 255, 255, 0.2);
+    padding: 5rem;
 }

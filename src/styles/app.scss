@@ -4,8 +4,34 @@ html {
     font-size: 62.5%;
 }
 
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: normal;
+}
+
 button:hover {
     cursor: pointer;
+}
+
+button:focus {
+    outline: none;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
 }
 
 .fullscreen {

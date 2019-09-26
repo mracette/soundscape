@@ -1,6 +1,7 @@
 @import '../settings.scss';
 
 .toggle-button {
+    position: relative;
     border-radius: 50%;
     border: none;
     padding: 0;
@@ -9,6 +10,10 @@
 } 
 
 .svg-circle {
+    position: absolute;
+    display: inline;
+    top: 0;
+    left: 0;
     fill-opacity: 0;
     stroke: white;
     stroke-linecap: round;

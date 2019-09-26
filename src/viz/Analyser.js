@@ -1,5 +1,7 @@
 export default class Analyser {
+    
     constructor(context, input, params){
+
         const defaults = {
             split: false,
             type: 'fft',
