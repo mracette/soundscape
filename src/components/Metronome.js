@@ -5,7 +5,7 @@ import React, { useContext, useEffect, useRef } from 'react';
 import anime from 'animejs/lib/anime.es.js';
 
 // contexts
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
 // styles
 import '../styles/components/Metronome.scss';

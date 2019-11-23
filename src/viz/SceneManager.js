@@ -1,16 +1,15 @@
-/* eslint-disable */ 
+/* eslint-disable */
 
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import FirstPersonControls from './controls/FirstPersonControls';
 
 export default class SceneManager {
-    constructor(canvas, analyserArray){
+
+    constructor(canvas, analyserArray) {
 
         this.that = this;
-
         this.analyserArray = analyserArray;
-
         this.canvas = canvas;
         this.clock = new THREE.Clock(true);
 
@@ -43,7 +42,7 @@ export default class SceneManager {
                 this.lights = this.initLights();
                 this.helpers = this.initHelpers();
                 resolve();
-            } catch(e) {
+            } catch (e) {
                 console.error(e);
                 reject(e)
             }
@@ -68,14 +67,14 @@ export default class SceneManager {
 
     initRender() {
 
-        const renderer = new THREE.WebGLRenderer( { 
+        const renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             antialias: true
-        } );
+        });
         const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
 
         renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
-        renderer.setPixelRatio( DPR );
+        renderer.setPixelRatio(DPR);
 
         return renderer;
     }
@@ -84,11 +83,11 @@ export default class SceneManager {
 
         const fieldOfView = 60;
         const nearPlane = 1;
-        const farPlane = 1000; 
+        const farPlane = 10000;
         const aspect = this.screenDimensions.width / this.screenDimensions.height;
         let camera;
-        
-        switch(type || 'perspective') {
+
+        switch (type || 'perspective') {
             case 'perspective':
                 camera = new THREE.PerspectiveCamera(fieldOfView, 1, nearPlane, farPlane);
                 break;
@@ -97,10 +96,10 @@ export default class SceneManager {
                 camera = new THREE.OrthographicCamera(-f, f, f / aspect, -f / aspect, nearPlane, farPlane);
                 break;
         }
-        
+
         camera.aspect = aspect;
         camera.position.set(0, 10, 115);
-        camera.lookAt(new THREE.Vector3(0,0,0));
+        camera.lookAt(new THREE.Vector3(0, 0, 0));
         camera.updateProjectionMatrix();
         return camera;
     }
@@ -135,7 +134,7 @@ export default class SceneManager {
         return helpers;
     }
 
-    onWindowResize(newWidth, newHeight){
+    onWindowResize(newWidth, newHeight) {
         this.screenDimensions.width = newWidth;
         this.screenDimensions.height = newHeight;
         this.camera.aspect = newWidth / newHeight;

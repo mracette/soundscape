@@ -29,7 +29,7 @@ export const createAudioPlayer = (audioCtx, audioFilePath) => {
         
 }
 
-export const loadArrayBuffer = (audioFilePath, callback) => {
+export const loadArrayBuffer = (audioFilePath) => {
 
     return new Promise((resolve, reject) => {
 

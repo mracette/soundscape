@@ -1,12 +1,20 @@
 /* eslint-disable */ 
 
 // libs
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
+import * as d3Chromatic from 'd3-scale-chromatic';
+
+// contexts
+import ThemeContext from '../contexts/ThemeContext';
+import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
 // styles
 import '../styles/components/FreqBands.scss';
 
 const FreqBands = (props) => {
+
+    const {vw, vh} = useContext(ThemeContext);
+    const {spectrumFunction} = useContext(MusicPlayerContext);
 
     const canvasRef = useRef(null);
     
@@ -30,7 +38,7 @@ const FreqBands = (props) => {
         canvasWidth = canvasRef.current.width;
         canvasHeight = canvasRef.current.height;
 
-        radius = canvasHeight / 3;
+        radius = canvasHeight / 2 - (canvasHeight / props.analyser.frequencyBinCount);
 
     }
 
@@ -44,24 +52,26 @@ const FreqBands = (props) => {
 
         // get time domain data
         const dataArray = props.analyser.getFrequencyData();
-        
-        canvasCtx.beginPath();
 
         // map time domain data to canvas draw actions
         dataArray.map((d, i) => {
             
-            canvasCtx.fillStyle = `rgba(255, 255, 255, ${v})`;
-            
             const vol = (d / 255);
             const cx = canvasWidth / 2 + radius * Math.cos((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
             const cy = canvasHeight / 2 + radius * Math.sin((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
+            
+            canvasCtx.beginPath();
+
+            canvasCtx.fillStyle = spectrumFunction(i / props.analyser.frequencyBinCount);
+
+            canvasCtx.globalAlphs = vol;
 
             canvasCtx.moveTo(cx, cy);
 
             canvasCtx.arc(
                 cx,
                 cy,
-                vol * (canvasHeight / props.analyser.frequencyBinCount),
+                (canvasHeight / props.analyser.frequencyBinCount) * vol,
                 0,
                 Math.PI * 2
             );
@@ -76,9 +86,19 @@ const FreqBands = (props) => {
     }
 
     return (
-        <div id = 'freq-bands'>
+        <div 
+            id = 'freq-bands'
+            style = {{
+                top: 1.5 * vh,
+                left: 1.5 * vh
+            }}
+        >
             <canvas 
                 id = 'freq-bands-canvas' 
+                style = {{
+                    width: 9 * vh,
+                    height: 9 * vh,
+                }}
                 ref = {canvasRef}
             />
         </div>

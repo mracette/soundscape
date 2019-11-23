@@ -1,11 +1,13 @@
 @import '../settings.scss';
 
 #oscilloscope {
-    height: 5rem;
-    flex-grow: 1;
+    height: vh(6.5);
+    flex: 1 1 0;
 }
 
 #oscilloscope-canvas {
+    padding: 0;
+    margin: 0;
     height: 100%;
     width: 100%;
 }

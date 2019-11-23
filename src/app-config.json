@@ -132,30 +132,30 @@
         "timeSignature": 4,
         "keySignature": "Eb Major",
         "ambientTrack": true,
-        "ambientTrackLength": "8m",
+        "ambientTrackLength": "4m",
         "groups": [
             {
                 "name": "rhythm",
                 "polyphony": -1,
                 "voices": [
                     {
-                        "name": "kick-snare[4]",
+                        "name": "rhythm-drums[4]",
                         "length": "4m",
                         "quantizeLength": "4m"
                     },
                     {
-                        "name": "fast-hats[4]",
+                        "name": "rhythm-kick[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "rhythm-reverse[4]",
                         "length": "4m",
                         "quantizeLength": "4m"
                     },
                     {
-                        "name": "rides[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "belly-percs[4]",
-                        "length": "4m",
+                        "name": "rhythm-tops[8]",
+                        "length": "8m",
                         "quantizeLength": "4m"
                     }
                 ]
@@ -165,18 +165,18 @@
                 "polyphony": 2,
                 "voices": [
                     {
-                        "name": "rhodes-arps[4]",
+                        "name": "harmony-one[4]",
                         "length": "4m",
                         "quantizeLength": "4m"
                     },
                     {
-                        "name": "rhodes-chords[4]",
+                        "name": "harmony-two[4]",
                         "length": "4m",
                         "quantizeLength": "4m"
                     },
                     {
-                        "name": "rhodes-sad[8]",
-                        "length": "8m",
+                        "name": "harmony-three[4]",
+                        "length": "4m",
                         "quantizeLength": "4m"
                     }
                 ]
@@ -186,18 +186,18 @@
                 "polyphony": 1,
                 "voices": [
                     {
-                        "name": "sub-desc[8]",
+                        "name": "bass-one[8]",
                         "length": "8m",
                         "quantizeLength": "4m"
                     },
                     {
-                        "name": "sub-simple[8]",
-                        "length": "8m",
+                        "name": "bass-two[4]",
+                        "length": "4m",
                         "quantizeLength": "8m"
                     },
                     {
-                        "name": "sub-bouncey[8]",
-                        "length": "8m",
+                        "name": "bass-three[4]",
+                        "length": "4m",
                         "quantizeLength": "4m"
                     }
                 ]
@@ -207,44 +207,39 @@
                 "polyphony": 1,
                 "voices": [
                     {
-                        "name": "melody-trance[4]",
+                        "name": "melody-one[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "melody-two[8]",
+                        "length": "8m",
+                        "quantizeLength": "4m"
+                    },
+                    {
+                        "name": "melody-three[4]",
                         "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "melody-bluesy[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "melody-soft[8]",
-                        "length": "8m",
                         "quantizeLength": "4m"
                     }
                 ]
             },
             {
-                "name": "atmosphere",
+                "name": "extras",
                 "polyphony": 3,
                 "voices": [
                     {
-                        "name": "atmo-water[4]",
+                        "name": "extra-sweep[4]",
                         "length": "4m",
                         "quantizeLength": "4m"
                     },
                     {
-                        "name": "atmo-swirl[16]",
-                        "length": "16m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "atmo-crunch[8]",
+                        "name": "extra-pad[8]",
                         "length": "8m",
                         "quantizeLength": "4m"
                     },
                     {
-                        "name": "atmo-photay[4]",
-                        "length": "4m",
+                        "name": "extra-jammy[8]",
+                        "length": "8m",
                         "quantizeLength": "4m"
                     }
                 ]

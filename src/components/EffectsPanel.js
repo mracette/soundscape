@@ -1,7 +1,26 @@
-import React from 'react';
+// libs
+import React, { useEffect, useState } from 'react';
+
+// styles
 import '../styles/components/EffectsPanel.scss';
 
 const EffectsPanel = (props) => {
+    
+    const handleReset = () => {
+        // reset hp
+        document.getElementById('hp-slider').value = 1;
+        props.handleChangeHP(1);
+
+        // reset lp
+        document.getElementById('lp-slider').value = 100;
+        props.handleChangeLP(100);
+
+        // reset spaciousness
+        document.getElementById('spaciousness-slider').value = 1; 
+        props.handleChangeSpaciousness(1);
+    }
+    
+    useEffect(handleReset, []);
 
         return (
 
@@ -10,11 +29,17 @@ const EffectsPanel = (props) => {
                 <h2>Effects</h2>
 
                 <div>
-                    <button id = 'effects-panel-reset'>
+                    <button 
+                        id = 'effects-panel-reset'
+                        onClick = {handleReset}
+                    >
                         Reset
                     </button>
 
-                    <button id = 'effects-panel-randomize'>
+                    <button 
+                        id = 'effects-panel-randomize'
+                        onClick = {props.handleEffectsRandomize}
+                    >
                         Randomize
                     </button>
                 </div>
@@ -24,21 +49,21 @@ const EffectsPanel = (props) => {
                 <input type="range" min="1" max="100" className="slider" id="hp-slider"
                     onInput = {(e) => {
                         e.preventDefault();
-                        //this.props.handleChangeHP(e.target.value);
+                        props.handleChangeHP(e.target.value);
                     }}
                 ></input>
                 <h3 className='slider-label'>lowpass filter</h3>
                 <input type="range" min="1" max="100" className="slider" id="lp-slider"
                     onInput = {(e) => {
                         e.preventDefault();
-                        //this.props.handleChangeLP(e.target.value);
+                        props.handleChangeLP(e.target.value);
                     }}
                 ></input>
-                <h3 className='slider-label'>ambience</h3>
-                <input type="range" min="1" max="100" className="slider" id="ambience-slider"
+                <h3 className='slider-label'>space</h3>
+                <input type="range" min="1" max="100" className="slider" id="spaciousness-slider"
                     onInput = {(e) => {
                         e.preventDefault();
-                        //this.props.handleChangeAmbience(e.target.value);
+                        props.handleChangeSpaciousness(e.target.value);
                     }}
                 ></input>
                 </div>

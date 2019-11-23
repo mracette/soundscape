@@ -14,12 +14,14 @@ const Oscilloscope = (props) => {
     useEffect(() => {
 
         canvasCtx = canvasRef.current.getContext("2d");
+        
         canvasWidth = canvasRef.current.width;
         canvasHeight = canvasRef.current.height;
 
-        canvasCtx.lineWidth = 3;
-        canvasCtx.fillStyle = 'rgba(0, 0, 0, 0)'
-        canvasCtx.strokeStyle = 'rgb(255, 255, 255)';
+        canvasCtx.lineWidth = 6.5;
+        canvasCtx.strokeStyle = props.spectrumFunction ? 
+            props.spectrumFunction(props.index / props.groupCount) :
+            'rgb(255, 255, 255)';
 
         draw();
 
@@ -34,22 +36,39 @@ const Oscilloscope = (props) => {
         const dataArray = props.analyser.getTimeData();
 
         const sliceWidth = canvasWidth / (dataArray.length - 1);
-        let x = 0;
-        
-        canvasCtx.beginPath();
 
+        let x = 0;
+        let prevX, prevY
+        
+        
         dataArray.map((d, i) => {
+
+            canvasCtx.beginPath();
+
+            if(props.gradient) {
+                canvasCtx.strokeStyle = props.spectrumFunction(props.index / props.groupCount + i / (dataArray.length * props.groupCount));
+            }
+
             const v = d / 128.0;
+
             const y = v * canvasHeight / 2;
-            if(i === 0) {
+
+            if(x === 0) {
                 canvasCtx.moveTo(x, y);
             } else {
-                canvasCtx.lineTo(x, y);
+                canvasCtx.moveTo(prevX, prevY);
             }
-            x += sliceWidth;
-        });
 
-        canvasCtx.stroke();
+            canvasCtx.lineTo(x, y);
+
+            prevX = x;
+            prevY = y;
+
+            x += sliceWidth;
+            
+            canvasCtx.stroke();
+
+        });
 
         requestAnimationFrame(draw);
 
@@ -57,7 +76,8 @@ const Oscilloscope = (props) => {
 
     return (
         <div id = 'oscilloscope'>
-            <canvas id = 'oscilloscope-canvas' ref = {canvasRef}/>
+            <canvas 
+                id = 'oscilloscope-canvas' ref = {canvasRef}/>
         </div>
     )
 

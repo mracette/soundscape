@@ -1,4 +1,4 @@
-/* eslint-disable */ 
+/* eslint-disable */
 
 // libs
 import React, { useEffect, useRef, useContext } from 'react';
@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useContext } from 'react';
 import Mornings from '../viz/scenes/Mornings';
 
 // context
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext'
+import MusicPlayerContext from '../contexts/MusicPlayerContext'
 
 // styles
 import '../styles/components/CanvasViz.scss';
@@ -17,11 +17,11 @@ const CanvasViz = (props) => {
 
     useEffect(() => {
 
-        switch(id) {
+        switch (id) {
             case 'moonrise':
                 // new Moonrise(canvasRef.current);
                 break;
-                case 'mornings':
+            case 'mornings':
                 new Mornings(canvasRef.current);
                 break;
         }
@@ -31,7 +31,7 @@ const CanvasViz = (props) => {
     const canvasRef = useRef(null);
 
     return (
-        <canvas id = 'canvas-viz' className = 'fullscreen' ref = {canvasRef}/>
+        <canvas id='canvas-viz' className='fullscreen' ref={canvasRef} />
     )
 
 }

@@ -22,16 +22,19 @@ button:focus {
 }
 
 .flex-row {
+    width: 100%;
     display: flex;
     flex-direction: row;
-    justify-content: start;
+    justify-content: flex-start;
     align-items: center;
 }
 
 .flex-col {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: start;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .fullscreen {
@@ -45,5 +48,5 @@ button:focus {
 }
 
 #app-container {
-    background: $off-black;
+    // background: $off-black;
 }

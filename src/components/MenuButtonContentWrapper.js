@@ -1,21 +1,26 @@
-import React from 'react';
-import ClassNames from 'classnames';
+// libs
+import React, { useContext } from 'react';
+
+// contexts
+import ThemeContext from '../contexts/ThemeContext';
+
+// styles
 import '../styles/components/MenuButtonContentWrapper.scss';
 
 const MenuButtonContentWrapper = (props) => {
 
-    const classPrefix = 'menu-button-content'
-    const classNames = ClassNames({
-        [classPrefix]: true
-    });
+    const {vw, vh} = useContext(ThemeContext);
 
     return (
         <div 
-            className = {classNames}
+            className = 'menu-button-content'
             style = {{
-                display: !props.parentIsOpen && 'none',
+                display: ! props.parentIsOpen && 'none',
                 marginTop: props.marginTop,
-                minWidth: props.minWidth
+                minWidth: props.minWidth,
+                maxHeight: 82 * vh,
+                maxWidth: 95 * vw,
+                padding: 4 * vh,
             }}
             >
             

@@ -6,38 +6,52 @@ h2, h3 {
 }
 
 h2 {
-    font-size: 2.5rem;
-    margin-top: 0;
+    font-size: vh(3);
+    margin: 0 0 vh(1) 0;
 }
 
 h3 {
-    font-size: 1.75rem;
-    padding: 0 1rem 0 1rem;
+    font-size: vh(2.15);
+    margin: 0;
+    padding: 0 vh(1) 0 0;
+    flex: 0 0 content;
     white-space: nowrap;
 }
 
 .button-white {
-    font-size: 1.5rem;
+    font-size: vh(1.75);
     background-color: rgba(255, 255, 255, 0);
     border-style: solid;
     border-color: white;
     color: white;
-    padding: 1rem;
+    padding: vh(1);
     margin: 0 auto 0 auto;
     flex-basis: auto;
     flex-grow: 1;
 }
 
 #toggle-button-panel-reset {
-    border-width: .2rem .1rem .2rem .2rem;
+    flex: 1 1 auto;
+    border-top-width: vh(0.2);
+    border-right-width: vh(0.1);
+    border-bottom-width: vh(0.2);
+    border-left-width: vh(0.2);
 }
 
 #toggle-button-panel-randomize {
-    border-width: .2rem .1rem .2rem .1rem;
+    flex: 1 1 auto;
+    border-top-width: vh(0.2);
+    border-right-width: vh(0.1);
+    border-bottom-width: vh(0.2);
+    border-left-width: vh(0.1);
 }
 
 #toggle-button-panel-mute {
-    border-width: .2rem .2rem .2rem .1rem;
+    flex: 1 1 auto;
+    border-top-width: vh(0.2);
+    border-right-width: vh(0.2);
+    border-bottom-width: vh(0.2);
+    border-left-width: vh(0.1);
 }
 
 #toggle-button-panel {
@@ -47,5 +61,5 @@ h3 {
 }
 
 .button-active {
-    background: lightgreen;
+    background: rgba(144, 238, 144, .5);
 }

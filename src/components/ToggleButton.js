@@ -5,7 +5,7 @@ import React from 'react';
 import anime from 'animejs/lib/anime.es.js';
 
 // context
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
 // other
 import { createAudioPlayer, nextSubdivision } from '../utils/audioUtils';
@@ -21,9 +21,8 @@ class ToggleButton extends React.Component {
     constructor(props) {
         super(props);
 
-        this.buttonRadius = 4;
+        this.buttonRadius = 3.5 * props.vh;
         this.buttonBorder = this.buttonRadius / 15;
-        this.buttonRadiusUnit = 'rem';
         this.buttonRef = React.createRef();
 
         this.quantizedStartBeats = undefined;
@@ -82,6 +81,9 @@ class ToggleButton extends React.Component {
     }
 
     componentDidUpdate() {
+
+        this.buttonRadius = 3.5 * this.props.vh;
+        this.buttonBorder = this.buttonRadius / 15;
 
         this.props.name === 'rhodes-arps[4]' && console.log(this.state.playerState, this.props.name);
 
@@ -220,7 +222,7 @@ class ToggleButton extends React.Component {
 
             rotateZ = '-180';
             backgroundColor = 'rgba(255, 255, 255, .3)';
-            strokeDashoffset = [0, 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2) + this.buttonRadiusUnit];
+            strokeDashoffset = [0, 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2)];
             points = [{value: "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188"}]; 
 
         } else if(type === 'stop') {
@@ -283,26 +285,25 @@ class ToggleButton extends React.Component {
                     }
                 } }
                 style = {{
-                    height: this.buttonRadius * 2 + this.buttonRadiusUnit,
-                    width: this.buttonRadius * 2 + this.buttonRadiusUnit,
-                    marginRight: this.buttonRadius / 4 + this.buttonRadiusUnit
+                    height: this.buttonRadius * 2,
+                    width: this.buttonRadius * 2
                 }}
             >
 
                 <svg 
                     className = 'svg'
-                    width = { 2 * this.buttonRadius + this.buttonRadiusUnit }
-                    height = { 2 * this.buttonRadius + this.buttonRadiusUnit }
+                    width = { 2 * this.buttonRadius }
+                    height = { 2 * this.buttonRadius }
                 >
 
                     <circle 
                         className = 'svg-circle'
-                        cx = { this.buttonRadius + this.buttonRadiusUnit }
-                        cy = { this.buttonRadius + this.buttonRadiusUnit }
-                        r = { this.buttonRadius - this.buttonBorder / 2 + this.buttonRadiusUnit }
+                        cx = { this.buttonRadius }
+                        cy = { this.buttonRadius }
+                        r = { this.buttonRadius - this.buttonBorder / 2 }
                         style = {{
-                            strokeWidth: this.buttonBorder + this.buttonRadiusUnit,
-                            strokeDasharray: 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2) + this.buttonRadiusUnit
+                            strokeWidth: this.buttonBorder,
+                            strokeDasharray: 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2)
                         }}
                     />
                     

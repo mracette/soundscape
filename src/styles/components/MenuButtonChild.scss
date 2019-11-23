@@ -4,16 +4,7 @@
     transition-duration: 250ms;
     position: absolute;
     border-radius: 50%;
-    height: 3rem;
-    width: 3rem;
-}
-
-.menu-button-child:hover {
-    cursor: pointer;
-}
-
-.menu-button-child:focus {
-    outline: none;
+    border: vh(.2) solid white;
 }
 
 .arrow {
@@ -24,6 +15,6 @@
     border-left-style: solid;
     border-right-color: transparent;
     border-right-style: solid;
-    border-bottom-color: $menu-content-color;
+    border-bottom-color: rgba(255, 255, 255, 0.15);
     border-bottom-style: solid;
   }

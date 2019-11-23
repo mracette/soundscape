@@ -11,13 +11,13 @@ const Icon = props => {
     if(props.handleAddIconRef) {props.handleAddIconRef(iconRef)};
 
 	return (
-        <div id = 'scale-div' className = {`icon ${props.classList}`}>
+        <div id = 'scale-div' className = {props.divClassList ? `icon ${props.divClassList}` : 'icon'}>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 xmlnsXlink="http://www.w3.org/1999/xlink"
-                className={`icon ${props.classList}`}
-                style = {props.styles}
-                id={`icon-${props.name}`}
+                className={props.svgClassList ? `icon ${props.svgClassList}` : 'icon'}
+                style = {props.style}
+                id={props.name}
             >
 			<use ref = {iconRef} xlinkHref={`${icons}#${props.name}`} />
 		    </svg>

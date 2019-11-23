@@ -22,11 +22,14 @@
 <title>menu</title>
 <path d="M2 6h28v6h-28zM2 14h28v6h-28zM2 22h28v6h-28z"></path>
 </symbol>
+<symbol id="icon-plus" viewBox="0 0 32 32">
+<title>plus</title>
+<path d="M31 12h-11v-11c0-0.552-0.448-1-1-1h-6c-0.552 0-1 0.448-1 1v11h-11c-0.552 0-1 0.448-1 1v6c0 0.552 0.448 1 1 1h11v11c0 0.552 0.448 1 1 1h6c0.552 0 1-0.448 1-1v-11h11c0.552 0 1-0.448 1-1v-6c0-0.552-0.448-1-1-1z"></path>
+</symbol>
 <symbol id="icon-info" viewBox="0 0 32 32">
 <title>info</title>
 <path d="M14 9.5c0-0.825 0.675-1.5 1.5-1.5h1c0.825 0 1.5 0.675 1.5 1.5v1c0 0.825-0.675 1.5-1.5 1.5h-1c-0.825 0-1.5-0.675-1.5-1.5v-1z"></path>
 <path d="M20 24h-8v-2h2v-6h-2v-2h6v8h2z"></path>
-<path d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13z"></path>
 </symbol>
 <symbol id="icon-play2" viewBox="0 0 32 32">
 <title>play2</title>
@@ -39,6 +42,10 @@
 <symbol id="icon-stop" viewBox="0 0 32 32">
 <title>stop</title>
 <path d="M16 0c-8.837 0-16 7.163-16 16s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16zM16 29c-7.18 0-13-5.82-13-13s5.82-13 13-13 13 5.82 13 13-5.82 13-13 13zM10 10h12v12h-12z"></path>
+</symbol>
+<symbol id="icon-play3" viewBox="0 0 32 32">
+<title>play3</title>
+<path d="M6 4l20 12-20 12z"></path>
 </symbol>
 <symbol id="icon-pause2" viewBox="0 0 32 32">
 <title>pause2</title>

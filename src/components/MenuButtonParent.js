@@ -1,16 +1,36 @@
 /* eslint-disable */ 
 
 // libs
-import React, { useState, useEffect, useRef } from 'react';
-import ClassNames from 'classnames';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 
 // components
 import MenuButtonChild from './MenuButtonChild';
+import Icon from './Icon';
+
+// contexts
+import ThemeContext from '../contexts/ThemeContext';
+import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
 // styles
 import '../styles/components/MenuButtonParent.scss';
 
 const MenuButtonParent = (props) => {
+
+    const {vw, vh} = useContext(ThemeContext);
+    const {backgroundColor} = useContext(MusicPlayerContext);
+
+    // parent button dimensions
+    const height = 7 * vh;
+    const width = height;
+
+    // div position
+    const top = 2.5 * vh;
+    const left = top;
+
+    const childHeight = 0.6 * height;
+    const childWidth = childHeight;
+
+    const separation = childWidth;
 
     // track elements inside the menu
     const node = useRef();
@@ -19,13 +39,6 @@ const MenuButtonParent = (props) => {
     const [isOpen, setIsOpen] = useState(true);
     const [openChildIndex, setOpenChildIndex] = useState(-1);
     const numOfChildren = props.childButtonProps.length;
-
-    // set classes
-    const classPrefix = 'menu-button-parent';
-    const classNames = ClassNames({
-        [classPrefix]: true,
-        [`${classPrefix}-open`]: isOpen,
-    });
 
     // handle click events outside of the node's dom
     const handleOutsideClick = (e) => {
@@ -55,21 +68,34 @@ const MenuButtonParent = (props) => {
 
     return (
         
-        <div className = 'menu-button' ref = {node}>
+        <div 
+            className = 'menu-button' 
+            style = {{
+                top,
+                left
+            }}
+            ref = {node}
+        >
 
             <button 
-                className = {classNames}
+                className = {isOpen ? `menu-button-parent menu-button-parent-open` : `menu-button-parent`}
                 style = {{
                     zIndex: numOfChildren + 1,
-                    width: props.parentSize,
-                    height: props.parentSize
+                    width,
+                    height,
+                    background: backgroundColor
                 }}
                 onClick = { (e) => {
                     e.preventDefault();
                     isOpen && setOpenChildIndex(-1);
                     props.clickToOpen && setIsOpen(!isOpen);
                 }}
-                >                
+                >         
+                <Icon 
+                    divClassList = {isOpen ? 'icon-white rotate45' : 'icon-white'}
+                    svgClassList = {'icon-white'}
+                    name = 'icon-plus'
+                />       
             </button>
 
             {props.childButtonProps.map((child, index) => (
@@ -82,6 +108,7 @@ const MenuButtonParent = (props) => {
                     content = { props.childButtonProps[index].content }
                     
                     // button appearance
+                    iconName = { child.iconName }
                     autoOpen = { child.autoOpen }
                     icon = { child.icon }
                     direction = { props.direction }
@@ -89,10 +116,12 @@ const MenuButtonParent = (props) => {
                     openChildIndex = { openChildIndex }
                     setOpenChildIndex = { setOpenChildIndex }
                     zIndex = { numOfChildren - index }
-                    separation = { props.separation }
-                    size = { props.childSize }
-                    parentSize = { props.parentSize }
-                    parentWidth = { `calc(${props.parentSize} + ((${props.childSize} + ${props.separation}) * ${numOfChildren - 1}))`}
+                    separation = { separation }
+                    width = { childWidth }
+                    height = { childHeight }
+                    parentWidth = { width }
+                    parentHeight = { height }
+                    menuWidth = { width + (childWidth + separation) * (numOfChildren - 1) }
                     parentIsOpen = { isOpen }
 
                 />

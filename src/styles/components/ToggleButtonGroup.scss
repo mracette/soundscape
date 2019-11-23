@@ -1,21 +1,32 @@
 @import '../settings.scss';
 
 .solo-button, .mute-button {
+    font-size: vh(1.5);
     color: white;
     padding: 0;
-    height: 2rem;
-    width: 2rem;
+    height: vh(3.25);
+    width: vh(3.25);
+    flex: 0 0 content;
     border-color: white;
     border-style: solid;
     background-color: rgba(255, 255, 255, 0);
 }
 
 .solo-button {
+    margin-left: vh(1);
     border-width: .2rem .1rem .2rem .2rem;
+}
+
+.solo-button-active {
+    background-color: rgba(135, 206, 250, 0.5);
 }
 
 .mute-button {
     border-width: .2rem .2rem .2rem .1rem;
+}
+
+.mute-button-active {
+    background-color: rgba(255, 255, 159, 0.5);
 }
 
 .toggle-button-group {

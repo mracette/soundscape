@@ -1,5 +1,8 @@
+/* eslint-disable */ 
+
 // libs
 import React from 'react';
+import anime from 'animejs';
 
 // components
 import CanvasViz from './CanvasViz';
@@ -11,13 +14,14 @@ import SongInfoPanel from './SongInfoPanel';
 import ToggleButtonPanel from './ToggleButtonPanel';
 
 // contexts
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
 // other
 import Analyser from '../viz/Analyser';
-import { createAudioPlayer, nextSubdivision } from '../utils/audioUtils';
+import { createAudioPlayer } from '../utils/audioUtils';
 import { AudioLooper } from '../classes/AudioLooper';
 import Scheduler from '../classes/Sheduler';
+import { solveExpEquation } from '../utils/mathUtils';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
@@ -51,17 +55,57 @@ class MusicPlayer extends React.Component {
             smoothingTimeConstanct: 0.25
         });
 
+        // init effects chain parameters
+        this.effectParams = {
+            lpFilter: {
+                minFreq: 320,
+                maxFreq: 20000,
+                minQ: 0.71,
+                maxQ: 3,
+                expFreqParams: solveExpEquation(1, 320, 100, 20000),
+                expQParams: solveExpEquation(1, 0.71, 100, 3)
+            },
+            hpFilter: {
+                minFreq: 20,
+                maxFreq: 4500,
+                minQ: 0.71,
+                maxQ: 1.5,
+                expFreqParams: solveExpEquation(1, 20, 100, 4500),
+                expQParams: solveExpEquation(1, 0.71, 100, 1.5)
+            },
+            ambience: {
+                minRoomSize: 0.1,
+                maxRoomSize: 0.3,
+                minWet: 0,
+                maxWet: 0.4
+            }
+        }
+
         this.state = {
             playerReferences: [],
+            groupEffects: {
+                hpFilters: [],
+                lpFilters: [],
+                reverbDry: [],
+                reverbWet: []
+            },
+            impulseResponse: null,
             mute: false,
             randomize: false,
+            effectsRandomize: false,
             randomizeEventId: null
         };
 
+        // bind handlers
         this.handleAddPlayerReference = this.handleAddPlayerReference.bind(this);
         this.handleRandomize = this.handleRandomize.bind(this);
         this.handleReset = this.handleReset.bind(this);
         this.handleMute = this.handleMute.bind(this);
+        this.handleAddEffect = this.handleAddEffect.bind(this);
+        this.handleEffectsRandomize = this.handleEffectsRandomize.bind(this);
+        this.handleChangeLP = this.handleChangeLP.bind(this);
+        this.handleChangeHP = this.handleChangeHP.bind(this);
+        this.handleChangeSpaciousness = this.handleChangeSpaciousness.bind(this);
 
     }
 
@@ -84,7 +128,7 @@ class MusicPlayer extends React.Component {
                     destination: this.premaster
                 });
 
-                //this.ambientLoopPlayer.start()
+                this.ambientLoopPlayer.start()
 
             });
 
@@ -96,8 +140,8 @@ class MusicPlayer extends React.Component {
         this.setState((prevState) => ({playerReferences: [...prevState.playerReferences, player]}));
     }
 
-    // turns off all active players
     handleReset() {
+        // turns off all active players
         this.state.playerReferences.map((p) => {
             if(p.instance.state.playerState === 'active') {p.instance.stopPlayer(false, true);}
             if(p.instance.state.playerState === 'pending-start') {p.instance.pendingStop(false, true);}
@@ -145,9 +189,103 @@ class MusicPlayer extends React.Component {
             return {
                 randomize: ! prevState.randomize,
                 randomizeEventId
-            }
+            };
 
         });
+
+    }
+
+    handleEffectsRandomize() {
+
+        this.setState((prevState) => {
+
+            let effectsRandomizeEventId;
+
+            if(! prevState.effectsRandomize) {
+
+                const duration = (60 / this.context.bpm) * 8;
+
+                effectsRandomizeEventId = this.scheduler.scheduleRepeating(
+                    this.audioCtx.currentTime + (60 / this.context.bpm), 
+                    duration,
+                    () => {
+
+                        anime.remove('hp-slider', 'lp-slider', 'spaciousness-slider');
+
+                        let increments = [
+                            {
+                                element: document.getElementById('hp-slider'),
+                                increment: 0.5 - Math.random()
+                            },
+                            {
+                                element: document.getElementById('lp-slider'),
+                                increment: 0.5 - Math.random()
+                            },
+                            {
+                                element: document.getElementById('spaciousness-slider'),
+                                increment: 0.5 - Math.random()
+                            }
+                        ];
+
+                        for(let i = 0; i < increments.length; i++) {
+
+                            const d = increments[i];
+
+                            const initialValue = parseInt(d.element.value);
+                            const maxInc = 25;
+                            let adjIncrement;
+
+                            const adjNeeded = 
+                                (initialValue + d.increment * maxInc) < 1 || 
+                                (initialValue + d.increment * maxInc) > 100;
+
+                            if(adjNeeded) {
+                                adjIncrement = maxInc * (d.increment * -1);
+                            } else {
+                                adjIncrement = maxInc * d.increment;
+                            }
+
+                            anime({
+                                targets: d.element,
+                                duration: duration * 1000,
+                                easing: 'linear',
+                                update: (anim) => {
+                                    // lerp new value
+                                    const newValue = initialValue + (adjIncrement * anim.progress / 100);
+
+                                    // update the slider
+                                    d.element.value = newValue;
+
+                                    // update the nodes
+                                    switch(d.element.id) {
+                                        case 'hp-slider': this.handleChangeHP(newValue); return;
+                                        case 'lp-slider': this.handleChangeLP(newValue); return;
+                                        case 'spaciousness-slider': this.handleChangeSpaciousness(newValue); return;
+                                    }
+                                }
+                            });
+                            
+                        }
+
+                    });
+
+            } else {
+
+                // cancel repeat scheduling
+                this.scheduler.cancel(this.state.effectsRandomizeEventId);
+                effectsRandomizeEventId = null;
+
+                // remove animations
+                anime.remove(['hp-slider', 'lp-slider', 'spaciousness-slider']);
+
+            }
+
+            return {
+                effectsRandomize: ! prevState.effectsRandomize,
+                effectsRandomizeEventId
+            };
+
+        })
 
     }
 
@@ -170,22 +308,101 @@ class MusicPlayer extends React.Component {
 
     }
 
-    // cleanup by closing the audio context when the component unmounts
+    handleAddEffect(effect, type) {
+        switch(type) {
+            case 'lowpass' :
+                this.setState((prevState) => {
+                    return {
+                        groupEffects: {
+                            ... prevState.groupEffects,
+                            lpFilters: prevState.groupEffects.lpFilters.concat(effect)
+                        }
+                    }
+                });
+            return;
+            case 'highpass' :
+                this.setState((prevState) => {
+                    return {
+                        groupEffects: {
+                            ... prevState.groupEffects,
+                            hpFilters: prevState.groupEffects.hpFilters.concat(effect),
+                        }
+                    }
+                });
+            return;
+            case 'reverb-dry' :
+                this.setState((prevState) => {
+                    return {
+                        groupEffects: {
+                            ... prevState.groupEffects,
+                            reverbDry: prevState.groupEffects.reverbDry.concat(effect),
+                        }
+                    }
+                });
+            return;
+            case 'reverb-wet' :
+                    this.setState((prevState) => {
+                        return {
+                            groupEffects: {
+                                ... prevState.groupEffects,
+                                reverbWet: prevState.groupEffects.reverbWet.concat(effect),
+                            }
+                        }
+                    });
+            return;
+        }
+    }
+
+    handleChangeLP(newValue) {
+        const freqParams = this.effectParams.lpFilter.expFreqParams;
+        const QParams = this.effectParams.lpFilter.expQParams;
+
+        this.state.groupEffects.lpFilters.map((filter) => {
+            filter.frequency.value = freqParams.a * Math.pow(freqParams.b, newValue);
+            filter.Q.value = QParams.a * Math.pow(QParams.b, newValue);
+        });
+
+    }
+
+    handleChangeHP(newValue) {
+        const freqParams = this.effectParams.hpFilter.expFreqParams;
+        const QParams = this.effectParams.hpFilter.expQParams;
+
+        this.state.groupEffects.hpFilters.map((filter) => {
+            filter.frequency.value = freqParams.a * Math.pow(freqParams.b, newValue);
+            filter.Q.value = QParams.a * Math.pow(QParams.b, newValue);
+        });
+    }
+
+    handleChangeSpaciousness(newValue) {
+
+        const maxValue = 0.75;
+
+        this.state.groupEffects.reverbDry.map((rd) => {
+            rd.gain.value = (1 - maxValue) + maxValue * ( 100 - newValue ) / 99;
+        });
+
+        this.state.groupEffects.reverbWet.map((rw) => {
+            rw.gain.value = maxValue * ( newValue - 1 ) / 99;
+        });
+    }
+
     componentWillUnmount() {
+        // cleanup by closing the audio context when the component unmounts
         !!this.ambientLoopPlayer && this.ambientLoopPlayer.stop();
         this.audioCtx.close();
     }
 
     render() {
         return (
-            <div>
+            <>
 
                 {/* <div className = 'flex-row'> */}
                     {/* <h1 id = 'song-title'>Now Playing: {this.context.name}</h1> */}
                 
                     {/* <Metronome /> */}
 
-                    <FreqBands 
+                    <FreqBands
                         analyser = {this.premasterAnalyser}
                         bpm = {this.context.bpm}
                         timeSignature = {this.context.timeSignature}
@@ -197,20 +414,22 @@ class MusicPlayer extends React.Component {
                         direction = 'right'
                         separation = '6rem'
                         parentSize = '5rem'
-                        childSize = '3rem'
                         clickToOpen = { true }
                         childButtonProps = { [{
                             autoOpen: true,
                             id: 'toggles',
-                            icon: '',
+                            iconName: 'icon-music',
                             content: 
                             <ToggleButtonPanel 
                                 devMode = {this.devMode}
                                 config = {this.context} 
+                                effectsChainEntry = {this.effectsChainEntry}
+                                effectsChainExit = {this.effectsChainExit}
                                 handleReset = {this.handleReset}
                                 handleRandomize = {this.handleRandomize}
                                 handleMute = {this.handleMute}
                                 handleAddPlayerReference = {this.handleAddPlayerReference}
+                                handleAddEffect = {this.handleAddEffect}
                                 audioCtx = {this.audioCtx}
                                 audioCtxInitTime = {this.audioCtxInitTime}
                                 premaster = {this.premaster}
@@ -219,18 +438,25 @@ class MusicPlayer extends React.Component {
                             />
                         }, {
                             id: 'effects',
-                            icon: '',
-                            content: <EffectsPanel/>
+                            iconName: 'icon-equalizer',
+                            content: 
+                            <EffectsPanel
+                                impulseResponse = {this.state.impulseResponse}
+                                handleChangeLP = {this.handleChangeLP}
+                                handleChangeHP = {this.handleChangeHP}
+                                handleChangeSpaciousness = {this.handleChangeSpaciousness}
+                                handleEffectsRandomize = {this.handleEffectsRandomize}
+                            />
                         }, {
                             id: 'song-info',
-                            icon: '',
+                            iconName: 'icon-info',
                             content: <SongInfoPanel/>
                         }] }
                     />
 
                     <CanvasViz />
 
-            </div>
+            </>
         );
     }
 }

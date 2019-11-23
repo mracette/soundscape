@@ -1,8 +1,8 @@
-/* eslint-disable */ 
+/* eslint-disable */
 
 import SceneManager from '../SceneManager';
+import { Birds } from '../subjects/birds';
 import * as THREE from 'three';
-import * as d3Chromatic from 'd3-scale-chromatic';
 import morningsModel from '../../models/soundscape-mornings-test.glb';
 
 export default class Mornings extends SceneManager {
@@ -12,13 +12,14 @@ export default class Mornings extends SceneManager {
         super(canvas, null);
 
         super.init().then(() => {
+            this.birds = new Birds(this.scene, this.camera, this.renderer);
+            this.scene.background = new THREE.Color(0xcccccc);
             this.loadModels();
         })
 
     }
 
     loadModels() {
-        //this.scene.background = new THREE.Color('#FF0000')
         this.helpers.gltfLoader.load(morningsModel, (gltf) => {
             console.log(gltf);
             this.scene.add(gltf.scene);
@@ -29,18 +30,18 @@ export default class Mornings extends SceneManager {
                 mesh.receiveShadow = true;
             });
             //this.camera = gltf.scene.getObjectByName('Camera');
-            // model.scene.children.map((obj) => {
+            // gltf.scene.children.map((obj) => {
             //     this.scene.add(obj);
             // })
         })
-        
+
         super.animate();
     }
 
     render() {
         this.controls.fpc.update(this.clock.getDelta());
         this.renderer.render(this.scene, this.camera);
-        console.log('r');
+        this.birds.renderSubject();
     }
 
 }

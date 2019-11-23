@@ -8,13 +8,24 @@
     top: 0;
 }
 
+.icon-white {
+    fill: white;
+    stroke: white;
+}
+
+.rotate45 {
+    transform: rotateZ(45deg);
+}
+
 #scale-div {
     display: inline-block;
     position: absolute; 
-    top: 0%;
-    left: 0%;
-    height: 100%;
-    width: 100%;
+    transition-duration: 250ms;
+    transform-origin: 50% 50%;
+    top: 25%;
+    left: 25%;
+    height: 50%;
+    width: 50%;
     margin: auto;
 }
 
@@ -33,7 +44,13 @@
     transform-origin: 50% 50%;
 }
 
-.icon-white {
-    fill: white;
-    stroke: white;
+#icon-plus {
+    transition-duration: 250ms;
+}
+
+#icon-info {
+    top: -20%;
+    left: -20%;
+    height: 140%;
+    width: 140%;
 }

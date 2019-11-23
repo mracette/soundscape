@@ -1,11 +1,21 @@
 /* eslint-disable */ 
 
-import React, { useState, useEffect, useReducer } from 'react';
-import ClassNames from 'classnames';
+// libs
+import React, { useState, useEffect, useContext } from 'react';
+
+// components
 import MenuButtonContentWrapper from './MenuButtonContentWrapper';
+import Icon from '../components/Icon';
+
+// contexts
+import MusicPlayerContext from '../contexts/MusicPlayerContext';
+
+// styles
 import '../styles/components/MenuButtonChild.scss';
 
 const MenuButtonChild = (props) => {
+
+    const {backgroundColor} = useContext(MusicPlayerContext);
 
     // track state
     const [isOpen, setIsOpen] = useState(false);
@@ -22,25 +32,20 @@ const MenuButtonChild = (props) => {
     }, [])
 
     // calculate the margin needed to expand this child to its outward position
-    const marginStyle = `calc(${props.separation} * ${props.index} + (${props.parentSize} - ${props.size}) / 2)`;
+    const marginStyle = ((props.parentWidth + props.width) / 2) + props.separation + (2 * props.separation * (props.index - 1));
 
     // assign classes
-    const classPrefix = 'menu-button-child';
-    const classNames = ClassNames({
-        [classPrefix]: true,
-        [`${classPrefix}-expand`]: props.parentIsOpen,
-        [`${classPrefix}-open`]: isOpen,
-    });
+    const classPrefix = 'menu-button-child'
+
+    let classList = classPrefix;
+
+    if(props.parentIsOpen) { classList += ` ${classPrefix}-expand` }
+    if(isOpen) { classList += ` ${classPrefix}-open` }
 
     return (
         <>
-        {/* Button
-            - takes size from props.size
-            - calculates margin based on props.separation
-            - supports different directions for expansion
-        */}
         <button 
-            className = { classNames }
+            className = { classList }
             onClick = { (e) => {
                 e.preventDefault();
                 if(isOpen) {
@@ -53,10 +58,11 @@ const MenuButtonChild = (props) => {
                 setIsOpen(!isOpen);
             }}
             style = {{
-                width: props.size,
-                height: props.size,
-                top: `calc((${props.parentSize} - ${props.size}) / 2)`,
-                left: `calc((${props.parentSize} - ${props.size}) / 2)`,
+                background: backgroundColor,
+                width: props.width,
+                height: props.height,
+                top: (props.parentHeight - props.height) / 2,
+                left: (props.parentWidth - props.width) / 2,
                 marginLeft: props.direction === 'right' && props.parentIsOpen ? marginStyle : 0,
                 marginRight: props.direction === 'left' && props.parentIsOpen ? marginStyle : 0,
                 marginTop: props.direction === 'down' && props.parentIsOpen ? marginStyle : 0,
@@ -65,6 +71,13 @@ const MenuButtonChild = (props) => {
             }}
             >
             {props.name}
+
+            <Icon 
+                divClassList = {'icon-white'}
+                svgClassList = {'icon-white'}
+                name = {props.iconName}
+            /> 
+
         </button>
         
         {/* Arrow
@@ -77,15 +90,15 @@ const MenuButtonChild = (props) => {
             className = 'arrow' 
             style = {{
                 display: !isOpen && 'none',
-                top: `calc((${props.parentSize} + ${props.size}) / 2)`,
-                left: `calc((${props.parentSize} - ${props.size}) / 2)`,
+                top: props.height + (props.parentHeight - props.height) / 2,
+                left: (props.parentWidth - props.width) / 2 - props.parentHeight / 8,
                 marginLeft: props.direction === 'right' && props.parentIsOpen ? marginStyle : 0,
                 marginRight: props.direction === 'left' && props.parentIsOpen ? marginStyle : 0,
                 marginTop: props.direction === 'down' && props.parentIsOpen ? marginStyle : 0,
                 marginBottom: props.direction === 'down' && props.parentIsOpen ? marginStyle : 0,
-                borderRightWidth: `calc(${props.size} / 2)`,
-                borderBottomWidth: `calc(${props.size} / 2)`,
-                borderLeftWidth: `calc(${props.size} / 2)`
+                borderRightWidth: props.parentHeight / 4 + (props.parentHeight - props.height) / 2,
+                borderBottomWidth: props.parentHeight / 4 + (props.parentHeight - props.height) / 2,
+                borderLeftWidth: props.parentHeight / 4 + (props.parentHeight - props.height) / 2
             }}
         />
 
@@ -97,11 +110,8 @@ const MenuButtonChild = (props) => {
             content = { props.content }
             config = { props.config }
             parentIsOpen = { isOpen }
-            minWidth = { props.parentWidth }
-            marginTop = { `calc((
-                ( ${props.parentSize} - ${props.size}) / -2 ) + 
-                ( ${props.size} / 2)
-            )`}
+            minWidth = { props.menuWidth + props.width }
+            marginTop = { props.parentHeight / 4 }
         />
 
         </>
