@@ -104,7 +104,7 @@ export class Birds {
         // For Vertex and Fragment
         this.birdUniforms = {
             "color": { value: new THREE.Color(0xff2200) },
-            "texturePosition": { value: -100 },
+            "texturePosition": { value: [null] },
             "textureVelocity": { value: null },
             "time": { value: 1.0 },
             "delta": { value: 0.0 }
