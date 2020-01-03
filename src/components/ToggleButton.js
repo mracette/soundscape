@@ -1,4 +1,4 @@
-/* eslint-disable */ 
+/* eslint-disable */
 
 // libs
 import React from 'react';
@@ -21,14 +21,12 @@ class ToggleButton extends React.Component {
     constructor(props) {
         super(props);
 
-        this.buttonRadius = 3.5 * props.vh;
-        this.buttonBorder = this.buttonRadius / 15;
         this.buttonRef = React.createRef();
 
         this.quantizedStartBeats = undefined;
 
         this.scheduler = undefined;
-    
+
         this.state = {
             player: null,
             playerState: 'stopped',
@@ -36,7 +34,7 @@ class ToggleButton extends React.Component {
             svgAnimation: null,
             buttonAnimation: null
         };
-        
+
     }
 
     componentDidMount() {
@@ -46,7 +44,7 @@ class ToggleButton extends React.Component {
 
         // construct the path to the audio file
         const pathToAudio = require(`../audio/${this.context.id}/${this.props.name}.mp3`);
-        
+
         // initialize the player associated with this button
         createAudioPlayer(this.props.audioCtx, pathToAudio).then((audioPlayer) => {
 
@@ -58,7 +56,7 @@ class ToggleButton extends React.Component {
                 destination: this.props.groupNode
             });
 
-            this.setState(() => ({player}));
+            this.setState(() => ({ player }));
 
         });
 
@@ -82,13 +80,13 @@ class ToggleButton extends React.Component {
 
     componentDidUpdate() {
 
-        this.buttonRadius = 3.5 * this.props.vh;
-        this.buttonBorder = this.buttonRadius / 15;
+        // this.getButtonRadius(this.props.vh) = 3.5 * this.props.vh;
+        // this.getButtonBorder(this.props.vh) = this.getButtonRadius(this.props.vh) / 15;
 
         this.props.name === 'rhodes-arps[4]' && console.log(this.state.playerState, this.props.name);
 
         // check if the player override is active (managed by the parent component)
-        if(this.props.override && this.state.playerState === 'active') {
+        if (this.props.override && this.state.playerState === 'active') {
             this.stopPlayer();
             // remove the player from the override list
             this.props.handleUpdateOverrides(this.props.name);
@@ -110,16 +108,16 @@ class ToggleButton extends React.Component {
     }
 
     startPlayer() {
-        
+
         // update current state
-        this.setState(() => ({playerState: 'pending-start'}));
+        this.setState(() => ({ playerState: 'pending-start' }));
 
         // handle polyphony updates
         this.props.handleUpdatePoly(1, this.props.name);
-        
+
         // calculate time till next loop start
         const quantizedStartSeconds = nextSubdivision(
-            this.props.audioCtx, 
+            this.props.audioCtx,
             this.props.audioCtxInitTime,
             this.context.bpm,
             this.quantizedStartBeats
@@ -128,7 +126,7 @@ class ToggleButton extends React.Component {
         // schedule a start and status change
         this.scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
             this.state.player.start();
-            this.setState(() => ({playerState: 'active'}));
+            this.setState(() => ({ playerState: 'active' }));
         });
 
         // convert to millis for animations
@@ -136,16 +134,16 @@ class ToggleButton extends React.Component {
 
         // run new animations
         this.runAnimation('start', quantizedStartMillis);
-            
+
     }
 
     stopPlayer(reset) {
-        
+
         // update current state
-        this.setState(() => ({playerState: 'pending-stop'}));
+        this.setState(() => ({ playerState: 'pending-stop' }));
 
         // handle polyphony updates
-        if(reset) {
+        if (reset) {
             this.props.handleResetPoly();
         } else {
             this.props.handleUpdatePoly(-1, this.props.name);
@@ -153,16 +151,16 @@ class ToggleButton extends React.Component {
 
         // calculate time till next loop start
         const quantizedStartSeconds = nextSubdivision(
-            this.props.audioCtx, 
+            this.props.audioCtx,
             this.props.audioCtxInitTime,
             this.context.bpm,
             this.quantizedStartBeats
         );
-        
+
         // schedule a stop and status change
         this.scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
             this.state.player.stop();
-            this.setState(() => ({playerState: 'stopped'}));
+            this.setState(() => ({ playerState: 'stopped' }));
         });
 
         // convert to millis for animations
@@ -180,10 +178,10 @@ class ToggleButton extends React.Component {
         this.state.player.stop();
 
         // update current state
-        this.setState(() => ({playerState: 'pending-stop'}));
+        this.setState(() => ({ playerState: 'pending-stop' }));
 
         // handle polyphony changes
-        if(reset) {
+        if (reset) {
             this.props.handleResetPoly();
         } else {
             this.props.handleUpdatePoly(-1, this.props.name);
@@ -191,7 +189,7 @@ class ToggleButton extends React.Component {
 
         // calculate time till next loop start
         const quantizedStartSeconds = nextSubdivision(
-            this.props.audioCtx, 
+            this.props.audioCtx,
             this.props.audioCtxInitTime,
             this.context.bpm,
             this.quantizedStartBeats
@@ -199,7 +197,7 @@ class ToggleButton extends React.Component {
 
         // schedule status change
         this.scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
-            this.setState(() => ({playerState: 'stopped'}));
+            this.setState(() => ({ playerState: 'stopped' }));
         });
 
         // remove the targets from any active animations
@@ -218,19 +216,19 @@ class ToggleButton extends React.Component {
 
         let strokeDashoffset, points, backgroundColor, rotateZ;
 
-        if(type === 'start') {
+        if (type === 'start') {
 
             rotateZ = '-180';
             backgroundColor = 'rgba(255, 255, 255, .3)';
-            strokeDashoffset = [0, 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2)];
-            points = [{value: "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188"}]; 
+            strokeDashoffset = [0, 2 * Math.PI * (this.getButtonRadius(this.props.vh) - this.getButtonBorder(this.props.vh) / 2)];
+            points = [{ value: "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188" }];
 
-        } else if(type === 'stop') {
+        } else if (type === 'stop') {
 
             rotateZ = '0';
             backgroundColor = 'rgba(255, 255, 255, 0)';
             strokeDashoffset = [this.buttonRef.current.children[0].style.strokeDashoffset, 0];
-            points = [{value: "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100"}]; 
+            points = [{ value: "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100" }];
 
         }
 
@@ -268,48 +266,64 @@ class ToggleButton extends React.Component {
 
     }
 
+    getButtonRadius(vh) {
+        if (vh) {
+            return vh * 3.5;
+        } else {
+            return 0;
+        }
+    }
+
+    getButtonBorder(vh) {
+        if (vh) {
+            return vh * 3.5 / 15;
+        } else {
+            return 0;
+        }
+    }
+
     render() {
         return (
-            
-            <button 
-                type = 'button'
-                className = 'toggle-button'
-                ref = { this.buttonRef }
-                onClick = { () => {
-                    switch(this.state.playerState) {
+
+            <button
+                type='button'
+                className='toggle-button'
+                ref={this.buttonRef}
+                onClick={() => {
+                    switch (this.state.playerState) {
                         case 'stopped': this.startPlayer(false, false); break; // start if stopped
                         case 'active': this.stopPlayer(false, false); break; // stop if active
                         case 'pending-start': this.pendingStop(); break; // cancel start if triggered on pending-start
                         case 'pending-stop': break; // do nothing if triggered on pending-stop
                         default: break;
                     }
-                } }
-                style = {{
-                    height: this.buttonRadius * 2,
-                    width: this.buttonRadius * 2
+                }}
+                style={{
+                    height: this.getButtonRadius(this.props.vh) * 2,
+                    width: this.getButtonRadius(this.props.vh) * 2
                 }}
             >
 
-                <svg 
-                    className = 'svg'
-                    width = { 2 * this.buttonRadius }
-                    height = { 2 * this.buttonRadius }
+                <svg
+                    className='svg'
+                    width={2 * this.getButtonRadius(this.props.vh)}
+                    height={2 * this.getButtonRadius(this.props.vh)}
                 >
 
-                    <circle 
-                        className = 'svg-circle'
-                        cx = { this.buttonRadius }
-                        cy = { this.buttonRadius }
-                        r = { this.buttonRadius - this.buttonBorder / 2 }
-                        style = {{
-                            strokeWidth: this.buttonBorder,
-                            strokeDasharray: 2 * Math.PI * (this.buttonRadius - this.buttonBorder / 2)
+                    <circle
+                        className='svg-circle'
+                        cx={this.getButtonRadius(this.props.vh)}
+                        cy={this.getButtonRadius(this.props.vh)}
+                        r={this.getButtonRadius(this.props.vh) - this.getButtonBorder(this.props.vh) / 2}
+                        style={{
+                            strokeWidth: this.getButtonBorder(this.props.vh),
+                            strokeDasharray: 2 * Math.PI * (this.getButtonRadius(this.props.vh) - this.getButtonBorder(this.props.vh) / 2)
                         }}
                     />
-                    
+
                 </svg>
 
-                <div id = 'scale-div-morph' className = {`icon`}>
+                <div id='scale-div-morph' className={`icon`}>
 
                     <svg
                         viewBox="0 0 100 100"
@@ -318,11 +332,11 @@ class ToggleButton extends React.Component {
                         className={`icon icon-white`}
                     >
 
-                    <polygon 
-                        id='icon-play3-poly' 
-                        className={`icon icon-white`}
-                        points="6.69872981 0 46.650635094 25 93.01270188 50 46.650635094 75 6.69872981 100" 
-                    />
+                        <polygon
+                            id='icon-play3-poly'
+                            className={`icon icon-white`}
+                            points="6.69872981 0 46.650635094 25 93.01270188 50 46.650635094 75 6.69872981 100"
+                        />
 
                     </svg>
 

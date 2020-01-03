@@ -1,10 +1,11 @@
-/* eslint-disable */ 
+/* eslint-disable */
 
 // libs
 import React, { useEffect, useRef, useContext } from 'react';
 import * as d3Chromatic from 'd3-scale-chromatic';
 
 // contexts
+import LayoutContext from '../contexts/LayoutContext';
 import ThemeContext from '../contexts/ThemeContext';
 import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
@@ -13,21 +14,22 @@ import '../styles/components/FreqBands.scss';
 
 const FreqBands = (props) => {
 
-    const {vw, vh} = useContext(ThemeContext);
-    const {spectrumFunction} = useContext(MusicPlayerContext);
+    const { vw, vh } = useContext(LayoutContext);
+    const { spectrumFunction } = useContext(ThemeContext);
+    const { bpm, timeSignature } = useContext(MusicPlayerContext);
 
     const canvasRef = useRef(null);
-    
+
     let canvasCtx, canvasWidth, canvasHeight, radius;
 
-    const secondsPerBeat = 60 / props.bpm;
-    const secondsPerBar = secondsPerBeat * props.timeSignature;
+    const secondsPerBeat = 60 / bpm;
+    const secondsPerBar = secondsPerBeat * timeSignature;
 
     useEffect(() => {
         init();
         draw();
     }, [])
-    
+
     const init = () => {
 
         canvasCtx = canvasRef.current.getContext("2d");
@@ -55,11 +57,11 @@ const FreqBands = (props) => {
 
         // map time domain data to canvas draw actions
         dataArray.map((d, i) => {
-            
+
             const vol = (d / 255);
             const cx = canvasWidth / 2 + radius * Math.cos((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
             const cy = canvasHeight / 2 + radius * Math.sin((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
-            
+
             canvasCtx.beginPath();
 
             canvasCtx.fillStyle = spectrumFunction(i / props.analyser.frequencyBinCount);
@@ -86,20 +88,20 @@ const FreqBands = (props) => {
     }
 
     return (
-        <div 
-            id = 'freq-bands'
-            style = {{
+        <div
+            id='freq-bands'
+            style={{
                 top: 1.5 * vh,
                 left: 1.5 * vh
             }}
         >
-            <canvas 
-                id = 'freq-bands-canvas' 
-                style = {{
+            <canvas
+                id='freq-bands-canvas'
+                style={{
                     width: 9 * vh,
                     height: 9 * vh,
                 }}
-                ref = {canvasRef}
+                ref={canvasRef}
             />
         </div>
     )

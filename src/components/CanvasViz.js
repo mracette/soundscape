@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useContext } from 'react';
 import Mornings from '../viz/scenes/Mornings';
 
 // context
-import MusicPlayerContext from '../contexts/MusicPlayerContext'
+import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
 // styles
 import '../styles/components/CanvasViz.scss';

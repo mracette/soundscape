@@ -1,4 +1,4 @@
-/* eslint-disable */ 
+/* eslint-disable */
 
 // libs
 import React, { useState, useEffect, useContext } from 'react';
@@ -9,7 +9,7 @@ import Oscilloscope from './Oscilloscope';
 
 // contexts
 import ThemeContext from '../contexts/ThemeContext';
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
+import LayoutContext from '../contexts/LayoutContext';
 
 // other
 import Analyser from '../viz/Analyser';
@@ -21,16 +21,15 @@ import '../styles/components/Oscilloscope.scss';
 
 const ToggleButtonGroup = (props) => {
 
-    const {vw, vh} = useContext(ThemeContext);
-    const {spectrumFunction, groupMuteButton, groupSoloButton} = useContext(MusicPlayerContext);
-    
-    const [ solo, setSolo ] = useState(false);
-    const [ mute, setMute ] = useState(false);
-    const [ groupNode, setGroupNode ] = useState(props.audioCtx.createGain());
-    const [ groupAnalyser, setGroupAnalyser ] = useState(null);
-    const [ currentPoly, setCurrentPoly ] = useState(0);
-    const [ playerOrder, setPlayerOrder ] = useState([]);
-    const [ playerOverrides, setPlayerOverrides ] = useState([]);
+    const { spectrumFunction, groupMuteButton, groupSoloButton } = useContext(ThemeContext);
+
+    const [solo, setSolo] = useState(false);
+    const [mute, setMute] = useState(false);
+    const [groupNode, setGroupNode] = useState(props.audioCtx.createGain());
+    const [groupAnalyser, setGroupAnalyser] = useState(null);
+    const [currentPoly, setCurrentPoly] = useState(0);
+    const [playerOrder, setPlayerOrder] = useState([]);
+    const [playerOverrides, setPlayerOverrides] = useState([]);
 
     useEffect(() => {
 
@@ -40,7 +39,7 @@ const ToggleButtonGroup = (props) => {
         filter.frequency.value = 120;
         filter.gain.value = -12;
         groupNode.connect(filter);
-        
+
         const analyser = new Analyser(props.audioCtx, filter, {
             power: 5,
             minDecibels: -120,
@@ -102,17 +101,17 @@ const ToggleButtonGroup = (props) => {
         reverbWetNode.connect(reverbNode);
         reverbNode.connect(effectsChainExit);
         effectsChainExit.connect(props.premaster);
-        
+
     }, [])
 
     useEffect(() => {
 
         // solo overrides mute, so only mute when it's exclusive state
-        if(mute && !solo) {
+        if (mute && !solo) {
             groupNode.gain.value = 0;
 
-        // when mute is turned off, add volume if group is not also overridden
-        } else if(!mute && !props.soloOverride) {
+            // when mute is turned off, add volume if group is not also overridden
+        } else if (!mute && !props.soloOverride) {
             groupNode.gain.value = 1;
         }
 
@@ -121,13 +120,13 @@ const ToggleButtonGroup = (props) => {
     useEffect(() => {
 
         // if this group has been overriden by another solo ...
-        if(props.soloOverride && props.soloOverride !== props.name) {
+        if (props.soloOverride && props.soloOverride !== props.name) {
             setSolo(false);
             groupNode.gain.value = 0;
         }
 
         // if override has been undone
-        if(!props.soloOverride && !mute) {
+        if (!props.soloOverride && !mute) {
             groupNode.gain.value = 1;
         }
 
@@ -137,7 +136,7 @@ const ToggleButtonGroup = (props) => {
     useEffect(() => {
 
         // if solo is turned on ...
-        if(solo) {
+        if (solo) {
             // add override
             props.handleAddSolo(props.name);
 
@@ -146,12 +145,12 @@ const ToggleButtonGroup = (props) => {
         }
 
         // if this group was overriding others, but the solo is turned off ...
-        if(props.soloOverride === props.name && !solo) {
+        if (props.soloOverride === props.name && !solo) {
             // turn off override
             props.handleAddSolo(false);
 
             // if this group was also on mute, return the volume to that state
-            if(mute) {
+            if (mute) {
                 groupNode.gain.value = 0;
             }
         }
@@ -185,73 +184,77 @@ const ToggleButtonGroup = (props) => {
 
     }
 
-        return (
-            <div className = 'toggle-button-group flex-col'>
+    return (
+        <div className='toggle-button-group flex-col'>
 
-                <div className = 'flex-row'>
+            <div className='flex-row'>
 
-                    <h3>{props.name} ({currentPoly} / {
-                        props.polyphony === -1 ? props.voices.length : props.polyphony
-                    })</h3>
+                <h3>{props.name} ({currentPoly} / {
+                    props.polyphony === -1 ? props.voices.length : props.polyphony
+                })</h3>
 
-                    {groupAnalyser && groupNode && 
-                        <Oscilloscope 
-                            index = {props.index}
-                            spectrumFunction = {spectrumFunction}
-                            groupCount = {props.groupCount}
-                            gradient = {true}
-                            name = {props.name}
-                            analyser = {groupAnalyser} 
-                        />
-                    }
+                {groupAnalyser && groupNode &&
+                    <Oscilloscope
+                        index={props.index}
+                        spectrumFunction={spectrumFunction}
+                        groupCount={props.groupCount}
+                        gradient={true}
+                        name={props.name}
+                        analyser={groupAnalyser}
+                    />
+                }
 
-                    <button 
-                        className = 'solo-button'
-                        style = {solo ? {
-                            background: groupSoloButton
-                        } : undefined}
-                        onClick = {() => setSolo(!solo)}
-                    >S</button>
-                    <button 
-                        className = 'mute-button'
-                        style = {mute ? {
-                            background: groupMuteButton
-                        } : undefined}
-                        onClick = {() => setMute(!mute)}
-                    >M</button>
-
-                </div>
-
-
-                <div className = 'toggle-buttons flex-row'>
-
-                    {props.voices.map((voice) => (
-                        <ToggleButton
-                            devMode = {props.devMode}
-                            vw = {vw}
-                            vh = {vh}
-                            key = {voice.name}
-                            name = {voice.name}
-                            groupName = {props.name}
-                            length = {voice.length}
-                            quantizeLength = {voice.quantizeLength}
-                            handleUpdatePoly = {handleUpdatePoly}
-                            handleResetPoly = {handleResetPoly}
-                            handleUpdateOverrides = {handleUpdateOverrides}
-                            handleAddPlayerReference = {props.handleAddPlayerReference}
-                            override = {playerOverrides.indexOf(voice.name) !== -1}
-                            groupNode = {groupNode}
-                            audioCtx = {props.audioCtx}
-                            audioCtxInitTime = {props.audioCtxInitTime}
-                            effectsChainEntry = {props.effectsChainEntry}
-                            effectsChainExit = {props.effectsChainExit}
-                        />
-                    ))}
-
-                </div>
+                <button
+                    className='solo-button'
+                    style={solo ? {
+                        background: groupSoloButton
+                    } : undefined}
+                    onClick={() => setSolo(!solo)}
+                >S</button>
+                <button
+                    className='mute-button'
+                    style={mute ? {
+                        background: groupMuteButton
+                    } : undefined}
+                    onClick={() => setMute(!mute)}
+                >M</button>
 
             </div>
-        );
+
+
+            <div className='toggle-buttons flex-row'>
+
+                {props.voices.map((voice) => (
+                    <LayoutContext.Consumer>
+                        {layoutContext => (
+                            <ToggleButton
+                                devMode={props.devMode}
+                                vh={layoutContext.vh}
+                                vw={layoutContext.vw}
+                                key={voice.name}
+                                name={voice.name}
+                                groupName={props.name}
+                                length={voice.length}
+                                quantizeLength={voice.quantizeLength}
+                                handleUpdatePoly={handleUpdatePoly}
+                                handleResetPoly={handleResetPoly}
+                                handleUpdateOverrides={handleUpdateOverrides}
+                                handleAddPlayerReference={props.handleAddPlayerReference}
+                                override={playerOverrides.indexOf(voice.name) !== -1}
+                                groupNode={groupNode}
+                                audioCtx={props.audioCtx}
+                                audioCtxInitTime={props.audioCtxInitTime}
+                                effectsChainEntry={props.effectsChainEntry}
+                                effectsChainExit={props.effectsChainExit}
+                            />
+                        )}
+                    </LayoutContext.Consumer>
+                ))}
+
+            </div>
+
+        </div>
+    );
 }
 
 export default ToggleButtonGroup;

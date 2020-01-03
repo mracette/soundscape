@@ -1,4 +1,4 @@
-/* eslint-disable */ 
+/* eslint-disable */
 
 // libs
 import React from 'react';
@@ -9,12 +9,8 @@ import CanvasViz from './CanvasViz';
 import EffectsPanel from './EffectsPanel';
 import FreqBands from './FreqBands';
 import MenuButtonParent from './MenuButtonParent';
-import Metronome from './Metronome';
 import SongInfoPanel from './SongInfoPanel';
 import ToggleButtonPanel from './ToggleButtonPanel';
-
-// contexts
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
 // other
 import Analyser from '../viz/Analyser';
@@ -30,9 +26,10 @@ class MusicPlayer extends React.Component {
 
     constructor(props) {
         super(props);
-        
-        this.devMode = true;
-        
+
+        this.devMode = false;
+        this.showVisuals = false;
+
         // init new audio context instance
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -110,17 +107,17 @@ class MusicPlayer extends React.Component {
     }
 
     componentDidMount() {
-    
-        // if song has an ambient track, load it
-        if(this.context.ambientTrack) {
 
-            const pathToAudio = require(`../audio/${this.context.id}/ambient-track.mp3`);
+        // if song has an ambient track, load it
+        if (this.props.musicPlayerContext.ambientTrack) {
+
+            const pathToAudio = require(`../audio/${this.props.musicPlayerContext.id}/ambient-track.mp3`);
 
             createAudioPlayer(this.audioCtx, pathToAudio).then((audioPlayer) => {
 
                 this.ambientLoopPlayer = new AudioLooper(this.audioCtx, audioPlayer.buffer, {
-                    bpm: this.context.bpm,
-                    loopLengthBeats: this.ambientTrackLength * this.context.timeSignature,
+                    bpm: this.props.musicPlayerContext.bpm,
+                    loopLengthBeats: this.ambientTrackLength * this.props.musicPlayerContext.timeSignature,
                     snapToGrid: false,
                     fadeInTime: .00001,
                     fadeOutTime: .00001,
@@ -137,14 +134,14 @@ class MusicPlayer extends React.Component {
     }
 
     handleAddPlayerReference(player) {
-        this.setState((prevState) => ({playerReferences: [...prevState.playerReferences, player]}));
+        this.setState((prevState) => ({ playerReferences: [...prevState.playerReferences, player] }));
     }
 
     handleReset() {
         // turns off all active players
         this.state.playerReferences.map((p) => {
-            if(p.instance.state.playerState === 'active') {p.instance.stopPlayer(false, true);}
-            if(p.instance.state.playerState === 'pending-start') {p.instance.pendingStop(false, true);}
+            if (p.instance.state.playerState === 'active') { p.instance.stopPlayer(false, true); }
+            if (p.instance.state.playerState === 'pending-start') { p.instance.pendingStop(false, true); }
         })
     }
 
@@ -154,15 +151,15 @@ class MusicPlayer extends React.Component {
 
             let randomizeEventId;
 
-            if(! prevState.randomize) {
+            if (!prevState.randomize) {
 
                 randomizeEventId = this.scheduler.scheduleRepeating(
-                    this.audioCtx.currentTime + (60 / this.context.bpm), 
-                    (60 / this.context.bpm) * 32,
+                    this.audioCtx.currentTime + (60 / this.props.musicPlayerContext.bpm),
+                    (60 / this.props.musicPlayerContext.bpm) * 32,
                     () => {
 
                         const playerMap = this.state.playerReferences.map((p) => p.instance.state.playerState === 'active' ? 1 : 0)
-                        const activePlayers = playerMap.reduce((a,b) => a + b);
+                        const activePlayers = playerMap.reduce((a, b) => a + b);
 
                         // trigger a random voice
                         const random = Math.floor(Math.random() * this.state.playerReferences.length);
@@ -170,12 +167,12 @@ class MusicPlayer extends React.Component {
                         button.click();
 
                         // if less than half of the players are active, trigger an additional voice
-                        if(activePlayers < this.state.playerReferences.length / 2) {
+                        if (activePlayers < this.state.playerReferences.length / 2) {
                             const random = Math.floor(Math.random() * this.state.playerReferences.length);
                             const button = this.state.playerReferences[random].instance.buttonRef.current;
                             button.click();
                         }
-                        
+
                     }
                 )
 
@@ -187,7 +184,7 @@ class MusicPlayer extends React.Component {
             }
 
             return {
-                randomize: ! prevState.randomize,
+                randomize: !prevState.randomize,
                 randomizeEventId
             };
 
@@ -201,12 +198,12 @@ class MusicPlayer extends React.Component {
 
             let effectsRandomizeEventId;
 
-            if(! prevState.effectsRandomize) {
+            if (!prevState.effectsRandomize) {
 
-                const duration = (60 / this.context.bpm) * 8;
+                const duration = (60 / this.props.musicPlayerContext.bpm) * 8;
 
                 effectsRandomizeEventId = this.scheduler.scheduleRepeating(
-                    this.audioCtx.currentTime + (60 / this.context.bpm), 
+                    this.audioCtx.currentTime + (60 / this.props.musicPlayerContext.bpm),
                     duration,
                     () => {
 
@@ -227,7 +224,7 @@ class MusicPlayer extends React.Component {
                             }
                         ];
 
-                        for(let i = 0; i < increments.length; i++) {
+                        for (let i = 0; i < increments.length; i++) {
 
                             const d = increments[i];
 
@@ -235,11 +232,11 @@ class MusicPlayer extends React.Component {
                             const maxInc = 25;
                             let adjIncrement;
 
-                            const adjNeeded = 
-                                (initialValue + d.increment * maxInc) < 1 || 
+                            const adjNeeded =
+                                (initialValue + d.increment * maxInc) < 1 ||
                                 (initialValue + d.increment * maxInc) > 100;
 
-                            if(adjNeeded) {
+                            if (adjNeeded) {
                                 adjIncrement = maxInc * (d.increment * -1);
                             } else {
                                 adjIncrement = maxInc * d.increment;
@@ -257,14 +254,14 @@ class MusicPlayer extends React.Component {
                                     d.element.value = newValue;
 
                                     // update the nodes
-                                    switch(d.element.id) {
+                                    switch (d.element.id) {
                                         case 'hp-slider': this.handleChangeHP(newValue); return;
                                         case 'lp-slider': this.handleChangeLP(newValue); return;
                                         case 'spaciousness-slider': this.handleChangeSpaciousness(newValue); return;
                                     }
                                 }
                             });
-                            
+
                         }
 
                     });
@@ -281,7 +278,7 @@ class MusicPlayer extends React.Component {
             }
 
             return {
-                effectsRandomize: ! prevState.effectsRandomize,
+                effectsRandomize: !prevState.effectsRandomize,
                 effectsRandomizeEventId
             };
 
@@ -293,7 +290,7 @@ class MusicPlayer extends React.Component {
 
         this.setState((prevState) => {
 
-            if(!prevState.mute) {
+            if (!prevState.mute) {
 
                 this.premaster.gain.value = 0;
 
@@ -302,54 +299,54 @@ class MusicPlayer extends React.Component {
                 this.premaster.gain.value = 1;
             }
 
-            return {mute: !prevState.mute}
+            return { mute: !prevState.mute }
 
         })
 
     }
 
     handleAddEffect(effect, type) {
-        switch(type) {
-            case 'lowpass' :
+        switch (type) {
+            case 'lowpass':
                 this.setState((prevState) => {
                     return {
                         groupEffects: {
-                            ... prevState.groupEffects,
+                            ...prevState.groupEffects,
                             lpFilters: prevState.groupEffects.lpFilters.concat(effect)
                         }
                     }
                 });
-            return;
-            case 'highpass' :
+                return;
+            case 'highpass':
                 this.setState((prevState) => {
                     return {
                         groupEffects: {
-                            ... prevState.groupEffects,
+                            ...prevState.groupEffects,
                             hpFilters: prevState.groupEffects.hpFilters.concat(effect),
                         }
                     }
                 });
-            return;
-            case 'reverb-dry' :
+                return;
+            case 'reverb-dry':
                 this.setState((prevState) => {
                     return {
                         groupEffects: {
-                            ... prevState.groupEffects,
+                            ...prevState.groupEffects,
                             reverbDry: prevState.groupEffects.reverbDry.concat(effect),
                         }
                     }
                 });
-            return;
-            case 'reverb-wet' :
-                    this.setState((prevState) => {
-                        return {
-                            groupEffects: {
-                                ... prevState.groupEffects,
-                                reverbWet: prevState.groupEffects.reverbWet.concat(effect),
-                            }
+                return;
+            case 'reverb-wet':
+                this.setState((prevState) => {
+                    return {
+                        groupEffects: {
+                            ...prevState.groupEffects,
+                            reverbWet: prevState.groupEffects.reverbWet.concat(effect),
                         }
-                    });
-            return;
+                    }
+                });
+                return;
         }
     }
 
@@ -379,11 +376,11 @@ class MusicPlayer extends React.Component {
         const maxValue = 0.75;
 
         this.state.groupEffects.reverbDry.map((rd) => {
-            rd.gain.value = (1 - maxValue) + maxValue * ( 100 - newValue ) / 99;
+            rd.gain.value = (1 - maxValue) + maxValue * (100 - newValue) / 99;
         });
 
         this.state.groupEffects.reverbWet.map((rw) => {
-            rw.gain.value = maxValue * ( newValue - 1 ) / 99;
+            rw.gain.value = maxValue * (newValue - 1) / 99;
         });
     }
 
@@ -398,69 +395,67 @@ class MusicPlayer extends React.Component {
             <>
 
                 {/* <div className = 'flex-row'> */}
-                    {/* <h1 id = 'song-title'>Now Playing: {this.context.name}</h1> */}
-                
-                    {/* <Metronome /> */}
+                {/* <h1 id = 'song-title'>Now Playing: {this.context.name}</h1> */}
 
-                    <FreqBands
-                        analyser = {this.premasterAnalyser}
-                        bpm = {this.context.bpm}
-                        timeSignature = {this.context.timeSignature}
-                    />
-                    {/* </div> */}
+                {/* <Metronome /> */}
 
-                    <MenuButtonParent 
-                        name = 'Menu'
-                        direction = 'right'
-                        separation = '6rem'
-                        parentSize = '5rem'
-                        clickToOpen = { true }
-                        childButtonProps = { [{
-                            autoOpen: true,
-                            id: 'toggles',
-                            iconName: 'icon-music',
-                            content: 
-                            <ToggleButtonPanel 
-                                devMode = {this.devMode}
-                                config = {this.context} 
-                                effectsChainEntry = {this.effectsChainEntry}
-                                effectsChainExit = {this.effectsChainExit}
-                                handleReset = {this.handleReset}
-                                handleRandomize = {this.handleRandomize}
-                                handleMute = {this.handleMute}
-                                handleAddPlayerReference = {this.handleAddPlayerReference}
-                                handleAddEffect = {this.handleAddEffect}
-                                audioCtx = {this.audioCtx}
-                                audioCtxInitTime = {this.audioCtxInitTime}
-                                premaster = {this.premaster}
-                                randomize = {this.state.randomize}
-                                mute = {this.state.mute}
+                <FreqBands
+                    analyser={this.premasterAnalyser}
+                    bpm={this.props.musicPlayerContext.bpm}
+                    timeSignature={this.props.musicPlayerContext.timeSignature}
+                />
+                {/* </div> */}
+
+                <MenuButtonParent
+                    name='Menu'
+                    direction='right'
+                    separation='6rem'
+                    parentSize='5rem'
+                    clickToOpen={true}
+                    childButtonProps={[{
+                        autoOpen: true,
+                        id: 'toggles',
+                        iconName: 'icon-music',
+                        content:
+                            <ToggleButtonPanel
+                                devMode={this.devMode}
+                                config={this.context}
+                                effectsChainEntry={this.effectsChainEntry}
+                                effectsChainExit={this.effectsChainExit}
+                                handleReset={this.handleReset}
+                                handleRandomize={this.handleRandomize}
+                                handleMute={this.handleMute}
+                                handleAddPlayerReference={this.handleAddPlayerReference}
+                                handleAddEffect={this.handleAddEffect}
+                                audioCtx={this.audioCtx}
+                                audioCtxInitTime={this.audioCtxInitTime}
+                                premaster={this.premaster}
+                                randomize={this.state.randomize}
+                                mute={this.state.mute}
                             />
-                        }, {
-                            id: 'effects',
-                            iconName: 'icon-equalizer',
-                            content: 
+                    }, {
+                        id: 'effects',
+                        iconName: 'icon-equalizer',
+                        content:
                             <EffectsPanel
-                                impulseResponse = {this.state.impulseResponse}
-                                handleChangeLP = {this.handleChangeLP}
-                                handleChangeHP = {this.handleChangeHP}
-                                handleChangeSpaciousness = {this.handleChangeSpaciousness}
-                                handleEffectsRandomize = {this.handleEffectsRandomize}
+                                impulseResponse={this.state.impulseResponse}
+                                handleChangeLP={this.handleChangeLP}
+                                handleChangeHP={this.handleChangeHP}
+                                handleChangeSpaciousness={this.handleChangeSpaciousness}
+                                handleEffectsRandomize={this.handleEffectsRandomize}
                             />
-                        }, {
-                            id: 'song-info',
-                            iconName: 'icon-info',
-                            content: <SongInfoPanel/>
-                        }] }
-                    />
+                    }, {
+                        id: 'song-info',
+                        iconName: 'icon-info',
+                        content: <SongInfoPanel />
+                    }]}
+                />
 
-                    <CanvasViz />
+                <CanvasViz />
 
             </>
         );
     }
 }
-
-MusicPlayer.contextType = MusicPlayerContext;
 
 export default MusicPlayer;

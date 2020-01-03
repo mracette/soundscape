@@ -1,4 +1,4 @@
-/* eslint-disable */ 
+/* eslint-disable */
 
 // libs
 import React, { useState, useEffect, useRef, useContext } from 'react';
@@ -9,15 +9,15 @@ import Icon from './Icon';
 
 // contexts
 import ThemeContext from '../contexts/ThemeContext';
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
+import LayoutContext from '../contexts/LayoutContext';
 
 // styles
 import '../styles/components/MenuButtonParent.scss';
 
 const MenuButtonParent = (props) => {
 
-    const {vw, vh} = useContext(ThemeContext);
-    const {backgroundColor} = useContext(MusicPlayerContext);
+    const { vw, vh } = useContext(LayoutContext);
+    const { backgroundColor } = useContext(ThemeContext);
 
     // parent button dimensions
     const height = 7 * vh;
@@ -42,13 +42,13 @@ const MenuButtonParent = (props) => {
 
     // handle click events outside of the node's dom
     const handleOutsideClick = (e) => {
-        if(!node.current.contains(e.target)) {
+        if (!node.current.contains(e.target)) {
             // if a child menu is open, close it
-            if(openChildIndex !== -1) {
+            if (openChildIndex !== -1) {
                 setOpenChildIndex(-1);
                 return;
-            // if child menus are all close, close the parent menu
-            } else if(isOpen) {
+                // if child menus are all close, close the parent menu
+            } else if (isOpen) {
                 setIsOpen(false);
                 return;
             }
@@ -57,77 +57,78 @@ const MenuButtonParent = (props) => {
 
     // add and remove event listeners to handle outside clicks
     useEffect(() => {
-        if(isOpen) {
+        if (isOpen) {
             document.addEventListener('mousedown', handleOutsideClick);
         } else {
-            document.removeEventListener('mousedown', handleOutsideClick); }
+            document.removeEventListener('mousedown', handleOutsideClick);
+        }
         return () => {
             document.removeEventListener('mousedown', handleOutsideClick);
         };
     }, [isOpen, openChildIndex]);
 
     return (
-        
-        <div 
-            className = 'menu-button' 
-            style = {{
+
+        <div
+            className='menu-button'
+            style={{
                 top,
                 left
             }}
-            ref = {node}
+            ref={node}
         >
 
-            <button 
-                className = {isOpen ? `menu-button-parent menu-button-parent-open` : `menu-button-parent`}
-                style = {{
+            <button
+                className={isOpen ? `menu-button-parent menu-button-parent-open` : `menu-button-parent`}
+                style={{
                     zIndex: numOfChildren + 1,
                     width,
                     height,
                     background: backgroundColor
                 }}
-                onClick = { (e) => {
+                onClick={(e) => {
                     e.preventDefault();
                     isOpen && setOpenChildIndex(-1);
                     props.clickToOpen && setIsOpen(!isOpen);
                 }}
-                >         
-                <Icon 
-                    divClassList = {isOpen ? 'icon-white rotate45' : 'icon-white'}
-                    svgClassList = {'icon-white'}
-                    name = 'icon-plus'
-                />       
+            >
+                <Icon
+                    divClassList={isOpen ? 'icon-white rotate45' : 'icon-white'}
+                    svgClassList={'icon-white'}
+                    name='icon-plus'
+                />
             </button>
 
             {props.childButtonProps.map((child, index) => (
-                
-                <MenuButtonChild 
+
+                <MenuButtonChild
 
                     // button content
-                    id = { child.id }
-                    key = { child.id }
-                    content = { props.childButtonProps[index].content }
-                    
+                    id={child.id}
+                    key={child.id}
+                    content={props.childButtonProps[index].content}
+
                     // button appearance
-                    iconName = { child.iconName }
-                    autoOpen = { child.autoOpen }
-                    icon = { child.icon }
-                    direction = { props.direction }
-                    index = { index + 1 }
-                    openChildIndex = { openChildIndex }
-                    setOpenChildIndex = { setOpenChildIndex }
-                    zIndex = { numOfChildren - index }
-                    separation = { separation }
-                    width = { childWidth }
-                    height = { childHeight }
-                    parentWidth = { width }
-                    parentHeight = { height }
-                    menuWidth = { width + (childWidth + separation) * (numOfChildren - 1) }
-                    parentIsOpen = { isOpen }
+                    iconName={child.iconName}
+                    autoOpen={child.autoOpen}
+                    icon={child.icon}
+                    direction={props.direction}
+                    index={index + 1}
+                    openChildIndex={openChildIndex}
+                    setOpenChildIndex={setOpenChildIndex}
+                    zIndex={numOfChildren - index}
+                    separation={separation}
+                    width={childWidth}
+                    height={childHeight}
+                    parentWidth={width}
+                    parentHeight={height}
+                    menuWidth={width + (childWidth + separation) * (numOfChildren - 1)}
+                    parentIsOpen={isOpen}
 
                 />
 
             ))}
-            
+
         </div>
     )
 
