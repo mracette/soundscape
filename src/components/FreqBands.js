@@ -2,7 +2,6 @@
 
 // libs
 import React, { useEffect, useRef, useContext } from 'react';
-import * as d3Chromatic from 'd3-scale-chromatic';
 
 // contexts
 import LayoutContext from '../contexts/LayoutContext';

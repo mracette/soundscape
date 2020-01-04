@@ -58,7 +58,7 @@ const MenuButtonChild = (props) => {
                     setIsOpen(!isOpen);
                 }}
                 style={{
-                    background: backgroundColor,
+                    backgroundColor,
                     width: props.width,
                     height: props.height,
                     top: (props.parentHeight - props.height) / 2,
@@ -85,10 +85,11 @@ const MenuButtonChild = (props) => {
             - size matches button size
             - uses a CSS trick to create an arrow with borders https://css-tricks.com/snippets/css/css-triangle/
             - TODO: implement arrow directionality based on which side the content is display and how the menu opens
-        */}
+            */}
             <div
                 className='arrow'
                 style={{
+                    borderBottomColor: backgroundColor,
                     display: !isOpen && 'none',
                     top: props.height + (props.parentHeight - props.height) / 2,
                     left: (props.parentWidth - props.width) / 2 - props.parentHeight / 8,
@@ -105,7 +106,7 @@ const MenuButtonChild = (props) => {
             {/* Content
             - allows content to be passed down the tree and displayed by the button
             - width is at least as big as the expanded menu
-        */}
+            */}
             <MenuButtonContentWrapper
                 content={props.content}
                 config={props.config}

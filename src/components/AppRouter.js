@@ -11,9 +11,6 @@ import MusicPlayerWrap from './MusicPlayerWrap';
 import LandingPage from './LandingPage';
 
 function AppRouter(props) {
-
-    console.log(props);
-
     return (
         <div>
             <Router>
@@ -23,16 +20,19 @@ function AppRouter(props) {
 
                         <ThemeContext.Provider value={{
                             // provide the song's themes
-                            ...props.themes.find((song) => {
+                            id: routeProps.match.params.songId,
+                            spectrumFunction: props.spectrumFunctions[routeProps.match.params.songId],
+                            ...props.appConfig.find((song) => {
                                 return song.id === routeProps.match.params.songId;
-                            })
+                            })["themes"]
                         }}>
 
                             <MusicPlayerContext.Provider value={{
                                 // provide the song's music player config
+                                id: routeProps.match.params.songId,
                                 ...props.appConfig.find((song) => {
                                     return song.id === routeProps.match.params.songId;
-                                })
+                                })["audio"]
                             }}>
 
                                 <MusicPlayerWrap {...routeProps} />

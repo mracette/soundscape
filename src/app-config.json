@@ -1,249 +1,269 @@
 [
     {
         "id": "moonrise",
-        "name": "Moonrise",
-        "bpm": 120,
-        "timeSignature": 4,
-        "keySignature": "G Minor",
-        "ambientTrack": true,
-        "ambientTrackLength": "8m",
-        "groups": [
-            {
-                "name": "rhythm",
-                "polyphony": -1,
-                "voices": [
-                    {
-                        "name": "kick-snare[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "fast-hats[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "rides[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "belly-percs[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            },
-            {
-                "name": "harmony",
-                "polyphony": 2,
-                "voices": [
-                    {
-                        "name": "rhodes-arps[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "rhodes-chords[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "rhodes-sad[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            },
-            {
-                "name": "bass",
-                "polyphony": 1,
-                "voices": [
-                    {
-                        "name": "sub-desc[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "sub-simple[8]",
-                        "length": "8m",
-                        "quantizeLength": "8m"
-                    },
-                    {
-                        "name": "sub-bouncey[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            },
-            {
-                "name": "melody",
-                "polyphony": 1,
-                "voices": [
-                    {
-                        "name": "melody-trance[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "melody-bluesy[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "melody-soft[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            },
-            {
-                "name": "atmosphere",
-                "polyphony": 3,
-                "voices": [
-                    {
-                        "name": "atmo-water[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "atmo-swirl[16]",
-                        "length": "16m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "atmo-crunch[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "atmo-photay[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            }
-        ]      
+        "audio": {
+            "name": "Moonrise",
+            "bpm": 120,
+            "timeSignature": 4,
+            "keySignature": "G Minor",
+            "ambientTrack": true,
+            "ambientTrackLength": "8m",
+            "groups": [
+                {
+                    "name": "rhythm",
+                    "polyphony": -1,
+                    "voices": [
+                        {
+                            "name": "kick-snare[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "fast-hats[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "rides[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "belly-percs[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "harmony",
+                    "polyphony": 2,
+                    "voices": [
+                        {
+                            "name": "rhodes-arps[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "rhodes-chords[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "rhodes-sad[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "bass",
+                    "polyphony": 1,
+                    "voices": [
+                        {
+                            "name": "sub-desc[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "sub-simple[8]",
+                            "length": "8m",
+                            "quantizeLength": "8m"
+                        },
+                        {
+                            "name": "sub-bouncey[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "melody",
+                    "polyphony": 1,
+                    "voices": [
+                        {
+                            "name": "melody-trance[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "melody-bluesy[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "melody-soft[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "atmosphere",
+                    "polyphony": 3,
+                    "voices": [
+                        {
+                            "name": "atmo-water[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "atmo-swirl[16]",
+                            "length": "16m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "atmo-crunch[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "atmo-photay[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                }
+            ]
+        },
+        "themes": {
+            "backgroundColor": "rgba(31, 38, 47, 0.65)",
+            "panelResetButton": "rgba(255, 255, 255, 0.3)",
+            "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
+            "panelMuteButton": "rgba(255, 255, 255, 0.3)",
+            "groupSoloButton": "rgba(90.5, 162.2, 240.8, 0.5)",
+            "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
+        }
     },
     {
         "id": "mornings",
-        "name": "Mornings",
-        "bpm": 92,
-        "timeSignature": 4,
-        "keySignature": "Eb Major",
-        "ambientTrack": true,
-        "ambientTrackLength": "4m",
-        "groups": [
-            {
-                "name": "rhythm",
-                "polyphony": -1,
-                "voices": [
-                    {
-                        "name": "rhythm-drums[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "rhythm-kick[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "rhythm-reverse[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "rhythm-tops[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            },
-            {
-                "name": "harmony",
-                "polyphony": 2,
-                "voices": [
-                    {
-                        "name": "harmony-one[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "harmony-two[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "harmony-three[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            },
-            {
-                "name": "bass",
-                "polyphony": 1,
-                "voices": [
-                    {
-                        "name": "bass-one[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "bass-two[4]",
-                        "length": "4m",
-                        "quantizeLength": "8m"
-                    },
-                    {
-                        "name": "bass-three[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            },
-            {
-                "name": "melody",
-                "polyphony": 1,
-                "voices": [
-                    {
-                        "name": "melody-one[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "melody-two[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "melody-three[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            },
-            {
-                "name": "extras",
-                "polyphony": 3,
-                "voices": [
-                    {
-                        "name": "extra-sweep[4]",
-                        "length": "4m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "extra-pad[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    },
-                    {
-                        "name": "extra-jammy[8]",
-                        "length": "8m",
-                        "quantizeLength": "4m"
-                    }
-                ]
-            }
-        ]      
+        "audio": {
+            "name": "Mornings",
+            "bpm": 92,
+            "timeSignature": 4,
+            "keySignature": "Eb Major",
+            "ambientTrack": true,
+            "ambientTrackLength": "4m",
+            "groups": [
+                {
+                    "name": "rhythm",
+                    "polyphony": -1,
+                    "voices": [
+                        {
+                            "name": "rhythm-drums[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "rhythm-kick[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "rhythm-reverse[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "rhythm-tops[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "harmony",
+                    "polyphony": 2,
+                    "voices": [
+                        {
+                            "name": "harmony-one[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "harmony-two[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "harmony-three[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "bass",
+                    "polyphony": 1,
+                    "voices": [
+                        {
+                            "name": "bass-one[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "bass-two[4]",
+                            "length": "4m",
+                            "quantizeLength": "8m"
+                        },
+                        {
+                            "name": "bass-three[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "melody",
+                    "polyphony": 1,
+                    "voices": [
+                        {
+                            "name": "melody-one[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "melody-two[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "melody-three[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "extras",
+                    "polyphony": 3,
+                    "voices": [
+                        {
+                            "name": "extra-sweep[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "extra-pad[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "extra-jammy[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                }
+            ]
+        },
+        "themes": {
+            "backgroundColor": "rgba(31, 38, 47, 0.65)",
+            "panelResetButton": "rgba(255, 255, 255, 0.3)",
+            "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
+            "panelMuteButton": "rgba(255, 255, 255, 0.3)",
+            "groupSoloButton": "rgba(90.5, 162.2, 240.8, 0.5)",
+            "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
+        }
     }
 ]
