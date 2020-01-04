@@ -27,9 +27,6 @@ class MusicPlayer extends React.Component {
     constructor(props) {
         super(props);
 
-        this.devMode = false;
-        this.showVisuals = false;
-
         // init new audio context instance
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -418,7 +415,6 @@ class MusicPlayer extends React.Component {
                         iconName: 'icon-music',
                         content:
                             <ToggleButtonPanel
-                                devMode={this.devMode}
                                 config={this.context}
                                 effectsChainEntry={this.effectsChainEntry}
                                 effectsChainExit={this.effectsChainExit}

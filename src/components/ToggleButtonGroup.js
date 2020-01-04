@@ -8,6 +8,7 @@ import ToggleButton from './ToggleButton';
 import Oscilloscope from './Oscilloscope';
 
 // contexts
+import TestingContext from '../contexts/TestingContext';
 import ThemeContext from '../contexts/ThemeContext';
 import LayoutContext from '../contexts/LayoutContext';
 
@@ -225,30 +226,34 @@ const ToggleButtonGroup = (props) => {
             <div className='toggle-buttons flex-row'>
 
                 {props.voices.map((voice) => (
-                    <LayoutContext.Consumer>
-                        {layoutContext => (
-                            <ToggleButton
-                                devMode={props.devMode}
-                                vh={layoutContext.vh}
-                                vw={layoutContext.vw}
-                                key={voice.name}
-                                name={voice.name}
-                                groupName={props.name}
-                                length={voice.length}
-                                quantizeLength={voice.quantizeLength}
-                                handleUpdatePoly={handleUpdatePoly}
-                                handleResetPoly={handleResetPoly}
-                                handleUpdateOverrides={handleUpdateOverrides}
-                                handleAddPlayerReference={props.handleAddPlayerReference}
-                                override={playerOverrides.indexOf(voice.name) !== -1}
-                                groupNode={groupNode}
-                                audioCtx={props.audioCtx}
-                                audioCtxInitTime={props.audioCtxInitTime}
-                                effectsChainEntry={props.effectsChainEntry}
-                                effectsChainExit={props.effectsChainExit}
-                            />
+                    <TestingContext.Consumer>
+                        {testingContext => (
+                            <LayoutContext.Consumer>
+                                {layoutContext => (
+                                    <ToggleButton
+                                        flags={testingContext.flags}
+                                        vh={layoutContext.vh}
+                                        vw={layoutContext.vw}
+                                        key={voice.name}
+                                        name={voice.name}
+                                        groupName={props.name}
+                                        length={voice.length}
+                                        quantizeLength={voice.quantizeLength}
+                                        handleUpdatePoly={handleUpdatePoly}
+                                        handleResetPoly={handleResetPoly}
+                                        handleUpdateOverrides={handleUpdateOverrides}
+                                        handleAddPlayerReference={props.handleAddPlayerReference}
+                                        override={playerOverrides.indexOf(voice.name) !== -1}
+                                        groupNode={groupNode}
+                                        audioCtx={props.audioCtx}
+                                        audioCtxInitTime={props.audioCtxInitTime}
+                                        effectsChainEntry={props.effectsChainEntry}
+                                        effectsChainExit={props.effectsChainExit}
+                                    />
+                                )}
+                            </LayoutContext.Consumer>
                         )}
-                    </LayoutContext.Consumer>
+                    </TestingContext.Consumer>
                 ))}
 
             </div>

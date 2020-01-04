@@ -22,9 +22,7 @@ class ToggleButton extends React.Component {
         super(props);
 
         this.buttonRef = React.createRef();
-
         this.quantizedStartBeats = undefined;
-
         this.scheduler = undefined;
 
         this.state = {
@@ -39,7 +37,7 @@ class ToggleButton extends React.Component {
 
     componentDidMount() {
 
-        this.quantizedStartBeats = this.props.devMode ? 1 : 4 * this.context.timeSignature;
+        this.quantizedStartBeats = this.props.flags.quantizeSamples ? 4 * this.context.timeSignature : 1;
         this.scheduler = new Scheduler(this.props.audioCtx);
 
         // construct the path to the audio file

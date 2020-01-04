@@ -2,11 +2,12 @@
 
 // libs
 import React, { useEffect, useRef, useContext } from 'react';
-//import Moonrise from '../viz/scenes/Moonrise';
+import Moonrise from '../viz/scenes/Moonrise';
 import Mornings from '../viz/scenes/Mornings';
 
 // context
 import MusicPlayerContext from '../contexts/MusicPlayerContext';
+import TestingContext from '../contexts/TestingContext';
 
 // styles
 import '../styles/components/CanvasViz.scss';
@@ -14,18 +15,21 @@ import '../styles/components/CanvasViz.scss';
 const CanvasViz = (props) => {
 
     const { id } = useContext(MusicPlayerContext);
+    const flagShowVisuals = useContext(TestingContext).flags.showVisuals;
 
     useEffect(() => {
-
         switch (id) {
             case 'moonrise':
-                // new Moonrise(canvasRef.current);
+                if (flagShowVisuals) {
+                    new Moonrise(canvasRef.current);
+                }
                 break;
             case 'mornings':
-                new Mornings(canvasRef.current);
+                if (flagShowVisuals) {
+                    new Mornings(canvasRef.current);
+                }
                 break;
         }
-
     }, []);
 
     const canvasRef = useRef(null);

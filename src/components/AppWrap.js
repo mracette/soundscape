@@ -10,13 +10,16 @@ import AppRouter from './AppRouter';
 
 // context
 import LayoutContext from '../contexts/LayoutContext';
+import TestingContext from '../contexts/TestingContext';
 
 // load the app config flat file
 const appConfig = require('../app-config.json');
 
 // global behavior flags for testing
-const flagQuantizeSamples = false;
-const flagShowVisuals = false;
+const flags = {
+  quantizeSamples: false,
+  showVisuals: false
+};
 
 // define spectrum functions here since they don't do well in json
 const spectrumFunctions = {
@@ -69,12 +72,14 @@ const AppWrap = () => {
   }, []);
 
   return (
-    <LayoutContext.Provider value={{ vw, vh }}>
-      <AppRouter
-        appConfig={appConfig}
-        spectrumFunctions={spectrumFunctions}
-      />
-    </LayoutContext.Provider>
+    <TestingContext.Provider value={{ flags }}>
+      <LayoutContext.Provider value={{ vw, vh }}>
+        <AppRouter
+          appConfig={appConfig}
+          spectrumFunctions={spectrumFunctions}
+        />
+      </LayoutContext.Provider>
+    </TestingContext.Provider>
   );
 
 }

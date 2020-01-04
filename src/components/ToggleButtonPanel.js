@@ -81,7 +81,6 @@ const ToggleButtonPanel = (props) => {
             {groups.map((group, index) => (
                 <ToggleButtonGroup
                     index={index}
-                    devMode={props.devMode}
                     handleAddSolo={handleAddSolo}
                     soloOverride={soloOverride}
                     key={group.name}
