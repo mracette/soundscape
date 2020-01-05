@@ -1,6 +1,8 @@
 @import '../settings.scss';
 
 #landing-page {
+    width: 100%;
+    height: 100%;
     background-color: $off-black;
 }
 
@@ -11,16 +13,25 @@
     justify-content: flex-start;
 }
 
+.custom-song-icon {
+    // border-radius: 50%;
+    display: block;
+    margin: 0;
+    width: 25rem;
+    height: 25rem;
+    line-height: 25rem;
+}
+
 .song-link {
     color: white;
     font-size: $l-size;
     text-decoration: none;
     text-align: center;
     vertical-align: middle;
-    margin: $s-size 0 $s-size $s-size;
-    border: 0.1rem solid white;
-    flex-basis: 25rem;
-    line-height: 25rem;
+    // margin: $s-size 0 $s-size $s-size;
+    // border: 0.1rem solid white;
+    // flex-basis: 25rem;
+    // line-height: 25rem;
 }
 
 .song-link:hover {
