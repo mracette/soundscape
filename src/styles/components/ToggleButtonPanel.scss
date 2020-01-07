@@ -1,16 +1,16 @@
 @import '../settings.scss';
 
-h2, h3 {
+#toggle-button-panel h2, #toggle-button-panel h3 {
     color: white;
     text-transform: capitalize;
 }
 
-h2 {
+#toggle-button-panel h2 {
     font-size: vh(3);
     margin: 0 0 vh(1) 0;
 }
 
-h3 {
+#toggle-button-panel h3 {
     font-size: vh(2.15);
     margin: 0;
     padding: 0 vh(1) 0 0;

@@ -31,7 +31,7 @@ const ToggleButtonPanel = (props) => {
 
     return (
 
-        <div id='toggle-button-panel flex-col'>
+        <div id='toggle-button-panel' className='flex-col'>
 
             <div
                 className='flex-col'

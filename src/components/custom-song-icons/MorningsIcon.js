@@ -1,6 +1,6 @@
 // libs
 import React from 'react';
-import { TAU, rotatePoint, boundedSin } from '../../utils/crco-utils.module';
+import { boundedSin } from '../../utils/crco-utils.module';
 
 // components
 import { CustomSongIcon } from './CustomSongIcon';
@@ -8,13 +8,13 @@ import { CustomSongIcon } from './CustomSongIcon';
 // styles
 import '../../styles/components/LandingPage.scss';
 
-const count = 5;
 const bsin = boundedSin(2, 0, 1, -1.5);
 
-const animate = (context, cycle, coords, options) => {
+const animate = (context, cycle, coords) => {
+    const count = 5;
     const panelWidth = coords.getWidth() / 8;
-    const centerPoint = coords.nx(0) - coords.getWidth() / 10;
-    for (let i = 0; i < options.count; i++) {
+    const centerPoint = coords.nx(0) - panelWidth / 2;
+    for (let i = 0; i < count; i++) {
         const panelHeight = coords.getHeight() * (.6 - Math.abs(2 - i) * .1);
         context.beginPath();
         context.strokeRect(
@@ -26,12 +26,12 @@ const animate = (context, cycle, coords, options) => {
     }
 }
 
-export function Mornings() {
+export function MorningsIcon(props) {
     return (
         <CustomSongIcon
-            id="custom-moonrise-icon"
+            handleSetSelected={props.handleSetSelected}
+            id="custom-mornings-icon"
             animate={animate}
-            options={{ count }}
         />
     );
 }

@@ -22,9 +22,10 @@ const animate = (context, cycle, coords, options) => {
     }
 }
 
-export function Moonrise() {
+export function MoonriseIcon(props) {
     return (
         <CustomSongIcon
+            handleSetSelected={props.handleSetSelected}
             id="custom-moonrise-icon"
             animate={animate}
             options={{ count }}

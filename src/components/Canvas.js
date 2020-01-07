@@ -1,13 +1,15 @@
 // libs
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 
 /* 
 Props:
+id
+className
 makeSquare
 onResize
 onLoad
 */
-function Canvas(props) {
+export const Canvas = (props) => {
 
     const pixelRatio = typeof document !== 'undefined' ? window.devicePixelRatio : 1;
 
@@ -52,5 +54,3 @@ function Canvas(props) {
     );
 
 }
-
-export default Canvas;
