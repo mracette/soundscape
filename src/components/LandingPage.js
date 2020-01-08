@@ -16,6 +16,10 @@ function LandingPage() {
 
     const [selected, setSelected] = React.useState(null);
 
+    const handleUnsetSelected = () => {
+        setSelected(null);
+    }
+
     let bpm, key;
 
     switch (selected) {
@@ -47,21 +51,20 @@ function LandingPage() {
             <div id='song-selection-panel'>
                 <Link className='song-link' id='song-link-moonrise' to="/play/moonrise">
                     <MoonriseIcon
-                        handleSetSelected={(name = 'Moonrise') => {
-                            setSelected(name)
-                        }}
+                        handleSetSelected={() => setSelected('Moonrise')}
+                        handleUnsetSelected={handleUnsetSelected}
                     />
                 </Link>
                 <Link className='song-link' id='song-link-mornings' to="/play/mornings">
                     <MorningsIcon
-                        handleSetSelected={(name = 'Mornings', bpm = '92', key = 'Eb Major') => {
-                            setSelected(name)
-                        }}
+                        handleSetSelected={() => setSelected('Mornings')}
+                        handleUnsetSelected={handleUnsetSelected}
                     />
                 </Link>
                 <Link className='song-link' id='song-link-coming-soon' to="/coming-soon">
                     <ComingSoonIcon
-                        handleSetSelected={(name = 'Coming soon..') => setSelected(name)}
+                        handleSetSelected={() => setSelected('Coming soon...')}
+                        handleUnsetSelected={handleUnsetSelected}
                     />
                 </Link>
             </div>

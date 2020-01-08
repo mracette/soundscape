@@ -1,15 +1,25 @@
 // libs
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect } from 'react';
 
-/* 
-Props:
-id
-className
-makeSquare
-onResize
-onLoad
-*/
+function useTraceUpdate(props) {
+    const prev = useRef(props);
+    useEffect(() => {
+        const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
+            if (prev.current[k] !== v) {
+                ps[k] = [prev.current[k], v];
+            }
+            return ps;
+        }, {});
+        if (Object.keys(changedProps).length > 0) {
+            console.log('Changed props:', changedProps);
+        }
+        prev.current = props;
+    });
+}
+
 export const Canvas = (props) => {
+
+    useTraceUpdate(props);
 
     const pixelRatio = typeof document !== 'undefined' ? window.devicePixelRatio : 1;
 
@@ -26,6 +36,8 @@ export const Canvas = (props) => {
         } else {
             canvasRef.current.clientHeight !== 0 && (canvasRef.current.height = pixelRatio * canvasRef.current.clientHeight);
         }
+
+        console.log(canvasRef.current.width, canvasRef.current.height);
 
         // trigger the resize callback
         props.onResize !== undefined && props.onResize(canvasRef.current);

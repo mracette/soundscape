@@ -26,6 +26,7 @@ export function ComingSoonIcon(props) {
     return (
         <CustomSongIcon
             handleSetSelected={props.handleSetSelected}
+            handleUnsetSelected={props.handleUnsetSelected}
             id="coming-soon-icon"
             animate={animate}
         />

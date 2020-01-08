@@ -1,6 +1,7 @@
 // libs
 import React from 'react';
 import { boundedSin } from '../../utils/crco-utils.module';
+import { useTraceUpdate } from '../../hooks/useTraceUpdate';
 
 // components
 import { CustomSongIcon } from './CustomSongIcon';
@@ -27,9 +28,11 @@ const animate = (context, cycle, coords) => {
 }
 
 export function MorningsIcon(props) {
+    useTraceUpdate(props);
     return (
         <CustomSongIcon
             handleSetSelected={props.handleSetSelected}
+            handleUnsetSelected={props.handleUnsetSelected}
             id="custom-mornings-icon"
             animate={animate}
         />
