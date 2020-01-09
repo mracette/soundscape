@@ -1,10 +1,13 @@
 // libs
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTraceUpdate } from '../../hooks/useTraceUpdate';
 import { CanvasCoordinates } from '../../utils/crco-utils.module';
 
 // components
 import { Canvas } from '../Canvas';
+
+// context
+import { landingPageDispatch } from '../LandingPage';
 
 // styles
 import '../../styles/components/LandingPage.scss';
@@ -21,10 +24,12 @@ export function CustomSongIcon(props) {
     const timeRef = useRef(0);
     const animationRef = useRef();
     const coordsRef = useRef();
+    const dispatch = React.useContext(landingPageDispatch);
+
+    const handleSetSelected = () => dispatch({ type: props.name });
+    const handleUnsetSelected = () => dispatch({ type: null });
 
     const updateCanvas = (time, loop, reset) => {
-
-        console.log('updating');
 
         const delta = reset ? 0 : time - timeRef.current;
         cycleRef.current += delta * speed;
@@ -47,54 +52,43 @@ export function CustomSongIcon(props) {
 
     }
 
+    const beginAnimation = () => {
+        animationRef.current = window.requestAnimationFrame((time) => updateCanvas(time, true, true));
+    }
+
+    const stopAnimation = () => {
+        window.cancelAnimationFrame(animationRef.current);
+    }
+
     useEffect(() => {
 
-        canvasRef.current.addEventListener('mouseover', () => {
-            animationRef.current = window.requestAnimationFrame((time) => updateCanvas(time, true, true));
-        });
+        // add listeners
+        canvasRef.current.addEventListener('mouseover', beginAnimation);
+        canvasRef.current.addEventListener('mouseover', handleSetSelected);
+        canvasRef.current.addEventListener('mouseout', stopAnimation);
+        canvasRef.current.addEventListener('mouseout', handleUnsetSelected);
 
-        canvasRef.current.addEventListener('mouseout', () => {
-            window.cancelAnimationFrame(animationRef.current);
-        });
-
-        // canvasRef.current.addEventListener('resize', () => updateCanvas(timeRef.current, false, false));
-
+        // set up canvas/coords and initialize drawing
         coordsRef.current = new CanvasCoordinates({ canvas: canvasRef.current, padding: .02 });;
         contextRef.current = canvasRef.current.getContext('2d');
         updateCanvas(0, false, false);
 
-        return () => window.cancelAnimationFrame(animationRef.current);
+        // cleanup
+        return () => {
+            stopAnimation();
+            canvasRef.current.removeEventListener('mouseover', beginAnimation);
+            canvasRef.current.removeEventListener('mouseover', handleSetSelected);
+            canvasRef.current.removeEventListener('mouseout', stopAnimation);
+            canvasRef.current.removeEventListener('mouseout', handleUnsetSelected);
+        }
 
     }, []);
-
-    useEffect(() => {
-
-        console.log('new listener');
-
-        if (props.handleSetSelected) {
-            canvasRef.current.addEventListener('mouseover', props.handleSetSelected);
-            canvasRef.current.addEventListener('mouseout', props.handleUnsetSelected);
-        }
-
-        updateCanvas(timeRef.current, false, false);
-
-        return () => {
-            canvasRef.current.removeEventListener('mouseover', props.handleSetSelected);
-            canvasRef.current.removeEventListener('mouseout', props.handleUnsetSelected);
-        }
-
-    }, [props.handleSetSelected, props.handleUnsetSelected]);
 
     return React.useMemo(() => {
         return <Canvas
             id={props.id}
             className="custom-song-icon"
-            onLoad={(canvas) => {
-                // only use the canvas reference on the first render
-                if (canvasRef.current === null) {
-                    canvasRef.current = canvas;
-                }
-            }}
+            onLoad={(canvas) => canvasRef.current = canvas}
         />
     }, []);
 

@@ -25,8 +25,7 @@ const animate = (context, cycle, coords) => {
 export function ComingSoonIcon(props) {
     return (
         <CustomSongIcon
-            handleSetSelected={props.handleSetSelected}
-            handleUnsetSelected={props.handleUnsetSelected}
+            name={props.name}
             id="coming-soon-icon"
             animate={animate}
         />

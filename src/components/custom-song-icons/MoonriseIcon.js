@@ -8,13 +8,12 @@ import { CustomSongIcon } from './CustomSongIcon';
 // styles
 import '../../styles/components/LandingPage.scss';
 
-const count = 5;
-const animate = (context, cycle, coords, options) => {
-    for (let i = 0; i < options.count; i++) {
+const animate = (context, cycle, coords) => {
+    for (let i = 0; i < 5; i++) {
         context.beginPath();
         context.arc(
-            coords.nx(rotatePoint(.2, 0, 0, 0, cycle + TAU * i / count).x),
-            coords.ny(rotatePoint(.2, 0, 0, 0, cycle + TAU * i / count).y),
+            coords.nx(rotatePoint(.2, 0, 0, 0, cycle + TAU * i / 5).x),
+            coords.ny(rotatePoint(.2, 0, 0, 0, cycle + TAU * i / 5).y),
             coords.getWidth() / 4,
             0, TAU
         );
@@ -24,10 +23,8 @@ const animate = (context, cycle, coords, options) => {
 
 export function MoonriseIcon(props) {
     return <CustomSongIcon
-        handleSetSelected={props.handleSetSelected}
-        handleUnsetSelected={props.handleUnsetSelected}
+        name={props.name}
         id="custom-moonrise-icon"
         animate={animate}
-        options={{ count }}
     />
 }

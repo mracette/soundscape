@@ -1,25 +1,7 @@
 // libs
 import React, { useRef, useEffect } from 'react';
 
-function useTraceUpdate(props) {
-    const prev = useRef(props);
-    useEffect(() => {
-        const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
-            if (prev.current[k] !== v) {
-                ps[k] = [prev.current[k], v];
-            }
-            return ps;
-        }, {});
-        if (Object.keys(changedProps).length > 0) {
-            console.log('Changed props:', changedProps);
-        }
-        prev.current = props;
-    });
-}
-
 export const Canvas = (props) => {
-
-    useTraceUpdate(props);
 
     const pixelRatio = typeof document !== 'undefined' ? window.devicePixelRatio : 1;
 
@@ -37,10 +19,8 @@ export const Canvas = (props) => {
             canvasRef.current.clientHeight !== 0 && (canvasRef.current.height = pixelRatio * canvasRef.current.clientHeight);
         }
 
-        console.log(canvasRef.current.width, canvasRef.current.height);
-
         // trigger the resize callback
-        props.onResize !== undefined && props.onResize(canvasRef.current);
+        props.resize !== undefined && props.onResize !== undefined && props.onResize(canvasRef.current);
 
     }
 
@@ -48,14 +28,14 @@ export const Canvas = (props) => {
 
         setCanvasSize();
 
-        window.addEventListener('resize', setCanvasSize);
+        props.resize !== undefined && window.addEventListener('resize', setCanvasSize);
 
         // trigger the onload callback
         props.onLoad !== undefined && props.onLoad(canvasRef.current);
 
-        return () => window.removeEventListener('resize', setCanvasSize);
+        return () => props.resize !== undefined && window.removeEventListener('resize', setCanvasSize);
 
-    }, [setCanvasSize])
+    }, [setCanvasSize, props])
 
     return (
         <canvas

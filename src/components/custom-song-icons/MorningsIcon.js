@@ -1,7 +1,6 @@
 // libs
 import React from 'react';
 import { boundedSin } from '../../utils/crco-utils.module';
-import { useTraceUpdate } from '../../hooks/useTraceUpdate';
 
 // components
 import { CustomSongIcon } from './CustomSongIcon';
@@ -12,10 +11,9 @@ import '../../styles/components/LandingPage.scss';
 const bsin = boundedSin(2, 0, 1, -1.5);
 
 const animate = (context, cycle, coords) => {
-    const count = 5;
     const panelWidth = coords.getWidth() / 8;
     const centerPoint = coords.nx(0) - panelWidth / 2;
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < 5; i++) {
         const panelHeight = coords.getHeight() * (.6 - Math.abs(2 - i) * .1);
         context.beginPath();
         context.strokeRect(
@@ -28,11 +26,9 @@ const animate = (context, cycle, coords) => {
 }
 
 export function MorningsIcon(props) {
-    useTraceUpdate(props);
     return (
         <CustomSongIcon
-            handleSetSelected={props.handleSetSelected}
-            handleUnsetSelected={props.handleUnsetSelected}
+            name={props.name}
             id="custom-mornings-icon"
             animate={animate}
         />
