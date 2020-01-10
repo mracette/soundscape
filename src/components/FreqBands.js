@@ -1,10 +1,13 @@
-/* eslint-disable */
-
 // libs
-import React, { useEffect, useRef, useContext } from 'react';
+import React from 'react';
+
+// components
+import { Canvas } from '../components/Canvas';
+
+// hooks
+import { useAnimationFrame } from '../hooks/useAnimationFrame';
 
 // contexts
-import LayoutContext from '../contexts/LayoutContext';
 import ThemeContext from '../contexts/ThemeContext';
 import MusicPlayerContext from '../contexts/MusicPlayerContext';
 
@@ -13,43 +16,24 @@ import '../styles/components/FreqBands.scss';
 
 const FreqBands = (props) => {
 
-    const { vw, vh } = useContext(LayoutContext);
-    const { spectrumFunction } = useContext(ThemeContext);
-    const { bpm, timeSignature } = useContext(MusicPlayerContext);
-
-    const canvasRef = useRef(null);
-
-    let canvasCtx, canvasWidth, canvasHeight, radius;
+    const { spectrumFunction } = React.useContext(ThemeContext);
+    const { bpm, timeSignature } = React.useContext(MusicPlayerContext);
 
     const secondsPerBeat = 60 / bpm;
     const secondsPerBar = secondsPerBeat * timeSignature;
 
-    useEffect(() => {
-        init();
-        draw();
-    }, [])
+    const canvasRef = React.useRef(null);
+    const contextRef = React.useRef(null);
 
-    const init = () => {
+    const render = React.useCallback((canvas, context, time) => {
 
-        canvasCtx = canvasRef.current.getContext("2d");
-
-        canvasRef.current.width = canvasRef.current.clientWidth;
-        canvasRef.current.height = canvasRef.current.clientHeight;
-
-        canvasWidth = canvasRef.current.width;
-        canvasHeight = canvasRef.current.height;
-
-        radius = canvasHeight / 2 - (canvasHeight / props.analyser.frequencyBinCount);
-
-    }
-
-    const draw = (time) => {
+        const radius = canvas.height / 2 - (canvas.height / props.analyser.frequencyBinCount);
 
         // calculate cycle time 
         const cycleTime = (time / 1000) / (secondsPerBar * 4);
 
         // clear previous draw
-        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+        context.clearRect(0, 0, canvas.height, canvas.height);
 
         // get time domain data
         const dataArray = props.analyser.getFrequencyData();
@@ -58,52 +42,45 @@ const FreqBands = (props) => {
         dataArray.map((d, i) => {
 
             const vol = (d / 255);
-            const cx = canvasWidth / 2 + radius * Math.cos((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
-            const cy = canvasHeight / 2 + radius * Math.sin((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
+            const cx = canvas.width / 2 + radius * Math.cos((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
+            const cy = canvas.height / 2 + radius * Math.sin((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
 
-            canvasCtx.beginPath();
+            context.beginPath();
 
-            canvasCtx.fillStyle = spectrumFunction(i / props.analyser.frequencyBinCount);
+            context.fillStyle = spectrumFunction(i / props.analyser.frequencyBinCount);
 
-            canvasCtx.globalAlphs = vol;
+            context.globalAlphs = vol;
 
-            canvasCtx.moveTo(cx, cy);
+            context.moveTo(cx, cy);
 
-            canvasCtx.arc(
+            context.arc(
                 cx,
                 cy,
-                (canvasHeight / props.analyser.frequencyBinCount) * vol,
+                (canvas.height / props.analyser.frequencyBinCount) * vol,
                 0,
                 Math.PI * 2
             );
 
-            canvasCtx.fill();
+            context.fill();
 
         });
 
-        // repeat
-        requestAnimationFrame(draw);
+    }, []);
 
-    }
+    useAnimationFrame(({ time } = time) => render(canvasRef.current, contextRef.current, time))
 
-    return (
-        <div
-            id='freq-bands'
-            style={{
-                top: 1.5 * vh,
-                left: 1.5 * vh
-            }}
-        >
-            <canvas
+    return React.useMemo(() => (
+        <div id='freq-bands'>
+            <Canvas
                 id='freq-bands-canvas'
-                style={{
-                    width: 9 * vh,
-                    height: 9 * vh,
+                onLoad={(canvas) => {
+                    canvasRef.current = canvas;
+                    contextRef.current = canvas.getContext('2d');
+                    contextRef.current.lineWidth = 6.5;
                 }}
-                ref={canvasRef}
             />
         </div>
-    )
+    ));
 
 }
 

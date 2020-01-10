@@ -1,9 +1,10 @@
-/* eslint-disable */
-
 // libs
-import React, { useEffect, useRef, useContext } from 'react';
+import React from 'react';
 import Moonrise from '../viz/scenes/Moonrise';
 import Mornings from '../viz/scenes/Mornings';
+
+// components
+import { Canvas } from '../components/Canvas';
 
 // context
 import MusicPlayerContext from '../contexts/MusicPlayerContext';
@@ -12,32 +13,35 @@ import TestingContext from '../contexts/TestingContext';
 // styles
 import '../styles/components/CanvasViz.scss';
 
-const CanvasViz = (props) => {
+export const CanvasViz = () => {
 
-    const { id } = useContext(MusicPlayerContext);
-    const flagShowVisuals = useContext(TestingContext).flags.showVisuals;
+    const { id } = React.useContext(MusicPlayerContext);
+    const flagShowVisuals = React.useContext(TestingContext).flags.showVisuals;
 
-    useEffect(() => {
+    const canvasRef = React.useRef(null);
+    const sceneRef = React.useRef(null);
+
+    React.useEffect(() => {
         switch (id) {
             case 'moonrise':
                 if (flagShowVisuals) {
-                    new Moonrise(canvasRef.current);
+                    sceneRef.current = new Moonrise(canvasRef.current);
                 }
                 break;
             case 'mornings':
                 if (flagShowVisuals) {
-                    new Mornings(canvasRef.current);
+                    sceneRef.current = new Mornings(canvasRef.current);
                 }
                 break;
         }
-    }, []);
-
-    const canvasRef = useRef(null);
+    }, [flagShowVisuals, id]);
 
     return (
-        <canvas id='canvas-viz' className='fullscreen' ref={canvasRef} />
+        <Canvas
+            id='canvas-viz'
+            className='fullscreen'
+            onLoad={(canvas) => canvasRef.current = canvas}
+        />
     )
 
 }
-
-export default CanvasViz;

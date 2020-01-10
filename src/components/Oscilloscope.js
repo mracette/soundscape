@@ -1,85 +1,81 @@
-/* eslint-disable */ 
-
 // libs
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
+
+// components
+import { Canvas } from '../components/Canvas';
+
+// hooks
+import { useAnimationFrame } from '../hooks/useAnimationFrame';
 
 // styles
 import '../styles/components/Oscilloscope.scss';
 
 const Oscilloscope = (props) => {
 
-    const canvasRef = useRef(null);
-    let canvasCtx, canvasWidth, canvasHeight;
+    const canvasRef = React.useRef(null);
+    const contextRef = React.useRef(null);
 
-    useEffect(() => {
-
-        canvasCtx = canvasRef.current.getContext("2d");
-        
-        canvasWidth = canvasRef.current.width;
-        canvasHeight = canvasRef.current.height;
-
-        canvasCtx.lineWidth = 6.5;
-        canvasCtx.strokeStyle = props.spectrumFunction ? 
-            props.spectrumFunction(props.index / props.groupCount) :
-            'rgb(255, 255, 255)';
-
-        draw();
-
-    }, [])
-
-    const draw = () => {
+    const render = React.useCallback((canvas, context) => {
 
         // clear previous draw
-        canvasCtx.clearRect(0, 0, canvasWidth, canvasHeight);
+        context.clearRect(0, 0, canvas.width, canvas.height);
 
         // get time domain data
         const dataArray = props.analyser.getTimeData();
 
-        const sliceWidth = canvasWidth / (dataArray.length - 1);
+        const sliceWidth = canvas.width / (dataArray.length - 1);
 
         let x = 0;
         let prevX, prevY
-        
-        
+
+
         dataArray.map((d, i) => {
 
-            canvasCtx.beginPath();
+            context.beginPath();
 
-            if(props.gradient) {
-                canvasCtx.strokeStyle = props.spectrumFunction(props.index / props.groupCount + i / (dataArray.length * props.groupCount));
+            if (props.gradient) {
+                context.strokeStyle = props.spectrumFunction(props.index / props.groupCount + i / (dataArray.length * props.groupCount));
             }
 
             const v = d / 128.0;
 
-            const y = v * canvasHeight / 2;
+            const y = v * canvas.height / 2;
 
-            if(x === 0) {
-                canvasCtx.moveTo(x, y);
+            if (x === 0) {
+                context.moveTo(x, y);
             } else {
-                canvasCtx.moveTo(prevX, prevY);
+                context.moveTo(prevX, prevY);
             }
 
-            canvasCtx.lineTo(x, y);
+            context.lineTo(x, y);
 
             prevX = x;
             prevY = y;
 
             x += sliceWidth;
-            
-            canvasCtx.stroke();
 
+            context.stroke();
         });
 
-        requestAnimationFrame(draw);
+    }, [props]);
 
-    }
+    useAnimationFrame(() => render(canvasRef.current, contextRef.current));
 
-    return (
-        <div id = 'oscilloscope'>
-            <canvas 
-                id = 'oscilloscope-canvas' ref = {canvasRef}/>
+    return React.useMemo(() => (
+        <div id='oscilloscope'>
+            <Canvas
+                id='oscilloscope-canvas'
+                onLoad={(canvas) => {
+                    canvasRef.current = canvas;
+                    contextRef.current = canvas.getContext('2d');
+                    contextRef.current.lineWidth = 5;
+                }}
+                onResize={() => {
+                    render(canvasRef.current, contextRef.current);
+                }}
+            />
         </div>
-    )
+    ), []);
 
 }
 

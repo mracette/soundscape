@@ -5,7 +5,7 @@ import React from 'react';
 import anime from 'animejs';
 
 // components
-import CanvasViz from './CanvasViz';
+import { CanvasViz } from './CanvasViz';
 import EffectsPanel from './EffectsPanel';
 import FreqBands from './FreqBands';
 import MenuButtonParent from './MenuButtonParent';

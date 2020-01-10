@@ -8,7 +8,6 @@ export default class SceneManager {
 
     constructor(canvas, analyserArray) {
 
-        this.that = this;
         this.analyserArray = analyserArray;
         this.canvas = canvas;
         this.clock = new THREE.Clock(true);
@@ -134,7 +133,10 @@ export default class SceneManager {
         return helpers;
     }
 
-    onWindowResize(newWidth, newHeight) {
+    onWindowResize() {
+        console.log('resize');
+        const newWidth = window.width;
+        const newHeight = window.height;
         this.screenDimensions.width = newWidth;
         this.screenDimensions.height = newHeight;
         this.camera.aspect = newWidth / newHeight;
