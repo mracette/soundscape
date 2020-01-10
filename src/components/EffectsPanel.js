@@ -1,11 +1,11 @@
 // libs
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 // styles
 import '../styles/components/EffectsPanel.scss';
 
 const EffectsPanel = (props) => {
-    
+
     const handleReset = () => {
         // reset hp
         document.getElementById('hp-slider').value = 1;
@@ -16,60 +16,60 @@ const EffectsPanel = (props) => {
         props.handleChangeLP(100);
 
         // reset spaciousness
-        document.getElementById('spaciousness-slider').value = 1; 
+        document.getElementById('spaciousness-slider').value = 1;
         props.handleChangeSpaciousness(1);
     }
-    
-    useEffect(handleReset, []);
 
-        return (
+    React.useEffect(handleReset, []);
 
-            <div id = 'effects-panel'>
+    return (
 
-                <h2>Effects</h2>
+        <div id='effects-panel'>
 
-                <div>
-                    <button 
-                        id = 'effects-panel-reset'
-                        onClick = {handleReset}
-                    >
-                        Reset
+            <h2>Effects</h2>
+
+            <div>
+                <button
+                    id='effects-panel-reset'
+                    onClick={handleReset}
+                >
+                    Reset
                     </button>
 
-                    <button 
-                        id = 'effects-panel-randomize'
-                        onClick = {props.handleEffectsRandomize}
-                    >
-                        Randomize
+                <button
+                    id='effects-panel-randomize'
+                    onClick={props.handleEffectsRandomize}
+                >
+                    Randomize
                     </button>
-                </div>
+            </div>
 
-                <div>
+            <div>
                 <h3 className='slider-label'>highpass filter</h3>
                 <input type="range" min="1" max="100" className="slider" id="hp-slider"
-                    onInput = {(e) => {
+                    onInput={(e) => {
                         e.preventDefault();
                         props.handleChangeHP(e.target.value);
                     }}
                 ></input>
                 <h3 className='slider-label'>lowpass filter</h3>
                 <input type="range" min="1" max="100" className="slider" id="lp-slider"
-                    onInput = {(e) => {
+                    onInput={(e) => {
                         e.preventDefault();
                         props.handleChangeLP(e.target.value);
                     }}
                 ></input>
                 <h3 className='slider-label'>space</h3>
                 <input type="range" min="1" max="100" className="slider" id="spaciousness-slider"
-                    onInput = {(e) => {
+                    onInput={(e) => {
                         e.preventDefault();
                         props.handleChangeSpaciousness(e.target.value);
                     }}
                 ></input>
-                </div>
-
             </div>
-        );
+
+        </div>
+    );
 }
 
 export default EffectsPanel;

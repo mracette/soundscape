@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const TAU = Math.PI * 2;
 
 /**
@@ -169,6 +171,9 @@ class Spread {
               i
             });
             break;
+
+          default:
+            throw new Error('Anchor type not valid. Choose from (spacing, endpoints).');
         }
 
         clone.push(value);

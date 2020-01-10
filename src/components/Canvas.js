@@ -1,41 +1,45 @@
 // libs
-import React, { useRef, useEffect } from 'react';
+import React from 'react';
 
 export const Canvas = (props) => {
 
-    const pixelRatio = typeof document !== 'undefined' ? window.devicePixelRatio : 1;
+    const canvasRef = React.useRef(null);
 
-    const canvasRef = useRef(null);
+    React.useEffect(() => {
 
-    const setCanvasSize = () => {
+        const pixelRatio = typeof document !== 'undefined' ? window.devicePixelRatio : 1;
 
-        // resize to device pixel ratio
-        canvasRef.current.clientWidth !== 0 && (canvasRef.current.width = pixelRatio * canvasRef.current.clientWidth);
+        const setCanvasSize = () => {
 
-        // height depends on props.makeSquare
-        if (props.makeSquare) {
-            canvasRef.current.clientHeight !== 0 && (canvasRef.current.height = pixelRatio * canvasRef.current.clientWidth);
-        } else {
-            canvasRef.current.clientHeight !== 0 && (canvasRef.current.height = pixelRatio * canvasRef.current.clientHeight);
+            // resize to device pixel ratio
+            canvasRef.current.clientWidth !== 0 && (canvasRef.current.width = pixelRatio * canvasRef.current.clientWidth);
+
+            // height depends on props.makeSquare
+            if (props.makeSquare) {
+                canvasRef.current.clientHeight !== 0 && (canvasRef.current.height = pixelRatio * canvasRef.current.clientWidth);
+            } else {
+                canvasRef.current.clientHeight !== 0 && (canvasRef.current.height = pixelRatio * canvasRef.current.clientHeight);
+            }
+
+            // trigger the resize callback
+            if (props.resize !== false && props.onResize !== undefined) {
+                props.onResize(canvasRef.current);
+            }
+
         }
 
-        // trigger the resize callback
-        props.resize !== undefined && props.onResize !== undefined && props.onResize(canvasRef.current);
-
-    }
-
-    useEffect(() => {
-
+        // set initial dimensions
         setCanvasSize();
 
-        props.resize !== undefined && window.addEventListener('resize', setCanvasSize);
+        // unless explicity false, add event listener for resize
+        props.resize !== false && window.addEventListener('resize', setCanvasSize);
 
         // trigger the onload callback
         props.onLoad !== undefined && props.onLoad(canvasRef.current);
 
-        return () => props.resize !== undefined && window.removeEventListener('resize', setCanvasSize);
+        return () => props.resize !== false && window.removeEventListener('resize', setCanvasSize);
 
-    }, [setCanvasSize, props])
+    }, [props])
 
     return (
         <canvas

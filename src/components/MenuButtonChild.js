@@ -1,7 +1,5 @@
-/* eslint-disable */
-
 // libs
-import React, { useState, useEffect, useContext } from 'react';
+import React from 'react';
 
 // components
 import MenuButtonContentWrapper from './MenuButtonContentWrapper';
@@ -15,21 +13,23 @@ import '../styles/components/MenuButtonChild.scss';
 
 const MenuButtonChild = (props) => {
 
-    const { backgroundColor } = useContext(ThemeContext);
+    const { autoOpen, setOpenChildIndex, index } = props;
+
+    const { backgroundColor } = React.useContext(ThemeContext);
 
     // track state
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = React.useState(false);
 
     // if another button in the set is open, close this button
-    useEffect(() => { props.openChildIndex !== props.index && setIsOpen(false) }, [props.openChildIndex])
+    React.useEffect(() => { props.openChildIndex !== props.index && setIsOpen(false) }, [props.openChildIndex, props.index])
 
     // open button once if autoOpen === true
-    useEffect(() => {
-        if (props.autoOpen) {
-            props.setOpenChildIndex(props.index);
-            setIsOpen(!isOpen);
+    React.useEffect(() => {
+        if (autoOpen) {
+            setOpenChildIndex(index);
+            setIsOpen(true);
         }
-    }, [])
+    }, [autoOpen, setOpenChildIndex, index])
 
     // calculate the margin needed to expand this child to its outward position
     const marginStyle = ((props.parentWidth + props.width) / 2) + props.separation + (2 * props.separation * (props.index - 1));

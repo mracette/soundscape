@@ -17,6 +17,8 @@ const Oscilloscope = (props) => {
 
     const render = React.useCallback((canvas, context) => {
 
+        contextRef.current.lineWidth = canvas.height / 20;
+
         // clear previous draw
         context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -29,7 +31,7 @@ const Oscilloscope = (props) => {
         let prevX, prevY
 
 
-        dataArray.map((d, i) => {
+        dataArray.forEach((d, i) => {
 
             context.beginPath();
 
@@ -68,10 +70,6 @@ const Oscilloscope = (props) => {
                 onLoad={(canvas) => {
                     canvasRef.current = canvas;
                     contextRef.current = canvas.getContext('2d');
-                    contextRef.current.lineWidth = 5;
-                }}
-                onResize={() => {
-                    render(canvasRef.current, contextRef.current);
                 }}
             />
         </div>

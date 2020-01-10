@@ -19,8 +19,7 @@ const FreqBands = (props) => {
     const { spectrumFunction } = React.useContext(ThemeContext);
     const { bpm, timeSignature } = React.useContext(MusicPlayerContext);
 
-    const secondsPerBeat = 60 / bpm;
-    const secondsPerBar = secondsPerBeat * timeSignature;
+    const secondsPerBar = 60 / bpm * timeSignature;
 
     const canvasRef = React.useRef(null);
     const contextRef = React.useRef(null);
@@ -39,7 +38,7 @@ const FreqBands = (props) => {
         const dataArray = props.analyser.getFrequencyData();
 
         // map time domain data to canvas draw actions
-        dataArray.map((d, i) => {
+        dataArray.forEach((d, i) => {
 
             const vol = (d / 255);
             const cx = canvas.width / 2 + radius * Math.cos((i / props.analyser.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
@@ -65,9 +64,9 @@ const FreqBands = (props) => {
 
         });
 
-    }, []);
+    }, [props, spectrumFunction, secondsPerBar]);
 
-    useAnimationFrame(({ time } = time) => render(canvasRef.current, contextRef.current, time))
+    useAnimationFrame((t) => render(canvasRef.current, contextRef.current, t.time))
 
     return React.useMemo(() => (
         <div id='freq-bands'>
@@ -76,11 +75,10 @@ const FreqBands = (props) => {
                 onLoad={(canvas) => {
                     canvasRef.current = canvas;
                     contextRef.current = canvas.getContext('2d');
-                    contextRef.current.lineWidth = 6.5;
                 }}
             />
         </div>
-    ));
+    ), []);
 
 }
 

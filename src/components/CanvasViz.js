@@ -33,6 +33,8 @@ export const CanvasViz = () => {
                     sceneRef.current = new Mornings(canvasRef.current);
                 }
                 break;
+            default:
+                throw new Error('Song not found');
         }
     }, [flagShowVisuals, id]);
 
