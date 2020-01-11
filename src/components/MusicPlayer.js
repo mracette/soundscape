@@ -1,28 +1,26 @@
-/* eslint-disable */
-
 // libs
 import React from 'react';
 import anime from 'animejs';
 
 // components
 import { CanvasViz } from './CanvasViz';
-import EffectsPanel from './EffectsPanel';
-import FreqBands from './FreqBands';
-import MenuButtonParent from './MenuButtonParent';
-import SongInfoPanel from './SongInfoPanel';
-import ToggleButtonPanel from './ToggleButtonPanel';
+import { EffectsPanel } from './EffectsPanel';
+import { FreqBands } from './FreqBands';
+import { MenuButtonParent } from './MenuButtonParent';
+import { SongInfoPanel } from './SongInfoPanel';
+import { ToggleButtonPanel } from './ToggleButtonPanel';
 
 // other
-import Analyser from '../viz/Analyser';
+import { Analyser } from '../viz/Analyser';
 import { createAudioPlayer } from '../utils/audioUtils';
 import { AudioLooper } from '../classes/AudioLooper';
-import Scheduler from '../classes/Sheduler';
 import { solveExpEquation } from '../utils/mathUtils';
+import { Scheduler } from '../classes/Scheduler';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
 
-class MusicPlayer extends React.Component {
+export class MusicPlayer extends React.Component {
 
     constructor(props) {
         super(props);
@@ -453,5 +451,3 @@ class MusicPlayer extends React.Component {
         );
     }
 }
-
-export default MusicPlayer;

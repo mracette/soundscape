@@ -1,6 +1,4 @@
-/* eslint-disable */ 
-
-class Scheduler {
+export class Scheduler {
 
     constructor(audioCtx) {
 
@@ -30,7 +28,7 @@ class Scheduler {
         const newEventId = this.eventId;
 
         // increment for the next event
-        this.eventId ++;
+        this.eventId++;
 
         // create a dummy buffer to trigger the event
         const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
@@ -40,7 +38,7 @@ class Scheduler {
         // add to schedule queue
         this.queue.push({
             id: this.eventId,
-            name: name || null, 
+            name: name || null,
             time,
             type: 'single',
             source: dummySource
@@ -48,7 +46,7 @@ class Scheduler {
 
         this.eventId++;
 
-        if(callback) {
+        if (callback) {
 
             dummySource.onended = callback;
 
@@ -59,7 +57,7 @@ class Scheduler {
 
         } else {
 
-            const promise = new Promise(resolve => dummySource.onended = () => {resolve(newEventId)});
+            const promise = new Promise(resolve => dummySource.onended = () => { resolve(newEventId) });
 
             // start buffer
             dummySource.start(time - dummyBuffer.duration);
@@ -76,7 +74,7 @@ class Scheduler {
         const newEventId = this.eventId;
 
         // increment for the next event
-        this.eventId ++;
+        this.eventId++;
 
         // create a dummy buffer to trigger the event
         const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
@@ -109,14 +107,14 @@ class Scheduler {
     }
 
     updateQueue() {
-        
-        for(let i = this.repeatingQueue.length - 1; i >= 0; i--) {
-            
-            const event = this.repeatingQueue[i];
-            
-            if(event.time < this.audioCtx.currentTime) {
 
-                this.repeatingQueue.splice(i,1);
+        for (let i = this.repeatingQueue.length - 1; i >= 0; i--) {
+
+            const event = this.repeatingQueue[i];
+
+            if (event.time < this.audioCtx.currentTime) {
+
+                this.repeatingQueue.splice(i, 1);
 
                 // create a dummy buffer to trigger the event
                 const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
@@ -169,27 +167,27 @@ class Scheduler {
 
     cancel(id) {
 
-        for(let i = this.repeatingQueue.length - 1; i >= 0; i--) {
+        for (let i = this.repeatingQueue.length - 1; i >= 0; i--) {
 
             const event = this.repeatingQueue[i];
 
-            if(event.id === id) {
+            if (event.id === id) {
                 window.clearInterval(event.timer);
                 event.source.onended = null;
                 event.source.stop();
-                this.queue.splice(i,1);
+                this.queue.splice(i, 1);
             }
 
         }
 
-        for(let i = this.queue.length - 1; i >= 0; i--) {
+        for (let i = this.queue.length - 1; i >= 0; i--) {
 
             const event = this.queue[i];
 
-            if(event.id === id) {
+            if (event.id === id) {
                 event.source.onended = null;
                 event.source.stop();
-                this.queue.splice(i,1);
+                this.queue.splice(i, 1);
             }
 
         }

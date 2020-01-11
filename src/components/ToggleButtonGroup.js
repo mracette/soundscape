@@ -1,26 +1,24 @@
-/* eslint-disable */
-
 // libs
 import React, { useState, useEffect, useContext } from 'react';
 
 // components
-import ToggleButton from './ToggleButton';
-import Oscilloscope from './Oscilloscope';
+import { ToggleButton } from './ToggleButton';
+import { Oscilloscope } from './Oscilloscope';
 
 // contexts
-import TestingContext from '../contexts/TestingContext';
-import ThemeContext from '../contexts/ThemeContext';
-import LayoutContext from '../contexts/LayoutContext';
+import { TestingContext } from '../contexts/TestingContext';
+import { ThemeContext } from '../contexts/ThemeContext';
+import { LayoutContext } from '../contexts/LayoutContext';
 
 // other
-import Analyser from '../viz/Analyser';
+import { Analyser } from '../viz/Analyser';
 import { loadArrayBuffer } from '../utils/audioUtils';
 
 // styles
 import '../styles/components/ToggleButtonGroup.scss';
 import '../styles/components/Oscilloscope.scss';
 
-const ToggleButtonGroup = (props) => {
+export const ToggleButtonGroup = (props) => {
 
     const { spectrumFunction, groupMuteButton, groupSoloButton } = useContext(ThemeContext);
 
@@ -261,5 +259,3 @@ const ToggleButtonGroup = (props) => {
         </div>
     );
 }
-
-export default ToggleButtonGroup;

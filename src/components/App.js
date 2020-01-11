@@ -1,11 +1,9 @@
-/* eslint-disable */
-
 // libs
 import React from 'react';
 
 // components
-import AppWrap from './AppWrap';
-import WebGLUnavailable from './WebGLUnavailable';
+import { AppWrap } from './AppWrap';
+import { WebGLUnavailable } from './WebGLUnavailable';
 
 // other
 import { WEBGL } from 'three/examples/jsm/WebGL';
@@ -13,7 +11,7 @@ import { WEBGL } from 'three/examples/jsm/WebGL';
 // styles
 import '../styles/app.scss';
 
-const App = () => {
+export const App = () => {
 
   // check if webgl is available, if not, show the error page
   if (WEBGL.isWebGLAvailable()) {
@@ -36,5 +34,3 @@ const App = () => {
   }
 
 }
-
-export default App;

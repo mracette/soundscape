@@ -1,29 +1,27 @@
-/* eslint-disable */
-
 // libs
-import React, { useContext, useState } from 'react';
+import React from 'react';
 
 // components
-import ToggleButtonGroup from './ToggleButtonGroup';
+import { ToggleButtonGroup } from './ToggleButtonGroup';
 
 // contexts
-import LayoutContext from '../contexts/ThemeContext';
-import ThemeContext from '../contexts/ThemeContext';
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
+import { LayoutContext } from '../contexts/LayoutContext';
+import { ThemeContext } from '../contexts/ThemeContext';
+import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
 
 // styles
 import '../styles/components/ToggleButtonPanel.scss';
 
-const ToggleButtonPanel = (props) => {
+export const ToggleButtonPanel = (props) => {
 
-    const { vw, vh } = useContext(LayoutContext);
+    const { vw, vh } = React.useContest(LayoutContext);
     const {
         panelMuteButtonBackground,
         panelRandomizeButtonBackground,
-        panelResetButtonBackground } = useContext(ThemeContext);
-    const { groups } = useContext(MusicPlayerContext);
+        panelResetButtonBackground } = React.useContest(ThemeContext);
+    const { groups } = React.useContest(MusicPlayerContext);
 
-    const [soloOverride, setSoloOverride] = useState(false);
+    const [soloOverride, setSoloOverride] = React.useState(false);
 
     const handleAddSolo = (value) => {
         setSoloOverride(value);
@@ -101,5 +99,3 @@ const ToggleButtonPanel = (props) => {
         </div>
     );
 }
-
-export default ToggleButtonPanel;

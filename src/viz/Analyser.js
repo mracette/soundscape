@@ -1,6 +1,6 @@
-export default class Analyser {
-    
-    constructor(context, input, params){
+export class Analyser {
+
+    constructor(context, input, params) {
 
         const defaults = {
             split: false,
@@ -48,8 +48,8 @@ export default class Analyser {
             this.analyser.right.maxDecibels = this.maxDecibels;
             this.analyser.right.smoothingTimeConstant = this.smoothingTimeConstant;
 
-        // if split === false, this.analser is a single stereo analyser and this class' 
-        // getter functions do not take a channel parameter
+            // if split === false, this.analser is a single stereo analyser and this class' 
+            // getter functions do not take a channel parameter
         } else {
             this.analyser = context.createAnalyser();
             this.analyser.fftSize = Math.pow(2, this.power);
@@ -66,7 +66,7 @@ export default class Analyser {
         this.fftSize = this.split ? this.analyser.right.fftSize : this.analyser.fftSize;
 
         // create containers for frequency and time data
-        if(this.split) {
+        if (this.split) {
             this.fftData = {};
             this.timeData = {};
             this.fftData.left = new Uint8Array(this.analyser.left.frequencyBinCount);
@@ -79,21 +79,21 @@ export default class Analyser {
         }
 
         // set routing
-        if(this.split) {
+        if (this.split) {
             this.merger = context.createChannelMerger(2);
             this.analyser.left.connect(this.merger, 0, 0);
             this.analyser.right.connect(this.merger, 0, 1);
 
             // set the output as the channel merger node
             this.output = this.merger;
-        } else {          
+        } else {
             // set the output as the analyser node
             this.output = this.analyser;
         }
     }
 
     getFrequencyData(channel) {
-        if(this.split) {
+        if (this.split) {
             this.analyser[channel].getByteFrequencyData(this.fftData[channel]);
             return this.fftData[channel];
         } else {
@@ -103,7 +103,7 @@ export default class Analyser {
     }
 
     getTimeData(channel) {
-        if(this.split) {
+        if (this.split) {
             this.analyser[channel].getByteTimeDomainData(this.timeData[channel]);
             return this.fftData[channel];
         } else {

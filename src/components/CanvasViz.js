@@ -7,8 +7,8 @@ import Mornings from '../viz/scenes/Mornings';
 import { Canvas } from '../components/Canvas';
 
 // context
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
-import TestingContext from '../contexts/TestingContext';
+import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import { TestingContext } from '../contexts/TestingContext';
 
 // styles
 import '../styles/components/CanvasViz.scss';

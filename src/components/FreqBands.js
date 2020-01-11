@@ -8,13 +8,13 @@ import { Canvas } from '../components/Canvas';
 import { useAnimationFrame } from '../hooks/useAnimationFrame';
 
 // contexts
-import ThemeContext from '../contexts/ThemeContext';
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
+import { ThemeContext } from '../contexts/ThemeContext';
+import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
 
 // styles
 import '../styles/components/FreqBands.scss';
 
-const FreqBands = (props) => {
+export const FreqBands = (props) => {
 
     const { spectrumFunction } = React.useContext(ThemeContext);
     const { bpm, timeSignature } = React.useContext(MusicPlayerContext);
@@ -81,5 +81,3 @@ const FreqBands = (props) => {
     ), []);
 
 }
-
-export default FreqBands;

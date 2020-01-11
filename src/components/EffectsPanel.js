@@ -4,7 +4,7 @@ import React from 'react';
 // styles
 import '../styles/components/EffectsPanel.scss';
 
-const EffectsPanel = (props) => {
+export const EffectsPanel = (props) => {
 
     const handleReset = () => {
         // reset hp
@@ -71,5 +71,3 @@ const EffectsPanel = (props) => {
         </div>
     );
 }
-
-export default EffectsPanel;

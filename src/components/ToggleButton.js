@@ -1,22 +1,20 @@
-/* eslint-disable */
-
 // libs
 import React from 'react';
 import anime from 'animejs/lib/anime.es.js';
 
 // context
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
+import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
 
 // other
 import { createAudioPlayer, nextSubdivision } from '../utils/audioUtils';
 import { AudioLooper } from '../classes/AudioLooper';
-import Scheduler from '../classes/Sheduler';
+import { Scheduler } from '../classes/Scheduler';
 
 // styles
 import '../styles/components/Icon.scss';
 import '../styles/components/ToggleButton.scss';
 
-class ToggleButton extends React.Component {
+export class ToggleButton extends React.Component {
 
     constructor(props) {
         super(props);
@@ -346,5 +344,3 @@ class ToggleButton extends React.Component {
 }
 
 ToggleButton.contextType = MusicPlayerContext;
-
-export default ToggleButton;

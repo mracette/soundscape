@@ -10,7 +10,7 @@ import { useAnimationFrame } from '../hooks/useAnimationFrame';
 // styles
 import '../styles/components/Oscilloscope.scss';
 
-const Oscilloscope = (props) => {
+export const Oscilloscope = (props) => {
 
     const canvasRef = React.useRef(null);
     const contextRef = React.useRef(null);
@@ -76,5 +76,3 @@ const Oscilloscope = (props) => {
     ), []);
 
 }
-
-export default Oscilloscope;

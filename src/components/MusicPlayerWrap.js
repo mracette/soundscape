@@ -2,16 +2,16 @@
 import React from 'react';
 
 // components
-import MusicPlayer from './MusicPlayer';
+import { MusicPlayer } from './MusicPlayer';
 
 // context
-import LayoutContext from '../contexts/LayoutContext';
-import ThemeContext from '../contexts/ThemeContext';
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
-import TestingContext from '../contexts/TestingContext';
+import { LayoutContext } from '../contexts/LayoutContext';
+import { ThemeContext } from '../contexts/ThemeContext';
+import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import { TestingContext } from '../contexts/TestingContext';
 
 // loads configs, inits globals vars, adds listeners, and manages some other settings
-const MusicPlayerWrap = (props) => {
+export const MusicPlayerWrap = (props) => {
 
   return (
     <TestingContext.Consumer>
@@ -39,5 +39,3 @@ const MusicPlayerWrap = (props) => {
   );
 
 }
-
-export default MusicPlayerWrap;

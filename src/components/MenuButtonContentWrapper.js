@@ -2,13 +2,13 @@
 import React, { useContext } from 'react';
 
 // contexts
-import LayoutContext from '../contexts/LayoutContext';
-import ThemeContext from '../contexts/ThemeContext';
+import { LayoutContext } from '../contexts/LayoutContext';
+import { ThemeContext } from '../contexts/ThemeContext';
 
 // styles
 import '../styles/components/MenuButtonContentWrapper.scss';
 
-const MenuButtonContentWrapper = (props) => {
+export const MenuButtonContentWrapper = (props) => {
 
     const { vw, vh } = useContext(LayoutContext);
     const { backgroundColor } = useContext(ThemeContext);
@@ -32,5 +32,3 @@ const MenuButtonContentWrapper = (props) => {
         </div>
     );
 }
-
-export default MenuButtonContentWrapper;

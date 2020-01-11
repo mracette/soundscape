@@ -1,16 +1,14 @@
-/* eslint-disable */
-
 // libs
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import * as d3Chromatic from 'd3-scale-chromatic';
 import * as d3Color from 'd3-color';
 
 // components
-import AppRouter from './AppRouter';
+import { AppRouter } from './AppRouter';
 
 // context
-import LayoutContext from '../contexts/LayoutContext';
-import TestingContext from '../contexts/TestingContext';
+import { LayoutContext } from '../contexts/LayoutContext';
+import { TestingContext } from '../contexts/TestingContext';
 
 // load the app config flat file
 const appConfig = require('../app-config.json');
@@ -28,7 +26,7 @@ const spectrumFunctions = {
 };
 
 // inits globals vars, adds listeners, and manages some other settings
-const AppWrap = () => {
+export const AppWrap = () => {
 
   // run once before the dom is drawn
   const viewportWidth = window.innerWidth;
@@ -37,10 +35,10 @@ const AppWrap = () => {
   document.documentElement.style.setProperty('--vh', `${viewportHeight / 100}px`);
 
   // custom vw and vh vars
-  const [vw, setvw] = useState(viewportWidth / 100);
-  const [vh, setvh] = useState(viewportHeight / 100);
+  const [vw, setvw] = React.useState(viewportWidth / 100);
+  const [vh, setvh] = React.useState(viewportHeight / 100);
 
-  useEffect(() => {
+  React.useEffect(() => {
 
     // gets the inner height/width to act as viewport dimensions (cross-platform benefits)
     const setViewportVars = () => {
@@ -83,5 +81,3 @@ const AppWrap = () => {
   );
 
 }
-
-export default AppWrap;

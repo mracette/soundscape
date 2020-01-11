@@ -10,10 +10,7 @@ import { ComingSoonIcon } from './custom-song-icons/ComingSoonIcon';
 // styles
 import '../styles/components/LandingPage.scss';
 
-// context
-export const landingPageDispatch = React.createContext(null);
-
-const landingPageReducer = (state, action) => {
+export const landingPageReducer = (state, action) => {
     switch (action.type) {
         case 'moonrise':
             return {
@@ -42,8 +39,9 @@ const landingPageReducer = (state, action) => {
     }
 }
 
-function LandingPage() {
+export const LandingPage = () => {
 
+    const landingPageDispatch = React.createContext(null);
     const [selected, dispatch] = React.useReducer(landingPageReducer, { name: null, bpm: null, key: null });
 
     return (
@@ -74,5 +72,3 @@ function LandingPage() {
         </landingPageDispatch.Provider>
     )
 }
-
-export default LandingPage;

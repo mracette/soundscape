@@ -2,16 +2,16 @@
 import React from 'react';
 
 // components
-import MenuButtonContentWrapper from './MenuButtonContentWrapper';
-import Icon from '../components/Icon';
+import { MenuButtonContentWrapper } from './MenuButtonContentWrapper';
+import { Icon } from '../components/Icon';
 
 // contexts
-import ThemeContext from '../contexts/ThemeContext';
+import { ThemeContext } from '../contexts/ThemeContext';
 
 // styles
 import '../styles/components/MenuButtonChild.scss';
 
-const MenuButtonChild = (props) => {
+export const MenuButtonChild = (props) => {
 
     const { autoOpen, setOpenChildIndex, index } = props;
 
@@ -119,5 +119,3 @@ const MenuButtonChild = (props) => {
     )
 
 }
-
-export default MenuButtonChild;

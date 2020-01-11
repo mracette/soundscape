@@ -1,5 +1,2 @@
 import React from 'react';
-
-const LayoutContext = React.createContext();
-
-export default LayoutContext;
+export const LayoutContext = React.createContext();

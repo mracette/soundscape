@@ -1,8 +1,8 @@
 import React from 'react';
 
-function WebGLUnavailable() {
+export const WebGLUnavailable = () => {
 
-    const unsupportedType = !! window.WebGLRenderingContext ? 'graphics card' : 'browser';
+    const unsupportedType = !!window.WebGLRenderingContext ? 'graphics card' : 'browser';
 
     return (
         <div>

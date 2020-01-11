@@ -3,14 +3,14 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 
 // context
-import ThemeContext from '../contexts/ThemeContext';
-import MusicPlayerContext from '../contexts/MusicPlayerContext';
+import { ThemeContext } from '../contexts/ThemeContext';
+import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
 
 // components
-import MusicPlayerWrap from './MusicPlayerWrap';
-import LandingPage from './LandingPage';
+import { MusicPlayerWrap } from './MusicPlayerWrap';
+import { LandingPage } from './LandingPage';
 
-function AppRouter(props) {
+export const AppRouter = (props) => {
     return (
         <div>
             <Router>
@@ -48,5 +48,3 @@ function AppRouter(props) {
         </div>
     )
 }
-
-export default AppRouter;

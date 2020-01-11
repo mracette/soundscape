@@ -1,20 +1,18 @@
-/* eslint-disable */
-
 // libs
 import React, { useState, useEffect, useRef, useContext } from 'react';
 
 // components
-import MenuButtonChild from './MenuButtonChild';
-import Icon from './Icon';
+import { MenuButtonChild } from './MenuButtonChild';
+import { Icon } from './Icon';
 
 // contexts
-import ThemeContext from '../contexts/ThemeContext';
-import LayoutContext from '../contexts/LayoutContext';
+import { ThemeContext } from '../contexts/ThemeContext';
+import { LayoutContext } from '../contexts/LayoutContext';
 
 // styles
 import '../styles/components/MenuButtonParent.scss';
 
-const MenuButtonParent = (props) => {
+export const MenuButtonParent = (props) => {
 
     const { vw, vh } = useContext(LayoutContext);
     const { backgroundColor } = useContext(ThemeContext);
@@ -133,5 +131,3 @@ const MenuButtonParent = (props) => {
     )
 
 }
-
-export default MenuButtonParent;
