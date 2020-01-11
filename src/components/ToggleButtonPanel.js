@@ -5,9 +5,9 @@ import React from 'react';
 import { ToggleButtonGroup } from './ToggleButtonGroup';
 
 // contexts
-import { LayoutContext } from '../contexts/LayoutContext';
-import { ThemeContext } from '../contexts/ThemeContext';
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import { LayoutContext } from '../contexts/contexts';
+import { ThemeContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/ToggleButtonPanel.scss';

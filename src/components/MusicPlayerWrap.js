@@ -5,10 +5,10 @@ import React from 'react';
 import { MusicPlayer } from './MusicPlayer';
 
 // context
-import { LayoutContext } from '../contexts/LayoutContext';
-import { ThemeContext } from '../contexts/ThemeContext';
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
-import { TestingContext } from '../contexts/TestingContext';
+import { LayoutContext } from '../contexts/contexts';
+import { ThemeContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../contexts/contexts';
+import { TestingContext } from '../contexts/contexts';
 
 // loads configs, inits globals vars, adds listeners, and manages some other settings
 export const MusicPlayerWrap = (props) => {

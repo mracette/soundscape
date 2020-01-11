@@ -3,7 +3,7 @@ import React from 'react';
 import anime from 'animejs/lib/anime.es.js';
 
 // context
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // other
 import { createAudioPlayer, nextSubdivision } from '../utils/audioUtils';

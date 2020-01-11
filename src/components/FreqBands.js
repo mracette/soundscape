@@ -8,8 +8,8 @@ import { Canvas } from '../components/Canvas';
 import { useAnimationFrame } from '../hooks/useAnimationFrame';
 
 // contexts
-import { ThemeContext } from '../contexts/ThemeContext';
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import { ThemeContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/FreqBands.scss';

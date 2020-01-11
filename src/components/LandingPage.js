@@ -7,6 +7,9 @@ import { MoonriseIcon } from './custom-song-icons/MoonriseIcon';
 import { MorningsIcon } from './custom-song-icons/MorningsIcon';
 import { ComingSoonIcon } from './custom-song-icons/ComingSoonIcon';
 
+// contexts
+import { landingPageContext } from '../contexts/contexts';
+
 // styles
 import '../styles/components/LandingPage.scss';
 
@@ -41,11 +44,10 @@ export const landingPageReducer = (state, action) => {
 
 export const LandingPage = () => {
 
-    const landingPageDispatch = React.createContext(null);
     const [selected, dispatch] = React.useReducer(landingPageReducer, { name: null, bpm: null, key: null });
 
     return (
-        <landingPageDispatch.Provider value={dispatch}>
+        <landingPageContext.Provider value={{ dispatch }}>
             <div id='landing-page'>
                 <div id='landing-page-header'>
                     <div className='flex-row'><h1 id='landing-page-soundscape-title'>Soundscape</h1></div>
@@ -69,6 +71,6 @@ export const LandingPage = () => {
                     </Link>
                 </div>
             </div>
-        </landingPageDispatch.Provider>
+        </landingPageContext.Provider>
     )
 }

@@ -2,8 +2,8 @@
 import React, { useContext } from 'react';
 
 // contexts
-import { LayoutContext } from '../contexts/LayoutContext';
-import { ThemeContext } from '../contexts/ThemeContext';
+import { LayoutContext } from '../contexts/contexts';
+import { ThemeContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/MenuButtonContentWrapper.scss';

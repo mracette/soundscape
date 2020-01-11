@@ -6,8 +6,8 @@ import { MenuButtonChild } from './MenuButtonChild';
 import { Icon } from './Icon';
 
 // contexts
-import { ThemeContext } from '../contexts/ThemeContext';
-import { LayoutContext } from '../contexts/LayoutContext';
+import { ThemeContext } from '../contexts/contexts';
+import { LayoutContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/MenuButtonParent.scss';

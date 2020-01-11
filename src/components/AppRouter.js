@@ -3,8 +3,8 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 
 // context
-import { ThemeContext } from '../contexts/ThemeContext';
-import { MusicPlayerContext } from '../contexts/MusicPlayerContext';
+import { ThemeContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // components
 import { MusicPlayerWrap } from './MusicPlayerWrap';

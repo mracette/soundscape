@@ -13,4 +13,3 @@ export const WebGLUnavailable = () => {
 
 }
 
-export default WebGLUnavailable;

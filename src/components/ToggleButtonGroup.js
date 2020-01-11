@@ -6,9 +6,9 @@ import { ToggleButton } from './ToggleButton';
 import { Oscilloscope } from './Oscilloscope';
 
 // contexts
-import { TestingContext } from '../contexts/TestingContext';
-import { ThemeContext } from '../contexts/ThemeContext';
-import { LayoutContext } from '../contexts/LayoutContext';
+import { TestingContext } from '../contexts/contexts';
+import { ThemeContext } from '../contexts/contexts';
+import { LayoutContext } from '../contexts/contexts';
 
 // other
 import { Analyser } from '../viz/Analyser';

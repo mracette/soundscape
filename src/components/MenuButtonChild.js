@@ -6,7 +6,7 @@ import { MenuButtonContentWrapper } from './MenuButtonContentWrapper';
 import { Icon } from '../components/Icon';
 
 // contexts
-import { ThemeContext } from '../contexts/ThemeContext';
+import { ThemeContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/MenuButtonChild.scss';

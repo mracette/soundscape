@@ -7,8 +7,8 @@ import * as d3Color from 'd3-color';
 import { AppRouter } from './AppRouter';
 
 // context
-import { LayoutContext } from '../contexts/LayoutContext';
-import { TestingContext } from '../contexts/TestingContext';
+import { LayoutContext } from '../contexts/contexts';
+import { TestingContext } from '../contexts/contexts';
 
 // load the app config flat file
 const appConfig = require('../app-config.json');

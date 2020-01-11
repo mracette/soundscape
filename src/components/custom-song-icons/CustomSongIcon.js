@@ -6,7 +6,7 @@ import { CanvasCoordinates } from '../../utils/crco-utils.module';
 import { Canvas } from '../Canvas';
 
 // context
-import { landingPageReducer } from '../LandingPage';
+import { landingPageContext } from '../../contexts/contexts';
 
 // styles
 import '../../styles/components/LandingPage.scss';
@@ -21,8 +21,8 @@ export function CustomSongIcon(props) {
     const timeRef = React.useRef(0);
     const animationRef = React.useRef();
     const coordsRef = React.useRef();
-    const dispatch = React.useContext(landingPageReducer);
 
+    const { dispatch } = React.useContext(landingPageContext);
     const { animate, id } = props;
 
     React.useEffect(() => {
