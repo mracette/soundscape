@@ -9,6 +9,7 @@ import { Oscilloscope } from './Oscilloscope';
 import { TestingContext } from '../contexts/contexts';
 import { ThemeContext } from '../contexts/contexts';
 import { LayoutContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // other
 import { Analyser } from '../viz/Analyser';
@@ -21,10 +22,22 @@ import '../styles/components/Oscilloscope.scss';
 export const ToggleButtonGroup = (props) => {
 
     const { spectrumFunction, groupMuteButton, groupSoloButton } = useContext(ThemeContext);
+    const { dispatch, audioCtx, audioCtxInitTime, premaster } = useContext(MusicPlayerContext);
+
+    // analyser for this group
+    const groupAnalyserRef = React.useRef(new Analyser(audioCtx, filter, {
+        power: 5,
+        minDecibels: -120,
+        maxDecibels: 0,
+        smoothingTimeConstant: 0
+    }));
+
+    // point that connects voices to group
+    const groupNodeRef = React.useRef(audioCtx.createGain());
 
     const [solo, setSolo] = useState(false);
     const [mute, setMute] = useState(false);
-    const [groupNode, setGroupNode] = useState(props.audioCtx.createGain());
+    const [groupNode, setGroupNode] = useState(audioCtx.createGain());
     const [groupAnalyser, setGroupAnalyser] = useState(null);
     const [currentPoly, setCurrentPoly] = useState(0);
     const [playerOrder, setPlayerOrder] = useState([]);
@@ -33,59 +46,73 @@ export const ToggleButtonGroup = (props) => {
     useEffect(() => {
 
         // create a filter to taper the low end analyser output
-        const filter = props.audioCtx.createBiquadFilter();
+        const filter = audioCtx.createBiquadFilter();
         filter.type = 'lowshelf';
         filter.frequency.value = 120;
         filter.gain.value = -12;
-        groupNode.connect(filter);
+        groupNodeRef.current.connect(filter);
 
-        const analyser = new Analyser(props.audioCtx, filter, {
-            power: 5,
-            minDecibels: -120,
-            maxDecibels: 0,
-            smoothingTimeConstant: 0
-        });
-
-        setGroupAnalyser(analyser);
-
-        // init effects chain entry
-        const effectsChainEntry = props.audioCtx.createGain();
+        const effectsChainEntry = audioCtx.createGain();
         effectsChainEntry.gain.value = 1;
 
-        // init effects chain exit
-        const effectsChainExit = props.audioCtx.createGain();
+        const effectsChainExit = audioCtx.createGain();
         effectsChainExit.gain.value = 1;
 
-        // init highpass
-        const hpFilter = props.audioCtx.createBiquadFilter()
+        const hpFilter = audioCtx.createBiquadFilter()
         hpFilter.type = 'highpass';
         hpFilter.frequency.value = 20;
         hpFilter.Q.value = 0.71;
-        props.handleAddEffect(hpFilter, 'highpass');
 
-        // init lowpass
-        const lpFilter = props.audioCtx.createBiquadFilter()
+        dispatch({
+            type: 'addEffect',
+            payload: {
+                effectType: 'highpass',
+                effect: hpFilter
+            }
+        });
+
+        const lpFilter = audioCtx.createBiquadFilter()
         lpFilter.type = 'lowpass';
         lpFilter.frequency.value = 20000;
         lpFilter.Q.value = 0.71;
-        props.handleAddEffect(lpFilter, 'lowpass');
 
-        // init reverb
-        const reverbDryNode = props.audioCtx.createGain();
+        dispatch({
+            type: 'addEffect',
+            payload: {
+                effectType: 'lowpass',
+                effect: lpFilter
+            }
+        });
+
+        const reverbDryNode = audioCtx.createGain();
         reverbDryNode.gain.value = 1;
-        props.handleAddEffect(reverbDryNode, 'reverb-dry');
 
-        const reverbWetNode = props.audioCtx.createGain();
+        dispatch({
+            type: 'addEffect',
+            payload: {
+                effectType: 'reverb-dry',
+                effect: reverbDryNode
+            }
+        });
+
+        const reverbWetNode = audioCtx.createGain();
         reverbWetNode.gain.value = 0;
-        props.handleAddEffect(reverbWetNode, 'reverb-wet');
 
-        const reverbNode = props.audioCtx.createConvolver();
+        dispatch({
+            type: 'addEffect',
+            payload: {
+                effectType: 'reverb-dry',
+                effect: reverbDryNode
+            }
+        });
+
+        const reverbNode = audioCtx.createConvolver();
 
         // load impulse response to be used in convolution reverb
         const pathToAudio = require('../audio/application/impulse-response.wav');
 
         loadArrayBuffer(pathToAudio).then((arrayBuffer) => {
-            props.audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
+            audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
                 reverbNode.buffer = audioBuffer;
             })
         });
@@ -99,7 +126,7 @@ export const ToggleButtonGroup = (props) => {
         reverbDryNode.connect(effectsChainExit);
         reverbWetNode.connect(reverbNode);
         reverbNode.connect(effectsChainExit);
-        effectsChainExit.connect(props.premaster);
+        effectsChainExit.connect(premaster);
 
     }, [])
 
@@ -192,16 +219,13 @@ export const ToggleButtonGroup = (props) => {
                     props.polyphony === -1 ? props.voices.length : props.polyphony
                 })</h3>
 
-                {groupAnalyser && groupNode &&
-                    <Oscilloscope
-                        index={props.index}
-                        spectrumFunction={spectrumFunction}
-                        groupCount={props.groupCount}
-                        gradient={true}
-                        name={props.name}
-                        analyser={groupAnalyser}
-                    />
-                }
+                <Oscilloscope
+                    index={props.index}
+                    groupCount={props.groupCount}
+                    gradient={true}
+                    name={props.name}
+                    analyser={groupAnalyserRef.current}
+                />
 
                 <button
                     className='solo-button'
@@ -224,34 +248,21 @@ export const ToggleButtonGroup = (props) => {
             <div className='toggle-buttons flex-row'>
 
                 {props.voices.map((voice) => (
-                    <TestingContext.Consumer>
-                        {testingContext => (
-                            <LayoutContext.Consumer>
-                                {layoutContext => (
-                                    <ToggleButton
-                                        flags={testingContext.flags}
-                                        vh={layoutContext.vh}
-                                        vw={layoutContext.vw}
-                                        key={voice.name}
-                                        name={voice.name}
-                                        groupName={props.name}
-                                        length={voice.length}
-                                        quantizeLength={voice.quantizeLength}
-                                        handleUpdatePoly={handleUpdatePoly}
-                                        handleResetPoly={handleResetPoly}
-                                        handleUpdateOverrides={handleUpdateOverrides}
-                                        handleAddPlayerReference={props.handleAddPlayerReference}
-                                        override={playerOverrides.indexOf(voice.name) !== -1}
-                                        groupNode={groupNode}
-                                        audioCtx={props.audioCtx}
-                                        audioCtxInitTime={props.audioCtxInitTime}
-                                        effectsChainEntry={props.effectsChainEntry}
-                                        effectsChainExit={props.effectsChainExit}
-                                    />
-                                )}
-                            </LayoutContext.Consumer>
-                        )}
-                    </TestingContext.Consumer>
+                    <ToggleButton
+                        key={voice.name}
+                        name={voice.name}
+                        groupName={props.name}
+                        length={voice.length}
+                        quantizeLength={voice.quantizeLength}
+                        handleUpdatePoly={handleUpdatePoly}
+                        handleResetPoly={handleResetPoly}
+                        handleUpdateOverrides={handleUpdateOverrides}
+                        handleAddPlayerReference={props.handleAddPlayerReference}
+                        override={playerOverrides.indexOf(voice.name) !== -1}
+                        groupNode={groupNode}
+                        effectsChainEntry={props.effectsChainEntry}
+                        effectsChainExit={props.effectsChainExit}
+                    />
                 ))}
 
             </div>

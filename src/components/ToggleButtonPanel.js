@@ -8,18 +8,22 @@ import { ToggleButtonGroup } from './ToggleButtonGroup';
 import { LayoutContext } from '../contexts/contexts';
 import { ThemeContext } from '../contexts/contexts';
 import { MusicPlayerContext } from '../contexts/contexts';
+import { SongContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/ToggleButtonPanel.scss';
 
 export const ToggleButtonPanel = (props) => {
 
-    const { vw, vh } = React.useContest(LayoutContext);
+    const { vw, vh } = React.useContext(LayoutContext);
+
     const {
         panelMuteButtonBackground,
         panelRandomizeButtonBackground,
-        panelResetButtonBackground } = React.useContest(ThemeContext);
-    const { groups } = React.useContest(MusicPlayerContext);
+        panelResetButtonBackground
+    } = React.useContext(ThemeContext);
+
+    const { groups } = React.useContext(SongContext);
 
     const [soloOverride, setSoloOverride] = React.useState(false);
 

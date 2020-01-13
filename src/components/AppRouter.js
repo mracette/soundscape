@@ -4,10 +4,10 @@ import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-d
 
 // context
 import { ThemeContext } from '../contexts/contexts';
-import { MusicPlayerContext } from '../contexts/contexts';
+import { SongContext } from '../contexts/contexts';
 
 // components
-import { MusicPlayerWrap } from './MusicPlayerWrap';
+import { MusicPlayer } from './MusicPlayer';
 import { LandingPage } from './LandingPage';
 
 export const AppRouter = (props) => {
@@ -27,7 +27,7 @@ export const AppRouter = (props) => {
                             })["themes"]
                         }}>
 
-                            <MusicPlayerContext.Provider value={{
+                            <SongContext.Provider value={{
                                 // provide the song's music player config
                                 id: routeProps.match.params.songId,
                                 ...props.appConfig.find((song) => {
@@ -35,9 +35,9 @@ export const AppRouter = (props) => {
                                 })["audio"]
                             }}>
 
-                                <MusicPlayerWrap {...routeProps} />
+                                <MusicPlayer />
 
-                            </MusicPlayerContext.Provider>
+                            </SongContext.Provider>
 
                         </ThemeContext.Provider>
 

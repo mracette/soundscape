@@ -15,18 +15,18 @@ export const MusicPlayerWrap = (props) => {
 
   return (
     <TestingContext.Consumer>
-      {testingContext => (
+      {TestingContext => (
         <LayoutContext.Consumer>
-          {layoutContext => (
+          {LayoutContext => (
             <ThemeContext.Consumer>
-              {themeContext => (
+              {ThemeContext => (
                 <MusicPlayerContext.Consumer>
-                  {musicPlayerContext => (
+                  {MusicPlayerContext => (
                     <MusicPlayer
-                      testingContext={testingContext}
-                      layoutContext={layoutContext}
-                      themeContext={themeContext}
-                      musicPlayerContext={musicPlayerContext}
+                      TestingContext={TestingContext}
+                      LayoutContext={LayoutContext}
+                      ThemeContext={ThemeContext}
+                      MusicPlayerContext={MusicPlayerContext}
                     />
                   )}
                 </MusicPlayerContext.Consumer>
