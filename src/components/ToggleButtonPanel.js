@@ -18,10 +18,12 @@ export const ToggleButtonPanel = (props) => {
     const { vw, vh } = React.useContext(LayoutContext);
 
     const {
-        panelMuteButtonBackground,
-        panelRandomizeButtonBackground,
-        panelResetButtonBackground
+        panelMuteButton,
+        panelRandomizeButton,
+        panelResetButton
     } = React.useContext(ThemeContext);
+
+    const { dispatch, randomize, mute } = React.useContext(MusicPlayerContext);
 
     const { groups } = React.useContext(SongContext);
 
@@ -52,29 +54,29 @@ export const ToggleButtonPanel = (props) => {
                         onClick={props.handleReset}
                     >
                         Reset
-                        </button>
+                    </button>
 
                     <button
                         id='toggle-button-panel-randomize'
                         className={'button-white'}
-                        style={props.randomize ? {
-                            background: panelRandomizeButtonBackground
+                        style={randomize ? {
+                            background: panelRandomizeButton
                         } : undefined}
-                        onClick={props.handleRandomize}
+                        onClick={() => randomize ? dispatch({ type: 'stopRandomize' }) : dispatch({ type: 'startRandomize' })}
                     >
                         Randomize
-                        </button>
+                    </button>
 
                     <button
                         id='toggle-button-panel-mute'
                         className={'button-white'}
-                        style={props.mute ? {
-                            background: panelMuteButtonBackground
+                        style={mute ? {
+                            background: panelMuteButton
                         } : undefined}
-                        onClick={props.handleMute}
+                        onClick={() => mute ? dispatch({ type: 'stopMute' }) : dispatch({ type: 'startMute' })}
                     >
                         Mute
-                        </button>
+                    </button>
 
                 </div>
 
@@ -88,10 +90,12 @@ export const ToggleButtonPanel = (props) => {
                     key={group.name}
                     name={group.name}
                     groupCount={groups.length}
+                    currentPolyphony={props.players.filter((p) => (
+                        p.groupName === group.name && (
+                            p.playerState === 'active' || p.playerState === 'pending-start'
+                        ))).length}
                     polyphony={group.polyphony}
                     voices={group.voices}
-                    handleAddPlayerReference={props.handleAddPlayerReference}
-                    handleAddEffect={props.handleAddEffect}
                     audioCtx={props.audioCtx}
                     audioCtxInitTime={props.audioCtxInitTime}
                     premaster={props.premaster}

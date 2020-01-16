@@ -13,6 +13,7 @@ import { ToggleButtonPanel } from './ToggleButtonPanel';
 // context
 import { MusicPlayerContext } from '../contexts/contexts';
 import { SongContext } from '../contexts/contexts';
+import { TestingContext } from '../contexts/contexts';
 
 // reducers
 import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
@@ -56,6 +57,10 @@ const effectParams = {
 export const MusicPlayer = (props) => {
 
     const {
+        playAmbientTrack
+    } = React.useContext(TestingContext);
+
+    const {
         id,
         timeSignature,
         bpm,
@@ -65,9 +70,9 @@ export const MusicPlayer = (props) => {
 
     const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
         randomize: false,
-        playerReferences: [],
-        groups: [],
+        mute: false,
         players: [],
+        groups: [],
         groupEffects: {
             highpass: [],
             lowpass: [],
@@ -76,6 +81,8 @@ export const MusicPlayer = (props) => {
         }
     });
 
+    const randomizeEventRef = React.useRef();
+    const ambientPlayerRef = React.useRef();
     const audioCtx = React.useRef(new (window.AudioContext || window.webkitAudioContext)());
     const audioCtxInitTime = React.useRef(audioCtx.current.currentTime);
     const scheduler = React.useRef(new Scheduler(audioCtx.current));
@@ -87,18 +94,30 @@ export const MusicPlayer = (props) => {
         smoothingTimeConstanct: 0.25
     }));
 
+    const handleReset = React.useCallback(() => {
+
+        // take the simple route - click the players!
+        const activePlayers = state.players.filter((p) => (p.playerState === 'active' || p.playerState === 'pending-start'));
+        activePlayers.forEach((p) => p.buttonRef.click());
+
+    }, [state.players]);
+
+    // React.useEffect(() => {
+    //     console.log(state.players.map((p) => p.playerState).join(', '));
+    // }, [state.players])
+
     React.useEffect(() => {
 
         audioCtx.current.resume();
         premaster.current.connect(audioCtx.current.destination);
 
-        if (ambientTrack) {
+        if (playAmbientTrack && ambientTrack) {
 
             const pathToAudio = require(`../audio/${id}/ambient-track.mp3`);
 
             createAudioPlayer(audioCtx.current, pathToAudio).then((audioPlayer) => {
 
-                const ambientLoopPlayer = new AudioLooper(audioCtx.current, audioPlayer.buffer, {
+                ambientPlayerRef.current = new AudioLooper(audioCtx.current, audioPlayer.buffer, {
                     bpm,
                     loopLengthBeats: ambientTrackLength * timeSignature,
                     snapToGrid: false,
@@ -108,14 +127,84 @@ export const MusicPlayer = (props) => {
                     destination: premaster.current
                 });
 
-                // ambientLoopPlayer.start();
+                ambientPlayerRef.current.start();
 
             });
 
         }
-    }, [])
+
+        return () => {
+            playAmbientTrack && ambientPlayerRef.current.stop();
+            audioCtx.current.close();
+        };
+
+    }, []);
+
+    // handle randomize state changes
+    React.useEffect(() => {
+
+        const startRandomize = () => {
+
+            const triggerRandomVoice = () => {
+                const random = Math.floor(Math.random() * state.players.length);
+                const button = state.players[random].buttonRef;
+                button.click();
+            }
+
+            randomizeEventRef.current = scheduler.current.scheduleRepeating(
+                audioCtx.current.currentTime + (60 / bpm),
+                (60 / bpm) * 32,
+                () => {
+
+                    const playerMap = state.players.map((p) => p.playerState === 'active' ? 1 : 0)
+                    const activePlayers = playerMap.reduce((a, b) => a + b);
+
+                    // trigger a random voice
+                    triggerRandomVoice();
+
+                    // if less than half of the players are active, trigger an additional voice
+                    if (activePlayers < state.players.length / 2) {
+                        triggerRandomVoice();
+                    }
+
+                }
+            )
+
+        }
+
+        const stopRandomize = () => {
+            scheduler.current.cancel(randomizeEventRef.current);
+        }
+
+        if (state.randomize) {
+            startRandomize();
+        } else {
+            stopRandomize();
+        }
+
+    }, [state.randomize])
+
+    // handle mute state changes
+    React.useEffect(() => {
+
+        const startMute = () => {
+            premaster.current.gain.value = 0;
+        }
+
+        const stopMute = () => {
+            premaster.current.gain.value = 1;
+        }
+
+        if (state.mute) {
+            startMute();
+        } else {
+            stopMute();
+        }
+
+    }, [state.mute])
 
     return (
+
         <MusicPlayerContext.Provider value={{
             ...state,
             audioCtx: audioCtx.current,
@@ -126,6 +215,7 @@ export const MusicPlayer = (props) => {
             dispatch,
             premasterAnalyser: premasterAnalyser.current
         }}>
+
             <FreqBands />
 
             <MenuButtonParent
@@ -138,12 +228,10 @@ export const MusicPlayer = (props) => {
                     autoOpen: true,
                     id: 'toggles',
                     iconName: 'icon-music',
-                    content:
-                        <ToggleButtonPanel
-                        // handleReset={this.handleReset}
-                        // handleRandomize={this.handleRandomize}
-                        // handleMute={this.handleMute}
-                        />
+                    content: <ToggleButtonPanel
+                        handleReset={handleReset}
+                        players={state.players}
+                    />
                 }, {
                     id: 'effects',
                     iconName: 'icon-equalizer',

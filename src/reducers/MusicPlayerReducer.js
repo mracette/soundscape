@@ -10,17 +10,31 @@ export const MusicPlayerReducer = (state, action) => {
                 ...state,
                 randomize: false
             };
+        case 'resetPlayers':
+            state.players.forEach((p) => {
+                if (p.instance.state.playerState === 'active') { p.instance.stopPlayer(false, true); }
+                if (p.instance.state.playerState === 'pending-start') { p.instance.pendingStop(false, true); }
+            })
+            return state;
         case 'addPlayer':
             return {
                 ...state,
-                players: [...state.players, action.payload]
+                players: [...state.players, action.payload.player]
             };
-        case 'mute':
+        case 'updatePlayerState':
+            return {
+                ...state,
+                players: [
+                    ...state.players.filter((p) => p.id !== action.payload.id),
+                    { ...state.players.find((p) => p.id === action.payload.id), playerState: action.payload.newState }
+                ]
+            };
+        case 'startMute':
             return {
                 ...state,
                 mute: true
             };
-        case 'unmute':
+        case 'stopMute':
             return {
                 ...state,
                 mute: false

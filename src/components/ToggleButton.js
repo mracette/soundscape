@@ -20,10 +20,9 @@ import '../styles/components/ToggleButton.scss';
 export const ToggleButton = (props) => {
 
     const buttonRef = React.useRef();
-    const iconRef = React.useRef();
-    const svgAnimationRef = React.useRef();
-    const buttonAnimationRef = React.useRef();
     const playerRef = React.useRef();
+    const animationTargetsRef = React.useRef();
+    const schedulerRef = React.useRef();
 
     const { vh, vw } = React.useContext(LayoutContext);
     const { id, name, timeSignature, bpm } = React.useContext(SongContext);
@@ -36,9 +35,119 @@ export const ToggleButton = (props) => {
     const buttonRadius = vh ? vh * 3.5 : 0;
     const buttonBorder = vh ? vh * 3.5 / 15 : 0;
 
+    const changePlayerState = (newState) => {
+
+        const initialState = newState === 'active' ? 'pending-start' : 'pending-stop';
+
+        // set local state
+        setPlayerState(initialState);
+
+        // update poly count for the group
+        props.handleUpdatePlayerOrder(props.name, initialState);
+
+        // dispatch initial update to music player
+        dispatch({
+            type: 'updatePlayerState',
+            payload: {
+                id: props.name,
+                newState: initialState
+            }
+        });
+
+        // calculate time till next loop start
+        const quantizedStartSeconds = nextSubdivision(
+            audioCtx,
+            audioCtxInitTime,
+            bpm,
+            quantizedStartBeats
+        );
+
+        // schedule a status change
+        schedulerRef.current.scheduleOnce(quantizedStartSeconds).then(() => {
+
+            switch (newState) {
+                case 'active': playerRef.current.start(); break;
+                case 'stopped': playerRef.current.stop(); break;
+            }
+
+            // update local state
+            setPlayerState(newState);
+
+            // dispatch final update to music player
+            dispatch({
+                type: 'updatePlayerState',
+                payload: {
+                    id: props.name,
+                    newState: newState
+                }
+            });
+
+        });
+
+        // convert to millis for animations
+        const quantizedStartMillis = (quantizedStartSeconds - audioCtx.currentTime) * 1000;
+        const animationType = newState === 'stopped' ? 'stop' : 'start';
+        runAnimation(animationType, quantizedStartMillis);
+
+    }
+
+    const runAnimation = (type, duration) => {
+
+        let strokeDashoffset, points, backgroundColor, rotateZ;
+
+        if (type === 'start') {
+
+            rotateZ = '-180';
+            backgroundColor = 'rgba(255, 255, 255, .3)';
+            strokeDashoffset = [0, 2 * Math.PI * (buttonRadius - buttonBorder / 2)];
+            points = [{ value: "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188" }];
+
+        } else if (type === 'stop') {
+
+            rotateZ = '0';
+            backgroundColor = 'rgba(255, 255, 255, 0)';
+            strokeDashoffset = [animationTargetsRef.current.circleSvg.style.strokeDashoffset, 0];
+            points = [{ value: "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100" }];
+
+        }
+
+        // run cirle animation
+        anime({
+            targets: animationTargetsRef.current.circleSvg,
+            strokeDashoffset,
+            duration,
+            easing: 'linear'
+        });
+
+        // run icon animation
+        anime({
+            targets: animationTargetsRef.current.iconPoly,
+            points,
+            duration,
+            easing: 'linear'
+        });
+
+        // run rotate animation
+        anime({
+            targets: [animationTargetsRef.current.iconDiv, animationTargetsRef.current.iconDiv.children],
+            rotateZ,
+            duration,
+            easing: 'linear'
+        });
+
+        // run button animation
+        anime({
+            targets: animationTargetsRef.current.button,
+            backgroundColor,
+            duration,
+            easing: 'easeInCubic'
+        });
+
+    }
+
     React.useEffect(() => {
 
-        const scheduler = new Scheduler(audioCtx);
+        schedulerRef.current = new Scheduler(audioCtx);
         const pathToAudio = require(`../audio/${id}/${props.name}.mp3`);
 
         createAudioPlayer(audioCtx, pathToAudio).then((audioPlayer) => {
@@ -56,15 +165,36 @@ export const ToggleButton = (props) => {
             dispatch({
                 type: 'addPlayer',
                 payload: {
-                    id: props.name,
-                    instance: this,
-                    groupName: props.groupName
+                    player: {
+                        id: props.name,
+                        groupName: props.groupName,
+                        buttonRef: buttonRef.current,
+                        playerState
+                    }
                 }
             });
 
         });
 
+        // store the animation targets based on their relative positions in the DOM
+        animationTargetsRef.current = {
+            button: buttonRef.current,
+            circleSvg: buttonRef.current.children[0],
+            iconDiv: buttonRef.current.children[1],
+            iconSvg: buttonRef.current.children[1].children[0],
+            iconPoly: buttonRef.current.children[1].children[0].children[0],
+        }
+
     }, []);
+
+    React.useEffect(() => {
+        console.log(props.override, props.name);
+        if (props.override && (playerState === 'active' || playerState === 'pending-start')) {
+            // stop player and remove from the override list
+            changePlayerState('stopped');
+            props.handleUpdateOverrides(props.name);
+        }
+    }, [props.override, props.handleUpdateOverrides, props.name, playerState, changePlayerState])
 
     return (
 
@@ -73,13 +203,19 @@ export const ToggleButton = (props) => {
             className='toggle-button'
             ref={buttonRef}
             onClick={() => {
-                // switch (this.state.playerState) {
-                //     case 'stopped': this.startPlayer(false, false); break; // start if stopped
-                //     case 'active': this.stopPlayer(false, false); break; // stop if active
-                //     case 'pending-start': this.pendingStop(); break; // cancel start if triggered on pending-start
-                //     case 'pending-stop': break; // do nothing if triggered on pending-stop
-                //     default: break;
-                // }
+                switch (playerState) {
+                    case 'stopped': // start if stopped
+                        changePlayerState('active');
+                        break;
+                    case 'active': // stop if active
+                        changePlayerState('stopped');
+                        break;
+                    case 'pending-start': // cancel start if triggered on pending-start
+                        changePlayerState('stopped');
+                        break;
+                    case 'pending-stop': break; // do nothing if triggered on pending-stop
+                    default: break;
+                }
             }}
             style={{
                 height: buttonRadius * 2,
@@ -91,6 +227,9 @@ export const ToggleButton = (props) => {
                 className='svg'
                 width={2 * buttonRadius}
                 height={2 * buttonRadius}
+                style={{
+                    strokeDashoffset: playerState === 'active' ? 2 * Math.PI * (buttonRadius - buttonBorder / 2) : 0
+                }}
             >
 
                 <circle
