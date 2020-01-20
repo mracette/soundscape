@@ -68,10 +68,13 @@ export const MusicPlayer = (props) => {
         ambientTrackLength
     } = React.useContext(SongContext);
 
+    const [premasterAnalyser, setPremasterAnalyser] = React.useState(null);
+
     const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
         randomize: false,
         mute: false,
         players: [],
+        analysers: [],
         groups: [],
         groupEffects: {
             highpass: [],
@@ -87,12 +90,6 @@ export const MusicPlayer = (props) => {
     const audioCtxInitTime = React.useRef(audioCtx.current.currentTime);
     const scheduler = React.useRef(new Scheduler(audioCtx.current));
     const premaster = React.useRef(audioCtx.current.createGain());
-    const premasterAnalyser = React.useRef(new Analyser(audioCtx.current, premaster.current, {
-        power: 6,
-        minDecibels: -120,
-        maxDecibels: 0,
-        smoothingTimeConstanct: 0.25
-    }));
 
     const handleReset = React.useCallback(() => {
 
@@ -102,13 +99,19 @@ export const MusicPlayer = (props) => {
 
     }, [state.players]);
 
-    // React.useEffect(() => {
-    //     console.log(state.players.map((p) => p.playerState).join(', '));
-    // }, [state.players])
-
     React.useEffect(() => {
 
         audioCtx.current.resume();
+
+        setPremasterAnalyser(
+            new Analyser(audioCtx.current, premaster.current, {
+                power: 6,
+                minDecibels: -120,
+                maxDecibels: 0,
+                smoothingTimeConstanct: 0.25
+            })
+        );
+
         premaster.current.connect(audioCtx.current.destination);
 
         if (playAmbientTrack && ambientTrack) {
@@ -211,12 +214,13 @@ export const MusicPlayer = (props) => {
             audioCtxInitTime: audioCtxInitTime.current,
             scheduler: scheduler.current,
             premaster: premaster.current,
-            premasterAnalyser: premasterAnalyser.current,
-            dispatch,
-            premasterAnalyser: premasterAnalyser.current
+            dispatch
         }}>
 
-            <FreqBands />
+            {premasterAnalyser &&
+                <FreqBands
+                    premasterAnalyser={premasterAnalyser}
+                />}
 
             <MenuButtonParent
                 name='Menu'
@@ -251,7 +255,7 @@ export const MusicPlayer = (props) => {
                 }]}
             />
 
-            {/* <CanvasViz /> */}
+            <CanvasViz />
 
         </MusicPlayerContext.Provider>
     );

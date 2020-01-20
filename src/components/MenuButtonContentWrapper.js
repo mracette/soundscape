@@ -11,13 +11,13 @@ import '../styles/components/MenuButtonContentWrapper.scss';
 export const MenuButtonContentWrapper = (props) => {
 
     const { vw, vh } = useContext(LayoutContext);
-    const { backgroundColor } = useContext(ThemeContext);
+    const { contentPanelColor } = useContext(ThemeContext);
 
     return (
         <div
             className='menu-button-content'
             style={{
-                backgroundColor,
+                background: contentPanelColor,
                 display: !props.parentIsOpen && 'none',
                 marginTop: props.marginTop,
                 minWidth: props.minWidth,

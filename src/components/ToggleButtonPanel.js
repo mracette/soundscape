@@ -96,11 +96,7 @@ export const ToggleButtonPanel = (props) => {
                         ))).length}
                     polyphony={group.polyphony}
                     voices={group.voices}
-                    audioCtx={props.audioCtx}
-                    audioCtxInitTime={props.audioCtxInitTime}
-                    premaster={props.premaster}
-                    effectsChainEntry={props.effectsChainEntry}
-                    effectsChainExit={props.effectsChainExit}
+                    analyserParams={group.analyser}
                 />
             ))}
 

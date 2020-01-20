@@ -3,6 +3,7 @@ export class Analyser {
     constructor(context, input, params) {
 
         const defaults = {
+            id: null,
             split: false,
             type: 'fft',
             power: 13,
@@ -11,14 +12,9 @@ export class Analyser {
             smoothingTimeConstant: 0.8
         }
 
-        const properties = Object.assign({}, defaults, params);
-
-        Object.keys(defaults).forEach(prop => {
-            this[prop] = properties[prop];
-        })
+        Object.assign(this, { ...defaults, ...params });
 
         this.input = input;
-        this.output = null;
 
         // if split === true, this.analyser is an obj with 'left' and 'right' properties
         // channel data is received by passing 'left' or 'right' into this class' getter functions
@@ -48,9 +44,10 @@ export class Analyser {
             this.analyser.right.maxDecibels = this.maxDecibels;
             this.analyser.right.smoothingTimeConstant = this.smoothingTimeConstant;
 
+        } else {
+
             // if split === false, this.analser is a single stereo analyser and this class' 
             // getter functions do not take a channel parameter
-        } else {
             this.analyser = context.createAnalyser();
             this.analyser.fftSize = Math.pow(2, this.power);
             this.analyser.minDecibels = this.minDecibels;
@@ -78,18 +75,6 @@ export class Analyser {
             this.timeData = new Uint8Array(this.analyser.fftSize);
         }
 
-        // set routing
-        if (this.split) {
-            this.merger = context.createChannelMerger(2);
-            this.analyser.left.connect(this.merger, 0, 0);
-            this.analyser.right.connect(this.merger, 0, 1);
-
-            // set the output as the channel merger node
-            this.output = this.merger;
-        } else {
-            // set the output as the analyser node
-            this.output = this.analyser;
-        }
     }
 
     getFrequencyData(channel) {

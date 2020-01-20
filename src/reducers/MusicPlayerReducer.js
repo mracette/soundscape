@@ -21,6 +21,11 @@ export const MusicPlayerReducer = (state, action) => {
                 ...state,
                 players: [...state.players, action.payload.player]
             };
+        case 'addAnalyser':
+            return {
+                ...state,
+                analysers: [...state.analysers, action.payload.analyser]
+            };
         case 'updatePlayerState':
             return {
                 ...state,

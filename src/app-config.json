@@ -12,6 +12,10 @@
                 {
                     "name": "rhythm",
                     "polyphony": -1,
+                    "analyser": {
+                        "power": 7,
+                        "smoothingTimeConstant": 0.3
+                    },
                     "voices": [
                         {
                             "name": "kick-snare[4]",
@@ -38,6 +42,10 @@
                 {
                     "name": "harmony",
                     "polyphony": 2,
+                    "analyser": {
+                        "power": 9,
+                        "smoothingTimeConstant": 0.95
+                    },
                     "voices": [
                         {
                             "name": "rhodes-arps[4]",
@@ -59,6 +67,10 @@
                 {
                     "name": "bass",
                     "polyphony": 1,
+                    "analyser": {
+                        "power": 5,
+                        "smoothingTimeConstant": 0.85
+                    },
                     "voices": [
                         {
                             "name": "sub-desc[8]",
@@ -80,6 +92,12 @@
                 {
                     "name": "melody",
                     "polyphony": 1,
+                    "analyser": {
+                        "power": 5,
+                        "minDecibels": -120,
+                        "maxDecibels": 0,
+                        "smoothingTimeConstant": 0
+                    },
                     "voices": [
                         {
                             "name": "melody-trance[4]",
@@ -101,6 +119,11 @@
                 {
                     "name": "atmosphere",
                     "polyphony": 3,
+                    "analyser": {
+                        "split": true,
+                        "power": 5,
+                        "smoothingTimeConstant": 0.4
+                    },
                     "voices": [
                         {
                             "name": "atmo-water[4]",
@@ -127,7 +150,8 @@
             ]
         },
         "themes": {
-            "backgroundColor": "rgba(31, 38, 47, 0.65)",
+            "buttonColor": "rgba(31, 38, 47, 1)",
+            "contentPanelColor": "rgba(31, 38, 47, 0.65)",
             "panelResetButton": "rgba(255, 255, 255, 0.3)",
             "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
             "panelMuteButton": "rgba(255, 255, 255, 0.3)",
@@ -148,6 +172,10 @@
                 {
                     "name": "rhythm",
                     "polyphony": -1,
+                    "analyser": {
+                        "power": 5,
+                        "smoothingTimeConstant": 0.85
+                    },
                     "voices": [
                         {
                             "name": "rhythm-drums[4]",
@@ -174,6 +202,10 @@
                 {
                     "name": "harmony",
                     "polyphony": 2,
+                    "analyser": {
+                        "power": 5,
+                        "smoothingTimeConstant": 0.85
+                    },
                     "voices": [
                         {
                             "name": "harmony-one[4]",
@@ -195,6 +227,10 @@
                 {
                     "name": "bass",
                     "polyphony": 1,
+                    "analyser": {
+                        "power": 5,
+                        "smoothingTimeConstant": 0.85
+                    },
                     "voices": [
                         {
                             "name": "bass-one[8]",
@@ -216,6 +252,10 @@
                 {
                     "name": "melody",
                     "polyphony": 1,
+                    "analyser": {
+                        "power": 5,
+                        "smoothingTimeConstant": 0.85
+                    },
                     "voices": [
                         {
                             "name": "melody-one[8]",
@@ -237,6 +277,10 @@
                 {
                     "name": "extras",
                     "polyphony": 3,
+                    "analyser": {
+                        "power": 5,
+                        "smoothingTimeConstant": 0.85
+                    },
                     "voices": [
                         {
                             "name": "extra-sweep[4]",

@@ -1,11 +1,11 @@
 /* eslint-disable */
 
-import SceneManager from '../SceneManager';
+import { SceneManager } from '../SceneManager';
 import { Birds } from '../subjects/birds';
 import * as THREE from 'three';
-import morningsModel from '../../models/soundscape-mornings-test.glb';
+import morningsModel from '../models/mornings/soundscape-mornings-test.glb';
 
-export default class Mornings extends SceneManager {
+export class Mornings extends SceneManager {
 
     constructor(canvas) {
 

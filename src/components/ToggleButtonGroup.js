@@ -6,9 +6,7 @@ import { ToggleButton } from './ToggleButton';
 import { Oscilloscope } from './Oscilloscope';
 
 // contexts
-import { TestingContext } from '../contexts/contexts';
 import { ThemeContext } from '../contexts/contexts';
-import { LayoutContext } from '../contexts/contexts';
 import { MusicPlayerContext } from '../contexts/contexts';
 
 // other
@@ -22,15 +20,14 @@ import '../styles/components/Oscilloscope.scss';
 export const ToggleButtonGroup = (props) => {
 
     const { groupMuteButton, groupSoloButton } = React.useContext(ThemeContext);
-    const { dispatch, audioCtx, audioCtxInitTime, premaster } = React.useContext(MusicPlayerContext);
+    const { dispatch, audioCtx, premaster } = React.useContext(MusicPlayerContext);
 
     // point that connects voices to group
     const groupNodeRef = React.useRef(audioCtx.createGain());
 
-    const [groupAnalyser, setGroupAnalyser] = React.useState(null);
+    const [oAnalyser, setOAnalyser] = React.useState(null);
     const [solo, setSolo] = React.useState(false);
     const [mute, setMute] = React.useState(false);
-    const [currentPoly, setCurrentPoly] = React.useState(0);
     const [playerOrder, setPlayerOrder] = React.useState([]);
     const [playerOverrides, setPlayerOverrides] = React.useState([]);
 
@@ -54,48 +51,16 @@ export const ToggleButtonGroup = (props) => {
         hpFilter.frequency.value = 20;
         hpFilter.Q.value = 0.71;
 
-        dispatch({
-            type: 'addEffect',
-            payload: {
-                effectType: 'highpass',
-                effect: hpFilter
-            }
-        });
-
         const lpFilter = audioCtx.createBiquadFilter()
         lpFilter.type = 'lowpass';
         lpFilter.frequency.value = 20000;
         lpFilter.Q.value = 0.71;
 
-        dispatch({
-            type: 'addEffect',
-            payload: {
-                effectType: 'lowpass',
-                effect: lpFilter
-            }
-        });
-
         const reverbDryNode = audioCtx.createGain();
         reverbDryNode.gain.value = 1;
 
-        dispatch({
-            type: 'addEffect',
-            payload: {
-                effectType: 'reverb-dry',
-                effect: reverbDryNode
-            }
-        });
-
         const reverbWetNode = audioCtx.createGain();
         reverbWetNode.gain.value = 0;
-
-        dispatch({
-            type: 'addEffect',
-            payload: {
-                effectType: 'reverb-dry',
-                effect: reverbDryNode
-            }
-        });
 
         const reverbNode = audioCtx.createConvolver();
 
@@ -119,15 +84,58 @@ export const ToggleButtonGroup = (props) => {
         reverbNode.connect(effectsChainExit);
         effectsChainExit.connect(premaster);
 
-        // analyser for this group
-        const groupAnalyser = new Analyser(audioCtx, filter, {
+        // analyser for the oscilloscope
+        const oAnalyser = new Analyser(audioCtx, filter, {
+            id: `${props.name}-oscilloscope-analyser`,
             power: 5,
             minDecibels: -120,
             maxDecibels: 0,
             smoothingTimeConstant: 0
         });
 
-        setGroupAnalyser(groupAnalyser);
+        // analyser for the group
+        const gAnalyser = new Analyser(audioCtx, effectsChainExit, {
+            id: `${props.name}-analyser`,
+            ...props.analyserParams
+        });
+
+        setOAnalyser(oAnalyser);
+
+        dispatch({
+            type: 'addAnalyser', payload: { analyser: gAnalyser }
+        });
+
+        dispatch({
+            type: 'addEffect',
+            payload: {
+                effectType: 'reverb-dry',
+                effect: reverbDryNode
+            }
+        });
+
+        dispatch({
+            type: 'addEffect',
+            payload: {
+                effectType: 'reverb-dry',
+                effect: reverbDryNode
+            }
+        });
+
+        dispatch({
+            type: 'addEffect',
+            payload: {
+                effectType: 'lowpass',
+                effect: lpFilter
+            }
+        });
+
+        dispatch({
+            type: 'addEffect',
+            payload: {
+                effectType: 'highpass',
+                effect: hpFilter
+            }
+        });
 
     }, []);
 
@@ -217,12 +225,12 @@ export const ToggleButtonGroup = (props) => {
                     props.polyphony === -1 ? props.voices.length : props.polyphony
                 })</h3>
 
-                {groupAnalyser && <Oscilloscope
+                {oAnalyser && <Oscilloscope
                     index={props.index}
                     groupCount={props.groupCount}
                     gradient={true}
                     name={props.name}
-                    analyser={groupAnalyser}
+                    analyser={oAnalyser}
                 />}
 
                 <button
@@ -256,8 +264,6 @@ export const ToggleButtonGroup = (props) => {
                         handleUpdateOverrides={handleUpdateOverrides}
                         override={playerOverrides.indexOf(voice.name) !== -1}
                         groupNode={groupNodeRef.current}
-                        effectsChainEntry={props.effectsChainEntry}
-                        effectsChainExit={props.effectsChainExit}
                     />
                 ))}
 

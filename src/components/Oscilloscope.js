@@ -61,6 +61,7 @@ export const Oscilloscope = (props) => {
             x += sliceWidth;
 
             context.stroke();
+
         });
 
     }, [props]);

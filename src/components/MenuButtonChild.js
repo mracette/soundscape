@@ -15,7 +15,7 @@ export const MenuButtonChild = (props) => {
 
     const { autoOpen, setOpenChildIndex, index } = props;
 
-    const { backgroundColor } = React.useContext(ThemeContext);
+    const { buttonColor, contentPanelColor } = React.useContext(ThemeContext);
 
     // track state
     const [isOpen, setIsOpen] = React.useState(false);
@@ -58,7 +58,7 @@ export const MenuButtonChild = (props) => {
                     setIsOpen(!isOpen);
                 }}
                 style={{
-                    backgroundColor,
+                    background: buttonColor,
                     width: props.width,
                     height: props.height,
                     top: (props.parentHeight - props.height) / 2,
@@ -89,7 +89,7 @@ export const MenuButtonChild = (props) => {
             <div
                 className='arrow'
                 style={{
-                    borderBottomColor: backgroundColor,
+                    borderBottomColor: contentPanelColor,
                     display: !isOpen && 'none',
                     top: props.height + (props.parentHeight - props.height) / 2,
                     left: (props.parentWidth - props.width) / 2 - props.parentHeight / 8,

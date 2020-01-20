@@ -15,7 +15,7 @@ import '../styles/components/MenuButtonParent.scss';
 export const MenuButtonParent = (props) => {
 
     const { vw, vh } = useContext(LayoutContext);
-    const { backgroundColor } = useContext(ThemeContext);
+    const { buttonColor } = useContext(ThemeContext);
 
     // parent button dimensions
     const height = 7 * vh;
@@ -82,7 +82,7 @@ export const MenuButtonParent = (props) => {
                     zIndex: numOfChildren + 1,
                     width,
                     height,
-                    background: backgroundColor
+                    background: buttonColor
                 }}
                 onClick={(e) => {
                     e.preventDefault();

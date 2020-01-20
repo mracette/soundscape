@@ -188,7 +188,6 @@ export const ToggleButton = (props) => {
     }, []);
 
     React.useEffect(() => {
-        console.log(props.override, props.name);
         if (props.override && (playerState === 'active' || playerState === 'pending-start')) {
             // stop player and remove from the override list
             changePlayerState('stopped');
