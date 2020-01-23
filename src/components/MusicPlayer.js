@@ -19,7 +19,7 @@ import { TestingContext } from '../contexts/contexts';
 import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
 
 // other
-import { Analyser } from '../viz/Analyser';
+import { Analyser } from '../classes/Analyser';
 import { createAudioPlayer } from '../utils/audioUtils';
 import { AudioLooper } from '../classes/AudioLooper';
 import { solveExpEquation } from '../utils/mathUtils';

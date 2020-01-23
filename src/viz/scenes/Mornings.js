@@ -1,47 +1,75 @@
 /* eslint-disable */
 
 import { SceneManager } from '../SceneManager';
-import { Birds } from '../subjects/birds';
 import * as THREE from 'three';
-import morningsModel from '../models/mornings/soundscape-mornings-test.glb';
+import houseModel from '../models/mornings/house.glb';
 
 export class Mornings extends SceneManager {
 
     constructor(canvas) {
 
-        super(canvas, null);
+        super(canvas);
 
-        super.init().then(() => {
-            this.birds = new Birds(this.scene, this.camera, this.renderer);
-            this.scene.background = new THREE.Color(0xcccccc);
-            this.loadModels();
-        })
+        Promise.all([
+            super.init(),
+            this.loadModels()
+        ]).then(() => {
+            super.animate()
+        }).catch((err) => {
+            console.log(err);
+        });
 
     }
 
+    initScene() {
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xcccccc);
+        return scene;
+    }
+
+    initLights() {
+        const lights = {
+            ambient: new THREE.AmbientLight(0xffffff, .5)
+        }
+        this.scene.add(lights.ambient);
+        this.lights = lights;
+    }
+
     loadModels() {
-        this.helpers.gltfLoader.load(morningsModel, (gltf) => {
-            console.log(gltf);
-            this.scene.add(gltf.scene);
-            gltf.scene.getObjectByName('Spot').children[0].intensity = .1;
-            gltf.scene.getObjectByName('Sun').children[0].intensity = 10;
-            gltf.scene.children.filter(obj => obj.type === 'Mesh').map((mesh) => {
-                mesh.castShadow = true;
-                mesh.receiveShadow = true;
+
+        return new Promise((resolve, reject) => {
+
+            const loadPromiseArray = []
+
+            loadPromiseArray.push(
+                new Promise((resolve, reject) => {
+                    this.helpers.gltfLoader.load(houseModel, (gltf) => {
+                        console.log(gltf);
+                        this.scene.add(gltf.scene);
+                        // gltf.scene.getObjectByName('Spot').children[0].intensity = .1;
+                        // gltf.scene.getObjectByName('Sun').children[0].intensity = 10;
+                        // gltf.scene.children.filter(obj => obj.type === 'Mesh').map((mesh) => {
+                        //     mesh.castShadow = true;
+                        //     mesh.receiveShadow = true;
+                        // });
+                        resolve();
+                    }, null, (err) => reject(err))
+                })
+            );
+
+            Promise.all(loadPromiseArray).then(() => {
+                resolve();
+            }).catch(() => {
+                reject('Error loading models');
             });
-            //this.camera = gltf.scene.getObjectByName('Camera');
-            // gltf.scene.children.map((obj) => {
-            //     this.scene.add(obj);
-            // })
+
         })
 
-        super.animate();
     }
 
     render() {
         this.controls.fpc.update(this.clock.getDelta());
         this.renderer.render(this.scene, this.camera);
-        this.birds.renderSubject();
     }
 
 }

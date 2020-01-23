@@ -449,10 +449,10 @@ export class Moonrise extends SceneManager {
         this.subjects.pineTrees.children.map((child, i) => {
             const freqIndex = Math.floor(i / 8);
             const rawData = harmonyFreqData.slice([1 + freqIndex])[0];
-            const tranformedData = Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.060);
+            const transformedData = Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.060);
 
             const color = new THREE.Color(this.palette.tropicalGreen);
-            color.lerp(new THREE.Color(this.palette.white), -1.5 + (tranformedData));
+            color.lerp(new THREE.Color(this.palette.white), -1.5 + (transformedData));
 
             child.children[0].material.color.set(color);
         });

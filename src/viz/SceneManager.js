@@ -6,10 +6,10 @@ import FirstPersonControls from './controls/FirstPersonControls';
 
 export class SceneManager {
 
-    constructor(canvas, analyserArray) {
+    constructor(canvas) {
 
-        this.analyserArray = analyserArray;
         this.canvas = canvas;
+
         this.clock = new THREE.Clock(true);
 
         this.screenDimensions = {
@@ -41,14 +41,14 @@ export class SceneManager {
                 this.lights = this.initLights();
                 this.helpers = this.initHelpers();
                 resolve();
-            } catch (e) {
-                console.error(e);
-                reject(e)
+            } catch (err) {
+                reject(err);
             }
         })
     }
 
     animate() {
+        console.log('gong');
         //this.helpers.stats.begin();
         this.render();
         //this.helpers.stats.end();

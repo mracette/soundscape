@@ -10,7 +10,7 @@ import { ThemeContext } from '../contexts/contexts';
 import { MusicPlayerContext } from '../contexts/contexts';
 
 // other
-import { Analyser } from '../viz/Analyser';
+import { Analyser } from '../classes/Analyser';
 import { loadArrayBuffer } from '../utils/audioUtils';
 
 // styles
