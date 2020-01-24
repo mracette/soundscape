@@ -37,7 +37,7 @@ export class SceneManager {
                 this.renderer = this.initRender();
                 this.camera = this.initCamera('perspective');
                 this.controls = this.initControls();
-                this.subjects = {};
+                this.subjects = this.initSubjects();
                 this.lights = this.initLights();
                 this.helpers = this.initHelpers();
                 resolve();
@@ -48,7 +48,6 @@ export class SceneManager {
     }
 
     animate() {
-        console.log('gong');
         //this.helpers.stats.begin();
         this.render();
         //this.helpers.stats.end();
@@ -67,6 +66,7 @@ export class SceneManager {
     initRender() {
 
         const renderer = new THREE.WebGLRenderer({
+            alpha: true,
             canvas: this.canvas,
             antialias: true
         });
@@ -109,6 +109,10 @@ export class SceneManager {
         };
 
         return controls;
+    }
+
+    initSubjects() {
+
     }
 
     initLights() {
