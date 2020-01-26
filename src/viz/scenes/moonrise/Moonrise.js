@@ -1,15 +1,15 @@
 // libs
 import * as THREE from 'three';
 import * as d3Chromatic from 'd3-scale-chromatic';
-import { linToLog } from '../../utils/mathUtils';
-import { regularPolygon } from '../../utils/crco-utils.module.js';
+import { linToLog } from '../../../utils/mathUtils';
+import { regularPolygon } from '../../../utils/crco-utils.module.js';
 
 
-import { SceneManager } from '../SceneManager';
-import { StarQuandrants } from '../subjects/StarQuandrants';
-import lilyModel from '../models/moonrise/lily.gltf';
-import landscapeModel from '../models/moonrise/landscape.gltf';
-import pineTreeModel from '../models/moonrise/pine-tree.gltf';
+import { SceneManager } from '../../SceneManager';
+import { StarQuandrants } from '../../subjects/StarQuandrants';
+import lilyModel from '../../models/moonrise/lily.gltf';
+import landscapeModel from '../../models/moonrise/landscape.gltf';
+import pineTreeModel from '../../models/moonrise/pine-tree.gltf';
 
 export class Moonrise extends SceneManager {
 

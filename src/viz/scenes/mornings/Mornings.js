@@ -1,20 +1,35 @@
 // libs
 import * as THREE from 'three';
-import { SceneManager } from '../SceneManager';
-import FirstPersonControls from '../controls/FirstPersonControls';
+import { SceneManager } from '../../SceneManager';
+import FirstPersonControls from '../../controls/FirstPersonControls';
 
 // models
-import houseModel from '../models/mornings/house.glb';
-import tableModel from '../models/mornings/table.glb';
-import flowerModel from '../models/mornings/flowers.glb';
-import spiralPlantModel from '../models/mornings/spiral_plant.glb';
-import bookcaseModel from '../models/mornings/bookcase.glb';
+import houseModel from '../../models/mornings/house.glb';
+import tableModel from '../../models/mornings/table.glb';
+import flowerModel from '../../models/mornings/flowers.glb';
+import spiralPlantModel from '../../models/mornings/spiral_plant.glb';
+import bookcaseModel from '../../models/mornings/bookcase.glb';
+
+// rendering
+import { renderBass } from './renderBass';
+import { renderRhythm } from './renderRhythm';
 
 export class Mornings extends SceneManager {
 
-    constructor(canvas) {
+    constructor(canvas, analysers, extras) {
 
         super(canvas);
+
+        // after rendering these once, turn off auto-updates to optimize further renders
+        this.staticObjects = [];
+
+        this.spectrumFunction = extras.spectrumFunction;
+
+        this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
+        this.atmosphereAnalyser = analysers.find(a => a.id === 'atmosphere-analyser');
+        this.harmonyAnalyser = analysers.find(a => a.id === 'harmony-analyser');
+        this.melodyAnalyser = analysers.find(a => a.id === 'melody-analyser');
+        this.bassAnalyser = analysers.find(a => a.id === 'bass-analyser');
 
         this.fovAdjust = true;
         this.fpcControl = false;
@@ -24,6 +39,8 @@ export class Mornings extends SceneManager {
             this.loadModels()
         ]).then(() => {
             this.applySceneSettings();
+            this.render(); // render once to get objects in place
+            this.staticObjects.forEach(mesh => mesh.matrixAutoUpdate = false); // freeze static objects
             super.animate();
         }).catch((err) => {
             console.log(err);
@@ -75,14 +92,14 @@ export class Mornings extends SceneManager {
 
     initLights() {
 
-        const MAPSIZE = 1024;
+        const MAPSIZE = 512;
         const CAMERASIZE = 20;
         const TILT = (10 / 180) * Math.PI;
         const OPP_RATIO = -1 * Math.sin(TILT);
 
         const lights = {
-            ambient: new THREE.AmbientLight(0xffffff, .5),
-            sunlight: new THREE.DirectionalLight(0xffffff, 1),
+            ambient: new THREE.AmbientLight(0xffffff, .35),
+            sunlight: new THREE.DirectionalLight(0xffffff, 0),
             pointOne: new THREE.PointLight(0xffffff, .1)
         }
 
@@ -112,7 +129,7 @@ export class Mornings extends SceneManager {
         this.scene.add(lights.sunlight.target);
         this.scene.add(lights.pointOne);
 
-        this.lights = lights;
+        return lights;
 
     }
 
@@ -142,6 +159,9 @@ export class Mornings extends SceneManager {
 
                         gltf.scene.children.forEach((mesh) => {
 
+                            // every mesh is static
+                            this.staticObjects.push(mesh);
+
                             if (mesh.name === 'god_rays_top' || mesh.name === 'god_rays_bottom') {
                                 mesh.material = this.subjects.godrays.materials[0];
                                 this.subjects.godrays.meshes.push(mesh);
@@ -166,41 +186,105 @@ export class Mornings extends SceneManager {
 
                 // table
                 new Promise((resolve, reject) => {
+
                     this.helpers.gltfLoader.load(tableModel, (gltf) => {
-                        console.log(gltf);
+
                         gltf.scene.children.forEach((mesh) => {
+
+                            // every mesh is static
+                            this.staticObjects.push(mesh);
+
                             mesh.castShadow = true;
+
                             if (mesh.name === 'table') {
                                 mesh.receiveShadow = true;
                             }
+
                         });
+
                         this.scene.add(gltf.scene);
+
                         resolve();
+
                     }, null, () => reject())
                 }),
 
                 // flowers
                 new Promise((resolve, reject) => {
+
                     this.helpers.gltfLoader.load(flowerModel, (gltf) => {
+
+                        gltf.scene.children.forEach((mesh) => {
+
+                            // every mesh is static
+                            this.staticObjects.push(mesh);
+
+                        })
+
                         this.scene.add(gltf.scene);
                         resolve();
+
                     }, null, () => reject())
                 }),
 
                 // spiral plant
                 new Promise((resolve, reject) => {
+
                     this.helpers.gltfLoader.load(spiralPlantModel, (gltf) => {
+
                         this.scene.add(gltf.scene);
+
                         resolve();
+
                     }, null, () => reject())
                 }),
 
                 // bookshelf
                 new Promise((resolve, reject) => {
+
+                    // 3d array: columns, rows, books in cell
+                    this.subjects.books = new Array(4).fill(null).map(d => new Array(5).fill(null).map(d => []));
+
                     this.helpers.gltfLoader.load(bookcaseModel, (gltf) => {
+
+                        const pageMat = new THREE.MeshBasicMaterial({ color: 0xE7DACA, side: THREE.DoubleSide });
+
+                        gltf.scene.children.forEach((mesh) => {
+
+                            // every mesh is static
+                            this.staticObjects.push(mesh);
+
+                            if (mesh.name.includes('book') && mesh.type === 'Group') {
+
+                                console.log(mesh);
+
+                                const bookMesh = mesh.children.find(mesh => mesh.material.name.includes('book'));
+                                const pageMesh = mesh.children.find(mesh => mesh.material.name.includes('page'));
+
+                                pageMesh.material = pageMat;
+                                bookMesh.material = new THREE.MeshBasicMaterial({
+                                    side: THREE.DoubleSide
+                                });
+
+                                bookMesh.userData.baseColor = new THREE.Color(this.spectrumFunction(Math.random()));
+
+                                const name = mesh.name;
+                                const z = parseInt(name.slice(name.length - 1, name.length));
+                                const y = parseInt(name.slice(name.length - 2, name.length - 1));
+                                const x = parseInt(name.slice(name.length - 3, name.length - 2));
+                                this.subjects.books[x][y][z] = bookMesh;
+
+                            }
+
+                        });
+
+                        console.log(this.subjects.books);
+
                         this.scene.add(gltf.scene);
+
                         resolve();
-                    }, null, () => reject())
+
+                    }, null, (err) => reject(err))
                 })
 
             );
@@ -216,7 +300,17 @@ export class Mornings extends SceneManager {
     }
 
     render() {
+
         this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
+
+        renderBass(this.subjects.godrays, this.bassAnalyser, {
+            sunlight: this.lights.sunlight
+        });
+
+        renderRhythm(this.subjects.books, this.rhythmAnalyser, {
+            spectrumFunction: this.spectrumFunction
+        });
+
         this.renderer.render(this.scene, this.camera);
     }
 

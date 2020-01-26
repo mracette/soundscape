@@ -1,6 +1,7 @@
 /* eslint-disable */
 
 import * as THREE from 'three';
+import Stats from 'stats.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import FirstPersonControls from './controls/FirstPersonControls';
 
@@ -27,6 +28,8 @@ export class SceneManager {
         this.render = this.render.bind(this);
         this.onWindowResize = this.onWindowResize.bind(this);
 
+        this.showStats = true;
+
     }
 
     init() {
@@ -48,14 +51,10 @@ export class SceneManager {
     }
 
     animate() {
-        //this.helpers.stats.begin();
+        this.showStats && this.helpers.stats.begin();
         this.render();
-        //this.helpers.stats.end();
+        this.showStats && this.helpers.stats.end();
         requestAnimationFrame(this.animate);
-    }
-
-    render() {
-        // overridden by child class
     }
 
     initScene() {
@@ -68,8 +67,10 @@ export class SceneManager {
         const renderer = new THREE.WebGLRenderer({
             alpha: true,
             canvas: this.canvas,
-            antialias: true
+            antialias: true,
+            powerPreference: "high-performance"
         });
+
         const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
 
         renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
@@ -127,17 +128,24 @@ export class SceneManager {
     }
 
     initHelpers() {
-        // const stats = new Stats();
-        // stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-        // stats.dom.style.left = null;
-        // stats.dom.style.right = '0px';
-        // document.body.appendChild( stats.dom );
+
+        let stats = null;
+
+        if (this.showStats) {
+            stats = new Stats();
+            stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+            stats.dom.style.left = null;
+            stats.dom.style.right = '0px';
+            document.body.appendChild(stats.dom);
+        }
 
         const helpers = {
-            // stats: stats,
+            stats: stats,
             gltfLoader: new GLTFLoader()
         }
+
         return helpers;
+
     }
 
     onWindowResize() {

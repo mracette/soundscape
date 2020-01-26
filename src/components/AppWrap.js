@@ -22,8 +22,8 @@ const flags = {
 
 // define spectrum functions here since they don't do well in json
 const spectrumFunctions = {
-  'moonrise': (n) => d3Color.color(d3Chromatic.interpolateViridis(n)).brighter(1.5),
-  'mornings': (n) => d3Color.color(d3Chromatic.interpolateRdYlBu(.1 + n * .8))
+  'moonrise': (n) => d3Chromatic.interpolateViridis(n).brighter(1.5),
+  'mornings': (n) => d3Chromatic.interpolateRdYlBu(.1 + n * .8)
 };
 
 // inits globals vars, adds listeners, and manages some other settings

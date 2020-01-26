@@ -2,8 +2,8 @@
 import React from 'react';
 
 // scenes
-import { Moonrise } from '../viz/scenes/Moonrise';
-import { Mornings } from '../viz/scenes/Mornings';
+import { Moonrise } from '../viz/scenes/moonrise/Moonrise';
+import { Mornings } from '../viz/scenes/mornings/Mornings';
 
 // components
 import { Canvas } from '../components/Canvas';
@@ -12,12 +12,14 @@ import { Canvas } from '../components/Canvas';
 import { SongContext } from '../contexts/contexts';
 import { TestingContext } from '../contexts/contexts';
 import { MusicPlayerContext } from '../contexts/contexts';
+import { ThemeContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/CanvasViz.scss';
 
 export const CanvasViz = () => {
 
+    const { spectrumFunction } = React.useContext(ThemeContext);
     const { id, groups } = React.useContext(SongContext);
     const { analysers } = React.useContext(MusicPlayerContext);
     const flagShowVisuals = React.useContext(TestingContext).flags.showVisuals;
@@ -35,12 +37,15 @@ export const CanvasViz = () => {
                     break;
                 case 'mornings':
                     if (flagShowVisuals) {
-                        sceneRef.current = new Mornings(canvasRef.current);
+                        sceneRef.current = new Mornings(canvasRef.current, analysers, {
+                            spectrumFunction
+                        });
                     }
                     break;
                 default:
                     throw new Error('Song not found');
             }
+
             window.addEventListener('resize', sceneRef.current.onWindowResize);
             window.addEventListener('orientationchange', sceneRef.current.onWindowResize);
             window.addEventListener('fullscreenchange', sceneRef.current.onWindowResize);
