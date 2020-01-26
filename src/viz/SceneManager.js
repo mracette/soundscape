@@ -104,14 +104,17 @@ export class SceneManager {
     }
 
     initControls() {
-        const controls = {
-            fpc: new FirstPersonControls(this.camera)
-        };
 
+        const controls = {};
+        controls.fpc = new FirstPersonControls(this.camera);
         return controls;
+
     }
 
     initSubjects() {
+
+        const subjects = {};
+        return subjects;
 
     }
 
@@ -138,12 +141,17 @@ export class SceneManager {
     }
 
     onWindowResize() {
-        console.log('resize');
-        const newWidth = window.width;
-        const newHeight = window.height;
+        const newWidth = window.innerWidth;
+        const newHeight = window.innerHeight;
         this.screenDimensions.width = newWidth;
         this.screenDimensions.height = newHeight;
-        this.camera.aspect = newWidth / newHeight;
+        const aspectRatio = newWidth / newHeight;
+
+        if (this.fovAdjust) {
+            this.camera.fov = this.getNewFov(aspectRatio);
+        }
+
+        this.camera.aspect = aspectRatio;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(newWidth, newHeight);
     }

@@ -41,6 +41,10 @@ export const CanvasViz = () => {
                 default:
                     throw new Error('Song not found');
             }
+            window.addEventListener('resize', sceneRef.current.onWindowResize);
+            window.addEventListener('orientationchange', sceneRef.current.onWindowResize);
+            window.addEventListener('fullscreenchange', sceneRef.current.onWindowResize);
+
         }
     }, [flagShowVisuals, id, analysers]);
 
