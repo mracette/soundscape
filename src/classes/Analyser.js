@@ -2,10 +2,15 @@ export class Analyser {
 
     constructor(context, input, params) {
 
+        this.input = input;
+        this.context = context;
+
         const defaults = {
             id: null,
             split: false,
-            type: 'fft',
+            freqResponse: 'byte',
+            timeResponse: 'byte',
+            aWeighted: false,
             power: 13,
             minDecibels: -130,
             maxDecibels: 0,
@@ -13,8 +18,6 @@ export class Analyser {
         }
 
         Object.assign(this, { ...defaults, ...params });
-
-        this.input = input;
 
         // if split === true, this.analyser is an obj with 'left' and 'right' properties
         // channel data is received by passing 'left' or 'right' into this class' getter functions
@@ -64,37 +67,129 @@ export class Analyser {
 
         // create containers for frequency and time data
         if (this.split) {
+
             this.fftData = {};
             this.timeData = {};
-            this.fftData.left = new Uint8Array(this.analyser.left.frequencyBinCount);
-            this.fftData.right = new Uint8Array(this.analyser.right.frequencyBinCount);
-            this.timeData.left = new Uint8Array(this.analyser.left.fftSize);
-            this.timeData.right = new Uint8Array(this.analyser.right.fftSize);
+
+            this.fftData.left = this.freqResponse === 'byte' ?
+                new Uint8Array(this.analyser.left.frequencyBinCount) :
+                new Float32Array(this.analyser.left.frequencyBinCount);
+
+            this.fftData.right = this.freqResponse === 'byte' ?
+                new Uint8Array(this.analyser.right.frequencyBinCount) :
+                new Float32Array(this.analyser.right.frequencyBinCount);
+
+            this.timeData.left = this.timeResponse === 'byte' ?
+                new Float32Array(this.analyser.left.fftSize) :
+                new Uint8Array(this.analyser.left.fftSize);
+
+            this.timeData.right = this.timeResponse === 'byte' ?
+                new Float32Array(this.analyser.right.fftSize) :
+                new Uint8Array(this.analyser.right.fftSize);
+
         } else {
-            this.fftData = new Uint8Array(this.analyser.frequencyBinCount);
-            this.timeData = new Uint8Array(this.analyser.fftSize);
+
+            this.fftData = this.freqResponse === 'byte' ?
+                new Uint8Array(this.analyser.frequencyBinCount) :
+                new Float32Array(this.analyser.left.frequencyBinCount);
+
+            this.timeData = this.timeResponse === 'byte' ?
+                new Uint8Array(this.analyser.fftSize) :
+                new Float32Array(this.analyser.fftSize);
+
         }
+
+        if (this.aWeighted) { this.initAWeights() }
 
     }
 
-    getFrequencyData(channel) {
+    getFrequencyData(channel, start, end) {
+
         if (this.split) {
-            this.analyser[channel].getByteFrequencyData(this.fftData[channel]);
-            return this.fftData[channel];
+
+            if (this.freqResponse === 'byte') {
+
+                // update the array with the latest fft data
+                this.analyser[channel].getByteFrequencyData(this.fftData[channel]);
+                return this.fftData[channel].slice(start, end);
+
+            }
+
+            else if (this.freqResponse === 'float') {
+                this.analyser[channel].getFloatFrequencyData(this.fftData[channel]);
+                return this.fftData[channel].slice(start, end);
+            }
+
         } else {
-            this.analyser.getByteFrequencyData(this.fftData);
-            return this.fftData.slice(this.minBinIndex, this.maxBinIndex);
+
+            if (this.freqResponse === 'byte') {
+
+                // update the array with the latest fft data
+                this.analyser.getByteFrequencyData(this.fftData);
+                return this.fftData.slice(start, end);
+
+            }
+
+            else if (this.freqResponse === 'float') {
+
+                // update the array with the latest fft data
+                this.analyser.getFloatFrequencyData(this.fftData);
+                return this.fftData.slice(start, end);
+
+            }
+
         }
     }
 
     getTimeData(channel) {
+
         if (this.split) {
-            this.analyser[channel].getByteTimeDomainData(this.timeData[channel]);
-            return this.fftData[channel];
+
+            if (this.timeResponse === 'byte') {
+                this.analyser[channel].getByteTimeDomainData(this.timeData[channel]);
+                return this.fftData[channel];
+            }
+
+            else if (this.timeResponse === 'float') {
+                this.analyser[channel].getFloatTimeDomainData(this.timeData[channel]);
+                return this.fftData[channel];
+            }
+
         } else {
-            this.analyser.getByteTimeDomainData(this.timeData);
-            return this.timeData;
+
+            if (this.timeResponse === 'byte') {
+                this.analyser.getByteTimeDomainData(this.timeData);
+                return this.timeData;
+            }
+
+            else if (this.timeResponse === 'float') {
+                this.analyser.getFloatTimeDomainData(this.timeData);
+                return this.timeData;
+            }
+
         }
+
+    }
+
+    initAWeights() {
+
+        const a = (f) => {
+            var f2 = f * f;
+            return 1.2588966 * 148840000 * f2 * f2 /
+                ((f2 + 424.36) * Math.sqrt((f2 + 11599.29) * (f2 + 544496.41)) * (f2 + 148840000));
+        };
+
+        // get the center point of each frequency bin
+        const freqBins = new Array(this.frequencyBinCount);
+        const nyquist = this.context.sampleRate / 2;
+        const binSize = nyquist / this.frequencyBinCount;
+
+        for (let i = 0; i < this.frequencyBinCount; i++) {
+            freqBins[i] = (i + 0.5) * binSize;
+        }
+
+        this.aWeights = freqBins.map(f => a(f));
+
     }
 
 }

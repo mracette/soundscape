@@ -1,22 +1,31 @@
 
 import * as THREE from 'three';
-import * as d3 from 'd3-ease';
 
-const VOL_COEF = 1 / Math.pow(1200, 1.5);
-const BOOK_COUNT = 121;
 const WHITE = new THREE.Color(0xffffff);
-const EASE = d3.easePolyInOut.exponent(.71);
 
 export const renderRhythm = (subjects, analyser, extras) => {
 
     const freqData = analyser.getFrequencyData();
     const freqDataBins = [0, 0, 0, 0, 0];
+    const freqDataCounts = [0, 0, 0, 0, 0];
 
     for (let i = 0, n = analyser.frequencyBinCount; i < n; i++) {
 
-        freqDataBins[Math.floor(i * 5 / n)] += Math.pow(freqData[i], 2);
+        const binNum = Math.floor(i * freqDataBins.length / n);
+        const normalized = analyser.aWeights[i] * freqData[i] / 255;
+        freqDataBins[binNum] += normalized;
+        freqDataCounts[binNum] += 1;
 
     }
+
+    for (let i = 0; i < freqDataBins.length; i++) {
+
+        freqDataBins[i] = freqDataBins[i] / freqDataCounts[i];
+
+    }
+
+    console.log(freqData);
+    console.log(freqDataBins);
 
     for (let i = 0; i < subjects.length; i++) {
 
@@ -29,7 +38,7 @@ export const renderRhythm = (subjects, analyser, extras) => {
             for (let k = 0; k < row.length; k++) {
 
                 const book = row[k];
-                book.material.color = book.userData.baseColor.clone().lerp(WHITE, freqDataBins[j] * VOL_COEF * EASE((j + 1) / 5));
+                book.material.color = book.userData.baseColor.clone().lerp(WHITE, freqDataBins[j]);
 
             }
 
