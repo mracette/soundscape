@@ -1,3 +1,5 @@
+import * as d3 from 'd3-ease';
+
 export class Analyser {
 
     constructor(context, input, params) {
@@ -7,30 +9,81 @@ export class Analyser {
 
         const defaults = {
             id: null,
-            split: false,
-            freqResponse: 'byte',
-            timeResponse: 'byte',
-            aWeighted: false,
             power: 13,
             minDecibels: -130,
             maxDecibels: 0,
-            smoothingTimeConstant: 0.8
+            minFrequency: 20,
+            maxFrequency: 16500,
+            smoothingTimeConstant: 0.8,
+            numBuckets: 10,
+            split: false,
+            aWeighted: false,
+            xEasing: undefined,
+            yEasing: undefined,
+            binMethod: 'center'
         }
 
         Object.assign(this, { ...defaults, ...params });
+        this.fftSize = Math.pow(2, this.power);
+        this.frequencyBinCount = this.fftSize / 2;
+        this.nyquist = this.context.sampleRate / 2;
+        this.binSize = this.nyquist / this.frequencyBinCount;
+        this.adj =
+            this.binMethod === 'center' ? 0.5 :
+                this.binMethod === 'start' ? 0 :
+                    this.binMethod === 'end' ? 1 : 0.5;
 
-        // if split === true, this.analyser is an obj with 'left' and 'right' properties
-        // channel data is received by passing 'left' or 'right' into this class' getter functions
-        if (this.split) {
+        // represents the first and last bin to take to stay true to frequency bounds
+        // errs on the side of preserving more data
+        this.binMin = Math.floor(this.minFrequency / this.binSize);
+        this.binMax = this.frequencyBinCount - Math.floor((this.nyquist - this.maxFrequency) / this.binSize);
 
-            const splitter = context.createChannelSplitter(2);
+        // create once to optimize render loops
+        this.bucketCounts = new Array(this.numBuckets).fill(0, 0, this.numBuckets);
+        this.bucketData = new Array(this.numBuckets).fill(0, 0, this.numBuckets);
+
+        // update the min / max according to the actual calculated above
+        this.minFrequency = (this.binMin + this.adj) * this.binSize;
+        this.maxFrequency = (this.binMax + this.adj) * this.binSize;
+
+        // convert any string easing params into functions
+        if (typeof this.xEasing === 'string') {
+            switch (this.xEasing) {
+                case 'polyIn': this.xEasing = d3.easePolyIn.exponent(this.xExponent); break;
+                case 'polyOut': this.xEasing = d3.easePolyOut.exponent(this.xExponent); break;
+                case 'polyInOut': this.xEasing = d3.easePolyInOut.exponent(this.xExponent); break;
+                default: this.xEasing = (n) => n; break;
+            }
+        }
+
+        if (typeof this.yEasing === 'string') {
+            switch (this.yEasing) {
+                case 'polyIn': this.yEasing = d3.easePolyIn.exponent(this.yExponent); break;
+                case 'polyOut': this.yEasing = d3.easePolyOut.exponent(this.yExponent); break;
+                case 'polyInOut': this.yEasing = d3.easePolyInOut.exponent(this.yExponent); break;
+                default: this.yEasing = (n) => n; break;
+            }
+        }
+
+        this.createAudioNodes();
+        this.createDataStructure();
+        this.aWeighted && this.createAWeights();
+
+    }
+
+    createAudioNodes(split = this.split) {
+
+        if (split) {
+
+            // if split === true, this.analyser is an obj with 'left' and 'right' properties
+            const splitter = this.context.createChannelSplitter(2);
 
             // feed in the input
             this.input.connect(splitter);
 
             this.analyser = {};
-            this.analyser.left = context.createAnalyser();
-            this.analyser.right = context.createAnalyser();
+            this.analyser.left = this.context.createAnalyser();
+            this.analyser.right = this.context.createAnalyser();
 
             splitter.connect(this.analyser.left, 0);
             splitter.connect(this.analyser.right, 1);
@@ -49,9 +102,8 @@ export class Analyser {
 
         } else {
 
-            // if split === false, this.analser is a single stereo analyser and this class' 
-            // getter functions do not take a channel parameter
-            this.analyser = context.createAnalyser();
+            // if split === false, this.analser is a single stereo analyser
+            this.analyser = this.context.createAnalyser();
             this.analyser.fftSize = Math.pow(2, this.power);
             this.analyser.minDecibels = this.minDecibels;
             this.analyser.maxDecibels = this.maxDecibels;
@@ -59,119 +111,32 @@ export class Analyser {
 
             // feed in the input
             this.input.connect(this.analyser);
+
         }
 
-        // bind the bin count and fftSize
-        this.frequencyBinCount = this.split ? this.analyser.right.frequencyBinCount : this.analyser.frequencyBinCount;
-        this.fftSize = this.split ? this.analyser.right.fftSize : this.analyser.fftSize;
+    }
 
-        // create containers for frequency and time data
-        if (this.split) {
+    createDataStructure(split = this.split) {
+
+        if (split) {
 
             this.fftData = {};
             this.timeData = {};
-
-            this.fftData.left = this.freqResponse === 'byte' ?
-                new Uint8Array(this.analyser.left.frequencyBinCount) :
-                new Float32Array(this.analyser.left.frequencyBinCount);
-
-            this.fftData.right = this.freqResponse === 'byte' ?
-                new Uint8Array(this.analyser.right.frequencyBinCount) :
-                new Float32Array(this.analyser.right.frequencyBinCount);
-
-            this.timeData.left = this.timeResponse === 'byte' ?
-                new Float32Array(this.analyser.left.fftSize) :
-                new Uint8Array(this.analyser.left.fftSize);
-
-            this.timeData.right = this.timeResponse === 'byte' ?
-                new Float32Array(this.analyser.right.fftSize) :
-                new Uint8Array(this.analyser.right.fftSize);
+            this.fftData.left = new Uint8Array(this.analyser.left.frequencyBinCount);
+            this.fftData.right = new Uint8Array(this.analyser.right.frequencyBinCount);
+            this.timeData.left = new Uint8Array(this.analyser.left.fftSize);
+            this.timeData.right = new Uint8Array(this.analyser.right.fftSize);
 
         } else {
 
-            this.fftData = this.freqResponse === 'byte' ?
-                new Uint8Array(this.analyser.frequencyBinCount) :
-                new Float32Array(this.analyser.left.frequencyBinCount);
-
-            this.timeData = this.timeResponse === 'byte' ?
-                new Uint8Array(this.analyser.fftSize) :
-                new Float32Array(this.analyser.fftSize);
-
-        }
-
-        if (this.aWeighted) { this.initAWeights() }
-
-    }
-
-    getFrequencyData(channel, start, end) {
-
-        if (this.split) {
-
-            if (this.freqResponse === 'byte') {
-
-                // update the array with the latest fft data
-                this.analyser[channel].getByteFrequencyData(this.fftData[channel]);
-                return this.fftData[channel].slice(start, end);
-
-            }
-
-            else if (this.freqResponse === 'float') {
-                this.analyser[channel].getFloatFrequencyData(this.fftData[channel]);
-                return this.fftData[channel].slice(start, end);
-            }
-
-        } else {
-
-            if (this.freqResponse === 'byte') {
-
-                // update the array with the latest fft data
-                this.analyser.getByteFrequencyData(this.fftData);
-                return this.fftData.slice(start, end);
-
-            }
-
-            else if (this.freqResponse === 'float') {
-
-                // update the array with the latest fft data
-                this.analyser.getFloatFrequencyData(this.fftData);
-                return this.fftData.slice(start, end);
-
-            }
-
-        }
-    }
-
-    getTimeData(channel) {
-
-        if (this.split) {
-
-            if (this.timeResponse === 'byte') {
-                this.analyser[channel].getByteTimeDomainData(this.timeData[channel]);
-                return this.fftData[channel];
-            }
-
-            else if (this.timeResponse === 'float') {
-                this.analyser[channel].getFloatTimeDomainData(this.timeData[channel]);
-                return this.fftData[channel];
-            }
-
-        } else {
-
-            if (this.timeResponse === 'byte') {
-                this.analyser.getByteTimeDomainData(this.timeData);
-                return this.timeData;
-            }
-
-            else if (this.timeResponse === 'float') {
-                this.analyser.getFloatTimeDomainData(this.timeData);
-                return this.timeData;
-            }
+            this.fftData = new Uint8Array(this.analyser.frequencyBinCount);
+            this.timeData = new Uint8Array(this.analyser.fftSize);
 
         }
 
     }
 
-    initAWeights() {
+    createAWeights() {
 
         const a = (f) => {
             var f2 = f * f;
@@ -180,16 +145,90 @@ export class Analyser {
         };
 
         // get the center point of each frequency bin
-        const freqBins = new Array(this.frequencyBinCount);
-        const nyquist = this.context.sampleRate / 2;
-        const binSize = nyquist / this.frequencyBinCount;
+        const bins = [];
+        const binSize = this.nyquist / this.frequencyBinCount;
 
         for (let i = 0; i < this.frequencyBinCount; i++) {
-            freqBins[i] = (i + 0.5) * binSize;
+            bins[i] = (i + 0.5) * binSize;
         }
 
-        this.aWeights = freqBins.map(f => a(f));
+        this.aWeights = bins.map(f => a(f));
 
+    }
+
+    getFrequencyData(channel) {
+
+        if (channel === 'left' || channel === 'right') {
+            this.analyser[channel].getByteFrequencyData(this.fftData[channel]); // refresh in place
+            this.yEasing && this.fftData[channel].forEach((d, i, a) => a[i] = 255 * this.yEasing(d / 255)); // map in place
+            this.aWeights && this.fftData[channel].forEach((d, i, a) => a[i] = this.aWeights[i] * d); // map in place
+            return this.fftData[channel];
+        } else {
+            this.analyser.getByteFrequencyData(this.fftData); // refresh in place
+            this.yEasing && this.fftData.forEach((d, i, a) => a[i] = 255 * this.yEasing(d / 255)); // map in place
+            this.aWeighted && this.fftData.forEach((d, i, a) => a[i] = this.aWeights[i] * d); // map in place
+            return this.fftData;
+        }
+
+    }
+
+    getFrequencyBins(channel) {
+
+        const fBins = [];
+        const data = this.getFrequencyData(channel).slice(this.binMin, this.binMax + 1);
+
+        data.forEach((d, i) => {
+            fBins.push({
+                data: d,
+                freq: (this.binMin + i + this.adj) * this.binSize
+            });
+        });
+
+        return fBins;
+
+    }
+
+    getFrequencyBuckets(channel) {
+
+        const data = this.getFrequencyData(channel);
+
+        // reset buckets
+        this.bucketData.forEach((d, i, a) => {
+            a[i] = 0
+            this.bucketCounts[i] = 0;
+        });
+
+        for (let i = this.binMin; i <= this.binMax; i++) {
+            const n = this.xEasing ?
+                Math.floor(this.xEasing(i / (this.binMax - this.binMin + 1)) * this.numBuckets) :
+                Math.floor((i / (this.binMax - this.binMin + 1)) * this.numBuckets);
+
+            this.bucketData[n] += data[i];
+            this.bucketCounts[n] += 1;
+
+        }
+
+        this.bucketData.forEach((d, i, a) => a[i] = d / this.bucketCounts[i]);
+
+        return this.bucketData;
+
+    }
+
+    getTimeData(channel) {
+
+        if (channel === 'left' || channel === 'right') {
+            this.analyser[channel].getByteTimeDomainData(this.timeData[channel]);
+            return this.timeData[channel];
+        } else {
+            this.analyser.getByteTimeDomainData(this.timeData);
+            return this.timeData;
+        }
+
+    }
+
+    reconnect(newInput) {
+        this.input.disconnect();
+        newInput.connect(this.analyser);
     }
 
 }

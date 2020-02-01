@@ -13,6 +13,7 @@ import bookcaseModel from '../../models/mornings/bookcase.glb';
 // rendering
 import { renderBass } from './renderBass';
 import { renderRhythm } from './renderRhythm';
+import { renderHarmony } from './renderHarmony';
 
 export class Mornings extends SceneManager {
 
@@ -20,10 +21,18 @@ export class Mornings extends SceneManager {
 
         super(canvas);
 
+        this.colors = {
+            plant: new THREE.Color(0x7B9E53)
+        };
+
         // after rendering these once, turn off auto-updates to optimize further renders
         this.staticObjects = [];
-
+        this.renderList = [
+            // 'house', 'plant', 'table', 'bookshelf', 'flower'
+            'plant', 'flower', 'house', 'table', 'bookshelf'
+        ];
         this.spectrumFunction = extras.spectrumFunction;
+        this.bpm = extras.bpm;
 
         this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
         this.atmosphereAnalyser = analysers.find(a => a.id === 'atmosphere-analyser');
@@ -36,10 +45,10 @@ export class Mornings extends SceneManager {
 
         Promise.all([
             super.init(),
-            this.loadModels()
+            this.loadModels(this.renderList)
         ]).then(() => {
             this.applySceneSettings();
-            this.render(); // render once to get objects in place
+            this.render(this.renderList); // render once to get objects in place
             this.staticObjects.forEach(mesh => mesh.matrixAutoUpdate = false); // freeze static objects
             super.animate();
         }).catch((err) => {
@@ -133,15 +142,14 @@ export class Mornings extends SceneManager {
 
     }
 
-    loadModels() {
+    loadModels(modelList) {
 
         return new Promise((resolve, reject) => {
 
             const loadPromiseArray = []
 
-            loadPromiseArray.push(
-
-                // house and god rays
+            // house and god rays
+            modelList.indexOf('house') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
                     this.subjects.godrays = {};
@@ -182,9 +190,11 @@ export class Mornings extends SceneManager {
 
                     }, null, (err) => reject(err));
 
-                }),
+                })
+            );
 
-                // table
+            // table
+            modelList.indexOf('table') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
                     this.helpers.gltfLoader.load(tableModel, (gltf) => {
@@ -207,10 +217,15 @@ export class Mornings extends SceneManager {
                         resolve();
 
                     }, null, () => reject())
-                }),
+                })
+            );
 
-                // flowers
+            // flowers
+            modelList.indexOf('flower') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
+
+                    const stickLeaves = [];
+                    const stickLeavesOne = [];
 
                     this.helpers.gltfLoader.load(flowerModel, (gltf) => {
 
@@ -219,27 +234,66 @@ export class Mornings extends SceneManager {
                             // every mesh is static
                             this.staticObjects.push(mesh);
 
+                            if (mesh.name.includes('stick_leaves_one')) {
+                                mesh.material = new THREE.MeshLambertMaterial({
+                                    color: this.colors.plant,
+                                    emissive: this.colors.plant,
+                                    emissiveIntensity: 0
+                                })
+                                stickLeavesOne.push(mesh);
+                            } else if (mesh.name.includes('stick_leaves')) {
+                                mesh.material = new THREE.MeshLambertMaterial({
+                                    color: this.colors.plant,
+                                    emissive: this.colors.plant,
+                                    emissiveIntensity: 0
+                                })
+                                stickLeaves.push(mesh);
+                            }
+
                         })
 
+                        this.subjects.stickLeaves = stickLeaves;
+                        this.subjects.stickLeavesOne = stickLeavesOne;
+
                         this.scene.add(gltf.scene);
+
                         resolve();
 
                     }, null, () => reject())
-                }),
+                })
+            );
 
-                // spiral plant
+            // spiral plant
+            modelList.indexOf('plant') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
                     this.helpers.gltfLoader.load(spiralPlantModel, (gltf) => {
 
+                        const leaves = [];
+
+                        gltf.scene.children
+                            .filter(mesh => mesh.name.includes('spiral_plant_leaf'))
+                            .forEach(mesh => {
+                                mesh.material = new THREE.MeshLambertMaterial({
+                                    color: this.colors.plant,
+                                    emissive: this.colors.plant,
+                                    emissiveIntensity: 0
+                                })
+                                leaves.push(mesh);
+                            });
+
+                        this.subjects.spiralPlantLeaves = leaves;
+
                         this.scene.add(gltf.scene);
 
                         resolve();
 
-                    }, null, () => reject())
-                }),
+                    }, null, (err) => reject(err))
+                })
+            );
 
-                // bookshelf
+            // bookshelf
+            modelList.indexOf('bookshelf') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
                     // 3d array: columns, rows, books in cell
@@ -247,7 +301,7 @@ export class Mornings extends SceneManager {
 
                     this.helpers.gltfLoader.load(bookcaseModel, (gltf) => {
 
-                        const pageMat = new THREE.MeshBasicMaterial({ color: 0xE7DACA, side: THREE.DoubleSide });
+                        const pageMat = new THREE.MeshLambertMaterial({ color: 0xE7DACA, side: THREE.DoubleSide });
 
                         gltf.scene.children.forEach((mesh) => {
 
@@ -256,22 +310,24 @@ export class Mornings extends SceneManager {
 
                             if (mesh.name.includes('book') && mesh.type === 'Group') {
 
-                                console.log(mesh);
+                                const name = mesh.name;
+                                const z = parseInt(name.slice(name.length - 1, name.length));
+                                const y = parseInt(name.slice(name.length - 2, name.length - 1));
+                                const x = parseInt(name.slice(name.length - 3, name.length - 2));
+                                const r = 0.5 * Math.random() - 0.25;
+                                const c = new THREE.Color(this.spectrumFunction((r + y + .5) / 5));
 
                                 const bookMesh = mesh.children.find(mesh => mesh.material.name.includes('book'));
                                 const pageMesh = mesh.children.find(mesh => mesh.material.name.includes('page'));
 
                                 pageMesh.material = pageMat;
-                                bookMesh.material = new THREE.MeshBasicMaterial({
-                                    side: THREE.DoubleSide
+                                bookMesh.material = new THREE.MeshLambertMaterial({
+                                    color: c,
+                                    side: THREE.DoubleSide,
+                                    emissive: c,
+                                    emissiveIntensity: .2
                                 });
 
-                                bookMesh.userData.baseColor = new THREE.Color(this.spectrumFunction(Math.random()));
-
-                                const name = mesh.name;
-                                const z = parseInt(name.slice(name.length - 1, name.length));
-                                const y = parseInt(name.slice(name.length - 2, name.length - 1));
-                                const x = parseInt(name.slice(name.length - 3, name.length - 2));
                                 this.subjects.books[x][y][z] = bookMesh;
 
                             }
@@ -286,7 +342,6 @@ export class Mornings extends SceneManager {
 
                     }, null, (err) => reject(err))
                 })
-
             );
 
             Promise.all(loadPromiseArray).then(() => {
@@ -301,14 +356,25 @@ export class Mornings extends SceneManager {
 
     render() {
 
+        this.elapsedBeats = this.bpm * this.clock.getElapsedTime() / 60;
         this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
 
-        renderBass(this.subjects.godrays, this.bassAnalyser, {
+        this.renderList.indexOf('house') !== -1 && renderBass(this.subjects.godrays, this.bassAnalyser, {
             sunlight: this.lights.sunlight
         });
 
-        renderRhythm(this.subjects.books, this.rhythmAnalyser, {
+        this.renderList.indexOf('bookshelf') !== -1 && renderRhythm(this.subjects.books, this.rhythmAnalyser, {
             spectrumFunction: this.spectrumFunction
+        });
+
+        this.renderList.indexOf('plant') !== -1 && renderHarmony({
+            leaves: this.subjects.spiralPlantLeaves,
+            stickLeaves: this.subjects.stickLeaves,
+            stickLeavesOne: this.subjects.stickLeavesOne,
+            group: this.subjects.spiralPlantGroup,
+            box: this.subjects.spiralPlantBox
+        }, this.harmonyAnalyser, {
+            beats: this.elapsedBeats
         });
 
         this.renderer.render(this.scene, this.camera);

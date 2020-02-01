@@ -205,8 +205,15 @@
                     "name": "harmony",
                     "polyphony": 2,
                     "analyser": {
-                        "power": 5,
-                        "smoothingTimeConstant": 0.85
+                        "power": 10,
+                        "smoothingTimeConstant": 0.95,
+                        "minFrequency": 115,
+                        "maxFrequency": 650,
+                        "minDecibels": -146,
+                        "maxDecibels": -48,
+                        "xEasing": "none",
+                        "yEasing": "polyIn",
+                        "yExponent": 10
                     },
                     "voices": [
                         {
@@ -305,6 +312,8 @@
         },
         "themes": {
             "buttonColor": "#8FA693",
+            "contentPanelColor": "rgba(255, 255, 255, 0.25)",
+            "contentPanelText": "rgba(0, 0, 0, 1)",
             "panelResetButton": "rgba(255, 255, 255, 0.3)",
             "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
             "panelMuteButton": "rgba(255, 255, 255, 0.3)",

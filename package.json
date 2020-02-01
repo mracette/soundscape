@@ -5,14 +5,16 @@
   "dependencies": {
     "animejs": "^3.1.0",
     "classnames": "^2.2.6",
+    "color-curves": "0.0.7",
+    "crco-utils": "0.0.4",
     "d3-color": "^1.4.0",
     "d3-ease": "^1.0.6",
     "d3-scale-chromatic": "^1.5.0",
-    "node-sass": "^4.12.0",
+    "node-sass": "^4.13.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-router-dom": "^5.0.1",
-    "react-scripts": "3.1.1",
+    "react-scripts": "^3.3.1",
     "stats.js": "^0.17.0",
     "three": "^0.108.0"
   },

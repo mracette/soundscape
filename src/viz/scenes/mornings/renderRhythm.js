@@ -1,4 +1,3 @@
-
 import * as THREE from 'three';
 
 const WHITE = new THREE.Color(0xffffff);
@@ -24,9 +23,6 @@ export const renderRhythm = (subjects, analyser, extras) => {
 
     }
 
-    console.log(freqData);
-    console.log(freqDataBins);
-
     for (let i = 0; i < subjects.length; i++) {
 
         const col = subjects[i];
@@ -38,7 +34,7 @@ export const renderRhythm = (subjects, analyser, extras) => {
             for (let k = 0; k < row.length; k++) {
 
                 const book = row[k];
-                book.material.color = book.userData.baseColor.clone().lerp(WHITE, freqDataBins[j]);
+                book.material.emissiveIntensity = freqDataBins[j];
 
             }
 

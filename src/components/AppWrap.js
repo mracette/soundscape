@@ -2,6 +2,7 @@
 import React from 'react';
 import * as d3Chromatic from 'd3-scale-chromatic';
 import * as d3Color from 'd3-color';
+import { ColorPalette } from 'color-curves'
 
 // components
 import { AppRouter } from './AppRouter';
@@ -9,6 +10,8 @@ import { AppRouter } from './AppRouter';
 // context
 import { LayoutContext } from '../contexts/contexts';
 import { TestingContext } from '../contexts/contexts';
+
+const palette = new ColorPalette('{"type":"exponential","overflow":"clamp","reverse":true,"translation":{"x":-0.924,"y":-0.383},"scale":{"x":1.848,"y":0.765},"rotation":0,"variation":"in"}', '{"type":"linear","overflow":"clamp","reverse":true,"translation":{"x":-0.053,"y":0.479},"scale":{"x":1.053,"y":0.271},"rotation":0}', '{"start":0,"end":1}');
 
 // load the app config flat file
 const appConfig = require('../app-config.json');
@@ -23,7 +26,7 @@ const flags = {
 // define spectrum functions here since they don't do well in json
 const spectrumFunctions = {
   'moonrise': (n) => d3Chromatic.interpolateViridis(n).brighter(1.5),
-  'mornings': (n) => d3Chromatic.interpolateRdYlBu(.1 + n * .8)
+  'mornings': (n) => palette.rgbValueAt(n)
 };
 
 // inits globals vars, adds listeners, and manages some other settings

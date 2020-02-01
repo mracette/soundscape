@@ -20,7 +20,7 @@ import '../styles/components/CanvasViz.scss';
 export const CanvasViz = () => {
 
     const { spectrumFunction } = React.useContext(ThemeContext);
-    const { id, groups } = React.useContext(SongContext);
+    const { id, groups, bpm } = React.useContext(SongContext);
     const { analysers } = React.useContext(MusicPlayerContext);
     const flagShowVisuals = React.useContext(TestingContext).flags.showVisuals;
 
@@ -38,7 +38,8 @@ export const CanvasViz = () => {
                 case 'mornings':
                     if (flagShowVisuals) {
                         sceneRef.current = new Mornings(canvasRef.current, analysers, {
-                            spectrumFunction
+                            spectrumFunction,
+                            bpm
                         });
                     }
                     break;
@@ -46,9 +47,11 @@ export const CanvasViz = () => {
                     throw new Error('Song not found');
             }
 
-            window.addEventListener('resize', sceneRef.current.onWindowResize);
-            window.addEventListener('orientationchange', sceneRef.current.onWindowResize);
-            window.addEventListener('fullscreenchange', sceneRef.current.onWindowResize);
+            if (flagShowVisuals) {
+                window.addEventListener('resize', sceneRef.current.onWindowResize);
+                window.addEventListener('orientationchange', sceneRef.current.onWindowResize);
+                window.addEventListener('fullscreenchange', sceneRef.current.onWindowResize);
+            }
 
         }
     }, [flagShowVisuals, id, analysers]);

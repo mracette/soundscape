@@ -24,8 +24,8 @@ export const ToggleButton = (props) => {
     const animationTargetsRef = React.useRef();
     const schedulerRef = React.useRef();
 
-    const { vh, vw } = React.useContext(LayoutContext);
-    const { id, name, timeSignature, bpm } = React.useContext(SongContext);
+    const { vh } = React.useContext(LayoutContext);
+    const { id, timeSignature, bpm } = React.useContext(SongContext);
     const { dispatch, audioCtx, audioCtxInitTime } = React.useContext(MusicPlayerContext);
     const { flags } = React.useContext(TestingContext);
 
@@ -68,6 +68,7 @@ export const ToggleButton = (props) => {
             switch (newState) {
                 case 'active': playerRef.current.start(); break;
                 case 'stopped': playerRef.current.stop(); break;
+                default: break;
             }
 
             // update local state
