@@ -11,14 +11,15 @@ import { AppRouter } from './AppRouter';
 import { LayoutContext } from '../contexts/contexts';
 import { TestingContext } from '../contexts/contexts';
 
-const palette = new ColorPalette('{"type":"exponential","overflow":"clamp","reverse":true,"translation":{"x":-0.924,"y":-0.383},"scale":{"x":1.848,"y":0.765},"rotation":0,"variation":"in"}', '{"type":"linear","overflow":"clamp","reverse":true,"translation":{"x":-0.053,"y":0.479},"scale":{"x":1.053,"y":0.271},"rotation":0}', '{"start":0,"end":1}');
+// const palette = new ColorPalette('{"type":"exponential","overflow":"clamp","reverse":true,"translation":{"x":-0.924,"y":-0.383},"scale":{"x":1.848,"y":0.765},"rotation":0,"variation":"in"}', '{"type":"linear","overflow":"clamp","reverse":true,"translation":{"x":-0.053,"y":0.479},"scale":{"x":1.053,"y":0.271},"rotation":0}', '{"start":0,"end":1}');
+const palette = new ColorPalette('{"type":"exponential","overflow":"clamp","reverse":true,"translation":{"x":-0.899,"y":-0.445},"scale":{"x":1.854,"y":0.627},"rotation":0,"variation":"in"}', '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":0.531,"y":0.829},"scale":{"x":1,"y":1},"rotation":0,"angleStart":4.053,"angleEnd":6.283,"angleOffset":-0.377,"radius":0.25}', '{"start":0,"end":1}');
 
 // load the app config flat file
 const appConfig = require('../app-config.json');
 
 // global behavior flags for testing
 const flags = {
-  quantizeSamples: false,
+  quantizeSamples: true,
   showVisuals: true,
   playAmbientTrack: false
 };

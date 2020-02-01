@@ -174,9 +174,8 @@
                     "polyphony": -1,
                     "analyser": {
                         "power": 5,
-                        "smoothingTimeConstant": 0.45,
-                        "normalizeByteResponse": true,
-                        "aWeighted": true
+                        "numBuckets": 5,
+                        "smoothingTimeConstant": 0.75
                     },
                     "voices": [
                         {

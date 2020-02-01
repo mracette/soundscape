@@ -22,7 +22,8 @@ export class Mornings extends SceneManager {
         super(canvas);
 
         this.colors = {
-            plant: new THREE.Color(0x7B9E53)
+            plant: new THREE.Color(0x7B9E53),
+            white: new THREE.Color(0xFFFFFF)
         };
 
         // after rendering these once, turn off auto-updates to optimize further renders
@@ -314,8 +315,8 @@ export class Mornings extends SceneManager {
                                 const z = parseInt(name.slice(name.length - 1, name.length));
                                 const y = parseInt(name.slice(name.length - 2, name.length - 1));
                                 const x = parseInt(name.slice(name.length - 3, name.length - 2));
-                                const r = 0.5 * Math.random() - 0.25;
-                                const c = new THREE.Color(this.spectrumFunction((r + y + .5) / 5));
+                                const r = 0.8 * Math.random() - 0.4;
+                                const c = new THREE.Color(this.spectrumFunction(1 - ((r + y + .5) / 5)));
 
                                 const bookMesh = mesh.children.find(mesh => mesh.material.name.includes('book'));
                                 const pageMesh = mesh.children.find(mesh => mesh.material.name.includes('page'));
