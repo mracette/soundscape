@@ -175,6 +175,10 @@
                     "analyser": {
                         "power": 5,
                         "numBuckets": 5,
+                        "minFrequency": 160,
+                        "maxFrequency": 13100,
+                        "minDecibels": -120,
+                        "maxDecibels": -40,
                         "smoothingTimeConstant": 0.75
                     },
                     "voices": [

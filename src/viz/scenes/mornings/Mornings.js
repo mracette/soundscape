@@ -14,6 +14,10 @@ import bookcaseModel from '../../models/mornings/bookcase.glb';
 import { renderBass } from './renderBass';
 import { renderRhythm } from './renderRhythm';
 import { renderHarmony } from './renderHarmony';
+import { renderMelody } from './renderMelody';
+
+// shaders
+import { rgbaVertex, rgbaFragment } from '../../shaders/rgba';
 
 export class Mornings extends SceneManager {
 
@@ -30,7 +34,7 @@ export class Mornings extends SceneManager {
         this.staticObjects = [];
         this.renderList = [
             // 'house', 'plant', 'table', 'bookshelf', 'flower'
-            'plant', 'flower', 'house', 'table', 'bookshelf'
+            'table'
         ];
         this.spectrumFunction = extras.spectrumFunction;
         this.bpm = extras.bpm;
@@ -158,7 +162,7 @@ export class Mornings extends SceneManager {
                     this.subjects.godrays.meshes = [];
 
                     this.subjects.godrays.materials.push(new THREE.MeshBasicMaterial({
-                        color: 0xffffff,
+                        color: this.colors.white,
                         opacity: 0.05,
                         transparent: true,
                         side: THREE.DoubleSide
@@ -200,10 +204,51 @@ export class Mornings extends SceneManager {
 
                     this.helpers.gltfLoader.load(tableModel, (gltf) => {
 
+                        const pageGeo = new THREE.PlaneBufferGeometry(2, 2, 32, 32);
+                        pageGeo.rotateX(-Math.PI / 2);
+                        console.log(pageGeo.attributes.position);
+
                         gltf.scene.children.forEach((mesh) => {
 
-                            // every mesh is static
-                            this.staticObjects.push(mesh);
+                            if (mesh.name === 'left_page_ref' || mesh.name === 'right_page_ref') {
+
+                                const colors = new Array(pageGeo.attributes.position.count * 4)
+
+                                // for (let i = 0; i < pageGeo.attributes.position.count; i++) {
+                                //     const c = i / pageGeo.attributes.position.count;
+                                //     colors.push(c, c, c, 1)
+                                // }
+
+                                const newMesh = mesh.clone();
+                                newMesh.geometry = pageGeo.clone();
+                                newMesh.geometry.addAttribute('customColor', new THREE.Float32BufferAttribute(colors, 4));
+                                newMesh.material = new THREE.ShaderMaterial({
+                                    transparent: true,
+                                    side: THREE.DoubleSide,
+                                    vertexShader: rgbaVertex,
+                                    fragmentShader: rgbaFragment,
+                                    vertexColors: THREE.VertexColors
+                                })
+
+                                this.scene.add(newMesh);
+
+                                mesh.name === 'right_page_ref' && (this.subjects.rightPage = newMesh);
+                                mesh.name === 'left_page_ref' && (this.subjects.leftPage = newMesh);
+
+                            }
+
+                            if (mesh.name === 'steam') {
+                                mesh.material = new THREE.MeshBasicMaterial({
+                                    color: this.colors.white,
+                                    transparent: true,
+                                    side: THREE.DoubleSide,
+                                    opacity: .025
+                                })
+                                this.subjects.steam = mesh;
+                            } else {
+                                // every mesh is static except steam
+                                this.staticObjects.push(mesh);
+                            }
 
                             mesh.castShadow = true;
 
@@ -213,11 +258,12 @@ export class Mornings extends SceneManager {
 
                         });
 
+                        gltf.scene.children.filter(c => c.name.includes('page')).forEach(mesh => gltf.scene.remove(mesh));
                         this.scene.add(gltf.scene);
 
                         resolve();
 
-                    }, null, () => reject())
+                    }, null, (err) => reject(err))
                 })
             );
 
@@ -326,7 +372,7 @@ export class Mornings extends SceneManager {
                                     color: c,
                                     side: THREE.DoubleSide,
                                     emissive: c,
-                                    emissiveIntensity: .2
+                                    emissiveIntensity: .1
                                 });
 
                                 this.subjects.books[x][y][z] = bookMesh;
@@ -334,8 +380,6 @@ export class Mornings extends SceneManager {
                             }
 
                         });
-
-                        console.log(this.subjects.books);
 
                         this.scene.add(gltf.scene);
 
@@ -360,12 +404,22 @@ export class Mornings extends SceneManager {
         this.elapsedBeats = this.bpm * this.clock.getElapsedTime() / 60;
         this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
 
+        this.subjects.steam.rotateY(-.05);
+
+        this.renderList.indexOf('table') !== -1 && renderMelody({
+            leftPage: this.subjects.leftPage,
+            rightPage: this.subjects.rightPage
+        }, this.melodyAnalyser, {
+            spectrumFunction: this.spectrumFunction,
+        });
+
         this.renderList.indexOf('house') !== -1 && renderBass(this.subjects.godrays, this.bassAnalyser, {
             sunlight: this.lights.sunlight
         });
 
         this.renderList.indexOf('bookshelf') !== -1 && renderRhythm(this.subjects.books, this.rhythmAnalyser, {
-            spectrumFunction: this.spectrumFunction
+            spectrumFunction: this.spectrumFunction,
+            beats: this.elapsedBeats
         });
 
         this.renderList.indexOf('plant') !== -1 && renderHarmony({

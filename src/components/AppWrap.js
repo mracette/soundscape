@@ -19,7 +19,7 @@ const appConfig = require('../app-config.json');
 
 // global behavior flags for testing
 const flags = {
-  quantizeSamples: true,
+  quantizeSamples: false,
   showVisuals: true,
   playAmbientTrack: false
 };

@@ -1,6 +1,7 @@
-import * as THREE from 'three';
+import { boundedSin } from 'crco-utils';
 
-const WHITE = new THREE.Color(0xffffff);
+const period = 2;
+const bSin = boundedSin(period, .5, .75);
 
 export const renderRhythm = (subjects, analyser, extras) => {
 
@@ -16,8 +17,10 @@ export const renderRhythm = (subjects, analyser, extras) => {
 
             for (let k = 0; k < row.length; k++) {
 
+                const mod = (i + k) % 2;
+                const p = bSin(extras.beats + mod * period / 2)
                 const book = row[k];
-                book.material.emissiveIntensity = (0.35 * freqData[j]) / 255;
+                book.material.emissiveIntensity = p * freqData[j] / 255;
 
             }
 

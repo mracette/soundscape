@@ -1,12 +1,3 @@
-import * as THREE from 'three';
-import { boundedSin } from 'crco-utils';
-
-const WHITE = new THREE.Color(0xffffff);
-const GREEN = new THREE.Color(0x7B9E53);
-const bSin = boundedSin(4, 0, 1);
-
-// const base = bSin(extras.beats - 4 * i / subjects.length);
-
 export const renderHarmony = (subjects, analyser, extras) => {
 
     const data = analyser.getFrequencyData();
