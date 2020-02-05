@@ -68,7 +68,8 @@ export class SceneManager {
             alpha: true,
             canvas: this.canvas,
             antialias: true,
-            powerPreference: "high-performance"
+            powerPreference: "high-performance",
+            outputEncoding: THREE.sRGBEncoding
         });
 
         const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;

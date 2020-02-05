@@ -1,7 +1,7 @@
 import { boundedSin } from 'crco-utils';
 
 const period = 2;
-const bSin = boundedSin(period, .5, .75);
+const bSin = boundedSin(period, .2, .3);
 
 export const renderRhythm = (subjects, analyser, extras) => {
 
@@ -17,8 +17,8 @@ export const renderRhythm = (subjects, analyser, extras) => {
 
             for (let k = 0; k < row.length; k++) {
 
-                const mod = (i + k) % 2;
-                const p = bSin(extras.beats + mod * period / 2)
+                const mod = (i + k) % 4 / 4;
+                const p = bSin(extras.beats + mod * period / 4)
                 const book = row[k];
                 book.material.emissiveIntensity = p * freqData[j] / 255;
 

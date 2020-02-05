@@ -265,8 +265,14 @@
                     "name": "melody",
                     "polyphony": 1,
                     "analyser": {
-                        "power": 5,
-                        "smoothingTimeConstant": 0.85
+                        "power": 10,
+                        "minFrequency": 320,
+                        "maxFrequency": 1800,
+                        "minDecibels": -82,
+                        "yEasing": "polyOut",
+                        "yExponent": 2,
+                        "numBuckets": 32,
+                        "smoothingTimeConstant": 0.8
                     },
                     "voices": [
                         {
@@ -314,8 +320,8 @@
             ]
         },
         "themes": {
-            "buttonColor": "#8FA693",
-            "contentPanelColor": "rgba(255, 255, 255, 0.25)",
+            "buttonColor": "#465648",
+            "contentPanelColor": "rgba(55, 55, 55, 0.45)",
             "contentPanelText": "rgba(0, 0, 0, 1)",
             "panelResetButton": "rgba(255, 255, 255, 0.3)",
             "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",

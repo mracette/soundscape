@@ -9,6 +9,7 @@ import tableModel from '../../models/mornings/table.glb';
 import flowerModel from '../../models/mornings/flowers.glb';
 import spiralPlantModel from '../../models/mornings/spiral_plant.glb';
 import bookcaseModel from '../../models/mornings/bookcase.glb';
+import paintingsModel from '../../models/mornings/paintings.glb';
 
 // rendering
 import { renderBass } from './renderBass';
@@ -33,8 +34,8 @@ export class Mornings extends SceneManager {
         // after rendering these once, turn off auto-updates to optimize further renders
         this.staticObjects = [];
         this.renderList = [
-            // 'house', 'plant', 'table', 'bookshelf', 'flower'
-            'table'
+            'house', 'plant', 'table', 'bookshelf', 'flower'
+            // 'table'
         ];
         this.spectrumFunction = extras.spectrumFunction;
         this.bpm = extras.bpm;
@@ -184,9 +185,35 @@ export class Mornings extends SceneManager {
                                 mesh.castShadow = true;
                             }
 
-                            if (mesh.name === 'house_floor') {
+                            if (mesh.name === 'house_floor' || mesh.name === 'carpet') {
                                 mesh.receiveShadow = true;
                             }
+
+                        });
+
+                        this.scene.add(gltf.scene);
+                        resolve();
+
+                    }, null, (err) => reject(err));
+
+                })
+            );
+
+            // paintings
+            modelList.indexOf('house') !== -1 && loadPromiseArray.push(
+                new Promise((resolve, reject) => {
+
+                    this.helpers.gltfLoader.load(paintingsModel, (gltf) => {
+
+                        console.log(gltf);
+
+                        gltf.scene.children.forEach((mesh) => {
+
+                            // every mesh is static
+                            this.staticObjects.push(mesh);
+
+                            mesh.name === 'vonnegut_self_portrait' && (mesh.material.side = THREE.FrontSide);
+                            mesh.name === 'van_gogh' && (mesh.material.side = THREE.BackSide);
 
                         });
 
@@ -204,7 +231,7 @@ export class Mornings extends SceneManager {
 
                     this.helpers.gltfLoader.load(tableModel, (gltf) => {
 
-                        const pageGeo = new THREE.PlaneBufferGeometry(2, 2, 32, 32);
+                        const pageGeo = new THREE.PlaneBufferGeometry(1.9, 1.8, 64, 64);
                         pageGeo.rotateX(-Math.PI / 2);
                         console.log(pageGeo.attributes.position);
 
@@ -355,13 +382,13 @@ export class Mornings extends SceneManager {
                             // every mesh is static
                             this.staticObjects.push(mesh);
 
-                            if (mesh.name.includes('book') && mesh.type === 'Group') {
+                            if (mesh.name.includes('book') && !mesh.name.includes('bookcase') && mesh.type === 'Group') {
 
                                 const name = mesh.name;
                                 const z = parseInt(name.slice(name.length - 1, name.length));
                                 const y = parseInt(name.slice(name.length - 2, name.length - 1));
                                 const x = parseInt(name.slice(name.length - 3, name.length - 2));
-                                const r = 0.8 * Math.random() - 0.4;
+                                const r = -.1 + Math.random() * .2
                                 const c = new THREE.Color(this.spectrumFunction(1 - ((r + y + .5) / 5)));
 
                                 const bookMesh = mesh.children.find(mesh => mesh.material.name.includes('book'));
@@ -411,6 +438,7 @@ export class Mornings extends SceneManager {
             rightPage: this.subjects.rightPage
         }, this.melodyAnalyser, {
             spectrumFunction: this.spectrumFunction,
+            beats: this.elapsedBeats
         });
 
         this.renderList.indexOf('house') !== -1 && renderBass(this.subjects.godrays, this.bassAnalyser, {
