@@ -1,53 +1,63 @@
 <!DOCTYPE html>
 <html>
-    <head>
 
-        <!-- Global site tag (gtag.js) - Google Analytics -->
-        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-73084223-4"></script>
-        <script>
+<head>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-73084223-4"></script>
+    <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
 
         gtag('config', 'UA-73084223-4');
-        </script>
+    </script>
 
-        <!--  HTML -->
-        <title>SOUNDSCAPE</title>
-        <link rel="icon" type="img/png" href="./img/favicon.png">
-        <link rel="stylesheet" type="text/css" href="./styles.css">
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-        <meta name=”description” content="A world of sound and color. What will you make of it?">
+    <!-- Mail chimp integration -->
+    <script type="text/javascript" src="//downloads.mailchimp.com/js/signup-forms/popup/unique-methods/embed.js"
+        data-dojo-config="usePlainJson: true, isDebug: false"></script>
+    <script
+        type="text/javascript">window.dojoRequire(["mojo/signup-forms/Loader"], function (L) { L.start({ "baseUrl": "mc.us4.list-manage.com", "uuid": "4d5488d441c94ac4c98944eb9", "lid": "f3e8462184", "uniqueMethods": true }) })</script>
 
-        <!-- Open Graph -->
-        <meta property="og:title" content="SOUNDSCAPE">
-        <meta property="og:type" content="website">
-        <meta property="og:description" content="A world of sound and color. What will you make of it?">
-        <meta property="og:image" content="https://soundscape.world/img/full-banner.png">
-        <meta property="og:image:height" content="900">
-        <meta property="og:image:width" content="1800">
-        <meta property="og:url" content="https://soundscape.world">
+    <!--  HTML -->
+    <title>SOUNDSCAPE</title>
+    <link rel="icon" type="img/png" href="./img/favicon.png">
+    <link rel="stylesheet" type="text/css" href="./styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name=”description” content="A world of sound and color. What will you make of it?">
 
-        <!-- Twitter -->
-        <meta property="twitter:card" content='https://soundscape.world/img/full-banner.png'>
-        <meta property=”twitter:title” content='SOUNDSCAPE'>
-        <meta property=”twitter:description” content='A world of sound and color. What will you make of it?'>
-        <meta property=”twitter:url” content='https://soundscape.world'>
-        <meta property=”twitter:image” content='https://soundscape.world/img/full-banner.png'>
-        
-        
-        <!--  Non-Essential, But Recommended -->
-        
-        <meta property="og:site_name" content="SOUNDSCAPE">
-        
-        <!--  Non-Essential, But Required for Analytics -->
-        <!-- <meta property="fb:app_id" content="your_app_id" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="SOUNDSCAPE">
+    <meta property="og:type" content="website">
+    <meta property="og:description" content="A world of sound and color. What will you make of it?">
+    <meta property="og:image" content="https://soundscape.world/img/full-banner.png">
+    <meta property="og:image:height" content="900">
+    <meta property="og:image:width" content="1800">
+    <meta property="og:url" content="https://soundscape.world">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content='https://soundscape.world/img/full-banner.png'>
+    <meta property=”twitter:title” content='SOUNDSCAPE'>
+    <meta property=”twitter:description” content='A world of sound and color. What will you make of it?'>
+    <meta property=”twitter:url” content='https://soundscape.world'>
+    <meta property=”twitter:image” content='https://soundscape.world/img/full-banner.png'>
+
+
+    <!--  Non-Essential, But Recommended -->
+
+    <meta property="og:site_name" content="SOUNDSCAPE">
+
+    <!--  Non-Essential, But Required for Analytics -->
+    <!-- <meta property="fb:app_id" content="your_app_id" />
         <meta name="twitter:site" content="@website-username"> -->
 
-    </head>
-    <body>
-        <div id="app"></div>
-        <script src="./bundle.js"></script>
-    </body>
+</head>
+
+<body>
+    <div id="app"></div>
+    <script src="./bundle.js"></script>
+</body>
+
 </html>
