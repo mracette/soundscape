@@ -41,15 +41,17 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: flex-start;
 }
 
 .custom-song-icon {
     // border-radius: 50%;
     display: block;
     margin: 0;
-    width: 25rem;
+    flex-grow: 0;
+    width: 25rem;    
     height: 25rem;
-    line-height: 25rem;
+    //line-height: 25rem;
 }
 
 .song-link {
