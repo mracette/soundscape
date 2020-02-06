@@ -10,6 +10,11 @@
 
 # production
 /build
+/public/audio
+/public/fonts
+/public/node_modules
+/public/bundle.js
+/public/bundle.js.map
 
 # misc
 .DS_Store
