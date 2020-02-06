@@ -3,7 +3,12 @@
 #landing-page {
     width: 100%;
     height: 100%;
-    background-color: $off-black;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#star-canvas {
+    z-index: -1;
+    color: #00ff00;
 }
 
 #landing-page-soundscape-title {
@@ -26,12 +31,16 @@
     justify-content: center;
 }
 
+#landing-page-song-title {
+    color: $hot-pink;
+}
+
 #landing-page-bpm {
-    color: $hot-pink
+    color: $hot-green;
 }
 
 #landing-page-key {
-    color: $hot-green
+    color: $hot-blue;
 }
 
 #song-selection-panel {
@@ -42,6 +51,7 @@
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
+    align-content: flex-start;
 }
 
 .custom-song-icon {
@@ -49,15 +59,6 @@
     margin: 0;
     width: 25rem;    
     height: 25rem;
-    line-height: 25rem;
-}
-
-.song-link {
-    color: $moon-yellow;
-    font-size: $m-size;
-    text-decoration: none;
-    text-align: center;
-    vertical-align: middle;
 }
 
 .song-link:hover {

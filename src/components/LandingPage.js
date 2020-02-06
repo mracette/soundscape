@@ -6,12 +6,16 @@ import { Link } from 'react-router-dom';
 import { MoonriseIcon } from './custom-song-icons/MoonriseIcon';
 import { MorningsIcon } from './custom-song-icons/MorningsIcon';
 import { ComingSoonIcon } from './custom-song-icons/ComingSoonIcon';
+import { Canvas } from '../components/Canvas';
 
 // contexts
 import { LandingPageContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/LandingPage.scss';
+
+// other
+import { LandingPageScene } from '../viz/scenes/landing/LandingPageScene';
 
 export const landingPageReducer = (state, action) => {
     switch (action.type) {
@@ -45,16 +49,41 @@ export const landingPageReducer = (state, action) => {
 export const LandingPage = () => {
 
     const [selected, dispatch] = React.useReducer(landingPageReducer, { name: null, bpm: null, key: null });
+    const canvasRef = React.useRef(null);
+
+    React.useEffect(() => {
+        let scene;
+
+        if (canvasRef.current) {
+            scene = new LandingPageScene(canvasRef.current)
+            scene.init().then(() => scene.animate());
+            window.addEventListener('resize', scene.onWindowResize);
+            window.addEventListener('orientationchange', scene.onWindowResize);
+            window.addEventListener('fullscreenchange', scene.onWindowResize);
+        }
+
+        return () => {
+            window.removeEventListener('resize', scene.onWindowResize);
+            window.removeEventListener('orientationchange', scene.onWindowResize);
+            window.removeEventListener('fullscreenchange', scene.onWindowResize);
+        }
+
+    }, [])
 
     return (
         <LandingPageContext.Provider value={{ dispatch }}>
+            <Canvas
+                id='star-canvas'
+                className='fullscreen'
+                onLoad={(canvas) => canvasRef.current = canvas}
+            />
             <div id='landing-page'>
                 <div id='landing-page-header'>
                     <div className='flex-row'><h1 id='landing-page-soundscape-title'>Soundscape</h1></div>
                     <div className='flex-row'><span>This application uses audio.</span></div>
                     <div className='flex-row'><span>Use speakers or headphones for the best experience.</span></div>
                     <div className='flex-row'><p>
-                        <span id='landing-page-song-title'>{selected.name || "Choose a song to begin."}</span>
+                        <span id={selected.name ? 'landing-page-song-title' : 'choose-a-song'}>{selected.name || "Choose a song to begin."}</span>
                         {selected.bpm && (<><span>&nbsp;|&nbsp;</span> <span id='landing-page-bpm'>{` ${selected.bpm} bpm`}</span></>)}
                         {selected.key && (<><span>&nbsp;|&nbsp;</span> <span id='landing-page-key'>{selected.key}</span></>)}
                     </p></div>

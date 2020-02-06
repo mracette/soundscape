@@ -87,6 +87,7 @@ export function CustomSongIcon(props) {
             id={id}
             className="custom-song-icon"
             onLoad={(canvas) => canvasRef.current = canvas}
+            resize={false}
         />
     }, [id]);
 
