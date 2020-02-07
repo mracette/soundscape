@@ -1,5 +1,5 @@
 
-export class AudioPlayer {
+export class AudioPlayerWrapper {
 
     constructor(context, bufferSource, options) {
 
@@ -34,10 +34,15 @@ export class AudioPlayer {
     }
 
     stop(time) {
-        this.bufferSource.stop(time);
+        try {
+            this.bufferSource.stop(time);
+        } catch (err) {
+            console.log(err)
+        }
     }
 
     reload() {
+        console.log('reloading');
         const newSource = this.context.createBufferSource();
         newSource.buffer = this.bufferSource.buffer;
         newSource.connect(this.destination);

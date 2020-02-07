@@ -21,6 +21,11 @@ export const MusicPlayerReducer = (state, action) => {
                 ...state,
                 players: [...state.players, action.payload.player]
             };
+        case 'addButton':
+            return {
+                ...state,
+                buttons: [...state.buttons, action.payload.button]
+            }
         case 'addAnalyser':
             return {
                 ...state,
@@ -78,6 +83,8 @@ export const MusicPlayerReducer = (state, action) => {
                             reverbWet: [...state.groupEffects.reverbWet, action.payload.effect]
                         }
                     };
+                default: return state;
             }
+        default: return state;
     }
 }

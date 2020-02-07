@@ -11,7 +11,7 @@ import { LayoutContext } from '../contexts/contexts';
 // other
 import { createAudioPlayer } from 'crco-utils';
 import { nextSubdivision } from '../utils/audioUtils';
-import { AudioPlayer } from '../classes/AudioPlayer';
+import { AudioPlayerWrapper } from '../classes/AudioPlayerWrapper';
 import { Scheduler } from '../classes/Scheduler';
 
 // styles
@@ -29,6 +29,7 @@ export const ToggleButton = (props) => {
     const { id, timeSignature, bpm } = React.useContext(SongContext);
     const { dispatch, audioCtx, audioCtxInitTime, sampleRate } = React.useContext(MusicPlayerContext);
     const { flags } = React.useContext(TestingContext);
+    const { handleUpdatePlayerOrder, handleUpdateOverrides, name, groupName, groupNode, override, length } = props;
 
     const [playerState, setPlayerState] = React.useState('stopped');
 
@@ -36,7 +37,71 @@ export const ToggleButton = (props) => {
     const buttonRadius = vh ? vh * 3.5 : 0;
     const buttonBorder = vh ? vh * 3.5 / 15 : 0;
 
-    const changePlayerState = (newState) => {
+    const changePlayerState = React.useCallback((newState) => {
+
+        // clear future events for this toggle (necessary to stop a pending start)
+        schedulerRef.current.clear();
+
+        const runAnimation = (type, duration) => {
+
+            // clear queue
+            anime.remove(animationTargetsRef.current.circleSvg);
+            anime.remove(animationTargetsRef.current.iconPoly);
+            anime.remove(animationTargetsRef.current.iconDiv);
+            anime.remove(animationTargetsRef.current.iconDiv.children);
+            anime.remove(animationTargetsRef.current.button);
+
+            let strokeDashoffset, points, backgroundColor, rotateZ;
+
+            if (type === 'start') {
+
+                rotateZ = '-180';
+                backgroundColor = 'rgba(255, 255, 255, .3)';
+                strokeDashoffset = [0, 2 * Math.PI * (buttonRadius - buttonBorder / 2)];
+                points = [{ value: "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188" }];
+
+            } else if (type === 'stop') {
+
+                rotateZ = '0';
+                backgroundColor = 'rgba(255, 255, 255, 0)';
+                strokeDashoffset = [animationTargetsRef.current.circleSvg.style.strokeDashoffset, 0];
+                points = [{ value: "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100" }];
+
+            }
+
+            // run cirle animation
+            anime({
+                targets: animationTargetsRef.current.circleSvg,
+                strokeDashoffset,
+                duration,
+                easing: 'linear'
+            });
+
+            // run icon animation
+            anime({
+                targets: animationTargetsRef.current.iconPoly,
+                points,
+                duration,
+                easing: 'linear'
+            });
+
+            // run rotate animation
+            anime({
+                targets: [animationTargetsRef.current.iconDiv, animationTargetsRef.current.iconDiv.children],
+                rotateZ,
+                duration,
+                easing: 'linear'
+            });
+
+            // run button animation
+            anime({
+                targets: animationTargetsRef.current.button,
+                backgroundColor,
+                duration,
+                easing: 'easeInCubic'
+            });
+
+        }
 
         const initialState = newState === 'active' ? 'pending-start' : 'pending-stop';
 
@@ -44,13 +109,13 @@ export const ToggleButton = (props) => {
         setPlayerState(initialState);
 
         // update poly count for the group
-        props.handleUpdatePlayerOrder(props.name, initialState);
+        handleUpdatePlayerOrder(name, initialState);
 
         // dispatch initial update to music player
         dispatch({
             type: 'updatePlayerState',
             payload: {
-                id: props.name,
+                id: name,
                 newState: initialState
             }
         });
@@ -79,7 +144,7 @@ export const ToggleButton = (props) => {
             dispatch({
                 type: 'updatePlayerState',
                 payload: {
-                    id: props.name,
+                    id: name,
                     newState: newState
                 }
             });
@@ -91,76 +156,21 @@ export const ToggleButton = (props) => {
         const animationType = newState === 'stopped' ? 'stop' : 'start';
         runAnimation(animationType, quantizedStartMillis);
 
-    }
-
-    const runAnimation = (type, duration) => {
-
-        let strokeDashoffset, points, backgroundColor, rotateZ;
-
-        if (type === 'start') {
-
-            rotateZ = '-180';
-            backgroundColor = 'rgba(255, 255, 255, .3)';
-            strokeDashoffset = [0, 2 * Math.PI * (buttonRadius - buttonBorder / 2)];
-            points = [{ value: "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188" }];
-
-        } else if (type === 'stop') {
-
-            rotateZ = '0';
-            backgroundColor = 'rgba(255, 255, 255, 0)';
-            strokeDashoffset = [animationTargetsRef.current.circleSvg.style.strokeDashoffset, 0];
-            points = [{ value: "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100" }];
-
-        }
-
-        // run cirle animation
-        anime({
-            targets: animationTargetsRef.current.circleSvg,
-            strokeDashoffset,
-            duration,
-            easing: 'linear'
-        });
-
-        // run icon animation
-        anime({
-            targets: animationTargetsRef.current.iconPoly,
-            points,
-            duration,
-            easing: 'linear'
-        });
-
-        // run rotate animation
-        anime({
-            targets: [animationTargetsRef.current.iconDiv, animationTargetsRef.current.iconDiv.children],
-            rotateZ,
-            duration,
-            easing: 'linear'
-        });
-
-        // run button animation
-        anime({
-            targets: animationTargetsRef.current.button,
-            backgroundColor,
-            duration,
-            easing: 'easeInCubic'
-        });
-
-    }
+    }, [audioCtx, audioCtxInitTime, bpm, buttonBorder, buttonRadius, dispatch, quantizedStartBeats, handleUpdatePlayerOrder, name])
 
     React.useEffect(() => {
 
         schedulerRef.current = new Scheduler(audioCtx);
-        const pathToAudio = require(`../audio/${id}/${props.name}.mp3`);
+        const pathToAudio = require(`../audio/${id}/${name}.mp3`);
 
         createAudioPlayer(audioCtx, pathToAudio, {
             offlineRendering: true,
-            renderLength: sampleRate * parseInt(props.length) * timeSignature * 60 / bpm,
-            logLevel: 'debug'
+            renderLength: sampleRate * parseInt(length) * timeSignature * 60 / bpm
         }).then((audioPlayer) => {
 
             // create the player
-            playerRef.current = new AudioPlayer(audioCtx, audioPlayer, {
-                destination: props.groupNode,
+            playerRef.current = new AudioPlayerWrapper(audioCtx, audioPlayer, {
+                destination: groupNode,
                 loop: true
             });
 
@@ -169,13 +179,21 @@ export const ToggleButton = (props) => {
                 type: 'addPlayer',
                 payload: {
                     player: {
-                        id: props.name,
-                        groupName: props.groupName,
-                        buttonRef: buttonRef.current,
-                        playerState
+                        id: name,
+                        groupName: groupName,
+                        playerState,
+                        buttonRef: buttonRef.current
                     }
                 }
             });
+
+            // // send button ref to music player for randomize function
+            // dispatch({
+            //     type: 'addButton',
+            //     payload: {
+            //         button: buttonRef.current
+            //     }
+            // });
 
         });
 
@@ -188,15 +206,16 @@ export const ToggleButton = (props) => {
             iconPoly: buttonRef.current.children[1].children[0].children[0],
         }
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     React.useEffect(() => {
-        if (props.override && (playerState === 'active' || playerState === 'pending-start')) {
+        if (override && (playerState === 'active' || playerState === 'pending-start')) {
             // stop player and remove from the override list
             changePlayerState('stopped');
-            props.handleUpdateOverrides(props.name);
+            handleUpdateOverrides(name);
         }
-    }, [props.override, props.handleUpdateOverrides, props.name, playerState, changePlayerState])
+    }, [playerState, changePlayerState, handleUpdateOverrides, name, override])
 
     return (
 

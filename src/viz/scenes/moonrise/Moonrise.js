@@ -137,7 +137,7 @@ export class Moonrise extends SceneManager {
                 // add some rocks
                 this.helpers.gltfLoader.load(landscapeModel, (model) => {
                     this.subjects.rocks = model.scene.children.find((e) => e.name = 'rockGroup');
-                    this.subjects.rocks.children.map((rock) => { rock.material.color.setRGB(0.06, 0.06, 0.06) });
+                    this.subjects.rocks.children.forEach((rock) => { rock.material.color.setRGB(0.06, 0.06, 0.06) });
                     this.scene.add(this.subjects.rocks);
                 }, undefined, (err) => {
                     if (err) { reject(err) }
@@ -376,7 +376,7 @@ export class Moonrise extends SceneManager {
                         color: petalColor,
                     });
 
-                    clone.getObjectByName('petalGroup').children.map((petalGroup) => {
+                    clone.getObjectByName('petalGroup').children.forEach((petalGroup) => {
                         petalGroup.children[0].material = petalMat;
                     });
 
@@ -420,7 +420,7 @@ export class Moonrise extends SceneManager {
          * RIPPLES
          */
 
-        this.rhythmAnalyser.getFrequencyData().map((d, i) => {
+        this.rhythmAnalyser.getFrequencyData().forEach((d, i) => {
             const damping = 180 * (i / this.rhythmAnalyser.frequencyBinCount);
             this.subjects.ripples.children[i].material.opacity = (d - damping) / 500;
         });
@@ -432,11 +432,11 @@ export class Moonrise extends SceneManager {
         const atmosphereFreqDataLeft = this.atmosphereAnalyser.getFrequencyData('left');
         const atmosphereFreqDataRight = this.atmosphereAnalyser.getFrequencyData('right');
 
-        atmosphereFreqDataLeft.slice(1, 9).map((d, i) => {
+        atmosphereFreqDataLeft.slice(1, 9).forEach((d, i) => {
             this.subjects.stars.leftGroup.children[i].material.opacity = (d / 125);
         });
 
-        atmosphereFreqDataRight.slice(1, 9).map((d, i) => {
+        atmosphereFreqDataRight.slice(1, 9).forEach((d, i) => {
             this.subjects.stars.rightGroup.children[i].material.opacity = (d / 125);
         });
 
@@ -446,7 +446,7 @@ export class Moonrise extends SceneManager {
 
         // only render when sources are on
         const harmonyFreqData = this.harmonyAnalyser.getFrequencyData();
-        this.subjects.pineTrees.children.map((child, i) => {
+        this.subjects.pineTrees.children.forEach((child, i) => {
             const freqIndex = Math.floor(i / 8);
             const rawData = harmonyFreqData.slice([1 + freqIndex])[0];
             const transformedData = Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.060);
@@ -493,8 +493,8 @@ export class Moonrise extends SceneManager {
             }
 
             // copy the single moon beam's geometry into the other position arrays and update
-            this.subjects.moonBeams.children.map((moonBeam) => {
-                moonBeam.children.map((moonRing, moonRingIndex) => {
+            this.subjects.moonBeams.children.forEach((moonBeam) => {
+                moonBeam.children.forEach((moonRing, moonRingIndex) => {
                     moonRing.geometry.attributes.position.array = this.subjects.moonBeams.children[0].children[moonRingIndex].geometry.attributes.position.array;
                     moonRing.geometry.setDrawRange(0, moonRing.geometry.attributes.position.count);
                     moonRing.geometry.attributes.position.needsUpdate = true;
@@ -521,12 +521,12 @@ export class Moonrise extends SceneManager {
 
         const avgMelodyVolume = melodyVolume / melodyCount;
 
-        this.subjects.lilies.children.map((lily) => {
+        this.subjects.lilies.children.forEach((lily) => {
 
             const data = lily.userData;
             const increment = 0.11;
 
-            if (!data.ignited && avgMelodyVolume != 0 & avgMelodyVolume * Math.random() > 55) {
+            if (!data.ignited && avgMelodyVolume !== 0 & avgMelodyVolume * Math.random() > 55) {
                 data.ignited = true;
             }
             if (data.ignited && data.phase === 'waxing' && data.measure < 1) {
@@ -554,7 +554,7 @@ export class Moonrise extends SceneManager {
 
         const flyAmount = .3;
         const flightNoise = 0.01;
-        this.subjects.fireflies.children.map((fly) => {
+        this.subjects.fireflies.children.forEach((fly) => {
             if (fly.userData.state === 'off' && Math.random() < 0.0005) {
                 fly.userData.state = 'lighting';
                 fly.userData.flightPath = new THREE.Vector3(-0.5 + Math.random(), -0.5 + Math.random(), -0.5 + Math.random());

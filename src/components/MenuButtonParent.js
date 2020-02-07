@@ -14,7 +14,7 @@ import '../styles/components/MenuButtonParent.scss';
 
 export const MenuButtonParent = (props) => {
 
-    const { vw, vh } = useContext(LayoutContext);
+    const { vh } = useContext(LayoutContext);
     const { buttonColor } = useContext(ThemeContext);
 
     // parent button dimensions
@@ -38,23 +38,24 @@ export const MenuButtonParent = (props) => {
     const [openChildIndex, setOpenChildIndex] = useState(-1);
     const numOfChildren = props.childButtonProps.length;
 
-    // handle click events outside of the node's dom
-    const handleOutsideClick = (e) => {
-        if (!node.current.contains(e.target)) {
-            // if a child menu is open, close it
-            if (openChildIndex !== -1) {
-                setOpenChildIndex(-1);
-                return;
-                // if child menus are all close, close the parent menu
-            } else if (isOpen) {
-                setIsOpen(false);
-                return;
-            }
-        }
-    }
-
     // add and remove event listeners to handle outside clicks
     useEffect(() => {
+
+        // handle click events outside of the node's dom
+        const handleOutsideClick = (e) => {
+            if (!node.current.contains(e.target)) {
+                // if a child menu is open, close it
+                if (openChildIndex !== -1) {
+                    setOpenChildIndex(-1);
+                    return;
+                    // if child menus are all close, close the parent menu
+                } else if (isOpen) {
+                    setIsOpen(false);
+                    return;
+                }
+            }
+        }
+
         if (isOpen) {
             document.addEventListener('mousedown', handleOutsideClick);
         } else {

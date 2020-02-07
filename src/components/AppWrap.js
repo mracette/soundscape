@@ -1,7 +1,6 @@
 // libs
 import React from 'react';
 import * as d3Chromatic from 'd3-scale-chromatic';
-import * as d3Color from 'd3-color';
 import { ColorPalette } from 'color-curves'
 
 // components

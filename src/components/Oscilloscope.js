@@ -64,7 +64,7 @@ export const Oscilloscope = (props) => {
 
         });
 
-    }, [props]);
+    }, [props, spectrumFunction]);
 
     useAnimationFrame(() => render(canvasRef.current, contextRef.current));
 

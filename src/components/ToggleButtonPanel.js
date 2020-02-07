@@ -5,7 +5,6 @@ import React from 'react';
 import { ToggleButtonGroup } from './ToggleButtonGroup';
 
 // contexts
-import { LayoutContext } from '../contexts/contexts';
 import { ThemeContext } from '../contexts/contexts';
 import { MusicPlayerContext } from '../contexts/contexts';
 import { SongContext } from '../contexts/contexts';
@@ -15,12 +14,9 @@ import '../styles/components/ToggleButtonPanel.scss';
 
 export const ToggleButtonPanel = (props) => {
 
-    const { vw, vh } = React.useContext(LayoutContext);
-
     const {
         panelMuteButton,
         panelRandomizeButton,
-        panelResetButton
     } = React.useContext(ThemeContext);
 
     const { dispatch, randomize, mute } = React.useContext(MusicPlayerContext);

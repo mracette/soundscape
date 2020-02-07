@@ -56,7 +56,6 @@ export class Mornings extends SceneManager {
             this.applySceneSettings();
             this.render(this.renderList); // render once to get objects in place
             this.staticObjects.forEach(mesh => mesh.matrixAutoUpdate = false); // freeze static objects
-            super.animate();
         }).catch((err) => {
             console.log(err);
         });

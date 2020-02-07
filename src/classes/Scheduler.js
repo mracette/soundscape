@@ -5,12 +5,6 @@ export class Scheduler {
         // bind audio context
         this.audioCtx = audioCtx
 
-        // flag that triggers repeating events 
-        this.flagRepeating = false;
-
-        // by default keep 1 event in the repeating queue
-        this.scheduleAheadCount = 1;
-
         // for scheduleOnce
         this.queue = [];
 
@@ -37,14 +31,12 @@ export class Scheduler {
 
         // add to schedule queue
         this.queue.push({
-            id: this.eventId,
+            id: newEventId,
             name: name || null,
             time,
             type: 'single',
             source: dummySource
         });
-
-        this.eventId++;
 
         if (callback) {
 
@@ -106,6 +98,22 @@ export class Scheduler {
 
     }
 
+    updateCallback(id, callback) {
+
+        let event;
+
+        event = this.queue.find((e) => e.id === id);
+
+        if (!event) {
+            event = this.repeatingQueue.find((e) => e.id === id);
+        }
+
+        if (event) {
+            event.source.onended = callback;
+        }
+
+    }
+
     updateQueue() {
 
         for (let i = this.repeatingQueue.length - 1; i >= 0; i--) {
@@ -132,7 +140,6 @@ export class Scheduler {
 
                 // update the parameters and push a copy of the event to the queue
                 this.repeatingQueue.push({
-                    status: event.status,
                     id: event.id,
                     time: event.time + event.frequency,
                     type: 'repeating',
@@ -149,12 +156,12 @@ export class Scheduler {
 
     clear() {
 
-        this.queue.map((event) => {
+        this.queue.forEach((event) => {
             event.source.onended = null;
             event.source.stop();
         });
 
-        this.repeatingQueue.map((event) => {
+        this.repeatingQueue.forEach((event) => {
             window.clearInterval(event.timer);
             event.source.onended = null;
             event.source.stop();

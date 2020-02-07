@@ -54,7 +54,7 @@ export const CanvasViz = () => {
             }
 
         }
-    }, [flagShowVisuals, id, analysers]);
+    }, [bpm, groups, spectrumFunction, flagShowVisuals, id, analysers]);
 
     return (
         <Canvas

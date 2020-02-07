@@ -137,7 +137,7 @@ export const ToggleButtonGroup = (props) => {
             }
         });
 
-    }, []);
+    }, [audioCtx, dispatch, premaster, props.analyserParams, props.name]);
 
     React.useEffect(() => {
 
@@ -166,7 +166,7 @@ export const ToggleButtonGroup = (props) => {
             }
         }
 
-    }, [mute, solo]);
+    }, [mute, solo, props]);
 
     React.useEffect(() => {
 
@@ -182,7 +182,7 @@ export const ToggleButtonGroup = (props) => {
         }
 
 
-    }, [props.soloOverride]);
+    }, [props.soloOverride, mute, props.name]);
 
     const handleUpdatePlayerOrder = React.useCallback((playerId, newState) => {
 

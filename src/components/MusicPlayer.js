@@ -1,6 +1,5 @@
 // libs
 import React from 'react';
-import anime from 'animejs';
 
 // components
 import { CanvasViz } from './CanvasViz';
@@ -76,6 +75,7 @@ export const MusicPlayer = (props) => {
         randomize: false,
         mute: false,
         players: [],
+        buttons: [],
         analysers: [],
         groups: [],
         groupEffects: {
@@ -93,7 +93,7 @@ export const MusicPlayer = (props) => {
         latencyHint: 'interactive'
     }));
     const audioCtxInitTime = React.useRef(audioCtx.current.currentTime);
-    const scheduler = React.useRef(new Scheduler(audioCtx.current));
+    const schedulerRef = React.useRef(new Scheduler(audioCtx.current));
     const premaster = React.useRef(audioCtx.current.createGain());
 
     const handleReset = React.useCallback(() => {
@@ -104,9 +104,28 @@ export const MusicPlayer = (props) => {
 
     }, [state.players]);
 
+    const triggerRandomVoice = React.useCallback(() => {
+
+        const viableOne = state.players.filter((p) => !p.playerState.includes('pending'));
+        const randomOne = Math.floor(Math.random() * viableOne.length);
+        state.players[randomOne].buttonRef.click();
+
+        // trigger an additional voice when less than 1/2 are active
+        if (viableOne.length >= state.players.length) {
+            const viableTwo = viableOne.filter((p, i) => i !== randomOne);
+            const randomTwo = Math.floor(Math.random() * viableTwo.length);
+            state.players[randomTwo].buttonRef.click();
+        }
+
+    }, [state.players])
+
+    /* 
+        Ambient Track Hook
+    */
     React.useEffect(() => {
 
-        audioCtx.current.resume();
+        const actx = audioCtx.current;
+        actx.resume();
 
         setPremasterAnalyser(
             new Analyser(audioCtx.current, premaster.current, {
@@ -128,8 +147,6 @@ export const MusicPlayer = (props) => {
                 renderLength: ambientTrackLength * timeSignature,
             }).then((audioPlayer) => {
 
-                console.log(audioPlayer.buffer.duration * 60 / 92);
-
                 ambientPlayerRef.current = new AudioLooper(audioCtx.current, audioPlayer.buffer, {
                     bpm,
                     loopLengthBeats: ambientTrackLength * timeSignature,
@@ -148,56 +165,36 @@ export const MusicPlayer = (props) => {
 
         return () => {
             playAmbientTrack && ambientPlayerRef.current.stop();
-            audioCtx.current.close();
+            actx.close();
         };
 
-    }, []);
+    }, [bpm, id, playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature]);
 
-    // handle randomize state changes
+    /* 
+        Randomize Hook
+    */
     React.useEffect(() => {
-
-        const startRandomize = () => {
-
-            const triggerRandomVoice = () => {
-                const random = Math.floor(Math.random() * state.players.length);
-                const button = state.players[random].buttonRef;
-                button.click();
-            }
-
-            randomizeEventRef.current = scheduler.current.scheduleRepeating(
+        console.log('hook');
+        if (state.randomize && !schedulerRef.current.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
+            console.log('init randomize');
+            randomizeEventRef.current = schedulerRef.current.scheduleRepeating(
                 audioCtx.current.currentTime + (60 / bpm),
                 (60 / bpm) * 32,
-                () => {
-
-                    const playerMap = state.players.map((p) => p.playerState === 'active' ? 1 : 0)
-                    const activePlayers = playerMap.reduce((a, b) => a + b);
-
-                    // trigger a random voice
-                    triggerRandomVoice();
-
-                    // if less than half of the players are active, trigger an additional voice
-                    if (activePlayers < state.players.length / 2) {
-                        triggerRandomVoice();
-                    }
-
-                }
+                triggerRandomVoice
             )
-
+        } else if (state.randomize) {
+            console.log('update of callback');
+            schedulerRef.current.updateCallback(schedulerRef.current, triggerRandomVoice);
+        } else if (!state.randomize) {
+            console.log('stop randomize');
+            schedulerRef.current.cancel(randomizeEventRef.current);
         }
 
-        const stopRandomize = () => {
-            scheduler.current.cancel(randomizeEventRef.current);
-        }
+    }, [bpm, state.randomize, triggerRandomVoice])
 
-        if (state.randomize) {
-            startRandomize();
-        } else {
-            stopRandomize();
-        }
-
-    }, [state.randomize])
-
-    // handle mute state changes
+    /* 
+        Mute Hook
+    */
     React.useEffect(() => {
 
         const startMute = () => {
@@ -223,7 +220,7 @@ export const MusicPlayer = (props) => {
             sampleRate: SAMPLE_RATE,
             audioCtx: audioCtx.current,
             audioCtxInitTime: audioCtxInitTime.current,
-            scheduler: scheduler.current,
+            schedulerRef: schedulerRef.current,
             premaster: premaster.current,
             dispatch
         }}>
