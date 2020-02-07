@@ -9,8 +9,9 @@ import { TestingContext } from '../contexts/contexts';
 import { LayoutContext } from '../contexts/contexts';
 
 // other
-import { createAudioPlayer, nextSubdivision } from '../utils/audioUtils';
-import { AudioLooper } from '../classes/AudioLooper';
+import { createAudioPlayer } from 'crco-utils';
+import { nextSubdivision } from '../utils/audioUtils';
+import { AudioPlayer } from '../classes/AudioPlayer';
 import { Scheduler } from '../classes/Scheduler';
 
 // styles
@@ -26,7 +27,7 @@ export const ToggleButton = (props) => {
 
     const { vh } = React.useContext(LayoutContext);
     const { id, timeSignature, bpm } = React.useContext(SongContext);
-    const { dispatch, audioCtx, audioCtxInitTime } = React.useContext(MusicPlayerContext);
+    const { dispatch, audioCtx, audioCtxInitTime, sampleRate } = React.useContext(MusicPlayerContext);
     const { flags } = React.useContext(TestingContext);
 
     const [playerState, setPlayerState] = React.useState('stopped');
@@ -62,14 +63,14 @@ export const ToggleButton = (props) => {
             quantizedStartBeats
         );
 
+        switch (newState) {
+            case 'active': playerRef.current.start(quantizedStartSeconds); break;
+            case 'stopped': playerRef.current.stop(quantizedStartSeconds); break;
+            default: break;
+        }
+
         // schedule a status change
         schedulerRef.current.scheduleOnce(quantizedStartSeconds).then(() => {
-
-            switch (newState) {
-                case 'active': playerRef.current.start(); break;
-                case 'stopped': playerRef.current.stop(); break;
-                default: break;
-            }
 
             // update local state
             setPlayerState(newState);
@@ -151,15 +152,16 @@ export const ToggleButton = (props) => {
         schedulerRef.current = new Scheduler(audioCtx);
         const pathToAudio = require(`../audio/${id}/${props.name}.mp3`);
 
-        createAudioPlayer(audioCtx, pathToAudio).then((audioPlayer) => {
+        createAudioPlayer(audioCtx, pathToAudio, {
+            offlineRendering: true,
+            renderLength: sampleRate * parseInt(props.length) * timeSignature * 60 / bpm,
+            logLevel: 'debug'
+        }).then((audioPlayer) => {
 
             // create the player
-            playerRef.current = new AudioLooper(audioCtx, audioPlayer.buffer, {
-                bpm,
-                loopLengthBeats: parseInt(props.length) * timeSignature,
-                snapToGrid: true,
-                audioCtxInitTime,
-                destination: props.groupNode
+            playerRef.current = new AudioPlayer(audioCtx, audioPlayer, {
+                destination: props.groupNode,
+                loop: true
             });
 
             // send reference to music player

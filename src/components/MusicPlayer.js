@@ -54,6 +54,8 @@ const effectParams = {
     }
 }
 
+const SAMPLE_RATE = 44100;
+
 export const MusicPlayer = (props) => {
 
     const {
@@ -86,7 +88,10 @@ export const MusicPlayer = (props) => {
 
     const randomizeEventRef = React.useRef();
     const ambientPlayerRef = React.useRef();
-    const audioCtx = React.useRef(new (window.AudioContext || window.webkitAudioContext)());
+    const audioCtx = React.useRef(new (window.AudioContext || window.webkitAudioContext)({
+        sampleRate: SAMPLE_RATE,
+        latencyHint: 'interactive'
+    }));
     const audioCtxInitTime = React.useRef(audioCtx.current.currentTime);
     const scheduler = React.useRef(new Scheduler(audioCtx.current));
     const premaster = React.useRef(audioCtx.current.createGain());
@@ -118,7 +123,12 @@ export const MusicPlayer = (props) => {
 
             const pathToAudio = require(`../audio/${id}/ambient-track.mp3`);
 
-            createAudioPlayer(audioCtx.current, pathToAudio).then((audioPlayer) => {
+            createAudioPlayer(audioCtx.current, pathToAudio, {
+                offlineRendering: true,
+                renderLength: ambientTrackLength * timeSignature,
+            }).then((audioPlayer) => {
+
+                console.log(audioPlayer.buffer.duration * 60 / 92);
 
                 ambientPlayerRef.current = new AudioLooper(audioCtx.current, audioPlayer.buffer, {
                     bpm,
@@ -210,6 +220,7 @@ export const MusicPlayer = (props) => {
 
         <MusicPlayerContext.Provider value={{
             ...state,
+            sampleRate: SAMPLE_RATE,
             audioCtx: audioCtx.current,
             audioCtxInitTime: audioCtxInitTime.current,
             scheduler: scheduler.current,
