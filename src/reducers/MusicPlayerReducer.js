@@ -10,6 +10,11 @@ export const MusicPlayerReducer = (state, action) => {
                 ...state,
                 randomize: false
             };
+        case 'setRandomizeEffects':
+            return {
+                ...state,
+                randomizeEffects: action.payload
+            };
         case 'resetPlayers':
             state.players.forEach((p) => {
                 if (p.instance.state.playerState === 'active') { p.instance.stopPlayer(false, true); }
@@ -49,6 +54,14 @@ export const MusicPlayerReducer = (state, action) => {
                 ...state,
                 mute: false
             };
+        case 'addImpulseResponse':
+            return {
+                ...state,
+                impulseResponses: [
+                    ...state.impulseResponses,
+                    action.payload.impulseResponse
+                ]
+            };
         case 'addEffect':
             switch (action.payload.effectType) {
                 case 'highpass':
@@ -85,6 +98,54 @@ export const MusicPlayerReducer = (state, action) => {
                     };
                 default: return state;
             }
+        case 'incrementHighpass':
+            return {
+                ...state,
+                effectValues: {
+                    ...state.effectValues,
+                    highpass: state.effectValues.highpass + action.payload.value
+                }
+            };
+        case 'incrementLowpass':
+            return {
+                ...state,
+                effectValues: {
+                    ...state.effectValues,
+                    lowpass: state.effectValues.lowpass + action.payload.value
+                }
+            };
+        case 'incrementAmbience':
+            return {
+                ...state,
+                effectValues: {
+                    ...state.effectValues,
+                    ambience: state.effectValues.ambience + action.payload.value
+                }
+            };
+        case 'setHighpass':
+            return {
+                ...state,
+                effectValues: {
+                    ...state.effectValues,
+                    highpass: action.payload.value
+                }
+            };
+        case 'setLowpass':
+            return {
+                ...state,
+                effectValues: {
+                    ...state.effectValues,
+                    lowpass: action.payload.value
+                }
+            };
+        case 'setAmbience':
+            return {
+                ...state,
+                effectValues: {
+                    ...state.effectValues,
+                    ambience: action.payload.value
+                }
+            };
         default: return state;
     }
 }

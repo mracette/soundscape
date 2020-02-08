@@ -1,7 +1,10 @@
 @import '../settings.scss';
 
-#effects-panel {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
+.effect-panel-row {
+    padding-top: vh(1.2);
+    padding-bottom: vh(1.2);
+}
+
+#effects-panel input {
+    width: 100%
 }

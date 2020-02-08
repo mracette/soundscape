@@ -6,3 +6,4 @@ export const MusicPlayerContext = React.createContext();
 export const TestingContext = React.createContext();
 export const ThemeContext = React.createContext();
 export const SongContext = React.createContext();
+export const InfoContext = React.createContext();

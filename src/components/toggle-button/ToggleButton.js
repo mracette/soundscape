@@ -3,20 +3,20 @@ import React from 'react';
 import anime from 'animejs/lib/anime.es.js';
 
 // context
-import { MusicPlayerContext } from '../contexts/contexts';
-import { SongContext } from '../contexts/contexts';
-import { TestingContext } from '../contexts/contexts';
-import { LayoutContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../../contexts/contexts';
+import { SongContext } from '../../contexts/contexts';
+import { TestingContext } from '../../contexts/contexts';
+import { LayoutContext } from '../../contexts/contexts';
 
 // other
 import { createAudioPlayer } from 'crco-utils';
-import { nextSubdivision } from '../utils/audioUtils';
-import { AudioPlayerWrapper } from '../classes/AudioPlayerWrapper';
-import { Scheduler } from '../classes/Scheduler';
+import { nextSubdivision } from '../../utils/audioUtils';
+import { AudioPlayerWrapper } from '../../classes/AudioPlayerWrapper';
+import { Scheduler } from '../../classes/Scheduler';
 
 // styles
-import '../styles/components/Icon.scss';
-import '../styles/components/ToggleButton.scss';
+import '../../styles/components/Icon.scss';
+import '../../styles/components/ToggleButton.scss';
 
 export const ToggleButton = (props) => {
 
@@ -161,7 +161,7 @@ export const ToggleButton = (props) => {
     React.useEffect(() => {
 
         schedulerRef.current = new Scheduler(audioCtx);
-        const pathToAudio = require(`../audio/${id}/${name}.mp3`);
+        const pathToAudio = require(`../../audio/${id}/${name}.mp3`);
 
         createAudioPlayer(audioCtx, pathToAudio, {
             offlineRendering: true,

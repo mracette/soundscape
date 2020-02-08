@@ -3,19 +3,19 @@ import React from 'react';
 
 // components
 import { ToggleButton } from './ToggleButton';
-import { Oscilloscope } from './Oscilloscope';
+import { Oscilloscope } from '../Oscilloscope';
 
 // contexts
-import { ThemeContext } from '../contexts/contexts';
-import { MusicPlayerContext } from '../contexts/contexts';
+import { ThemeContext } from '../../contexts/contexts';
+import { MusicPlayerContext } from '../../contexts/contexts';
 
 // other
-import { Analyser } from '../classes/Analyser';
-import { loadArrayBuffer } from '../utils/audioUtils';
+import { Analyser } from '../../classes/Analyser';
+import { loadArrayBuffer } from '../../utils/audioUtils';
 
 // styles
-import '../styles/components/ToggleButtonGroup.scss';
-import '../styles/components/Oscilloscope.scss';
+import '../../styles/components/ToggleButtonGroup.scss';
+import '../../styles/components/Oscilloscope.scss';
 
 export const ToggleButtonGroup = (props) => {
 
@@ -65,11 +65,18 @@ export const ToggleButtonGroup = (props) => {
         const reverbNode = audioCtx.createConvolver();
 
         // load impulse response to be used in convolution reverb
-        const pathToAudio = require('../audio/application/impulse-response.wav');
+        const pathToAudio = require('../../audio/application/impulse-response.wav');
 
         loadArrayBuffer(pathToAudio).then((arrayBuffer) => {
             audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
                 reverbNode.buffer = audioBuffer;
+                dispatch({
+                    type: 'impulseResponse',
+                    payload: {
+                        name: 'standard',
+                        buffer: audioBuffer
+                    }
+                })
             })
         });
 
@@ -116,8 +123,8 @@ export const ToggleButtonGroup = (props) => {
         dispatch({
             type: 'addEffect',
             payload: {
-                effectType: 'reverb-dry',
-                effect: reverbDryNode
+                effectType: 'reverb-wet',
+                effect: reverbWetNode
             }
         });
 

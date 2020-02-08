@@ -1,73 +1,115 @@
 // libs
 import React from 'react';
+import anime from 'animejs';
+
+// context
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/EffectsPanel.scss';
 
 export const EffectsPanel = (props) => {
 
-    const handleReset = () => {
+    const hpRef = React.useRef();
+    const lpRef = React.useRef();
+    const ambienceRef = React.useRef();
+
+    const { dispatch, randomizeEffects } = React.useContext(MusicPlayerContext);
+
+    const handleReset = React.useCallback(() => {
+
         // reset hp
-        document.getElementById('hp-slider').value = 1;
-        props.handleChangeHP(1);
+        hpRef.current.value = 1;
+        dispatch({ type: 'setHighpass', payload: { value: 1 } })
 
         // reset lp
-        document.getElementById('lp-slider').value = 100;
-        props.handleChangeLP(100);
+        lpRef.current.value = 100;
+        dispatch({ type: 'setLowpass', payload: { value: 100 } })
 
         // reset spaciousness
-        document.getElementById('spaciousness-slider').value = 1;
-        props.handleChangeSpaciousness(1);
-    }
+        ambienceRef.current.value = 1;
+        dispatch({ type: 'setAmbience', payload: { value: 1 } })
 
-    React.useEffect(handleReset, []);
+    }, [dispatch]);
+
+    React.useEffect(() => handleReset(), [handleReset]);
 
     return (
 
-        <div id='effects-panel'>
+        <div id='effects-panel' className='flex-panel'>
 
             <h2>Effects</h2>
 
-            <div>
+            <div className='flex-row'>
                 <button
+                    className='button-white grouped-buttons'
                     id='effects-panel-reset'
-                    onClick={handleReset}
+                    onClick={() => handleReset()}
                 >
                     Reset
                     </button>
 
-                <button
+                {/* <button
                     id='effects-panel-randomize'
-                    onClick={props.handleEffectsRandomize}
+                    onClick={() => dispatch({ type: 'setRandomizeEffects', payload: !randomizeEffects })}
                 >
+                    Background Mode
+                    </button> */}
+
+                <button
+                    className='button-white grouped-buttons'
+                    id='effects-panel-randomize'
+                    onClick={() => {
+
+                        const h = 1 + 99 * Math.random();
+                        const l = 1 + 99 * Math.random();
+                        const a = 1 + 99 * Math.random();
+
+                        dispatch({ type: 'setHighpass', payload: { value: h } });
+                        dispatch({ type: 'setLowpass', payload: { value: l } });
+                        dispatch({ type: 'setAmbience', payload: { value: a } });
+
+                        hpRef.current.value = h;
+                        lpRef.current.value = l;
+                        ambienceRef.current.value = a;
+
+                    }
+                    }>
                     Randomize
                     </button>
             </div>
 
-            <div>
+            <div className='flex-row effect-panel-row'>
                 <h3 className='slider-label'>highpass filter</h3>
-                <input type="range" min="1" max="100" className="slider" id="hp-slider"
+            </div>
+            <div className='flex-row effect-panel-row'>
+                <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="hp-slider" ref={hpRef}
                     onInput={(e) => {
-                        e.preventDefault();
-                        props.handleChangeHP(e.target.value);
+                        dispatch({ type: 'setHighpass', payload: { value: e.target.value } });
                     }}
                 ></input>
+            </div>
+            <div className='flex-row effect-panel-row'>
                 <h3 className='slider-label'>lowpass filter</h3>
-                <input type="range" min="1" max="100" className="slider" id="lp-slider"
+            </div>
+            <div className='flex-row effect-panel-row'>
+                <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="lp-slider" ref={lpRef}
                     onInput={(e) => {
-                        e.preventDefault();
-                        props.handleChangeLP(e.target.value);
+                        dispatch({ type: 'setLowpass', payload: { value: e.target.value } });
                     }}
                 ></input>
-                <h3 className='slider-label'>space</h3>
-                <input type="range" min="1" max="100" className="slider" id="spaciousness-slider"
-                    onInput={(e) => {
-                        e.preventDefault();
-                        props.handleChangeSpaciousness(e.target.value);
+            </div>
+            <div className='flex-row effect-panel-row'>
+                <h3 className='slider-label'>ambience</h3>
+            </div>
+            <div className='flex-row effect-panel-row'>
+                <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="spaciousness-slider" ref={ambienceRef}
+                    onChange={(e) => {
+                        dispatch({ type: 'setAmbience', payload: { value: e.target.value } });
                     }}
                 ></input>
             </div>
 
-        </div>
+        </div >
     );
 }

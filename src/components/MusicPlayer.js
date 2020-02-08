@@ -1,5 +1,6 @@
 // libs
 import React from 'react';
+import anime from 'animejs';
 
 // components
 import { CanvasViz } from './CanvasViz';
@@ -7,7 +8,7 @@ import { EffectsPanel } from './EffectsPanel';
 import { FreqBands } from './FreqBands';
 import { MenuButtonParent } from './MenuButtonParent';
 import { SongInfoPanel } from './SongInfoPanel';
-import { ToggleButtonPanel } from './ToggleButtonPanel';
+import { ToggleButtonPanel } from './toggle-button/ToggleButtonPanel';
 
 // context
 import { MusicPlayerContext } from '../contexts/contexts';
@@ -46,10 +47,8 @@ const effectParams = {
         expQParams: solveExpEquation(1, 0.71, 100, 1.5)
     },
     ambience: {
-        minRoomSize: 0.1,
-        maxRoomSize: 0.3,
         minWet: 0,
-        maxWet: 0.4
+        maxWet: 0.55
     }
 }
 
@@ -73,6 +72,7 @@ export const MusicPlayer = (props) => {
 
     const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
         randomize: false,
+        randomizeEffects: false,
         mute: false,
         players: [],
         buttons: [],
@@ -83,10 +83,18 @@ export const MusicPlayer = (props) => {
             lowpass: [],
             reverbDry: [],
             reverbWet: []
+        },
+        effectValues: {
+            highpass: 1,
+            lowpass: 100,
+            ambience: 1
         }
     });
 
     const randomizeEventRef = React.useRef();
+    const randomizeEffectsEventRef = React.useRef();
+    const randomizeEffectsAnimRef = React.useRef();
+
     const ambientPlayerRef = React.useRef();
     const audioCtx = React.useRef(new (window.AudioContext || window.webkitAudioContext)({
         sampleRate: SAMPLE_RATE,
@@ -118,6 +126,49 @@ export const MusicPlayer = (props) => {
         }
 
     }, [state.players])
+
+    /* 
+        Effects Hooks
+    */
+    React.useEffect(() => {
+
+        const freqParams = effectParams.hpFilter.expFreqParams;
+        const QParams = effectParams.hpFilter.expQParams;
+
+        state.groupEffects.highpass.forEach((effect) => {
+            effect.frequency.value = freqParams.a * Math.pow(freqParams.b, state.effectValues.highpass);
+            effect.Q.value = QParams.a * Math.pow(QParams.b, state.effectValues.highpass);
+        })
+
+    }, [state.effectValues.highpass, state.groupEffects.highpass]);
+
+    React.useEffect(() => {
+
+        const freqParams = effectParams.lpFilter.expFreqParams;
+        const QParams = effectParams.lpFilter.expQParams;
+
+        state.groupEffects.lowpass.forEach((effect) => {
+            effect.frequency.value = freqParams.a * Math.pow(freqParams.b, state.effectValues.lowpass);
+            effect.Q.value = QParams.a * Math.pow(QParams.b, state.effectValues.lowpass);
+        })
+
+    }, [state.effectValues.lowpass, state.groupEffects.lowpass]);
+
+    React.useEffect(() => {
+
+        const wet = effectParams.ambience.minWet +
+            (effectParams.ambience.maxWet - effectParams.ambience.minWet) *
+            (state.effectValues.ambience - 1) / 99;
+
+        state.groupEffects.reverbDry.forEach((effect) => {
+            effect.gain.value = 1 - wet;
+        });
+
+        state.groupEffects.reverbWet.forEach((effect) => {
+            effect.gain.value = wet;
+        });
+
+    }, [state.effectValues.ambience, state.groupEffects.reverbDry, state.groupEffects.reverbWet]);
 
     /* 
         Ambient Track Hook
@@ -174,19 +225,18 @@ export const MusicPlayer = (props) => {
         Randomize Hook
     */
     React.useEffect(() => {
-        console.log('hook');
+        // init event
         if (state.randomize && !schedulerRef.current.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
-            console.log('init randomize');
             randomizeEventRef.current = schedulerRef.current.scheduleRepeating(
                 audioCtx.current.currentTime + (60 / bpm),
-                (60 / bpm) * 32,
+                32 * 60 / bpm,
                 triggerRandomVoice
             )
+            // update event
         } else if (state.randomize) {
-            console.log('update of callback');
-            schedulerRef.current.updateCallback(schedulerRef.current, triggerRandomVoice);
+            schedulerRef.current.updateCallback(randomizeEventRef.current, triggerRandomVoice);
+            // stop event
         } else if (!state.randomize) {
-            console.log('stop randomize');
             schedulerRef.current.cancel(randomizeEventRef.current);
         }
 
@@ -248,14 +298,14 @@ export const MusicPlayer = (props) => {
                     id: 'effects',
                     iconName: 'icon-equalizer',
                     content:
-                        <></>
-                    // <EffectsPanel
-                    //     impulseResponse={this.state.impulseResponse}
-                    //     handleChangeLP={this.handleChangeLP}
-                    //     handleChangeHP={this.handleChangeHP}
-                    //     handleChangeSpaciousness={this.handleChangeSpaciousness}
-                    //     handleEffectsRandomize={this.handleEffectsRandomize}
-                    // />
+                        <EffectsPanel
+                            impulseResponse={state.impulseResponse}
+                            dispatch={dispatch}
+                        // handleChangeLP={handleChangeLP}
+                        // handleChangeHP={handleChangeHP}
+                        // handleChangeSpaciousness={handleChangeSpaciousness}
+                        // handleEffectsRandomize={handleEffectsRandomize}
+                        />
                 }, {
                     id: 'song-info',
                     iconName: 'icon-info',

@@ -1,7 +1,16 @@
 @import '../settings.scss';
 
 #song-info-panel {
+    color: white;
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
+}
+
+a{
+    color: white;
+}
+
+.social-link{
+    display: inline-block;
 }

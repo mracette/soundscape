@@ -6,4 +6,70 @@
     width: auto;
     background: rgba(255, 255, 255, 0.15);
     overflow: auto;
+    
+}
+
+.flex-panel {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    flex: 1 1 auto;
+}
+
+h2, h3 {
+    color: white;
+    text-transform: capitalize;
+}
+
+h2 {
+    font-size: vh(3);
+    margin: 0 0 vh(1) 0;
+}
+
+h3 {
+    font-size: vh(2.15);
+    margin: 0;
+    padding: 0 vh(1) 0 0;
+    flex: 0 0 content;
+    white-space: nowrap;
+}
+
+.button-white {
+    font-size: vh(1.75);
+    background-color: rgba(255, 255, 255, 0);
+    border-style: solid;
+    border-color: white;
+    color: white;
+    padding: vh(1);
+    margin: 0 auto 0 auto;
+    flex-basis: auto;
+    flex-grow: 1;
+}
+
+.button-white {
+    font-size: vh(1.75);
+    background-color: rgba(255, 255, 255, 0);
+    border-style: solid;
+    border-color: white;
+    color: white;
+    padding: vh(1);
+    margin: 0 auto 0 auto;
+    flex-basis: auto;
+    flex-grow: 1;
+}
+
+.grouped-buttons {
+    flex: 1 1 auto;
+    border-top-width: vh(0.2);
+    border-bottom-width: vh(0.2);
+    border-left-width: vh(0.1);
+    border-right-width: vh(0.1);
+}
+
+.grouped-buttons:first-of-type {
+    border-left-width: vh(0.2);
+}
+
+.grouped-buttons:last-of-type {
+    border-right-width: vh(0.2);
 }

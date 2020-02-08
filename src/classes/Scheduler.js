@@ -154,6 +154,23 @@ export class Scheduler {
 
     }
 
+    getEvent(id) {
+
+        let event = this.queue.find((e) => e.id === id);
+
+        if (event) {
+            return event;
+        } else {
+            let event = this.repeatingQueue.find((e) => e.id === id);
+            if (event) {
+                return event;
+            } else {
+                return false;
+            }
+        }
+
+    }
+
     clear() {
 
         this.queue.forEach((event) => {
@@ -174,28 +191,14 @@ export class Scheduler {
 
     cancel(id) {
 
-        for (let i = this.repeatingQueue.length - 1; i >= 0; i--) {
+        if (typeof id !== 'undefined') {
 
-            const event = this.repeatingQueue[i];
+            const event = this.getEvent(id);
+            event.source.onended = null;
+            event.source.stop();
 
-            if (event.id === id) {
-                window.clearInterval(event.timer);
-                event.source.onended = null;
-                event.source.stop();
-                this.queue.splice(i, 1);
-            }
-
-        }
-
-        for (let i = this.queue.length - 1; i >= 0; i--) {
-
-            const event = this.queue[i];
-
-            if (event.id === id) {
-                event.source.onended = null;
-                event.source.stop();
-                this.queue.splice(i, 1);
-            }
+            this.queue = this.queue.filter((e) => e.id !== event.id);
+            this.repeatingQueue = this.repeatingQueue.filter((e) => e.id !== event.id);
 
         }
 

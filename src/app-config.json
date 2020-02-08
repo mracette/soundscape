@@ -157,6 +157,18 @@
             "panelMuteButton": "rgba(255, 255, 255, 0.3)",
             "groupSoloButton": "rgba(90.5, 162.2, 240.8, 0.5)",
             "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
+        },
+        "info": {
+            "credits": [
+                {
+                    "type": "Music, Art & Development: ",
+                    "content": "Mark Racette"
+                },
+                {
+                    "type": "Technology: ",
+                    "content": "React, Three.js, Anime.js, ColorCurves"
+                }
+            ]
         }
     },
     {
@@ -328,6 +340,22 @@
             "panelMuteButton": "rgba(255, 255, 255, 0.3)",
             "groupSoloButton": "rgba(90.5, 162.2, 240.8, 0.5)",
             "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
+        },
+        "info": {
+            "credits": [
+                {
+                    "type": "Music, Art & Development: ",
+                    "content": "Mark Racette"
+                },
+                {
+                    "type": "Additional 3D Assets: ",
+                    "content": "Poly by Google"
+                },
+                {
+                    "type": "Technology: ",
+                    "content": "React, Three.js, Anime.js, ColorCurves"
+                }
+            ]
         }
     }
 ]

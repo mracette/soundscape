@@ -1,6 +1,7 @@
 // libs
 import React from 'react';
 import * as d3Chromatic from 'd3-scale-chromatic';
+import * as d3Color from 'd3-color';
 import { ColorPalette } from 'color-curves'
 
 // components
@@ -15,14 +16,14 @@ const appConfig = require('../app-config.json');
 
 // global behavior flags for testing
 const flags = {
-  quantizeSamples: true,
-  showVisuals: false,
+  quantizeSamples: false,
+  showVisuals: true,
   playAmbientTrack: false
 };
 
 // define spectrum functions here since they don't do well in json
 const spectrumFunctions = {
-  'moonrise': (n) => d3Chromatic.interpolateViridis(n).brighter(1.5),
+  'moonrise': (n) => new d3Color.color(d3Chromatic.interpolateViridis(n)).brighter(1.5),
   'mornings': (n) => morningsPalette.rgbValueAt(n)
 };
 

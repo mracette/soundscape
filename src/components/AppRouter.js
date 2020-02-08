@@ -5,6 +5,8 @@ import { BrowserRouter as Router, Switch, Route, Redirect } from 'react-router-d
 // context
 import { ThemeContext } from '../contexts/contexts';
 import { SongContext } from '../contexts/contexts';
+import { InfoContext } from '../contexts/contexts';
+
 
 // components
 import { MusicPlayer } from './MusicPlayer';
@@ -34,7 +36,16 @@ export const AppRouter = (props) => {
                             })["audio"]
                         }}>
 
-                            <MusicPlayer />
+                            <InfoContext.Provider value={{
+                                id: routeProps.match.params.songId,
+                                ...props.appConfig.find((song) => {
+                                    return song.id === routeProps.match.params.songId;
+                                })["info"]
+                            }}>
+
+                                <MusicPlayer />
+
+                            </InfoContext.Provider>
 
                         </SongContext.Provider>
 
