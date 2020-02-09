@@ -8,15 +8,11 @@
     overflow-wrap: break-word;
     background-color: rgba(255, 255, 255, 0);
     margin-right: vh(3);
-    cursor: 'pointer';
+    cursor: pointer;
 } 
 
 .toggle-button:focus {
     outline: none;
-}
-
-.toggle-button:hover {
-    cursor: 'pointer';
 }
 
 .toggle-button:last-child {
