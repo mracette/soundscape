@@ -239,6 +239,7 @@ export const ToggleButton = (props) => {
                 }
             }}
             style={{
+                cursor: 'pointer',
                 height: buttonRadius * 2,
                 width: buttonRadius * 2
             }}
