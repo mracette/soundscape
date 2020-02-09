@@ -37,7 +37,6 @@ export class LandingPageScene extends SceneManager {
             maxOrbitRadius: 1000
         }
         );
-        this.scene.add(subjects.stars);
         return subjects;
     }
 

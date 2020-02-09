@@ -29,18 +29,23 @@ export const CanvasViz = () => {
 
     React.useEffect(() => {
         if (groups.length === analysers.length) {
+
+            let newScene;
+
             switch (id) {
                 case 'moonrise':
                     if (flagShowVisuals) {
-                        sceneRef.current = new Moonrise(canvasRef.current, analysers);
+                        newScene = new Moonrise(canvasRef.current, analysers);
+                        sceneRef.current = newScene;
                     }
                     break;
                 case 'mornings':
                     if (flagShowVisuals) {
-                        sceneRef.current = new Mornings(canvasRef.current, analysers, {
+                        newScene = new Mornings(canvasRef.current, analysers, {
                             spectrumFunction,
                             bpm
                         });
+                        sceneRef.current = newScene
                     }
                     break;
                 default:
@@ -51,6 +56,11 @@ export const CanvasViz = () => {
                 window.addEventListener('resize', sceneRef.current.onWindowResize);
                 window.addEventListener('orientationchange', sceneRef.current.onWindowResize);
                 window.addEventListener('fullscreenchange', sceneRef.current.onWindowResize);
+            }
+
+            return () => {
+                newScene.stop();
+                newScene.disposeAll(newScene.scene);
             }
 
         }

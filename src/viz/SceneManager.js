@@ -24,10 +24,10 @@ export class SceneManager {
             depth: 1000
         };
 
+        this.currentFrame;
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
         this.onWindowResize = this.onWindowResize.bind(this);
-
         this.showStats = true;
 
     }
@@ -50,11 +50,34 @@ export class SceneManager {
         })
     }
 
+    stop() {
+        window.cancelAnimationFrame(this.currentFrame);
+    }
+
+    disposeAll(obj) {
+        while (obj.children.length > 0) {
+            this.disposeAll(obj.children[0])
+            obj.remove(obj.children[0]);
+        }
+        if (obj.geometry) obj.geometry.dispose()
+
+        if (obj.material) {
+            //in case of map, bumpMap, normalMap, envMap ...
+            Object.keys(obj.material).forEach(prop => {
+                if (!obj.material[prop])
+                    return
+                if (typeof obj.material[prop].dispose === 'function')
+                    obj.material[prop].dispose()
+            })
+            obj.material.dispose()
+        }
+    }
+
     animate() {
         this.showStats && this.helpers.stats.begin();
         this.render();
         this.showStats && this.helpers.stats.end();
-        requestAnimationFrame(this.animate);
+        this.currentFrame = requestAnimationFrame(this.animate);
     }
 
     initScene() {

@@ -52,6 +52,7 @@ export const LandingPage = () => {
     const canvasRef = React.useRef(null);
 
     React.useEffect(() => {
+
         let scene;
 
         if (canvasRef.current) {
@@ -63,6 +64,8 @@ export const LandingPage = () => {
         }
 
         return () => {
+            scene.stop();
+            scene.disposeAll(scene.scene);
             window.removeEventListener('resize', scene.onWindowResize);
             window.removeEventListener('orientationchange', scene.onWindowResize);
             window.removeEventListener('fullscreenchange', scene.onWindowResize);

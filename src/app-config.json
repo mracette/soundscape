@@ -14,7 +14,9 @@
                     "polyphony": -1,
                     "analyser": {
                         "power": 7,
-                        "smoothingTimeConstant": 0.3
+                        "smoothingTimeConstant": 0.3,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
                     },
                     "voices": [
                         {
@@ -44,7 +46,9 @@
                     "polyphony": 2,
                     "analyser": {
                         "power": 9,
-                        "smoothingTimeConstant": 0.95
+                        "smoothingTimeConstant": 0.95,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
                     },
                     "voices": [
                         {
@@ -69,7 +73,9 @@
                     "polyphony": 1,
                     "analyser": {
                         "power": 5,
-                        "smoothingTimeConstant": 0.85
+                        "smoothingTimeConstant": 0.85,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
                     },
                     "voices": [
                         {
@@ -122,7 +128,9 @@
                     "analyser": {
                         "split": true,
                         "power": 5,
-                        "smoothingTimeConstant": 0.4
+                        "smoothingTimeConstant": 0.4,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
                     },
                     "voices": [
                         {
