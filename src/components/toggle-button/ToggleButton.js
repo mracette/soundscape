@@ -223,6 +223,21 @@ export const ToggleButton = (props) => {
             type='button'
             className='toggle-button'
             ref={buttonRef}
+            onTouchEnd={() => {
+                switch (playerState) {
+                    case 'stopped': // start if stopped
+                        changePlayerState('active');
+                        break;
+                    case 'active': // stop if active
+                        changePlayerState('stopped');
+                        break;
+                    case 'pending-start': // cancel start if triggered on pending-start
+                        changePlayerState('stopped');
+                        break;
+                    case 'pending-stop': break; // do nothing if triggered on pending-stop
+                    default: break;
+                }
+            }}
             onClick={() => {
                 switch (playerState) {
                     case 'stopped': // start if stopped
