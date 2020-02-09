@@ -1,0 +1,66 @@
+@import '../settings.scss';
+
+#landing-page {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#star-canvas {
+    z-index: -1;
+}
+
+#landing-page-soundscape-title {
+    font-family: 'Satisfy';
+    font-size: $xxl-size;
+    margin: 2%;
+}
+
+#landing-page-header {
+    font-size: $m-size;
+    color: $moon-yellow;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+#landing-page-header .flex-row {
+    justify-content: center;
+}
+
+#landing-page-song-title {
+    color: $hot-pink;
+}
+
+#landing-page-bpm {
+    color: $hot-green;
+}
+
+#landing-page-key {
+    color: $hot-blue;
+}
+
+#song-selection-panel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.custom-song-icon {
+    display: block;
+    margin: 0;
+    width: 25rem;    
+    height: 25rem;
+}
+
+.song-link:hover {
+    background-color: rgba(255,255,255,.2);
+    cursor: pointer;
+}
