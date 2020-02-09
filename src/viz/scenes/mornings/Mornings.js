@@ -22,7 +22,7 @@ import { rgbaVertex, rgbaFragment } from '../../shaders/rgba';
 
 export class Mornings extends SceneManager {
 
-    constructor(canvas, analysers, extras) {
+    constructor(canvas, analysers, callback, extras) {
 
         super(canvas);
 
@@ -57,6 +57,7 @@ export class Mornings extends SceneManager {
             super.init(),
             this.loadModels(this.renderList)
         ]).then(() => {
+            callback();
             this.applySceneSettings();
             this.render(this.renderList); // render once to get objects in place
             this.staticObjects.forEach(mesh => mesh.matrixAutoUpdate = false); // freeze static objects

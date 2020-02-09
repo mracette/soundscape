@@ -301,10 +301,6 @@ export const MusicPlayer = (props) => {
                         <EffectsPanel
                             impulseResponse={state.impulseResponse}
                             dispatch={dispatch}
-                        // handleChangeLP={handleChangeLP}
-                        // handleChangeHP={handleChangeHP}
-                        // handleChangeSpaciousness={handleChangeSpaciousness}
-                        // handleEffectsRandomize={handleEffectsRandomize}
                         />
                 }, {
                     id: 'song-info',

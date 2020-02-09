@@ -13,7 +13,7 @@ import pineTreeModel from '../../models/moonrise/pine-tree.gltf';
 
 export class Moonrise extends SceneManager {
 
-    constructor(canvas, analysers, players) {
+    constructor(canvas, analysers, callback, extras) {
 
         super(canvas);
 
@@ -54,6 +54,7 @@ export class Moonrise extends SceneManager {
                 this.initLakeLilies(),
                 this.initLakeMoon()
             ]).then(() => {
+                callback();
                 super.animate();
             })
         })

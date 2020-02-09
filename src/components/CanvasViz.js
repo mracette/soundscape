@@ -7,6 +7,7 @@ import { Mornings } from '../viz/scenes/mornings/Mornings';
 
 // components
 import { Canvas } from '../components/Canvas';
+import { LoadingScreen } from '../components/LoadingScreen';
 
 // context
 import { SongContext } from '../contexts/contexts';
@@ -24,6 +25,8 @@ export const CanvasViz = () => {
     const { analysers } = React.useContext(MusicPlayerContext);
     const flagShowVisuals = React.useContext(TestingContext).flags.showVisuals;
 
+    const [loading, setLoading] = React.useState(true);
+
     const canvasRef = React.useRef(null);
     const sceneRef = React.useRef(null);
 
@@ -35,13 +38,13 @@ export const CanvasViz = () => {
             switch (id) {
                 case 'moonrise':
                     if (flagShowVisuals) {
-                        newScene = new Moonrise(canvasRef.current, analysers);
+                        newScene = new Moonrise(canvasRef.current, analysers, () => setLoading(false));
                         sceneRef.current = newScene;
                     }
                     break;
                 case 'mornings':
                     if (flagShowVisuals) {
-                        newScene = new Mornings(canvasRef.current, analysers, {
+                        newScene = new Mornings(canvasRef.current, analysers, () => setLoading(false), {
                             spectrumFunction,
                             bpm
                         });
@@ -68,12 +71,13 @@ export const CanvasViz = () => {
         }
     }, [bpm, groups, spectrumFunction, flagShowVisuals, id, analysers]);
 
-    return (
+    return (<>
+        {loading && <LoadingScreen />}
         <Canvas
             id='canvas-viz'
             className='fullscreen'
             onLoad={(canvas) => canvasRef.current = canvas}
         />
-    )
+    </>)
 
 }
