@@ -64,12 +64,19 @@ export const CanvasViz = () => {
                 window.addEventListener('resize', sceneRef.current.onWindowResize);
                 window.addEventListener('orientationchange', sceneRef.current.onWindowResize);
                 window.addEventListener('fullscreenchange', sceneRef.current.onWindowResize);
+                window.visualViewport && (window.visualViewport.addEventListener('scroll', sceneRef.current.onWindowResize));
+                window.visualViewport && (window.visualViewport.addEventListener('resize', sceneRef.current.onWindowResize));
             }
 
             return () => {
                 if (flagShowVisuals) {
                     newScene.stop();
                     newScene.disposeAll(newScene.scene);
+                    window.removeEventListener('resize', sceneRef.current.onWindowResize);
+                    window.removeEventListener('orientationchange', sceneRef.current.onWindowResize);
+                    window.removeEventListener('fullscreenchange', sceneRef.current.onWindowResize);
+                    window.visualViewport && (window.visualViewport.removeEventListener('scroll', sceneRef.current.onWindowResize));
+                    window.visualViewport && (window.visualViewport.removeEventListener('resize', sceneRef.current.onWindowResize));
                 }
             }
 

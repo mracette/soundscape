@@ -9,6 +9,7 @@ import { FreqBands } from './FreqBands';
 import { MenuButtonParent } from './MenuButtonParent';
 import { SongInfoPanel } from './SongInfoPanel';
 import { ToggleButtonPanel } from './toggle-button/ToggleButtonPanel';
+import { AudioPlayerWrapper } from '../classes/AudioPlayerWrapper';
 
 // context
 import { MusicPlayerContext } from '../contexts/contexts';
@@ -21,7 +22,6 @@ import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
 // other
 import { Analyser } from '../classes/Analyser';
 import { createAudioPlayer } from '../utils/audioUtils';
-import { AudioLooper } from '../classes/AudioLooper';
 import { solveExpEquation } from '../utils/mathUtils';
 import { Scheduler } from '../classes/Scheduler';
 
@@ -56,9 +56,7 @@ const SAMPLE_RATE = 44100;
 
 export const MusicPlayer = (props) => {
 
-    const {
-        playAmbientTrack
-    } = React.useContext(TestingContext);
+    const { flags } = React.useContext(TestingContext);
 
     const {
         id,
@@ -190,37 +188,32 @@ export const MusicPlayer = (props) => {
 
         premaster.current.connect(audioCtx.current.destination);
 
-        if (playAmbientTrack && ambientTrack) {
+        if (flags.playAmbientTrack && ambientTrack) {
 
             const pathToAudio = require(`../audio/${id}/ambient-track.mp3`);
 
             createAudioPlayer(audioCtx.current, pathToAudio, {
                 offlineRendering: true,
-                renderLength: ambientTrackLength * timeSignature,
+                renderLength: SAMPLE_RATE * parseInt(ambientTrackLength) * timeSignature * 60 / bpm,
             }).then((audioPlayer) => {
 
-                ambientPlayerRef.current = new AudioLooper(audioCtx.current, audioPlayer.buffer, {
-                    bpm,
-                    loopLengthBeats: ambientTrackLength * timeSignature,
-                    snapToGrid: false,
-                    fadeInTime: .0000001,
-                    fadeOutTime: .0000001,
-                    audioCtxInitTime: audioCtxInitTime.current,
-                    destination: premaster.current
+                ambientPlayerRef.current = new AudioPlayerWrapper(audioCtx.current, audioPlayer, {
+                    destination: premaster.current,
+                    loop: true
                 });
 
-                ambientPlayerRef.current.start();
+                ambientPlayerRef.current.start(audioCtx.current.currentTime);
 
             });
 
         }
 
         return () => {
-            playAmbientTrack && ambientPlayerRef.current.stop();
+            flags.playAmbientTrack && ambientPlayerRef.current.stop();
             actx.close();
         };
 
-    }, [bpm, id, playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature]);
+    }, [bpm, id, flags.playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature]);
 
     /* 
         Randomize Hook

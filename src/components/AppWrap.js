@@ -62,11 +62,15 @@ export const AppWrap = () => {
     window.addEventListener('resize', setViewportVars);
     window.addEventListener('orientationchange', setViewportVars);
     window.addEventListener('fullscreenchange', setViewportVars);
+    window.visualViewport && (window.visualViewport.addEventListener('scroll', setViewportVars));
+    window.visualViewport && (window.visualViewport.addEventListener('resize', setViewportVars));
 
     return () => {
       window.removeEventListener('resize', setViewportVars);
       window.removeEventListener('orientationchange', setViewportVars);
       window.removeEventListener('fullscreenchange', setViewportVars);
+      window.visualViewport && (window.visualViewport.removeEventListener('scroll', setViewportVars));
+      window.visualViewport && (window.visualViewport.removeEventListener('resize', setViewportVars));
     }
 
   }, []);

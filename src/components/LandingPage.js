@@ -61,6 +61,8 @@ export const LandingPage = () => {
             window.addEventListener('resize', scene.onWindowResize);
             window.addEventListener('orientationchange', scene.onWindowResize);
             window.addEventListener('fullscreenchange', scene.onWindowResize);
+            window.visualViewport && (window.visualViewport.addEventListener('scroll', scene.onWindowResize));
+            window.visualViewport && (window.visualViewport.addEventListener('resize', scene.onWindowResize));
         }
 
         return () => {
@@ -69,6 +71,8 @@ export const LandingPage = () => {
             window.removeEventListener('resize', scene.onWindowResize);
             window.removeEventListener('orientationchange', scene.onWindowResize);
             window.removeEventListener('fullscreenchange', scene.onWindowResize);
+            window.visualViewport && (window.visualViewport.removeEventListener('scroll', scene.onWindowResize));
+            window.visualViewport && (window.visualViewport.removeEventListener('resize', scene.onWindowResize));
         }
 
     }, [])
