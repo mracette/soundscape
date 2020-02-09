@@ -7,7 +7,6 @@ import { ThemeContext } from '../contexts/contexts';
 import { SongContext } from '../contexts/contexts';
 import { InfoContext } from '../contexts/contexts';
 
-
 // components
 import { MusicPlayer } from './MusicPlayer';
 import { LandingPage } from './LandingPage';

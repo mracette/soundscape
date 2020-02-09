@@ -26,6 +26,8 @@ export class Mornings extends SceneManager {
 
         super(canvas);
 
+        this.DPRMax = 1.15;
+
         this.colors = {
             plant: new THREE.Color(0x7B9E53),
             white: new THREE.Color(0xFFFFFF),

@@ -17,7 +17,7 @@ export class Moonrise extends SceneManager {
 
         super(canvas);
 
-        console.log(analysers);
+        this.DPRMax = 1.5;
 
         this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
         this.atmosphereAnalyser = analysers.find(a => a.id === 'atmosphere-analyser');

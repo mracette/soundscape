@@ -1,5 +1,10 @@
 export const MusicPlayerReducer = (state, action) => {
     switch (action.type) {
+        case 'setIsLoading':
+            return {
+                ...state,
+                isLoading: action.payload
+            }
         case 'startRandomize':
             return {
                 ...state,

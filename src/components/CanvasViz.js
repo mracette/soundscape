@@ -22,10 +22,8 @@ export const CanvasViz = () => {
 
     const { spectrumFunction } = React.useContext(ThemeContext);
     const { id, groups, bpm } = React.useContext(SongContext);
-    const { analysers } = React.useContext(MusicPlayerContext);
+    const { analysers, dispatch, isLoading } = React.useContext(MusicPlayerContext);
     const flagShowVisuals = React.useContext(TestingContext).flags.showVisuals;
-
-    const [loading, setLoading] = React.useState(true);
 
     const canvasRef = React.useRef(null);
     const sceneRef = React.useRef(null);
@@ -38,13 +36,20 @@ export const CanvasViz = () => {
             switch (id) {
                 case 'moonrise':
                     if (flagShowVisuals) {
-                        newScene = new Moonrise(canvasRef.current, analysers, () => setLoading(false));
+                        newScene = new Moonrise(
+                            canvasRef.current,
+                            analysers,
+                            () => dispatch({ type: 'setIsLoading', payload: false })
+                        );
                         sceneRef.current = newScene;
                     }
                     break;
                 case 'mornings':
                     if (flagShowVisuals) {
-                        newScene = new Mornings(canvasRef.current, analysers, () => setLoading(false), {
+                        newScene = new Mornings(
+                            canvasRef.current,
+                            analysers,
+                            () => dispatch({ type: 'setIsLoading', payload: false }), {
                             spectrumFunction,
                             bpm
                         });
@@ -69,16 +74,11 @@ export const CanvasViz = () => {
             }
 
         }
-    }, [bpm, groups, spectrumFunction, flagShowVisuals, id, analysers]);
+    }, [bpm, groups, spectrumFunction, flagShowVisuals, id, analysers, dispatch]);
 
     return (<>
-        {loading && <LoadingScreen />}
+        {isLoading && <LoadingScreen />}
         <canvas id='canvas-viz' className='fullscreen' ref={canvasRef}></canvas>
-        {/* <Canvas
-            id='canvas-viz'
-            className='fullscreen'
-            onLoad={(canvas) => canvasRef.current = canvas}
-        /> */}
     </>)
 
 }

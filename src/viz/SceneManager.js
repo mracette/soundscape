@@ -95,7 +95,7 @@ export class SceneManager {
             // outputEncoding: THREE.sRGBEncoding
         });
 
-        let DPR = Math.min(1.15, (window.devicePixelRatio) ? window.devicePixelRatio : 1);
+        let DPR = Math.min(this.DPRMax || 1.5, (window.devicePixelRatio) ? window.devicePixelRatio : 1);
 
         renderer.setPixelRatio(DPR);
         renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);

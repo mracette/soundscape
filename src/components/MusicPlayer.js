@@ -71,6 +71,7 @@ export const MusicPlayer = (props) => {
     const [premasterAnalyser, setPremasterAnalyser] = React.useState(null);
 
     const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
+        isLoading: true,
         randomize: false,
         randomizeEffects: false,
         mute: false,
@@ -275,7 +276,7 @@ export const MusicPlayer = (props) => {
             dispatch
         }}>
 
-            {premasterAnalyser &&
+            {!state.isLoading && premasterAnalyser &&
                 <FreqBands
                     premasterAnalyser={premasterAnalyser}
                 />}

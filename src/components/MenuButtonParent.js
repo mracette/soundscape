@@ -8,6 +8,7 @@ import { Icon } from './Icon';
 // contexts
 import { ThemeContext } from '../contexts/contexts';
 import { LayoutContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // styles
 import '../styles/components/MenuButtonParent.scss';
@@ -16,6 +17,7 @@ export const MenuButtonParent = (props) => {
 
     const { vh } = useContext(LayoutContext);
     const { buttonColor } = useContext(ThemeContext);
+    const { isLoading } = useContext(MusicPlayerContext);
 
     // parent button dimensions
     const height = 7 * vh;
@@ -72,7 +74,8 @@ export const MenuButtonParent = (props) => {
             className='menu-button'
             style={{
                 top,
-                left
+                left,
+                visibility: isLoading ? 'hidden' : 'visible'
             }}
             ref={node}
         >
