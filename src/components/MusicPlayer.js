@@ -1,6 +1,6 @@
 // libs
 import React from 'react';
-import anime from 'animejs';
+// import anime from 'animejs';
 
 // components
 import { CanvasViz } from './CanvasViz';
@@ -92,8 +92,8 @@ export const MusicPlayer = (props) => {
     });
 
     const randomizeEventRef = React.useRef();
-    const randomizeEffectsEventRef = React.useRef();
-    const randomizeEffectsAnimRef = React.useRef();
+    // const randomizeEffectsEventRef = React.useRef();
+    // const randomizeEffectsAnimRef = React.useRef();
 
     const ambientPlayerRef = React.useRef();
     const audioCtx = React.useRef(new (window.AudioContext || window.webkitAudioContext)({

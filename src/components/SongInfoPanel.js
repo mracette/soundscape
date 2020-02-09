@@ -10,7 +10,7 @@ import '../styles/components/SongInfoPanel.scss';
 
 export const SongInfoPanel = (props) => {
 
-    const { name, bpm, keySignature, timeSignature } = React.useContext(SongContext)
+    const { name } = React.useContext(SongContext)
     const { credits } = React.useContext(InfoContext);
 
     return (

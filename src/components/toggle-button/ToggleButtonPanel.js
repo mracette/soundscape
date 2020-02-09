@@ -56,7 +56,7 @@ export const ToggleButtonPanel = (props) => {
                     } : undefined}
                     onClick={() => randomize ? dispatch({ type: 'stopRandomize' }) : dispatch({ type: 'startRandomize' })}
                 >
-                    Randomize
+                    Background Mode
                     </button>
 
                 <button

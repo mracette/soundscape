@@ -10,6 +10,14 @@
     margin-right: vh(3);
 } 
 
+.toggle-button:focus {
+    outline: none;
+}
+
+.toggle-button:hover {
+    cursor: pointer;
+}
+
 .toggle-button:last-child {
     margin-right: 0;
 }
