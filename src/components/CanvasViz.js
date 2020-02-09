@@ -73,11 +73,12 @@ export const CanvasViz = () => {
 
     return (<>
         {loading && <LoadingScreen />}
-        <Canvas
+        <canvas id='canvas-viz' className='fullscreen' ref={canvasRef}></canvas>
+        {/* <Canvas
             id='canvas-viz'
             className='fullscreen'
             onLoad={(canvas) => canvasRef.current = canvas}
-        />
+        /> */}
     </>)
 
 }

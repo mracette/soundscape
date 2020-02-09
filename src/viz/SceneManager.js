@@ -92,13 +92,13 @@ export class SceneManager {
             canvas: this.canvas,
             antialias: true,
             powerPreference: "high-performance",
-            outputEncoding: THREE.sRGBEncoding
+            // outputEncoding: THREE.sRGBEncoding
         });
 
-        const DPR = (window.devicePixelRatio) ? window.devicePixelRatio : 1;
+        let DPR = Math.min(1.15, (window.devicePixelRatio) ? window.devicePixelRatio : 1);
 
-        renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
         renderer.setPixelRatio(DPR);
+        renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
 
         return renderer;
     }
