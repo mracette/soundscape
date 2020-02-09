@@ -15,13 +15,7 @@ export const SongInfoPanel = (props) => {
 
     return (
         <div id='song-info-panel'>
-            <p>We're looking for 3D artists to partner with. Interested? Know someone who might be? Please get in touch.</p>
-            <h2>Song</h2>
-            <p>Title: {name}</p>
-            <p>BPM: {bpm}</p>
-            <p>Key Signature: {keySignature}</p>
-            <p>Time Signature: {timeSignature}/4 </p>
-            <h2>Credits</h2>
+            <h2>{name}</h2>
             {credits.map((c) => {
                 return <p>{c.type}{c.content}</p>
             })}
@@ -32,6 +26,7 @@ export const SongInfoPanel = (props) => {
                 <a className='social-link' href='https://twitter.com/markracette'> Twitter</a>&nbsp;|&nbsp;
                 <a className='social-link' href='https://github.com/mracette'> Github</a>
             </div>
+            <p>PS: We're looking for 3D artists to collaborate with. If you're interested or know someone who might be, please get in touch!</p>
         </div>
     )
 

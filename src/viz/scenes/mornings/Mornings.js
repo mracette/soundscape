@@ -28,7 +28,11 @@ export class Mornings extends SceneManager {
 
         this.colors = {
             plant: new THREE.Color(0x7B9E53),
-            white: new THREE.Color(0xFFFFFF)
+            white: new THREE.Color(0xFFFFFF),
+            paleBlue: new THREE.Color(0xDEEEFF),
+            coffee: new THREE.Color(0x260e00),
+            deepBlue: new THREE.Color(0x213058),
+            blueGrey: new THREE.Color(0xB0B1B6)
         };
 
         // after rendering these once, turn off auto-updates to optimize further renders
@@ -125,9 +129,9 @@ export class Mornings extends SceneManager {
         lights.sunlight.position.copy(new THREE.Vector3(sunX, sunY, sunZ));
         lights.sunlight.target.position.copy(new THREE.Vector3(sunX, 0, 0));
         lights.sunlight.castShadow = true;
-        lights.sunlight.shadowBias = 0.0001;
-        lights.sunlight.shadowMapHeight = MAPSIZE;
-        lights.sunlight.shadowMapWidth = MAPSIZE;
+        lights.sunlight.shadow.bias = 0.0001;
+        lights.sunlight.shadow.mapSize.height = MAPSIZE;
+        lights.sunlight.shadow.mapSize.width = MAPSIZE;
         lights.sunlight.shadow.camera.top = CAMERASIZE;
         lights.sunlight.shadow.camera.bottom = -1 * CAMERASIZE;
         lights.sunlight.shadow.camera.left = -1 * CAMERASIZE;
@@ -135,9 +139,9 @@ export class Mornings extends SceneManager {
 
         lights.pointOne.position.set(-36.792147432025736, 12.295984744079584, 19.50565058881036);
         lights.pointOne.castShadow = true;
-        lights.pointOne.shadowBias = 0.0001;
-        lights.pointOne.shadowMapHeight = MAPSIZE;
-        lights.pointOne.shadowMapWidth = MAPSIZE;
+        lights.pointOne.shadow.bias = 0.0001;
+        lights.pointOne.shadow.mapSize.height = MAPSIZE;
+        lights.pointOne.shadow.mapSize.Width = MAPSIZE;
 
         this.scene.add(lights.ambient);
         this.scene.add(lights.sunlight);
@@ -233,18 +237,23 @@ export class Mornings extends SceneManager {
 
                         const pageGeo = new THREE.PlaneBufferGeometry(1.9, 1.8, 64, 64);
                         pageGeo.rotateX(-Math.PI / 2);
-                        console.log(pageGeo.attributes.position);
 
                         gltf.scene.children.forEach((mesh) => {
+
+                            console.log(mesh);
+                            if (mesh.name.includes('mug_coffee')) {
+                                mesh.material = new THREE.MeshBasicMaterial({
+                                    color: this.colors.coffee
+                                })
+                            }
+
+                            if (mesh.name.includes('mug_top')) {
+                                mesh.material.color = new THREE.Color(0x666666);
+                            }
 
                             if (mesh.name === 'left_page_ref' || mesh.name === 'right_page_ref') {
 
                                 const colors = new Array(pageGeo.attributes.position.count * 4)
-
-                                // for (let i = 0; i < pageGeo.attributes.position.count; i++) {
-                                //     const c = i / pageGeo.attributes.position.count;
-                                //     colors.push(c, c, c, 1)
-                                // }
 
                                 const newMesh = mesh.clone();
                                 newMesh.geometry = pageGeo.clone();
@@ -354,6 +363,7 @@ export class Mornings extends SceneManager {
                                     emissiveIntensity: 0
                                 })
                                 leaves.push(mesh);
+                                this.staticObjects.push(mesh);
                             });
 
                         this.subjects.spiralPlantLeaves = leaves;

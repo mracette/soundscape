@@ -79,30 +79,30 @@ export const EffectsPanel = (props) => {
                     </button>
             </div>
 
-            <div className='flex-row effect-panel-row'>
+            <div className='flex-row'>
                 <h3 className='slider-label'>highpass filter</h3>
             </div>
-            <div className='flex-row effect-panel-row'>
+            <div className='flex-row'>
                 <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="hp-slider" ref={hpRef}
                     onInput={(e) => {
                         dispatch({ type: 'setHighpass', payload: { value: e.target.value } });
                     }}
                 ></input>
             </div>
-            <div className='flex-row effect-panel-row'>
+            <div className='flex-row'>
                 <h3 className='slider-label'>lowpass filter</h3>
             </div>
-            <div className='flex-row effect-panel-row'>
+            <div className='flex-row'>
                 <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="lp-slider" ref={lpRef}
                     onInput={(e) => {
                         dispatch({ type: 'setLowpass', payload: { value: e.target.value } });
                     }}
                 ></input>
             </div>
-            <div className='flex-row effect-panel-row'>
+            <div className='flex-row'>
                 <h3 className='slider-label'>ambience</h3>
             </div>
-            <div className='flex-row effect-panel-row'>
+            <div className='flex-row'>
                 <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="spaciousness-slider" ref={ambienceRef}
                     onChange={(e) => {
                         dispatch({ type: 'setAmbience', payload: { value: e.target.value } });

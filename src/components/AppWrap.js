@@ -16,9 +16,9 @@ const appConfig = require('../app-config.json');
 
 // global behavior flags for testing
 const flags = {
-  quantizeSamples: false,
+  quantizeSamples: true,
   showVisuals: true,
-  playAmbientTrack: false
+  playAmbientTrack: true
 };
 
 // define spectrum functions here since they don't do well in json

@@ -59,8 +59,10 @@ export const CanvasViz = () => {
             }
 
             return () => {
-                newScene.stop();
-                newScene.disposeAll(newScene.scene);
+                if (flagShowVisuals) {
+                    newScene.stop();
+                    newScene.disposeAll(newScene.scene);
+                }
             }
 
         }
