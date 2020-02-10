@@ -187,14 +187,6 @@ export const ToggleButton = (props) => {
                 }
             });
 
-            // // send button ref to music player for randomize function
-            // dispatch({
-            //     type: 'addButton',
-            //     payload: {
-            //         button: buttonRef.current
-            //     }
-            // });
-
         });
 
         // store the animation targets based on their relative positions in the DOM
@@ -223,7 +215,11 @@ export const ToggleButton = (props) => {
             className='toggle-button'
             ref={buttonRef}
             onClick={(e) => {
-                buttonRef.current.style.backgroundColor = 'blue';
+                // if (buttonRef.current.style.backgroundColor === 'blue') {
+                //     buttonRef.current.style.backgroundColor = 'rgba(0,0,0,0)'
+                // } else {
+                //     buttonRef.current.style.backgroundColor = 'blue'
+                // };
                 e.preventDefault();
                 switch (playerState) {
                     case 'stopped': // start if stopped

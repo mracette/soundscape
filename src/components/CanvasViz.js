@@ -6,7 +6,6 @@ import { Moonrise } from '../viz/scenes/moonrise/Moonrise';
 import { Mornings } from '../viz/scenes/mornings/Mornings';
 
 // components
-import { Canvas } from '../components/Canvas';
 import { LoadingScreen } from '../components/LoadingScreen';
 
 // context

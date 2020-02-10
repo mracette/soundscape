@@ -96,7 +96,8 @@ export const MusicPlayer = (props) => {
 
     const ambientPlayerRef = React.useRef();
     const audioCtx = React.useRef(new (window.AudioContext || window.webkitAudioContext)({
-        sampleRate: SAMPLE_RATE
+        sampleRate: SAMPLE_RATE,
+        latencyHint: 'interactive'
     }));
     const audioCtxInitTime = React.useRef(audioCtx.current.currentTime);
     const schedulerRef = React.useRef(new Scheduler(audioCtx.current));
@@ -114,12 +115,15 @@ export const MusicPlayer = (props) => {
 
         const viableOne = state.players.filter((p) => !p.playerState.includes('pending'));
         const randomOne = Math.floor(Math.random() * viableOne.length);
+        state.players[randomOne].buttonRef.style.color = 'blue';
+        console.log(state.players[randomOne].buttonRef);
         state.players[randomOne].buttonRef.click();
 
         // trigger an additional voice when less than 1/2 are active
         if (viableOne.length >= state.players.length) {
             const viableTwo = viableOne.filter((p, i) => i !== randomOne);
             const randomTwo = Math.floor(Math.random() * viableTwo.length);
+            state.players[randomTwo].buttonRef.style.backgroundColor = 'blue';
             state.players[randomTwo].buttonRef.click();
         }
 
@@ -173,8 +177,11 @@ export const MusicPlayer = (props) => {
     */
     React.useEffect(() => {
 
-        const actx = audioCtx.current;
-        actx.resume();
+        const currentAudioContext = audioCtx.current
+
+        // should be safe to resume ctx here (after use gesture)
+        currentAudioContext.resume();
+        audioCtxInitTime.current = audioCtx.current.currentTime;
 
         setPremasterAnalyser(
             new Analyser(audioCtx.current, premaster.current, {
@@ -209,7 +216,7 @@ export const MusicPlayer = (props) => {
 
         return () => {
             flags.playAmbientTrack && ambientPlayerRef.current.stop();
-            actx.close();
+            currentAudioContext.close();
         };
 
     }, [bpm, id, flags.playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature]);
