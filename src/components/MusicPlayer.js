@@ -96,8 +96,7 @@ export const MusicPlayer = (props) => {
 
     const ambientPlayerRef = React.useRef();
     const audioCtx = React.useRef(new (window.AudioContext || window.webkitAudioContext)({
-        sampleRate: SAMPLE_RATE,
-        latencyHint: 'interactive'
+        sampleRate: SAMPLE_RATE
     }));
     const audioCtxInitTime = React.useRef(audioCtx.current.currentTime);
     const schedulerRef = React.useRef(new Scheduler(audioCtx.current));
