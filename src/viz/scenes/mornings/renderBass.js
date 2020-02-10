@@ -2,9 +2,9 @@
 import * as d3 from 'd3-ease';
 
 const VOL_COEF = .0003;
-const MAX_OPACITY = .2;
+const MAX_OPACITY = .15;
 const MIN_OPACITY = .025;
-const MAX_SUN = 1;
+const MAX_SUN = .7;
 const MIN_SUN = .25
 
 export const renderBass = (subjects, analyser, extras) => {

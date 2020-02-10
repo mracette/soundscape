@@ -22,7 +22,7 @@ export const CanvasViz = () => {
 
     const { spectrumFunction } = React.useContext(ThemeContext);
     const { id, groups, bpm } = React.useContext(SongContext);
-    const { analysers, dispatch, isLoading } = React.useContext(MusicPlayerContext);
+    const { analysers, dispatch, isLoading, audioCtx } = React.useContext(MusicPlayerContext);
     const flagShowVisuals = React.useContext(TestingContext).flags.showVisuals;
 
     const canvasRef = React.useRef(null);
@@ -32,6 +32,7 @@ export const CanvasViz = () => {
         if (groups.length === analysers.length) {
 
             let newScene;
+            audioCtx.resume();
 
             switch (id) {
                 case 'moonrise':
