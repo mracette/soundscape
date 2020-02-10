@@ -223,20 +223,21 @@ export const ToggleButton = (props) => {
             className='toggle-button'
             ref={buttonRef}
             onClick={(e) => {
+                buttonRef.current.style.backgroundColor = 'green';
                 e.preventDefault();
-                switch (playerState) {
-                    case 'stopped': // start if stopped
-                        changePlayerState('active');
-                        break;
-                    case 'active': // stop if active
-                        changePlayerState('stopped');
-                        break;
-                    case 'pending-start': // cancel start if triggered on pending-start
-                        changePlayerState('stopped');
-                        break;
-                    case 'pending-stop': break; // do nothing if triggered on pending-stop
-                    default: break;
-                }
+                // switch (playerState) {
+                //     case 'stopped': // start if stopped
+                //         changePlayerState('active');
+                //         break;
+                //     case 'active': // stop if active
+                //         changePlayerState('stopped');
+                //         break;
+                //     case 'pending-start': // cancel start if triggered on pending-start
+                //         changePlayerState('stopped');
+                //         break;
+                //     case 'pending-stop': break; // do nothing if triggered on pending-stop
+                //     default: break;
+                // }
             }}
             style={{
                 cursor: 'pointer',
