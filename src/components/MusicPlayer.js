@@ -181,7 +181,6 @@ export const MusicPlayer = (props) => {
 
         // should be safe to resume ctx here (after use gesture)
         currentAudioContext.resume();
-        audioCtxInitTime.current = audioCtx.current.currentTime;
 
         setPremasterAnalyser(
             new Analyser(audioCtx.current, premaster.current, {
@@ -209,6 +208,10 @@ export const MusicPlayer = (props) => {
                 });
 
                 ambientPlayerRef.current.start(audioCtx.current.currentTime);
+
+                // should be safe to take the init time here
+                audioCtxInitTime.current = audioCtx.current.currentTime;
+                console.log('init time', audioCtxInitTime.current)
 
             });
 

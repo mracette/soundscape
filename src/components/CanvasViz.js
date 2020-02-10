@@ -31,7 +31,6 @@ export const CanvasViz = () => {
         if (groups.length === analysers.length) {
 
             let newScene;
-            audioCtx.resume();
 
             switch (id) {
                 case 'moonrise':
