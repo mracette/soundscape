@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import { MoonriseIcon } from './custom-song-icons/MoonriseIcon';
 import { MorningsIcon } from './custom-song-icons/MorningsIcon';
 import { ComingSoonIcon } from './custom-song-icons/ComingSoonIcon';
-import { Canvas } from '../components/Canvas';
 
 // contexts
 import { LandingPageContext } from '../contexts/contexts';
@@ -15,7 +14,7 @@ import { LandingPageContext } from '../contexts/contexts';
 import '../styles/components/LandingPage.scss';
 
 // other
-import { LandingPageScene } from '../viz/scenes/landing/LandingPageScene';
+// import { LandingPageScene } from '../viz/scenes/landing/LandingPageScene';
 
 export const landingPageReducer = (state, action) => {
     switch (action.type) {
@@ -33,7 +32,7 @@ export const landingPageReducer = (state, action) => {
             };
         case 'coming-soon':
             return {
-                name: 'Coming soon...',
+                name: 'The future of Soundscape...',
                 bpm: null,
                 key: null
             };
@@ -49,42 +48,42 @@ export const landingPageReducer = (state, action) => {
 export const LandingPage = () => {
 
     const [selected, dispatch] = React.useReducer(landingPageReducer, { name: null, bpm: null, key: null });
-    const canvasRef = React.useRef(null);
+    // const canvasRef = React.useRef(null);
 
-    React.useEffect(() => {
+    // React.useEffect(() => {
 
-        let scene;
+    //     let scene;
 
-        if (canvasRef.current) {
-            scene = new LandingPageScene(canvasRef.current)
-            scene.init().then(() => scene.animate());
-            window.addEventListener('resize', scene.onWindowResize);
-            window.addEventListener('orientationchange', scene.onWindowResize);
-            window.addEventListener('fullscreenchange', scene.onWindowResize);
-            window.visualViewport && (window.visualViewport.addEventListener('scroll', scene.onWindowResize));
-            window.visualViewport && (window.visualViewport.addEventListener('resize', scene.onWindowResize));
-        }
+    //     if (canvasRef.current) {
+    //         scene = new LandingPageScene(canvasRef.current)
+    //         scene.init().then(() => scene.animate());
+    //         window.addEventListener('resize', scene.onWindowResize);
+    //         window.addEventListener('orientationchange', scene.onWindowResize);
+    //         window.addEventListener('fullscreenchange', scene.onWindowResize);
+    //         window.visualViewport && (window.visualViewport.addEventListener('scroll', scene.onWindowResize));
+    //         window.visualViewport && (window.visualViewport.addEventListener('resize', scene.onWindowResize));
+    //     }
 
-        return () => {
-            scene.stop();
-            scene.disposeAll(scene.scene);
-            window.removeEventListener('resize', scene.onWindowResize);
-            window.removeEventListener('orientationchange', scene.onWindowResize);
-            window.removeEventListener('fullscreenchange', scene.onWindowResize);
-            window.visualViewport && (window.visualViewport.removeEventListener('scroll', scene.onWindowResize));
-            window.visualViewport && (window.visualViewport.removeEventListener('resize', scene.onWindowResize));
-        }
+    //     return () => {
+    //         scene.stop();
+    //         scene.disposeAll(scene.scene);
+    //         window.removeEventListener('resize', scene.onWindowResize);
+    //         window.removeEventListener('orientationchange', scene.onWindowResize);
+    //         window.removeEventListener('fullscreenchange', scene.onWindowResize);
+    //         window.visualViewport && (window.visualViewport.removeEventListener('scroll', scene.onWindowResize));
+    //         window.visualViewport && (window.visualViewport.removeEventListener('resize', scene.onWindowResize));
+    //     }
 
-    }, [])
+    // }, [])
 
     return (
         <LandingPageContext.Provider value={{ dispatch }}>
-            <Canvas
+            {/* <canvas
                 id='star-canvas'
                 className='fullscreen'
-                onLoad={(canvas) => canvasRef.current = canvas}
-            />
-            <div id='landing-page'>
+                ref={canvasRef}
+            /> */}
+            <div id='landing-page' className='fullscreen transparent'>
                 <div id='landing-page-header'>
                     <div className='flex-row'><h1 id='landing-page-soundscape-title'>Soundscape</h1></div>
                     <div className='flex-row'><span>This application uses audio.</span></div>

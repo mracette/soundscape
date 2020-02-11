@@ -5,6 +5,11 @@ import { ColorPalette } from 'color-curves'
 
 export class LandingPageScene extends SceneManager {
 
+    constructor(canvas) {
+        super(canvas);
+        this.DPRMax = 2.5;
+    }
+
     initScene() {
         const scene = new THREE.Scene();
         scene.background = new THREE.Color('#1f262f');
@@ -31,10 +36,10 @@ export class LandingPageScene extends SceneManager {
         subjects.stars = new Stars(
             this.scene,
             new THREE.Vector3(0, 0, 0),
-            1000, {
+            1600, {
             colorPalette: (n) => palette.rgbValueAt(n),
-            minOrbitRadius: 200,
-            maxOrbitRadius: 1000
+            minOrbitRadius: 210,
+            maxOrbitRadius: 600
         }
         );
         return subjects;
