@@ -95,8 +95,8 @@ export const MenuButtonParent = (props) => {
                 }}
             >
                 <Icon
-                    divClassList={isOpen ? 'icon-white rotate45' : 'icon-white'}
-                    svgClassList={'icon-white'}
+                    divClassList={isOpen ? 'scale-div menu-button-icon icon-white rotate45' : 'scale-div menu-button-icon icon-white'}
+                    svgClassList={'menu-button-icon icon-white'}
                     name='icon-plus'
                 />
             </button>

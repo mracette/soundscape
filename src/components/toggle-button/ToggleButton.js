@@ -264,7 +264,7 @@ export const ToggleButton = (props) => {
 
             </svg>
 
-            <div id='scale-div-morph' className={`icon`}>
+            <div id='scale-div-morph' className={`scale-div-morph icon`}>
 
                 <svg
                     viewBox="0 0 100 100"

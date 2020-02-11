@@ -14,7 +14,7 @@ import { LandingPageContext } from '../contexts/contexts';
 import '../styles/components/LandingPage.scss';
 
 // other
-// import { LandingPageScene } from '../viz/scenes/landing/LandingPageScene';
+import { LandingPageScene } from '../viz/scenes/landing/LandingPageScene';
 
 export const landingPageReducer = (state, action) => {
     switch (action.type) {
@@ -48,41 +48,41 @@ export const landingPageReducer = (state, action) => {
 export const LandingPage = () => {
 
     const [selected, dispatch] = React.useReducer(landingPageReducer, { name: null, bpm: null, key: null });
-    // const canvasRef = React.useRef(null);
+    const canvasRef = React.useRef(null);
 
-    // React.useEffect(() => {
+    React.useEffect(() => {
 
-    //     let scene;
+        let scene;
 
-    //     if (canvasRef.current) {
-    //         scene = new LandingPageScene(canvasRef.current)
-    //         scene.init().then(() => scene.animate());
-    //         window.addEventListener('resize', scene.onWindowResize);
-    //         window.addEventListener('orientationchange', scene.onWindowResize);
-    //         window.addEventListener('fullscreenchange', scene.onWindowResize);
-    //         window.visualViewport && (window.visualViewport.addEventListener('scroll', scene.onWindowResize));
-    //         window.visualViewport && (window.visualViewport.addEventListener('resize', scene.onWindowResize));
-    //     }
+        if (canvasRef.current) {
+            scene = new LandingPageScene(canvasRef.current)
+            scene.init().then(() => scene.animate());
+            window.addEventListener('resize', scene.onWindowResize);
+            window.addEventListener('orientationchange', scene.onWindowResize);
+            window.addEventListener('fullscreenchange', scene.onWindowResize);
+            window.visualViewport && (window.visualViewport.addEventListener('scroll', scene.onWindowResize));
+            window.visualViewport && (window.visualViewport.addEventListener('resize', scene.onWindowResize));
+        }
 
-    //     return () => {
-    //         scene.stop();
-    //         scene.disposeAll(scene.scene);
-    //         window.removeEventListener('resize', scene.onWindowResize);
-    //         window.removeEventListener('orientationchange', scene.onWindowResize);
-    //         window.removeEventListener('fullscreenchange', scene.onWindowResize);
-    //         window.visualViewport && (window.visualViewport.removeEventListener('scroll', scene.onWindowResize));
-    //         window.visualViewport && (window.visualViewport.removeEventListener('resize', scene.onWindowResize));
-    //     }
+        return () => {
+            scene.stop();
+            scene.disposeAll(scene.scene);
+            window.removeEventListener('resize', scene.onWindowResize);
+            window.removeEventListener('orientationchange', scene.onWindowResize);
+            window.removeEventListener('fullscreenchange', scene.onWindowResize);
+            window.visualViewport && (window.visualViewport.removeEventListener('scroll', scene.onWindowResize));
+            window.visualViewport && (window.visualViewport.removeEventListener('resize', scene.onWindowResize));
+        }
 
-    // }, [])
+    }, [])
 
     return (
         <LandingPageContext.Provider value={{ dispatch }}>
-            {/* <canvas
+            <canvas
                 id='star-canvas'
                 className='fullscreen'
                 ref={canvasRef}
-            /> */}
+            />
             <div id='landing-page' className='fullscreen transparent'>
                 <div id='landing-page-header'>
                     <div className='flex-row'><h1 id='landing-page-soundscape-title'>Soundscape</h1></div>
