@@ -21,7 +21,7 @@ import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
 
 // other
 import { Analyser } from '../classes/Analyser';
-import { createAudioPlayer } from '../utils/audioUtils';
+import { createAudioPlayer } from 'crco-utils';
 import { solveExpEquation } from '../utils/mathUtils';
 import { Scheduler } from '../classes/Scheduler';
 

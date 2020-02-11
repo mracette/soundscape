@@ -11,7 +11,7 @@ import { MusicPlayerContext } from '../../contexts/contexts';
 
 // other
 import { Analyser } from '../../classes/Analyser';
-import { loadArrayBuffer } from '../../utils/audioUtils';
+import { loadArrayBuffer } from 'crco-utils';
 
 // styles
 import '../../styles/components/ToggleButtonGroup.scss';

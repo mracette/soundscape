@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import * as d3Chromatic from 'd3-scale-chromatic';
 import { linToLog } from '../../../utils/mathUtils';
-import { regularPolygon } from '../../../utils/crco-utils.module.js';
+import { regularPolygon } from 'crco-utils';
 
 
 import { SceneManager } from '../../SceneManager';
