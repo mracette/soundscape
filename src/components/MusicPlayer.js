@@ -115,15 +115,12 @@ export const MusicPlayer = (props) => {
 
         const viableOne = state.players.filter((p) => !p.playerState.includes('pending'));
         const randomOne = Math.floor(Math.random() * viableOne.length);
-        state.players[randomOne].buttonRef.style.color = 'blue';
-        console.log(state.players[randomOne].buttonRef);
         state.players[randomOne].buttonRef.click();
 
         // trigger an additional voice when less than 1/2 are active
         if (viableOne.length >= state.players.length) {
             const viableTwo = viableOne.filter((p, i) => i !== randomOne);
             const randomTwo = Math.floor(Math.random() * viableTwo.length);
-            state.players[randomTwo].buttonRef.style.backgroundColor = 'blue';
             state.players[randomTwo].buttonRef.click();
         }
 

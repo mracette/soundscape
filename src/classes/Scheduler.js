@@ -194,11 +194,16 @@ export class Scheduler {
         if (typeof id !== 'undefined') {
 
             const event = this.getEvent(id);
-            event.source.onended = null;
-            event.source.stop();
 
-            this.queue = this.queue.filter((e) => e.id !== event.id);
-            this.repeatingQueue = this.repeatingQueue.filter((e) => e.id !== event.id);
+            if (event) {
+
+                event.source.onended = null;
+                event.source.stop();
+
+                this.queue = this.queue.filter((e) => e.id !== event.id);
+                this.repeatingQueue = this.repeatingQueue.filter((e) => e.id !== event.id);
+
+            }
 
         }
 
