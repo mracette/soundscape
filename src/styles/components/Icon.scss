@@ -1,7 +1,8 @@
 @import '../settings.scss';
 
 .icon svg {
-
+    height: 100%; 
+    width: 100%; 
 }
 
 .menu-button-icon svg {
@@ -17,7 +18,13 @@
     stroke: white;
 }
 
+.icon-red {
+    fill: $hot-pink;
+    stroke: $hot-pink;
+}
+
 .icon-row {
+    margin: 5vh 0 5vh 0;
     width: 100%;
 }
 
