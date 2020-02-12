@@ -28,29 +28,7 @@ import { Scheduler } from '../classes/Scheduler';
 // styles
 import '../styles/components/MusicPlayer.scss';
 
-// effects chain parameters
-const effectParams = {
-    lpFilter: {
-        minFreq: 320,
-        maxFreq: 20000,
-        minQ: 0.71,
-        maxQ: 3,
-        expFreqParams: solveExpEquation(1, 320, 100, 20000),
-        expQParams: solveExpEquation(1, 0.71, 100, 3)
-    },
-    hpFilter: {
-        minFreq: 20,
-        maxFreq: 4500,
-        minQ: 0.71,
-        maxQ: 1.5,
-        expFreqParams: solveExpEquation(1, 20, 100, 4500),
-        expQParams: solveExpEquation(1, 0.71, 100, 1.5)
-    },
-    ambience: {
-        minWet: 0,
-        maxWet: 0.55
-    }
-}
+import { useTraceUpdate } from '../hooks/useTraceUpdate';
 
 const SAMPLE_RATE = 44100;
 
@@ -66,23 +44,20 @@ export const MusicPlayer = (props) => {
         ambientTrackLength
     } = React.useContext(SongContext);
 
-    const [premasterAnalyser, setPremasterAnalyser] = React.useState(null);
-
     const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
         isLoading: true,
         randomize: false,
         randomizeEffects: false,
         mute: false,
         players: [],
-        buttons: [],
         analysers: [],
         groups: [],
-        groupEffects: {
-            highpass: [],
-            lowpass: [],
-            reverbDry: [],
-            reverbWet: []
-        },
+        // groupEffects: {
+        //     highpass: [],
+        //     lowpass: [],
+        //     reverbDry: [],
+        //     reverbWet: []
+        // },
         effectValues: {
             highpass: 1,
             lowpass: 100,
@@ -90,18 +65,16 @@ export const MusicPlayer = (props) => {
         }
     });
 
-    const randomizeEventRef = React.useRef();
-    // const randomizeEffectsEventRef = React.useRef();
-    // const randomizeEffectsAnimRef = React.useRef();
+    useTraceUpdate(state);
 
-    const ambientPlayerRef = React.useRef();
-    const audioCtx = React.useRef(new (window.AudioContext || window.webkitAudioContext)({
+    const audioCtxRef = React.useRef(new (window.AudioContext || window.webkitAudioContext)({
         sampleRate: SAMPLE_RATE,
         latencyHint: 'interactive'
     }));
-    const audioCtxInitTime = React.useRef(audioCtx.current.currentTime);
-    const schedulerRef = React.useRef(new Scheduler(audioCtx.current));
-    const premaster = React.useRef(audioCtx.current.createGain());
+    const audioCtxInitTimeRef = React.useRef(audioCtxRef.current.currentTime);
+    const schedulerRef = React.useRef(new Scheduler(audioCtxRef.current));
+    const premasterRef = React.useRef(audioCtxRef.current.createGain());
+    const randomizeEventRef = React.useRef(null);
 
     const handleReset = React.useCallback(() => {
 
@@ -127,95 +100,42 @@ export const MusicPlayer = (props) => {
     }, [state.players])
 
     /* 
-        Effects Hooks
-    */
-    React.useEffect(() => {
-
-        const freqParams = effectParams.hpFilter.expFreqParams;
-        const QParams = effectParams.hpFilter.expQParams;
-
-        state.groupEffects.highpass.forEach((effect) => {
-            effect.frequency.value = freqParams.a * Math.pow(freqParams.b, state.effectValues.highpass);
-            effect.Q.value = QParams.a * Math.pow(QParams.b, state.effectValues.highpass);
-        })
-
-    }, [state.effectValues.highpass, state.groupEffects.highpass]);
-
-    React.useEffect(() => {
-
-        const freqParams = effectParams.lpFilter.expFreqParams;
-        const QParams = effectParams.lpFilter.expQParams;
-
-        state.groupEffects.lowpass.forEach((effect) => {
-            effect.frequency.value = freqParams.a * Math.pow(freqParams.b, state.effectValues.lowpass);
-            effect.Q.value = QParams.a * Math.pow(QParams.b, state.effectValues.lowpass);
-        })
-
-    }, [state.effectValues.lowpass, state.groupEffects.lowpass]);
-
-    React.useEffect(() => {
-
-        const wet = effectParams.ambience.minWet +
-            (effectParams.ambience.maxWet - effectParams.ambience.minWet) *
-            (state.effectValues.ambience - 1) / 99;
-
-        state.groupEffects.reverbDry.forEach((effect) => {
-            effect.gain.value = 1 - wet;
-        });
-
-        state.groupEffects.reverbWet.forEach((effect) => {
-            effect.gain.value = wet;
-        });
-
-    }, [state.effectValues.ambience, state.groupEffects.reverbDry, state.groupEffects.reverbWet]);
-
-    /* 
         Ambient Track Hook
     */
     React.useEffect(() => {
 
-        const currentAudioContext = audioCtx.current
+        const currentAudioContext = audioCtxRef.current
+        let ambientPlayer;
 
         // should be safe to resume ctx here (after use gesture)
         currentAudioContext.resume();
-
-        setPremasterAnalyser(
-            new Analyser(audioCtx.current, premaster.current, {
-                power: 6,
-                minDecibels: -120,
-                maxDecibels: 0,
-                smoothingTimeConstanct: 0.25
-            })
-        );
-
-        premaster.current.connect(audioCtx.current.destination);
 
         if (flags.playAmbientTrack && ambientTrack) {
 
             const pathToAudio = require(`../audio/${id}/ambient-track.mp3`);
 
-            createAudioPlayer(audioCtx.current, pathToAudio, {
+            createAudioPlayer(audioCtxRef.current, pathToAudio, {
                 offlineRendering: true,
                 renderLength: SAMPLE_RATE * parseInt(ambientTrackLength) * timeSignature * 60 / bpm,
             }).then((audioPlayer) => {
 
-                ambientPlayerRef.current = new AudioPlayerWrapper(audioCtx.current, audioPlayer, {
-                    destination: premaster.current,
+                ambientPlayer = new AudioPlayerWrapper(audioCtxRef.current, audioPlayer, {
+                    // destination: premaster.current,
+                    destination: audioCtxRef.destination,
                     loop: true
                 });
 
-                ambientPlayerRef.current.start(audioCtx.current.currentTime);
+                ambientPlayer.start(audioCtxRef.current.currentTime);
 
                 // should be safe to take the init time here
-                audioCtxInitTime.current = audioCtx.current.currentTime;
-                console.log('init time', audioCtxInitTime.current)
+                audioCtxInitTimeRef.current = audioCtxRef.current.currentTime;
 
             });
 
         }
 
         return () => {
-            flags.playAmbientTrack && ambientPlayerRef.current.stop();
+            flags.playAmbientTrack && ambientPlayer.current.stop();
             currentAudioContext.close();
         };
 
@@ -228,7 +148,7 @@ export const MusicPlayer = (props) => {
         // init event
         if (state.randomize && !schedulerRef.current.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
             randomizeEventRef.current = schedulerRef.current.scheduleRepeating(
-                audioCtx.current.currentTime + (60 / bpm),
+                audioCtxRef.current.currentTime + (60 / bpm),
                 32 * 60 / bpm,
                 triggerRandomVoice
             )
@@ -248,11 +168,11 @@ export const MusicPlayer = (props) => {
     React.useEffect(() => {
 
         const startMute = () => {
-            premaster.current.gain.value = 0;
+            premasterRef.current.gain.value = 0;
         }
 
         const stopMute = () => {
-            premaster.current.gain.value = 1;
+            premasterRef.current.gain.value = 1;
         }
 
         if (state.mute) {
@@ -268,17 +188,17 @@ export const MusicPlayer = (props) => {
         <MusicPlayerContext.Provider value={{
             ...state,
             sampleRate: SAMPLE_RATE,
-            audioCtx: audioCtx.current,
-            audioCtxInitTime: audioCtxInitTime.current,
+            audioCtx: audioCtxRef.current,
+            audioCtxInitTime: audioCtxInitTimeRef.current,
             schedulerRef: schedulerRef.current,
-            premaster: premaster.current,
+            premaster: premasterRef.current,
             dispatch
         }}>
 
-            {!state.isLoading && premasterAnalyser &&
+            {/* {!state.isLoading && premasterAnalyser &&
                 <FreqBands
                     premasterAnalyser={premasterAnalyser}
-                />}
+                />} */}
 
             <MenuButtonParent
                 name='Menu'

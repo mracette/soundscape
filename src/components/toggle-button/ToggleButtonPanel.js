@@ -25,9 +25,9 @@ export const ToggleButtonPanel = (props) => {
 
     const [soloOverride, setSoloOverride] = React.useState(false);
 
-    const handleAddSolo = (value) => {
+    const handleAddSolo = React.useCallback((value) => {
         setSoloOverride(value);
-    };
+    }, []);
 
     return (
 
@@ -87,6 +87,7 @@ export const ToggleButtonPanel = (props) => {
                     polyphony={group.polyphony}
                     voices={group.voices}
                     analyserParams={group.analyser}
+                    effectValues={props.effectValues}
                 />
             ))}
 

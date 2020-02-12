@@ -17,7 +17,6 @@ export const MenuButtonChild = (props) => {
 
     const { buttonColor, contentPanelColor } = React.useContext(ThemeContext);
 
-    // track state
     const [isOpen, setIsOpen] = React.useState(false);
 
     // if another button in the set is open, close this button
@@ -34,18 +33,17 @@ export const MenuButtonChild = (props) => {
     // calculate the margin needed to expand this child to its outward position
     const marginStyle = ((props.parentWidth + props.width) / 2) + props.separation + (2 * props.separation * (props.index - 1));
 
-    // assign classes
-    const classPrefix = 'menu-button-child'
-
-    let classList = classPrefix;
-
-    if (props.parentIsOpen) { classList += ` ${classPrefix}-expand` }
-    if (isOpen) { classList += ` ${classPrefix}-open` }
+    const memoizedContent = React.useMemo(() => <MenuButtonContentWrapper
+        content={props.content}
+        config={props.config}
+        minWidth={props.menuWidth + props.width}
+        marginTop={props.parentHeight / 4}
+    />, [props.content, props.config, props.menuWidth, props.parentHeight, props.width])
 
     return (
         <>
             <button
-                className={classList}
+                className='menu-button-child'
                 onClick={(e) => {
                     e.preventDefault();
                     if (isOpen) {
@@ -70,13 +68,12 @@ export const MenuButtonChild = (props) => {
                     zIndex: props.zIndex
                 }}
             >
-                {props.name}
 
-                <Icon
-                    divClassList={'scale-div menu-button-icon icon-white'}
-                    svgClassList={'menu-button-icon icon-white'}
-                    name={props.iconName}
-                />
+            <Icon
+                divClassList={'scale-div menu-button-icon icon-white'}
+                svgClassList={'menu-button-icon icon-white'}
+                name={props.iconName}
+            />
 
             </button>
 
@@ -88,7 +85,7 @@ export const MenuButtonChild = (props) => {
             */}
             <div
                 className='arrow'
-                style={{
+                style={!isOpen ? {display: 'none'} : {
                     borderBottomColor: contentPanelColor,
                     display: !isOpen && 'none',
                     top: props.height + (props.parentHeight - props.height) / 2,
@@ -107,13 +104,8 @@ export const MenuButtonChild = (props) => {
             - allows content to be passed down the tree and displayed by the button
             - width is at least as big as the expanded menu
             */}
-            <MenuButtonContentWrapper
-                content={props.content}
-                config={props.config}
-                parentIsOpen={isOpen}
-                minWidth={props.menuWidth + props.width}
-                marginTop={props.parentHeight / 4}
-            />
+
+            {isOpen && memoizedContent}
 
         </>
     )

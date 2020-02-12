@@ -12,64 +12,101 @@ import { MusicPlayerContext } from '../../contexts/contexts';
 // other
 import { Analyser } from '../../classes/Analyser';
 import { loadArrayBuffer } from 'crco-utils';
+import { solveExpEquation } from '../../utils/mathUtils';
 
 // styles
 import '../../styles/components/ToggleButtonGroup.scss';
 import '../../styles/components/Oscilloscope.scss';
 
+import { useTraceUpdate } from '../../hooks/useTraceUpdate';
+
+// effects chain parameters
+const effectParams = {
+    lpFilter: {
+        minFreq: 320,
+        maxFreq: 20000,
+        minQ: 0.71,
+        maxQ: 3,
+        expFreqParams: solveExpEquation(1, 320, 100, 20000),
+        expQParams: solveExpEquation(1, 0.71, 100, 3)
+    },
+    hpFilter: {
+        minFreq: 20,
+        maxFreq: 4500,
+        minQ: 0.71,
+        maxQ: 1.5,
+        expFreqParams: solveExpEquation(1, 20, 100, 4500),
+        expQParams: solveExpEquation(1, 0.71, 100, 1.5)
+    },
+    ambience: {
+        minWet: 0,
+        maxWet: 0.55
+    }
+}
+
+const initGain = (audioCtx, gain) => {
+    const a = audioCtx.createGain();
+    a.gain.value = gain;
+    return a;
+}
+
+const initLowpass = (audioCtx) => {
+    const a = audioCtx.createBiquadFilter();
+    a.type = 'lowpass';
+    a.frequency.value = 20000;
+    a.Q.value = 0.71;
+    return a;
+}
+
+const initHighpass = (audioCtx) => {
+    const a = audioCtx.createBiquadFilter();
+    a.type = 'highpass';
+    a.frequency.value = 20000;
+    a.Q.value = 0.71;
+    return a;
+}
+
+
 export const ToggleButtonGroup = (props) => {
 
     const { groupMuteButton, groupSoloButton } = React.useContext(ThemeContext);
-    const { dispatch, audioCtx, premaster } = React.useContext(MusicPlayerContext);
+    const { dispatch, audioCtx, premaster, effectValues } = React.useContext(MusicPlayerContext);
 
-    // point that connects voices to group
-    const groupNodeRef = React.useRef(audioCtx.createGain());
+    // initialize audio effects
+    const groupNodeRef = React.useRef(initGain(audioCtx, 1));
+    const effectsChainEntryRef = React.useRef(initGain(audioCtx, 1));
+    const effectsChainExitRef = React.useRef(initGain(audioCtx, 1));
+    const hpFilterRef = React.useRef(initHighpass(audioCtx));
+    const lpFilterRef = React.useRef(initLowpass(audioCtx));
+    const reverbDryRef = React.useRef(initGain(audioCtx, 1));
+    const reverbWetRef = React.useRef(initGain(audioCtx, 0));
+    const reverbRef = React.useRef(audioCtx.createConvolver());
 
-    const [oAnalyser, setOAnalyser] = React.useState(null);
+    // initialize an analyser for the oscilloscope
+    const oAnalyser = React.useRef(new Analyser(audioCtx, effectsChainExitRef.current, {
+        id: `${props.name}-oscilloscope-analyser`,
+        power: 5,
+        minDecibels: -120,
+        maxDecibels: 0,
+        smoothingTimeConstant: 0
+    }));
+
     const [solo, setSolo] = React.useState(false);
     const [mute, setMute] = React.useState(false);
     const [playerOrder, setPlayerOrder] = React.useState([]);
     const [playerOverrides, setPlayerOverrides] = React.useState([]);
 
+    useTraceUpdate({ ...props, audioCtx, dispatch });
+
+    /* Audio effects setup */
     React.useEffect(() => {
-
-        // create a filter to taper the low end analyser output
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'lowshelf';
-        filter.frequency.value = 120;
-        filter.gain.value = -12;
-        groupNodeRef.current.connect(filter);
-
-        const effectsChainEntry = audioCtx.createGain();
-        effectsChainEntry.gain.value = 1;
-
-        const effectsChainExit = audioCtx.createGain();
-        effectsChainExit.gain.value = 1;
-
-        const hpFilter = audioCtx.createBiquadFilter()
-        hpFilter.type = 'highpass';
-        hpFilter.frequency.value = 20;
-        hpFilter.Q.value = 0.71;
-
-        const lpFilter = audioCtx.createBiquadFilter()
-        lpFilter.type = 'lowpass';
-        lpFilter.frequency.value = 20000;
-        lpFilter.Q.value = 0.71;
-
-        const reverbDryNode = audioCtx.createGain();
-        reverbDryNode.gain.value = 1;
-
-        const reverbWetNode = audioCtx.createGain();
-        reverbWetNode.gain.value = 0;
-
-        const reverbNode = audioCtx.createConvolver();
 
         // load impulse response to be used in convolution reverb
         const pathToAudio = require('../../audio/application/impulse-response.wav');
 
         loadArrayBuffer(pathToAudio).then((arrayBuffer) => {
             audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
-                reverbNode.buffer = audioBuffer;
+                reverbRef.current.buffer = audioBuffer;
                 dispatch({
                     type: 'impulseResponse',
                     payload: {
@@ -80,71 +117,61 @@ export const ToggleButtonGroup = (props) => {
             })
         });
 
+        console.log(audioCtx.current, premaster.current, effectsChainExitRef.current);
+
         // link effects chain
-        groupNodeRef.current.connect(effectsChainEntry);
-        effectsChainEntry.connect(lpFilter);
-        lpFilter.connect(hpFilter);
-        hpFilter.connect(reverbDryNode);
-        hpFilter.connect(reverbWetNode);
-        reverbDryNode.connect(effectsChainExit);
-        reverbWetNode.connect(reverbNode);
-        reverbNode.connect(effectsChainExit);
-        effectsChainExit.connect(premaster);
+        groupNodeRef.current.connect(effectsChainEntryRef.current);
+        effectsChainEntryRef.current.connect(lpFilterRef.current);
+        lpFilterRef.current.connect(hpFilterRef.current);
+        hpFilterRef.current.connect(reverbDryRef.current);
+        hpFilterRef.current.connect(reverbWetRef.current);
+        reverbDryRef.current.connect(effectsChainExitRef.current);
+        reverbWetRef.current.connect(reverbRef.current);
+        reverbRef.current.connect(effectsChainExitRef.current);
+        effectsChainExitRef.current.connect(premaster.current);
 
-        // analyser for the oscilloscope
-        const oAnalyser = new Analyser(audioCtx, filter, {
-            id: `${props.name}-oscilloscope-analyser`,
-            power: 5,
-            minDecibels: -120,
-            maxDecibels: 0,
-            smoothingTimeConstant: 0
-        });
-
-        // analyser for the group
-        const gAnalyser = new Analyser(audioCtx, effectsChainExit, {
+        const groupAnalyser = new Analyser(audioCtx, effectsChainExitRef.current, {
             id: `${props.name}-analyser`,
             ...props.analyserParams
         });
 
-        setOAnalyser(oAnalyser);
-
         dispatch({
-            type: 'addAnalyser', payload: { analyser: gAnalyser }
-        });
-
-        dispatch({
-            type: 'addEffect',
-            payload: {
-                effectType: 'reverb-dry',
-                effect: reverbDryNode
+            type: 'addAnalyser', payload: {
+                analyser: groupAnalyser
             }
         });
 
-        dispatch({
-            type: 'addEffect',
-            payload: {
-                effectType: 'reverb-wet',
-                effect: reverbWetNode
-            }
-        });
+    }, [])
 
-        dispatch({
-            type: 'addEffect',
-            payload: {
-                effectType: 'lowpass',
-                effect: lpFilter
-            }
-        });
+    /* Effects Hooks */
+    React.useEffect(() => {
 
-        dispatch({
-            type: 'addEffect',
-            payload: {
-                effectType: 'highpass',
-                effect: hpFilter
-            }
-        });
+        const freqParams = effectParams.hpFilter.expFreqParams;
+        const QParams = effectParams.hpFilter.expQParams;
+        hpFilterRef.current.frequency.value = freqParams.a * Math.pow(freqParams.b, effectValues.highpass);
+        hpFilterRef.current.Q.value = QParams.a * Math.pow(QParams.b, effectValues.highpass);
 
-    }, [audioCtx, dispatch, premaster, props.analyserParams, props.name]);
+    }, [effectValues.highpass]);
+
+    React.useEffect(() => {
+
+        const freqParams = effectParams.lpFilter.expFreqParams;
+        const QParams = effectParams.lpFilter.expQParams;
+        lpFilterRef.current.frequency.value = freqParams.a * Math.pow(freqParams.b, effectValues.lowpass);
+        lpFilterRef.current.Q.value = QParams.a * Math.pow(QParams.b, effectValues.lowpass);
+
+    }, [effectValues.lowpass]);
+
+    React.useEffect(() => {
+
+        const wet = effectParams.ambience.minWet +
+            (effectParams.ambience.maxWet - effectParams.ambience.minWet) *
+            (effectValues.ambience - 1) / 99;
+
+        reverbDryRef.current.gain.value = 1 - wet;
+        reverbWetRef.current.gain.value = wet;
+
+    }, [effectValues.ambience]);
 
     React.useEffect(() => {
 
@@ -232,13 +259,14 @@ export const ToggleButtonGroup = (props) => {
                     props.polyphony === -1 ? props.voices.length : props.polyphony
                 })</h3>
 
-                {oAnalyser && <Oscilloscope
+                <Oscilloscope
+                    ref={oAnalyser}
                     index={props.index}
                     groupCount={props.groupCount}
                     gradient={true}
                     name={props.name}
                     analyser={oAnalyser}
-                />}
+                />
 
                 <button
                     className='solo-button'
