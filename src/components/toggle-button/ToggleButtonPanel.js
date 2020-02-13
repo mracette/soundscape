@@ -14,6 +14,8 @@ import '../../styles/components/ToggleButtonPanel.scss';
 
 export const ToggleButtonPanel = (props) => {
 
+    console.log('render');
+
     const {
         panelMuteButton,
         panelRandomizeButton,
@@ -25,9 +27,9 @@ export const ToggleButtonPanel = (props) => {
 
     const [soloOverride, setSoloOverride] = React.useState(false);
 
-    const handleAddSolo = (value) => {
+    const handleAddSolo = React.useCallback((value) => {
         setSoloOverride(value);
-    };
+    }, []);
 
     return (
 

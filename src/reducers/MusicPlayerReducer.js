@@ -27,20 +27,28 @@ export const MusicPlayerReducer = (state, action) => {
             })
             return state;
         case 'addPlayer':
-            return {
-                ...state,
-                players: [...state.players, action.payload.player]
-            };
+            if (state.players.find(p => p.id === action.payload.player.id)) {
+                return state;
+            } else {
+                return {
+                    ...state,
+                    players: [...state.players, action.payload.player]
+                };
+            }
         case 'addButton':
             return {
                 ...state,
                 buttons: [...state.buttons, action.payload.button]
             }
         case 'addAnalyser':
-            return {
-                ...state,
-                analysers: [...state.analysers, action.payload.analyser]
-            };
+            if (state.analysers.find(a => a.id === action.payload.analyser.id)) {
+                return state;
+            } else {
+                return {
+                    ...state,
+                    analysers: [...state.analysers, action.payload.analyser]
+                };
+            }
         case 'updatePlayerState':
             return {
                 ...state,
@@ -106,51 +114,37 @@ export const MusicPlayerReducer = (state, action) => {
         case 'incrementHighpass':
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    highpass: state.effectValues.highpass + action.payload.value
-                }
+                highpass: state.highpass + action.payload.value
             };
         case 'incrementLowpass':
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    lowpass: state.effectValues.lowpass + action.payload.value
-                }
+                lowpass: state.lowpass + action.payload.value
             };
         case 'incrementAmbience':
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    ambience: state.effectValues.ambience + action.payload.value
-                }
+                ambience: state.ambience + action.payload.value
             };
         case 'setHighpass':
+            // if (state.effectValues.highpass === action.payload.value) {
+            //     return state;
+            // } else {
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    highpass: action.payload.value
-                }
-            };
+                highpass: action.payload.value
+            }
+        // }
         case 'setLowpass':
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    lowpass: action.payload.value
-                }
-            };
+                lowpass: action.payload.value
+            }
         case 'setAmbience':
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    ambience: action.payload.value
-                }
-            };
+                ambience: action.payload.value
+            }
         default: return state;
     }
 }

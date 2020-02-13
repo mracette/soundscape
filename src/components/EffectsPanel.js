@@ -1,6 +1,6 @@
 // libs
 import React from 'react';
-import anime from 'animejs';
+// import anime from 'animejs';
 
 // context
 import { MusicPlayerContext } from '../contexts/contexts';
@@ -85,7 +85,7 @@ export const EffectsPanel = (props) => {
             <div className='flex-row'>
                 <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="hp-slider" ref={hpRef}
                     onInput={(e) => {
-                        dispatch({ type: 'setHighpass', payload: { value: e.target.value } });
+                        dispatch({ type: 'setHighpass', payload: { value: parseInt(e.target.value) } });
                     }}
                 ></input>
             </div>
@@ -95,7 +95,7 @@ export const EffectsPanel = (props) => {
             <div className='flex-row'>
                 <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="lp-slider" ref={lpRef}
                     onInput={(e) => {
-                        dispatch({ type: 'setLowpass', payload: { value: e.target.value } });
+                        dispatch({ type: 'setLowpass', payload: { value: parseInt(e.target.value) } });
                     }}
                 ></input>
             </div>
@@ -105,7 +105,7 @@ export const EffectsPanel = (props) => {
             <div className='flex-row'>
                 <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="spaciousness-slider" ref={ambienceRef}
                     onChange={(e) => {
-                        dispatch({ type: 'setAmbience', payload: { value: e.target.value } });
+                        dispatch({ type: 'setAmbience', payload: { value: parseInt(e.target.value) } });
                     }}
                 ></input>
             </div>

@@ -1,9 +1,9 @@
 @import '../settings.scss';
 
-#landing-page {
+#landing-page-off-black {
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0);
+    background-color: $off-black;
 }
 
 #star-canvas {
@@ -44,8 +44,8 @@
 
 #song-selection-panel {
     overflow: auto;
-    width: 100%;
-    height: 100%;
+    width: vw(100);
+    height: 50rem;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;

@@ -40,33 +40,26 @@ export const MenuButtonParent = (props) => {
     const [openChildIndex, setOpenChildIndex] = useState(-1);
     const numOfChildren = props.childButtonProps.length;
 
-    // add and remove event listeners to handle outside clicks
-    useEffect(() => {
-
+    const handleOutsideClick = React.useCallback((e) => {
         // handle click events outside of the node's dom
-        const handleOutsideClick = (e) => {
-            if (!node.current.contains(e.target)) {
-                // if a child menu is open, close it
-                if (openChildIndex !== -1) {
-                    setOpenChildIndex(-1);
-                    return;
-                    // if child menus are all close, close the parent menu
-                } else if (isOpen) {
-                    setIsOpen(false);
-                    return;
-                }
+        if (!node.current.contains(e.target)) {
+            // if no children are open close the parent
+            if (openChildIndex === -1) {
+                setIsOpen(false);
+            // otherwise close the child
+            } else {
+                setOpenChildIndex(-1);
             }
         }
+    }, [openChildIndex])
 
-        if (isOpen) {
-            document.addEventListener('mousedown', handleOutsideClick);
-        } else {
-            document.removeEventListener('mousedown', handleOutsideClick);
-        }
+    // add and remove event listeners to handle outside clicks
+    useEffect(() => {
+        document.addEventListener('mousedown', handleOutsideClick);
         return () => {
             document.removeEventListener('mousedown', handleOutsideClick);
         };
-    }, [isOpen, openChildIndex]);
+    }, [handleOutsideClick]);
 
     return (
 
@@ -95,8 +88,8 @@ export const MenuButtonParent = (props) => {
                 }}
             >
                 <Icon
-                    divClassList={isOpen ? 'icon-white rotate45' : 'icon-white'}
-                    svgClassList={'icon-white'}
+                    divClassList={isOpen ? 'scale-div menu-button-icon icon-white rotate45' : 'scale-div menu-button-icon icon-white'}
+                    svgClassList={'menu-button-icon icon-white'}
                     name='icon-plus'
                 />
             </button>

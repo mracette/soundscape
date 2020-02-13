@@ -111,10 +111,10 @@ export class Mornings extends SceneManager {
 
     initLights() {
 
-        const MAPSIZE = 512;
-        const CAMERASIZE = 20;
-        const TILT = (10 / 180) * Math.PI;
-        const OPP_RATIO = -1 * Math.sin(TILT);
+        // const MAPSIZE = 512;
+        // const CAMERASIZE = 20;
+        // const OPP_RATIO = -1 * Math.sin(TILT);
+        // const TILT = (10 / 180) * Math.PI;
 
         const lights = {
             ambient: new THREE.AmbientLight(0xffffff, .35),

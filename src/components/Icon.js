@@ -11,16 +11,30 @@ export const Icon = (props) => {
     if (props.handleAddIconRef) { props.handleAddIconRef(iconRef) };
 
     return (
-        <div id='scale-div' className={props.divClassList ? `icon ${props.divClassList}` : 'icon'}>
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                xmlnsXlink="http://www.w3.org/1999/xlink"
-                className={props.svgClassList ? `icon ${props.svgClassList}` : 'icon'}
-                style={props.style}
-                id={props.name}
-            >
-                <use ref={iconRef} xlinkHref={`${icons}#${props.name}`} />
-            </svg>
+        <div className={props.divClassList ? `icon ${props.divClassList}` : 'icon'}>
+
+            {props.link ?
+                <a href={props.link}>
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                        className={props.svgClassList ? `icon ${props.svgClassList}` : 'icon'}
+                        style={props.style}
+                        id={props.name}
+                    >
+                        <use ref={iconRef} xlinkHref={`${icons}#${props.name}`} />
+                    </svg>
+                </a> :
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlnsXlink="http://www.w3.org/1999/xlink"
+                    className={props.svgClassList ? `icon ${props.svgClassList}` : 'icon'}
+                    style={props.style}
+                    id={props.name}
+                >
+                    <use ref={iconRef} xlinkHref={`${icons}#${props.name}`} />
+                </svg>
+            }
         </div>
     )
 }

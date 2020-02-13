@@ -10,12 +10,14 @@ import { InfoContext } from '../contexts/contexts';
 // components
 import { MusicPlayer } from './MusicPlayer';
 import { LandingPage } from './LandingPage';
+import { ComingSoon } from './ComingSoon';
 
 export const AppRouter = (props) => {
     return (
         <Router>
             <Switch>
                 <Route exact path='/' component={LandingPage} />
+                <Route exact path='/coming-soon' component={ComingSoon} />
                 <Route exact path={'/play/:songId'} render={routeProps =>
 
                     <ThemeContext.Provider value={{
@@ -36,6 +38,7 @@ export const AppRouter = (props) => {
                         }}>
 
                             <InfoContext.Provider value={{
+                                // provide extra information about the song
                                 id: routeProps.match.params.songId,
                                 ...props.appConfig.find((song) => {
                                     return song.id === routeProps.match.params.songId;

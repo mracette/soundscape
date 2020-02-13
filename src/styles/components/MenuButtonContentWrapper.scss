@@ -1,6 +1,8 @@
 @import '../settings.scss';
 
 .menu-button-content {
+    will-change: visibility;
+    visibility: visible;
     border-radius: .75rem .75rem;
     position: absolute;
     width: auto;

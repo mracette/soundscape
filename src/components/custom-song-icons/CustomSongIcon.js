@@ -61,6 +61,11 @@ export function CustomSongIcon(props) {
         }
 
         // add listeners
+        canvasRef.current.addEventListener('touchstart', beginAnimation);
+        canvasRef.current.addEventListener('touchstart', handleSetSelected);
+        canvasRef.current.addEventListener('touchstart', stopAnimation);
+        canvasRef.current.addEventListener('touchstart', handleUnsetSelected);
+
         canvasRef.current.addEventListener('mouseover', beginAnimation);
         canvasRef.current.addEventListener('mouseover', handleSetSelected);
         canvasRef.current.addEventListener('mouseout', stopAnimation);
@@ -74,6 +79,11 @@ export function CustomSongIcon(props) {
         // cleanup
         return () => {
             stopAnimation();
+            canvasRef.current.removeEventListener('touchstart', beginAnimation);
+            canvasRef.current.removeEventListener('touchstart', handleSetSelected);
+            canvasRef.current.removeEventListener('touchstart', stopAnimation);
+            canvasRef.current.removeEventListener('touchstart', handleUnsetSelected);
+
             canvasRef.current.removeEventListener('mouseover', beginAnimation);
             canvasRef.current.removeEventListener('mouseover', handleSetSelected);
             canvasRef.current.removeEventListener('mouseout', stopAnimation);

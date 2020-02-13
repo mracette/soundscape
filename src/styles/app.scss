@@ -45,6 +45,14 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: normal;
 }
 
+a {
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
 button:hover {
     cursor: pointer;
 }
@@ -77,6 +85,18 @@ button:focus {
     margin: 0;
     width: vw(100);
     height: vh(100);
+}
+
+.transparent {
+    background-color: rgba(0,0,0,0);
+}
+
+.off-black {
+    background-color: $off-black;
+}
+
+.front-most {
+    z-index: 999;
 }
 
 .hot-pink {

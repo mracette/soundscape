@@ -10,16 +10,32 @@ import { AppRouter } from './AppRouter';
 // context
 import { LayoutContext } from '../contexts/contexts';
 import { TestingContext } from '../contexts/contexts';
+import { ApplicationContext } from '../contexts/contexts';
+
+// other 
+import { initGain } from '../utils/audioUtils';
+import { Scheduler } from '../classes/Scheduler';
 
 const morningsPalette = new ColorPalette('{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.125,"y":-0.081},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.142,"angleOffset":5.781,"radius":0.5}', '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":0.5,"y":0.5},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.424,"angleOffset":0.628,"radius":0.25}', '{"start":0,"end":1}');// load the app config flat file
 const appConfig = require('../app-config.json');
 
 // global behavior flags for testing
 const flags = {
+  traceUpdates: true,
   quantizeSamples: true,
   showVisuals: true,
   playAmbientTrack: true
 };
+
+// highest-level application context / globals
+const sampleRate = 44100
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+  sampleRate: 44100,
+  latencyHint: 'interactive'
+});
+const premaster = initGain(audioCtx, 1)
+premaster.connect(audioCtx.destination);
+const scheduler = new Scheduler(audioCtx);
 
 // define spectrum functions here since they don't do well in json
 const spectrumFunctions = {
@@ -76,14 +92,16 @@ export const AppWrap = () => {
   }, []);
 
   return (
-    <TestingContext.Provider value={{ flags }}>
-      <LayoutContext.Provider value={{ vw, vh }}>
-        <AppRouter
-          appConfig={appConfig}
-          spectrumFunctions={spectrumFunctions}
-        />
-      </LayoutContext.Provider>
-    </TestingContext.Provider>
+    <ApplicationContext.Provider value={{ audioCtx, sampleRate, premaster, scheduler }}>
+      <TestingContext.Provider value={{ flags }}>
+        <LayoutContext.Provider value={{ vw, vh }}>
+          <AppRouter
+            appConfig={appConfig}
+            spectrumFunctions={spectrumFunctions}
+          />
+        </LayoutContext.Provider>
+      </TestingContext.Provider>
+    </ApplicationContext.Provider>
   );
 
 }

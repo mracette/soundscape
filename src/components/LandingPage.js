@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import { MoonriseIcon } from './custom-song-icons/MoonriseIcon';
 import { MorningsIcon } from './custom-song-icons/MorningsIcon';
 import { ComingSoonIcon } from './custom-song-icons/ComingSoonIcon';
-import { Canvas } from '../components/Canvas';
 
 // contexts
 import { LandingPageContext } from '../contexts/contexts';
@@ -33,7 +32,7 @@ export const landingPageReducer = (state, action) => {
             };
         case 'coming-soon':
             return {
-                name: 'Coming soon...',
+                name: 'The future of Soundscape...',
                 bpm: null,
                 key: null
             };
@@ -79,12 +78,12 @@ export const LandingPage = () => {
 
     return (
         <LandingPageContext.Provider value={{ dispatch }}>
-            <Canvas
+            <canvas
                 id='star-canvas'
                 className='fullscreen'
-                onLoad={(canvas) => canvasRef.current = canvas}
+                ref={canvasRef}
             />
-            <div id='landing-page'>
+            <div id='landing-page' className='fullscreen transparent'>
                 <div id='landing-page-header'>
                     <div className='flex-row'><h1 id='landing-page-soundscape-title'>Soundscape</h1></div>
                     <div className='flex-row'><span>This application uses audio.</span></div>

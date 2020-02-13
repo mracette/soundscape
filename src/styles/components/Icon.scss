@@ -1,6 +1,11 @@
 @import '../settings.scss';
 
 .icon svg {
+    height: 100%; 
+    width: 100%; 
+}
+
+.menu-button-icon svg {
     position: absolute; 
     height: 100%; 
     width: 100%; 
@@ -13,11 +18,35 @@
     stroke: white;
 }
 
+.icon-red {
+    fill: $hot-pink;
+    stroke: $hot-pink;
+}
+
+.icon-row {
+    margin: 5vh 0 5vh 0;
+    width: 100%;
+}
+
+.icon-row-child {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 1.5rem 0 1.5rem;
+}
+
+.icon-row-child:first-child {
+    margin-left: 0;
+}
+
+.icon-row-child:last-child {
+    margin-right: 0;
+}
+
 .rotate45 {
     transform: rotateZ(45deg);
 }
 
-#scale-div {
+.scale-div {
     display: inline-block;
     position: absolute; 
     transition-duration: 250ms;
@@ -29,7 +58,7 @@
     margin: auto;
 }
 
-#scale-div-morph {
+.scale-div-morph {
     display: inline-block;
     position: absolute; 
     transform-origin: 50% 50%;
