@@ -30,7 +30,7 @@ export const Oscilloscope = (props) => {
         power: 5,
         minDecibels: -120,
         maxDecibels: 0,
-        smoothingTimeConstant: .5
+        smoothingTimeConstant: 0
     }));
 
     const { spectrumFunction } = React.useContext(ThemeContext);
