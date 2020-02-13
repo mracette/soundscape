@@ -38,7 +38,7 @@ export class LandingPageScene extends SceneManager {
             new THREE.Vector3(0, 0, 0),
             1600, {
             colorPalette: (n) => palette.rgbValueAt(n),
-            minOrbitRadius: 210,
+            minOrbitRadius: 300,
             maxOrbitRadius: 600
         }
         );

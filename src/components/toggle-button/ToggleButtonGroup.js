@@ -8,69 +8,22 @@ import { Oscilloscope } from '../Oscilloscope';
 // contexts
 import { ThemeContext } from '../../contexts/contexts';
 import { MusicPlayerContext } from '../../contexts/contexts';
+import { ApplicationContext } from '../../contexts/contexts';
 
 // other
 import { Analyser } from '../../classes/Analyser';
 import { loadArrayBuffer } from 'crco-utils';
-import { solveExpEquation } from '../../utils/mathUtils';
+import { initGain, initHighpass, initLowpass, effectParams } from '../../utils/audioUtils';
 
 // styles
 import '../../styles/components/ToggleButtonGroup.scss';
 import '../../styles/components/Oscilloscope.scss';
 
-import { useTraceUpdate } from '../../hooks/useTraceUpdate';
-
-// effects chain parameters
-const effectParams = {
-    lpFilter: {
-        minFreq: 320,
-        maxFreq: 20000,
-        minQ: 0.71,
-        maxQ: 3,
-        expFreqParams: solveExpEquation(1, 320, 100, 20000),
-        expQParams: solveExpEquation(1, 0.71, 100, 3)
-    },
-    hpFilter: {
-        minFreq: 20,
-        maxFreq: 4500,
-        minQ: 0.71,
-        maxQ: 1.5,
-        expFreqParams: solveExpEquation(1, 20, 100, 4500),
-        expQParams: solveExpEquation(1, 0.71, 100, 1.5)
-    },
-    ambience: {
-        minWet: 0,
-        maxWet: 0.55
-    }
-}
-
-const initGain = (audioCtx, gain) => {
-    const a = audioCtx.createGain();
-    a.gain.value = gain;
-    return a;
-}
-
-const initLowpass = (audioCtx) => {
-    const a = audioCtx.createBiquadFilter();
-    a.type = 'lowpass';
-    a.frequency.value = 20000;
-    a.Q.value = 0.71;
-    return a;
-}
-
-const initHighpass = (audioCtx) => {
-    const a = audioCtx.createBiquadFilter();
-    a.type = 'highpass';
-    a.frequency.value = 20000;
-    a.Q.value = 0.71;
-    return a;
-}
-
-
 export const ToggleButtonGroup = (props) => {
 
     const { groupMuteButton, groupSoloButton } = React.useContext(ThemeContext);
-    const { dispatch, audioCtx, premaster, effectValues } = React.useContext(MusicPlayerContext);
+    const { dispatch, lowpass, highpass, ambience } = React.useContext(MusicPlayerContext);
+    const { audioCtx, premaster } = React.useContext(ApplicationContext);
 
     // initialize audio effects
     const groupNodeRef = React.useRef(initGain(audioCtx, 1));
@@ -82,21 +35,10 @@ export const ToggleButtonGroup = (props) => {
     const reverbWetRef = React.useRef(initGain(audioCtx, 0));
     const reverbRef = React.useRef(audioCtx.createConvolver());
 
-    // initialize an analyser for the oscilloscope
-    const oAnalyser = React.useRef(new Analyser(audioCtx, effectsChainExitRef.current, {
-        id: `${props.name}-oscilloscope-analyser`,
-        power: 5,
-        minDecibels: -120,
-        maxDecibels: 0,
-        smoothingTimeConstant: 0
-    }));
-
     const [solo, setSolo] = React.useState(false);
     const [mute, setMute] = React.useState(false);
     const [playerOrder, setPlayerOrder] = React.useState([]);
     const [playerOverrides, setPlayerOverrides] = React.useState([]);
-
-    useTraceUpdate({ ...props, audioCtx, dispatch });
 
     /* Audio effects setup */
     React.useEffect(() => {
@@ -117,8 +59,6 @@ export const ToggleButtonGroup = (props) => {
             })
         });
 
-        console.log(audioCtx.current, premaster.current, effectsChainExitRef.current);
-
         // link effects chain
         groupNodeRef.current.connect(effectsChainEntryRef.current);
         effectsChainEntryRef.current.connect(lpFilterRef.current);
@@ -128,7 +68,7 @@ export const ToggleButtonGroup = (props) => {
         reverbDryRef.current.connect(effectsChainExitRef.current);
         reverbWetRef.current.connect(reverbRef.current);
         reverbRef.current.connect(effectsChainExitRef.current);
-        effectsChainExitRef.current.connect(premaster.current);
+        effectsChainExitRef.current.connect(premaster);
 
         const groupAnalyser = new Analyser(audioCtx, effectsChainExitRef.current, {
             id: `${props.name}-analyser`,
@@ -141,37 +81,37 @@ export const ToggleButtonGroup = (props) => {
             }
         });
 
-    }, [])
+    }, [audioCtx, dispatch, props.analyserParams, props.name, premaster])
 
     /* Effects Hooks */
     React.useEffect(() => {
 
         const freqParams = effectParams.hpFilter.expFreqParams;
         const QParams = effectParams.hpFilter.expQParams;
-        hpFilterRef.current.frequency.value = freqParams.a * Math.pow(freqParams.b, effectValues.highpass);
-        hpFilterRef.current.Q.value = QParams.a * Math.pow(QParams.b, effectValues.highpass);
+        hpFilterRef.current.frequency.value = freqParams.a * Math.pow(freqParams.b, highpass);
+        hpFilterRef.current.Q.value = QParams.a * Math.pow(QParams.b, highpass);
 
-    }, [effectValues.highpass]);
+    }, [highpass]);
 
     React.useEffect(() => {
 
         const freqParams = effectParams.lpFilter.expFreqParams;
         const QParams = effectParams.lpFilter.expQParams;
-        lpFilterRef.current.frequency.value = freqParams.a * Math.pow(freqParams.b, effectValues.lowpass);
-        lpFilterRef.current.Q.value = QParams.a * Math.pow(QParams.b, effectValues.lowpass);
+        lpFilterRef.current.frequency.value = freqParams.a * Math.pow(freqParams.b, lowpass);
+        lpFilterRef.current.Q.value = QParams.a * Math.pow(QParams.b, lowpass);
 
-    }, [effectValues.lowpass]);
+    }, [lowpass]);
 
     React.useEffect(() => {
 
         const wet = effectParams.ambience.minWet +
             (effectParams.ambience.maxWet - effectParams.ambience.minWet) *
-            (effectValues.ambience - 1) / 99;
+            (ambience - 1) / 99;
 
         reverbDryRef.current.gain.value = 1 - wet;
         reverbWetRef.current.gain.value = wet;
 
-    }, [effectValues.ambience]);
+    }, [ambience]);
 
     React.useEffect(() => {
 
@@ -260,12 +200,11 @@ export const ToggleButtonGroup = (props) => {
                 })</h3>
 
                 <Oscilloscope
-                    ref={oAnalyser}
+                    input={effectsChainExitRef.current}
                     index={props.index}
                     groupCount={props.groupCount}
                     gradient={true}
                     name={props.name}
-                    analyser={oAnalyser}
                 />
 
                 <button

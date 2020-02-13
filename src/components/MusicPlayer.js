@@ -1,6 +1,5 @@
 // libs
 import React from 'react';
-// import anime from 'animejs';
 
 // components
 import { CanvasViz } from './CanvasViz';
@@ -15,26 +14,27 @@ import { AudioPlayerWrapper } from '../classes/AudioPlayerWrapper';
 import { MusicPlayerContext } from '../contexts/contexts';
 import { SongContext } from '../contexts/contexts';
 import { TestingContext } from '../contexts/contexts';
+import { ApplicationContext } from '../contexts/contexts';
 
 // reducers
 import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
 
 // other
-import { Analyser } from '../classes/Analyser';
 import { createAudioPlayer } from 'crco-utils';
-import { solveExpEquation } from '../utils/mathUtils';
-import { Scheduler } from '../classes/Scheduler';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
 
-import { useTraceUpdate } from '../hooks/useTraceUpdate';
-
-const SAMPLE_RATE = 44100;
-
-export const MusicPlayer = (props) => {
+export const MusicPlayer = () => {
 
     const { flags } = React.useContext(TestingContext);
+
+    const {
+        sampleRate,
+        audioCtx,
+        premaster,
+        scheduler
+    } = React.useContext(ApplicationContext);
 
     const {
         id,
@@ -52,30 +52,15 @@ export const MusicPlayer = (props) => {
         players: [],
         analysers: [],
         groups: [],
-        // groupEffects: {
-        //     highpass: [],
-        //     lowpass: [],
-        //     reverbDry: [],
-        //     reverbWet: []
-        // },
-        effectValues: {
-            highpass: 1,
-            lowpass: 100,
-            ambience: 1
-        }
+        highpass: 1,
+        lowpass: 100,
+        ambience: 1
     });
 
-    useTraceUpdate(state);
-
-    const audioCtxRef = React.useRef(new (window.AudioContext || window.webkitAudioContext)({
-        sampleRate: SAMPLE_RATE,
-        latencyHint: 'interactive'
-    }));
-    const audioCtxInitTimeRef = React.useRef(audioCtxRef.current.currentTime);
-    const schedulerRef = React.useRef(new Scheduler(audioCtxRef.current));
-    const premasterRef = React.useRef(audioCtxRef.current.createGain());
+    const audioCtxInitTimeRef = React.useRef(audioCtx.currentTime);
     const randomizeEventRef = React.useRef(null);
 
+    /* Reset Callback */
     const handleReset = React.useCallback(() => {
 
         // take the simple route - click the players!
@@ -84,6 +69,7 @@ export const MusicPlayer = (props) => {
 
     }, [state.players]);
 
+    /* Background Mode Callback */
     const triggerRandomVoice = React.useCallback(() => {
 
         const viableOne = state.players.filter((p) => !p.playerState.includes('pending'));
@@ -99,80 +85,70 @@ export const MusicPlayer = (props) => {
 
     }, [state.players])
 
-    /* 
-        Ambient Track Hook
-    */
+    /* Ambient Track Hook */
     React.useEffect(() => {
 
-        const currentAudioContext = audioCtxRef.current
         let ambientPlayer;
-
-        // should be safe to resume ctx here (after use gesture)
-        currentAudioContext.resume();
 
         if (flags.playAmbientTrack && ambientTrack) {
 
             const pathToAudio = require(`../audio/${id}/ambient-track.mp3`);
 
-            createAudioPlayer(audioCtxRef.current, pathToAudio, {
+            createAudioPlayer(audioCtx, pathToAudio, {
                 offlineRendering: true,
-                renderLength: SAMPLE_RATE * parseInt(ambientTrackLength) * timeSignature * 60 / bpm,
+                renderLength: sampleRate * parseInt(ambientTrackLength) * timeSignature * 60 / bpm,
             }).then((audioPlayer) => {
 
-                ambientPlayer = new AudioPlayerWrapper(audioCtxRef.current, audioPlayer, {
-                    // destination: premaster.current,
-                    destination: audioCtxRef.destination,
+                ambientPlayer = new AudioPlayerWrapper(audioCtx, audioPlayer, {
+                    destination: premaster,
                     loop: true
                 });
 
-                ambientPlayer.start(audioCtxRef.current.currentTime);
+                ambientPlayer.start(audioCtx.currentTime);
 
-                // should be safe to take the init time here
-                audioCtxInitTimeRef.current = audioCtxRef.current.currentTime;
+                // should be safe to resume and take the init time here (after user gesture)
+                audioCtx.resume();
+                audioCtxInitTimeRef.current = audioCtx.currentTime;
 
             });
 
         }
 
         return () => {
-            flags.playAmbientTrack && ambientPlayer.current.stop();
-            currentAudioContext.close();
+            flags.playAmbientTrack && ambientPlayer.stop();
+            audioCtx.close();
         };
 
-    }, [bpm, id, flags.playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature]);
+    }, [bpm, id, flags.playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature, audioCtx, sampleRate, premaster]);
 
-    /* 
-        Randomize Hook
-    */
+    /* Randomize Hook */
     React.useEffect(() => {
         // init event
-        if (state.randomize && !schedulerRef.current.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
-            randomizeEventRef.current = schedulerRef.current.scheduleRepeating(
-                audioCtxRef.current.currentTime + (60 / bpm),
+        if (state.randomize && !scheduler.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
+            randomizeEventRef.current = scheduler.scheduleRepeating(
+                audioCtx.currentTime + (60 / bpm),
                 32 * 60 / bpm,
                 triggerRandomVoice
             )
             // update event
         } else if (state.randomize) {
-            schedulerRef.current.updateCallback(randomizeEventRef.current, triggerRandomVoice);
+            scheduler.updateCallback(randomizeEventRef.current, triggerRandomVoice);
             // stop event
         } else if (!state.randomize) {
-            schedulerRef.current.cancel(randomizeEventRef.current);
+            scheduler.cancel(randomizeEventRef.current);
         }
 
-    }, [bpm, state.randomize, triggerRandomVoice])
+    }, [bpm, state.randomize, triggerRandomVoice, audioCtx, scheduler])
 
-    /* 
-        Mute Hook
-    */
+    /* Mute Hook */
     React.useEffect(() => {
 
         const startMute = () => {
-            premasterRef.current.gain.value = 0;
+            premaster.gain.value = 0;
         }
 
         const stopMute = () => {
-            premasterRef.current.gain.value = 1;
+            premaster.gain.value = 1;
         }
 
         if (state.mute) {
@@ -181,24 +157,17 @@ export const MusicPlayer = (props) => {
             stopMute();
         }
 
-    }, [state.mute])
+    }, [state.mute, premaster])
 
     return (
 
         <MusicPlayerContext.Provider value={{
             ...state,
-            sampleRate: SAMPLE_RATE,
-            audioCtx: audioCtxRef.current,
             audioCtxInitTime: audioCtxInitTimeRef.current,
-            schedulerRef: schedulerRef.current,
-            premaster: premasterRef.current,
             dispatch
         }}>
 
-            {/* {!state.isLoading && premasterAnalyser &&
-                <FreqBands
-                    premasterAnalyser={premasterAnalyser}
-                />} */}
+            <FreqBands />
 
             <MenuButtonParent
                 name='Menu'
@@ -210,22 +179,24 @@ export const MusicPlayer = (props) => {
                     autoOpen: true,
                     id: 'toggles',
                     iconName: 'icon-music',
-                    content: <ToggleButtonPanel
-                        handleReset={handleReset}
-                        players={state.players}
-                    />
+                    content:
+                        React.useMemo(() => <ToggleButtonPanel
+                            handleReset={handleReset}
+                            players={state.players}
+                        />, [handleReset, state.players])
                 }, {
                     id: 'effects',
                     iconName: 'icon-equalizer',
-                    content:
-                        <EffectsPanel
-                            impulseResponse={state.impulseResponse}
-                            dispatch={dispatch}
-                        />
+                    content: React.useMemo(() => <EffectsPanel
+                        impulseResponse={state.impulseResponse}
+                        dispatch={dispatch}
+                    />, [state.impulseResponse, dispatch])
                 }, {
                     id: 'song-info',
                     iconName: 'icon-info',
-                    content: <SongInfoPanel />
+                    content:
+                        React.useMemo(() => <SongInfoPanel
+                        />, [])
                 }]}
             />
 

@@ -7,6 +7,7 @@ import { MusicPlayerContext } from '../../contexts/contexts';
 import { SongContext } from '../../contexts/contexts';
 import { TestingContext } from '../../contexts/contexts';
 import { LayoutContext } from '../../contexts/contexts';
+import { ApplicationContext } from '../../contexts/contexts';
 
 // other
 import { createAudioPlayer } from 'crco-utils';
@@ -27,7 +28,8 @@ export const ToggleButton = (props) => {
 
     const { vh } = React.useContext(LayoutContext);
     const { id, timeSignature, bpm } = React.useContext(SongContext);
-    const { dispatch, audioCtx, audioCtxInitTime, sampleRate } = React.useContext(MusicPlayerContext);
+    const { dispatch, audioCtxInitTime } = React.useContext(MusicPlayerContext);
+    const { audioCtx, sampleRate } = React.useContext(ApplicationContext);
     const { flags } = React.useContext(TestingContext);
     const { handleUpdatePlayerOrder, handleUpdateOverrides, name, groupName, groupNode, override, length } = props;
 
@@ -158,6 +160,7 @@ export const ToggleButton = (props) => {
 
     }, [audioCtx, audioCtxInitTime, bpm, buttonBorder, buttonRadius, dispatch, quantizedStartBeats, handleUpdatePlayerOrder, name])
 
+    /* Initialize Player Hook */
     React.useEffect(() => {
 
         schedulerRef.current = new Scheduler(audioCtx);

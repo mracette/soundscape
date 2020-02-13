@@ -21,8 +21,8 @@ export const CanvasViz = () => {
 
     const { spectrumFunction } = React.useContext(ThemeContext);
     const { id, groups, bpm } = React.useContext(SongContext);
-    const { analysers, dispatch, isLoading, audioCtx } = React.useContext(MusicPlayerContext);
-    const flagShowVisuals = React.useContext(TestingContext).flags.showVisuals;
+    const { analysers, dispatch, isLoading } = React.useContext(MusicPlayerContext);
+    const { flags } = React.useContext(TestingContext);
 
     const canvasRef = React.useRef(null);
     const sceneRef = React.useRef(null);
@@ -34,7 +34,7 @@ export const CanvasViz = () => {
 
             switch (id) {
                 case 'moonrise':
-                    if (flagShowVisuals) {
+                    if (flags.showVisuals) {
                         newScene = new Moonrise(
                             canvasRef.current,
                             analysers,
@@ -44,7 +44,7 @@ export const CanvasViz = () => {
                     }
                     break;
                 case 'mornings':
-                    if (flagShowVisuals) {
+                    if (flags.showVisuals) {
                         newScene = new Mornings(
                             canvasRef.current,
                             analysers,
@@ -59,7 +59,7 @@ export const CanvasViz = () => {
                     throw new Error('Song not found');
             }
 
-            if (flagShowVisuals) {
+            if (flags.showVisuals) {
                 window.addEventListener('resize', sceneRef.current.onWindowResize);
                 window.addEventListener('orientationchange', sceneRef.current.onWindowResize);
                 window.addEventListener('fullscreenchange', sceneRef.current.onWindowResize);
@@ -68,7 +68,7 @@ export const CanvasViz = () => {
             }
 
             return () => {
-                if (flagShowVisuals) {
+                if (flags.showVisuals) {
                     newScene.stop();
                     newScene.disposeAll(newScene.scene);
                     window.removeEventListener('resize', sceneRef.current.onWindowResize);
@@ -80,7 +80,7 @@ export const CanvasViz = () => {
             }
 
         }
-    }, [bpm, groups, spectrumFunction, flagShowVisuals, id, analysers, dispatch]);
+    }, [bpm, groups, spectrumFunction, flags.showVisuals, id, analysers, dispatch]);
 
     return (<>
         {isLoading && <LoadingScreen />}

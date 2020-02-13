@@ -17,8 +17,7 @@ export const MenuButtonContentWrapper = (props) => {
         <div
             className='menu-button-content'
             style={{
-                // display: props.visible === false ? 'hidden' : 'visible',
-                // display: !props.parentIsOpen && 'none',
+                visibility: !props.parentIsOpen && 'hidden',
                 background: contentPanelColor,
                 marginTop: props.marginTop,
                 minWidth: props.minWidth,

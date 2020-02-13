@@ -20,7 +20,7 @@ export const SongInfoPanel = (props) => {
         <div id='song-info-panel'>
             <h2>{name}</h2>
             {credits.map((c) => {
-                return <p>{c.type}{c.content}</p>
+                return <p key={c.type}>{c.type}{c.content}</p>
             })}
             <h2>Connect</h2>
             <SocialIcons />

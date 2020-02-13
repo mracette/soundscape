@@ -114,62 +114,36 @@ export const MusicPlayerReducer = (state, action) => {
         case 'incrementHighpass':
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    highpass: state.effectValues.highpass + action.payload.value
-                }
+                highpass: state.highpass + action.payload.value
             };
         case 'incrementLowpass':
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    lowpass: state.effectValues.lowpass + action.payload.value
-                }
+                lowpass: state.lowpass + action.payload.value
             };
         case 'incrementAmbience':
             return {
                 ...state,
-                effectValues: {
-                    ...state.effectValues,
-                    ambience: state.effectValues.ambience + action.payload.value
-                }
+                ambience: state.ambience + action.payload.value
             };
         case 'setHighpass':
-            if (state.effectValues.highpass === action.payload.value) {
-                return state;
-            } else {
-                return {
-                    ...state,
-                    effectValues: {
-                        ...state.effectValues,
-                        highpass: action.payload.value
-                    }
-                };
+            // if (state.effectValues.highpass === action.payload.value) {
+            //     return state;
+            // } else {
+            return {
+                ...state,
+                highpass: action.payload.value
             }
+        // }
         case 'setLowpass':
-            if (state.effectValues.lowpass === action.payload.value) {
-                return state;
-            } else {
-                return {
-                    ...state,
-                    effectValues: {
-                        ...state.effectValues,
-                        lowpass: action.payload.value
-                    }
-                };
+            return {
+                ...state,
+                lowpass: action.payload.value
             }
         case 'setAmbience':
-            if (state.effectValues.ambience === action.payload.value) {
-                return state;
-            } else {
-                return {
-                    ...state,
-                    effectValues: {
-                        ...state.effectValues,
-                        ambience: action.payload.value
-                    }
-                };
+            return {
+                ...state,
+                ambience: action.payload.value
             }
         default: return state;
     }

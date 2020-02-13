@@ -33,12 +33,12 @@ export const MenuButtonChild = (props) => {
     // calculate the margin needed to expand this child to its outward position
     const marginStyle = ((props.parentWidth + props.width) / 2) + props.separation + (2 * props.separation * (props.index - 1));
 
-    const memoizedContent = React.useMemo(() => <MenuButtonContentWrapper
-        content={props.content}
-        config={props.config}
-        minWidth={props.menuWidth + props.width}
-        marginTop={props.parentHeight / 4}
-    />, [props.content, props.config, props.menuWidth, props.parentHeight, props.width])
+    // const memoizedContent = React.useMemo(() => <MenuButtonContentWrapper
+    //     content={props.content}
+    //     config={props.config}
+    //     minWidth={props.menuWidth + props.width}
+    //     marginTop={props.parentHeight / 4}
+    // />, [props.content, props.config, props.menuWidth, props.parentHeight, props.width])
 
     return (
         <>
@@ -69,11 +69,11 @@ export const MenuButtonChild = (props) => {
                 }}
             >
 
-            <Icon
-                divClassList={'scale-div menu-button-icon icon-white'}
-                svgClassList={'menu-button-icon icon-white'}
-                name={props.iconName}
-            />
+                <Icon
+                    divClassList={'scale-div menu-button-icon icon-white'}
+                    svgClassList={'menu-button-icon icon-white'}
+                    name={props.iconName}
+                />
 
             </button>
 
@@ -85,7 +85,7 @@ export const MenuButtonChild = (props) => {
             */}
             <div
                 className='arrow'
-                style={!isOpen ? {display: 'none'} : {
+                style={!isOpen ? { display: 'none' } : {
                     borderBottomColor: contentPanelColor,
                     display: !isOpen && 'none',
                     top: props.height + (props.parentHeight - props.height) / 2,
@@ -105,7 +105,13 @@ export const MenuButtonChild = (props) => {
             - width is at least as big as the expanded menu
             */}
 
-            {isOpen && memoizedContent}
+            <MenuButtonContentWrapper
+                content={props.content}
+                config={props.config}
+                minWidth={props.menuWidth + props.width}
+                marginTop={props.parentHeight / 4}
+                parentIsOpen={isOpen}
+            />
 
         </>
     )

@@ -14,6 +14,8 @@ import '../../styles/components/ToggleButtonPanel.scss';
 
 export const ToggleButtonPanel = (props) => {
 
+    console.log('render');
+
     const {
         panelMuteButton,
         panelRandomizeButton,
@@ -87,7 +89,6 @@ export const ToggleButtonPanel = (props) => {
                     polyphony={group.polyphony}
                     voices={group.voices}
                     analyserParams={group.analyser}
-                    effectValues={props.effectValues}
                 />
             ))}
 

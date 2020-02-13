@@ -6,18 +6,35 @@ import { Canvas } from '../components/Canvas';
 
 // context
 import { ThemeContext } from '../contexts/contexts';
+import { ApplicationContext } from '../contexts/contexts';
 
 // hooks
 import { useAnimationFrame } from '../hooks/useAnimationFrame';
+
+// other
+import { Analyser } from '../classes/Analyser';
 
 // styles
 import '../styles/components/Oscilloscope.scss';
 
 export const Oscilloscope = (props) => {
 
+    const { audioCtx } = React.useContext(ApplicationContext);
+
     const canvasRef = React.useRef(null);
     const contextRef = React.useRef(null);
+    const analyserRef = React.useRef(new Analyser(
+        audioCtx,
+        props.input, {
+        id: `${props.name}-oscilloscope-analyser`,
+        power: 5,
+        minDecibels: -120,
+        maxDecibels: 0,
+        smoothingTimeConstant: .5
+    }));
+
     const { spectrumFunction } = React.useContext(ThemeContext);
+
 
     const render = React.useCallback((canvas, context) => {
 
@@ -27,7 +44,7 @@ export const Oscilloscope = (props) => {
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         // get time domain data
-        const dataArray = props.analyser.getTimeData();
+        const dataArray = analyserRef.current.getTimeData();
 
         const sliceWidth = canvas.width / (dataArray.length - 1);
 

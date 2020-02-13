@@ -38,6 +38,7 @@ export const AppRouter = (props) => {
                         }}>
 
                             <InfoContext.Provider value={{
+                                // provide extra information about the song
                                 id: routeProps.match.params.songId,
                                 ...props.appConfig.find((song) => {
                                     return song.id === routeProps.match.params.songId;
