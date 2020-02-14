@@ -8,7 +8,6 @@ import { Oscilloscope } from '../Oscilloscope';
 // contexts
 import { ThemeContext } from '../../contexts/contexts';
 import { MusicPlayerContext } from '../../contexts/contexts';
-import { ApplicationContext } from '../../contexts/contexts';
 
 // other
 import { Analyser } from '../../classes/Analyser';
@@ -22,8 +21,7 @@ import '../../styles/components/Oscilloscope.scss';
 export const ToggleButtonGroup = (props) => {
 
     const { groupMuteButton, groupSoloButton } = React.useContext(ThemeContext);
-    const { dispatch, lowpass, highpass, ambience } = React.useContext(MusicPlayerContext);
-    const { audioCtx, premaster } = React.useContext(ApplicationContext);
+    const { audioCtx, premaster, dispatch, lowpass, highpass, ambience } = React.useContext(MusicPlayerContext);
 
     // initialize audio effects
     const groupNodeRef = React.useRef(initGain(audioCtx, 1));

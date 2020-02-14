@@ -6,7 +6,7 @@ import { Canvas } from '../components/Canvas';
 
 // context
 import { ThemeContext } from '../contexts/contexts';
-import { ApplicationContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // hooks
 import { useAnimationFrame } from '../hooks/useAnimationFrame';
@@ -19,13 +19,22 @@ import '../styles/components/Oscilloscope.scss';
 
 export const Oscilloscope = (props) => {
 
-    const { audioCtx } = React.useContext(ApplicationContext);
+    const { audioCtx } = React.useContext(MusicPlayerContext);
+
+    const filter = React.useRef((() => {
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowshelf';
+        filter.frequency.value = 120;
+        filter.gain.value = -12;
+        props.input.connect(filter);
+        return filter;
+    })());
 
     const canvasRef = React.useRef(null);
     const contextRef = React.useRef(null);
     const analyserRef = React.useRef(new Analyser(
         audioCtx,
-        props.input, {
+        filter.current, {
         id: `${props.name}-oscilloscope-analyser`,
         power: 5,
         minDecibels: -120,
@@ -33,8 +42,9 @@ export const Oscilloscope = (props) => {
         smoothingTimeConstant: 0
     }));
 
-    const { spectrumFunction } = React.useContext(ThemeContext);
 
+
+    const { spectrumFunction } = React.useContext(ThemeContext);
 
     const render = React.useCallback((canvas, context) => {
 

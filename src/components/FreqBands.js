@@ -10,7 +10,7 @@ import { useAnimationFrame } from '../hooks/useAnimationFrame';
 // contexts
 import { ThemeContext } from '../contexts/contexts';
 import { SongContext } from '../contexts/contexts';
-import { ApplicationContext } from '../contexts/contexts';
+import { MusicPlayerContext } from '../contexts/contexts';
 
 // other
 import { Analyser } from '../classes/Analyser';
@@ -20,7 +20,7 @@ import '../styles/components/FreqBands.scss';
 
 export const FreqBands = () => {
 
-    const { audioCtx, premaster } = React.useContext(ApplicationContext);
+    const { audioCtx, premaster } = React.useContext(MusicPlayerContext);
     const { spectrumFunction } = React.useContext(ThemeContext);
     const { bpm, timeSignature } = React.useContext(SongContext);
 

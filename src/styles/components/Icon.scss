@@ -1,45 +1,29 @@
 @import '../settings.scss';
 
-.icon svg {
+.icon {
     height: 100%; 
-    width: 100%; 
+    width: 100%;     
 }
 
-.menu-button-icon svg {
+.toggle-icon {
     position: absolute; 
     height: 100%; 
     width: 100%; 
-    left: 0; 
     top: 0;
+    left: 0; 
+}
+
+.menu-button-icon {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
 }
 
 .icon-white {
     fill: white;
     stroke: white;
-}
-
-.icon-red {
-    fill: $hot-pink;
-    stroke: $hot-pink;
-}
-
-.icon-row {
-    margin: 5vh 0 5vh 0;
-    width: 100%;
-}
-
-.icon-row-child {
-    width: 3rem;
-    height: 3rem;
-    margin: 0 1.5rem 0 1.5rem;
-}
-
-.icon-row-child:first-child {
-    margin-left: 0;
-}
-
-.icon-row-child:last-child {
-    margin-right: 0;
 }
 
 .rotate45 {

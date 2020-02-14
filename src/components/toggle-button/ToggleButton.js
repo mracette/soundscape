@@ -7,7 +7,6 @@ import { MusicPlayerContext } from '../../contexts/contexts';
 import { SongContext } from '../../contexts/contexts';
 import { TestingContext } from '../../contexts/contexts';
 import { LayoutContext } from '../../contexts/contexts';
-import { ApplicationContext } from '../../contexts/contexts';
 
 // other
 import { createAudioPlayer } from 'crco-utils';
@@ -28,8 +27,7 @@ export const ToggleButton = (props) => {
 
     const { vh } = React.useContext(LayoutContext);
     const { id, timeSignature, bpm } = React.useContext(SongContext);
-    const { dispatch, audioCtxInitTime } = React.useContext(MusicPlayerContext);
-    const { audioCtx, sampleRate } = React.useContext(ApplicationContext);
+    const { audioCtx, sampleRate, dispatch, audioCtxInitTime } = React.useContext(MusicPlayerContext);
     const { flags } = React.useContext(TestingContext);
     const { handleUpdatePlayerOrder, handleUpdateOverrides, name, groupName, groupNode, override, length } = props;
 
@@ -218,11 +216,6 @@ export const ToggleButton = (props) => {
             className='toggle-button'
             ref={buttonRef}
             onClick={(e) => {
-                // if (buttonRef.current.style.backgroundColor === 'blue') {
-                //     buttonRef.current.style.backgroundColor = 'rgba(0,0,0,0)'
-                // } else {
-                //     buttonRef.current.style.backgroundColor = 'blue'
-                // };
                 e.preventDefault();
                 switch (playerState) {
                     case 'stopped': // start if stopped
@@ -267,13 +260,13 @@ export const ToggleButton = (props) => {
 
             </svg>
 
-            <div id='scale-div-morph' className={`scale-div-morph icon`}>
+            <div className={`scale-div-morph toggle-icon`}>
 
                 <svg
                     viewBox="0 0 100 100"
                     xmlns="http://www.w3.org/2000/svg"
                     xmlnsXlink="http://www.w3.org/1999/xlink"
-                    className={`icon icon-white`}
+                    className={`toggle-icon icon-white`}
                 >
 
                     <polygon

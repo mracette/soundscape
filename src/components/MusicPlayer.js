@@ -14,27 +14,31 @@ import { AudioPlayerWrapper } from '../classes/AudioPlayerWrapper';
 import { MusicPlayerContext } from '../contexts/contexts';
 import { SongContext } from '../contexts/contexts';
 import { TestingContext } from '../contexts/contexts';
-import { ApplicationContext } from '../contexts/contexts';
 
 // reducers
 import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
 
 // other
 import { createAudioPlayer } from 'crco-utils';
+import { initGain } from '../utils/audioUtils';
+import { Scheduler } from '../classes/Scheduler';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
 
+// globals
+const sampleRate = 44100;
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+    sampleRate,
+    latencyHint: 'interactive'
+});
+const premaster = initGain(audioCtx, 1);
+premaster.connect(audioCtx.destination);
+const scheduler = new Scheduler(audioCtx);
+
 export const MusicPlayer = () => {
 
     const { flags } = React.useContext(TestingContext);
-
-    const {
-        sampleRate,
-        audioCtx,
-        premaster,
-        scheduler
-    } = React.useContext(ApplicationContext);
 
     const {
         id,
@@ -45,6 +49,10 @@ export const MusicPlayer = () => {
     } = React.useContext(SongContext);
 
     const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
+        audioCtx,
+        scheduler,
+        premaster,
+        sampleRate,
         isLoading: true,
         randomize: false,
         randomizeEffects: false,
@@ -57,7 +65,7 @@ export const MusicPlayer = () => {
         ambience: 1
     });
 
-    const audioCtxInitTimeRef = React.useRef(audioCtx.currentTime);
+    const audioCtxInitTimeRef = React.useRef(state.audioCtx.currentTime);
     const randomizeEventRef = React.useRef(null);
 
     /* Reset Callback */
@@ -94,39 +102,39 @@ export const MusicPlayer = () => {
 
             const pathToAudio = require(`../audio/${id}/ambient-track.mp3`);
 
-            createAudioPlayer(audioCtx, pathToAudio, {
+            createAudioPlayer(state.audioCtx, pathToAudio, {
+                logLevel: 'debug',
                 offlineRendering: true,
-                renderLength: sampleRate * parseInt(ambientTrackLength) * timeSignature * 60 / bpm,
+                renderLength: state.sampleRate * parseInt(ambientTrackLength) * timeSignature * 60 / bpm,
             }).then((audioPlayer) => {
 
-                ambientPlayer = new AudioPlayerWrapper(audioCtx, audioPlayer, {
-                    destination: premaster,
+                ambientPlayer = new AudioPlayerWrapper(state.audioCtx, audioPlayer, {
+                    destination: state.premaster,
                     loop: true
                 });
 
-                ambientPlayer.start(audioCtx.currentTime);
-
                 // should be safe to resume and take the init time here (after user gesture)
-                audioCtx.resume();
-                audioCtxInitTimeRef.current = audioCtx.currentTime;
+                state.audioCtx.resume();
+                ambientPlayer.start();
+                audioCtxInitTimeRef.current = state.audioCtx.currentTime;
 
             });
 
         }
 
         return () => {
+            state.audioCtx.close();
             flags.playAmbientTrack && ambientPlayer.stop();
-            audioCtx.close();
         };
 
-    }, [bpm, id, flags.playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature, audioCtx, sampleRate, premaster]);
+    }, [bpm, id, flags.playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature, state.audioCtx, state.premaster, state.sampleRate]);
 
     /* Randomize Hook */
     React.useEffect(() => {
         // init event
         if (state.randomize && !scheduler.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
             randomizeEventRef.current = scheduler.scheduleRepeating(
-                audioCtx.currentTime + (60 / bpm),
+                state.audioCtx.currentTime + (60 / bpm),
                 32 * 60 / bpm,
                 triggerRandomVoice
             )
@@ -138,7 +146,7 @@ export const MusicPlayer = () => {
             scheduler.cancel(randomizeEventRef.current);
         }
 
-    }, [bpm, state.randomize, triggerRandomVoice, audioCtx, scheduler])
+    }, [bpm, state.randomize, triggerRandomVoice, state.audioCtx, state.scheduler])
 
     /* Mute Hook */
     React.useEffect(() => {
@@ -157,7 +165,7 @@ export const MusicPlayer = () => {
             stopMute();
         }
 
-    }, [state.mute, premaster])
+    }, [state.mute, state.premaster])
 
     return (
 

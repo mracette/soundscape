@@ -46,7 +46,7 @@ export const MenuButtonParent = (props) => {
             // if no children are open close the parent
             if (openChildIndex === -1) {
                 setIsOpen(false);
-            // otherwise close the child
+                // otherwise close the child
             } else {
                 setOpenChildIndex(-1);
             }
@@ -88,8 +88,8 @@ export const MenuButtonParent = (props) => {
                 }}
             >
                 <Icon
-                    divClassList={isOpen ? 'scale-div menu-button-icon icon-white rotate45' : 'scale-div menu-button-icon icon-white'}
-                    svgClassList={'menu-button-icon icon-white'}
+                    divClassList={`scale-div menu-button-icon icon-white ${isOpen ? 'rotate45' : ''}`}
+                    svgClassList={'icon menu-button-icon icon-white'}
                     name='icon-plus'
                 />
             </button>
