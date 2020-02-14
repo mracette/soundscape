@@ -20,6 +20,8 @@ export class AudioPlayerWrapper {
 
         // setup
         this.bufferSource.loop = this.loop;
+        this.bufferSource.loopStart = 0;
+        this.bufferSource.loopEnd = bufferSource.buffer.duration;
         this.bufferSource.connect(this.destination);
 
     }
