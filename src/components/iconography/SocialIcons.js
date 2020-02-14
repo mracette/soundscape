@@ -10,7 +10,7 @@ import '../../styles/components/Icon.scss';
 export const SocialIcons = (props) => {
 
     return (
-        <div id='social-icons' className='icon-row flex-row'>
+        <div id='social-icons' className={'icon-row flex-row ' + props.divClassList}>
             <Icon
                 divClassList={'icon-row-child'}
                 svgClassList={props.svgClassList || 'icon-white'}

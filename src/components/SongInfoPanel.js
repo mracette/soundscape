@@ -23,7 +23,9 @@ export const SongInfoPanel = (props) => {
                 return <p key={c.type}>{c.type}{c.content}</p>
             })}
             <h2>Connect</h2>
-            <SocialIcons />
+            <SocialIcons
+                svgClassList='icon icon-white'
+            />
             <p>PS: We're looking for 3D artists to collaborate with. If you're interested or know someone who might be, please get in touch!</p>
         </div>
     )

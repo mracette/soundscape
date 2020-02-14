@@ -13,6 +13,28 @@
     left: 0; 
 }
 
+.icon-row {
+    width: 100%;
+}
+
+.coming-soon-icon-row {
+    margin: 5vh 0 5vh 0;
+}
+
+.icon-row-child {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 1.5rem 0 1.5rem;
+}
+
+.icon-row-child:first-child {
+    margin-left: 0;
+}
+
+.icon-row-child:last-child {
+    margin-right: 0;
+}
+
 .menu-button-icon {
     position: absolute;
     width: 100%;

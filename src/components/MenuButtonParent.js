@@ -40,6 +40,10 @@ export const MenuButtonParent = (props) => {
     const [openChildIndex, setOpenChildIndex] = useState(-1);
     const numOfChildren = props.childButtonProps.length;
 
+    const handleSetOpenChildIndex = React.useCallback((index) => {
+        setOpenChildIndex(index);
+    }, [])
+
     const handleOutsideClick = React.useCallback((e) => {
         // handle click events outside of the node's dom
         if (!node.current.contains(e.target)) {
@@ -110,7 +114,7 @@ export const MenuButtonParent = (props) => {
                     direction={props.direction}
                     index={index + 1}
                     openChildIndex={openChildIndex}
-                    setOpenChildIndex={setOpenChildIndex}
+                    setOpenChildIndex={handleSetOpenChildIndex}
                     zIndex={numOfChildren - index}
                     separation={separation}
                     width={childWidth}
