@@ -107,14 +107,16 @@ export const MenuButtonParent = (props) => {
                     key={child.id}
                     content={props.childButtonProps[index].content}
 
-                    // button appearance
-                    iconName={child.iconName}
-                    autoOpen={child.autoOpen}
-                    icon={child.icon}
-                    direction={props.direction}
+                    // button behavior
                     index={index + 1}
                     openChildIndex={openChildIndex}
                     setOpenChildIndex={handleSetOpenChildIndex}
+                    parentIsOpen={isOpen}
+                    autoOpen={child.autoOpen}
+
+                    // button appearance
+                    iconName={child.iconName}
+                    icon={child.icon}
                     zIndex={numOfChildren - index}
                     separation={separation}
                     width={childWidth}
@@ -122,7 +124,6 @@ export const MenuButtonParent = (props) => {
                     parentWidth={width}
                     parentHeight={height}
                     menuWidth={width + (childWidth + separation) * (numOfChildren - 1)}
-                    parentIsOpen={isOpen}
 
                 />
 

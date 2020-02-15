@@ -27,11 +27,10 @@ import { Scheduler } from '../classes/Scheduler';
 import '../styles/components/MusicPlayer.scss';
 
 // globals
-const sampleRate = 44100;
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-    sampleRate,
     latencyHint: 'interactive'
 });
+const sampleRate = audioCtx.sampleRate;
 const premaster = initGain(audioCtx, 1);
 premaster.connect(audioCtx.destination);
 const scheduler = new Scheduler(audioCtx);
