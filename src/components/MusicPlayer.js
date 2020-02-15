@@ -8,6 +8,7 @@ import { FreqBands } from './FreqBands';
 import { MenuButtonParent } from './menu-button/MenuButtonParent';
 import { SongInfoPanel } from './SongInfoPanel';
 import { ToggleButtonPanel } from './toggle-button/ToggleButtonPanel';
+import { HomePanel } from './HomePanel';
 import { AudioPlayerWrapper } from '../classes/AudioPlayerWrapper';
 
 // context
@@ -182,6 +183,11 @@ export const MusicPlayer = () => {
                 separation='6rem'
                 parentSize='5rem'
                 childButtonProps={[{
+                    id: 'home',
+                    iconName: 'icon-home',
+                    content:
+                        React.useMemo(() => <HomePanel />, [])
+                }, {
                     autoOpen: true,
                     id: 'toggles',
                     iconName: 'icon-music',

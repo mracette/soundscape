@@ -23,8 +23,10 @@ const animate = (context, cycle, coords) => {
 
 export function MoonriseIcon(props) {
     return <CustomSongIcon
+        dispatch={props.dispatch}
         name={props.name}
         id="custom-moonrise-icon"
         animate={animate}
+        listen={true}
     />
 }

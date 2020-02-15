@@ -28,9 +28,11 @@ const animate = (context, cycle, coords) => {
 export function MorningsIcon(props) {
     return (
         <CustomSongIcon
+            dispatch={props.dispatch}
             name={props.name}
             id="custom-mornings-icon"
             animate={animate}
+            listen={true}
         />
     );
 }

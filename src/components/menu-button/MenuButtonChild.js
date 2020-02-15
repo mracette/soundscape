@@ -17,7 +17,6 @@ import '../../styles/components/MenuButtonChild.scss';
 
 export const MenuButtonChild = (props) => {
 
-    const { vh } = React.useContext(LayoutContext);
     const { buttonColor, openButtonColor, contentPanelColor } = React.useContext(ThemeContext);
 
     const [isOpen, setIsOpen] = React.useState(props.autoOpen);
@@ -28,8 +27,8 @@ export const MenuButtonChild = (props) => {
     const marginStyle = props.parentIsOpen ? ((props.parentWidth + props.width) / 2) + props.separation + (2 * props.separation * (props.index - 1)) : 0;
 
     useOutsideClick(nodeRef,
-        React.useCallback(() => { setIsOpen(!isOpen) }, [isOpen]),
-        React.useCallback(() => { if (isOpen) setIsOpen(false); }, [isOpen])
+        React.useCallback(() => { if (!isOpen) setIsOpen(true) }, [isOpen]),
+        React.useCallback(() => { if (isOpen) setIsOpen(false) }, [isOpen])
     );
 
     return (

@@ -25,9 +25,11 @@ const animate = (context, cycle, coords) => {
 export function ComingSoonIcon(props) {
     return (
         <CustomSongIcon
+            dispatch={props.dispatch}
             name={props.name}
             id="coming-soon-icon"
             animate={animate}
+            listen={true}
         />
     );
 }

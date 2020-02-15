@@ -1,8 +1,33 @@
 @import '../settings.scss';
 
 .custom-song-icon {
+    display: block;
+    margin: 0;
+    width: 25rem;    
+    height: 25rem;
+}
+
+#loading-button-wrapper {
+    // display: inline-block;
+    width: 25rem;
+    height: 25rem;
+}
+
+#loading-button {
+    position: absolute;
+    width: 25rem;
+    height: 25rem;
+    margin: 0;
+    padding: 0px;
+    text-align: center;
+    vertical-align: middle;
+    border: none;
     border-radius: 50%;
-    border: 0.1rem solid white;
-    flex-basis: 5rem;
-    // line-height: 25rem;
+    background-color: rgba(0,0,0,0);
+}
+
+#loading-button * {
+    text-transform: none;
+    font-size: $m-size;
+    color: $moon-yellow;
 }

@@ -5,9 +5,6 @@ import { CanvasCoordinates } from 'crco-utils';
 // components
 import { Canvas } from '../Canvas';
 
-// context
-import { LandingPageContext } from '../../contexts/contexts';
-
 // styles
 import '../../styles/components/LandingPage.scss';
 
@@ -22,8 +19,7 @@ export function CustomSongIcon(props) {
     const animationRef = React.useRef();
     const coordsRef = React.useRef();
 
-    const { dispatch } = React.useContext(LandingPageContext);
-    const { animate, id } = props;
+    const { animate, id, listen, setCustomStyles, dispatch } = props;
 
     React.useEffect(() => {
 
@@ -33,9 +29,7 @@ export function CustomSongIcon(props) {
             cycleRef.current += delta * speed;
             timeRef.current = time;
 
-            contextRef.current.clearRect(0, 0, coordsRef.current.getWidth(), coordsRef.current.getHeight());
-            contextRef.current.lineWidth = coordsRef.current.getWidth() / 128;
-            contextRef.current.strokeStyle = '#f6f2d5';
+            contextRef.current.clearRect(coordsRef.current.nx(-1), coordsRef.current.ny(-1), coordsRef.current.getWidth(), coordsRef.current.getHeight());
 
             animate(
                 contextRef.current,
@@ -52,7 +46,15 @@ export function CustomSongIcon(props) {
         const handleSetSelected = () => dispatch({ type: props.name });
         const handleUnsetSelected = () => dispatch({ type: null });
 
+        const setStyles = () => {
+            contextRef.current.lineWidth = coordsRef.current.getWidth() / 128;
+            contextRef.current.strokeStyle = '#f6f2d5';
+            contextRef.current.fillStyle = '#f6f2d5';
+            setCustomStyles && setCustomStyles(contextRef.current);
+        }
+
         const beginAnimation = () => {
+            setStyles();
             animationRef.current = window.requestAnimationFrame((time) => updateCanvas(time, true, true));
         }
 
@@ -60,37 +62,48 @@ export function CustomSongIcon(props) {
             window.cancelAnimationFrame(animationRef.current);
         }
 
-        // add listeners
-        canvasRef.current.addEventListener('touchstart', beginAnimation);
-        canvasRef.current.addEventListener('touchstart', handleSetSelected);
-        canvasRef.current.addEventListener('touchstart', stopAnimation);
-        canvasRef.current.addEventListener('touchstart', handleUnsetSelected);
+        if (listen) {
 
-        canvasRef.current.addEventListener('mouseover', beginAnimation);
-        canvasRef.current.addEventListener('mouseover', handleSetSelected);
-        canvasRef.current.addEventListener('mouseout', stopAnimation);
-        canvasRef.current.addEventListener('mouseout', handleUnsetSelected);
+            // add listeners
+            canvasRef.current.addEventListener('touchstart', beginAnimation);
+            canvasRef.current.addEventListener('touchstart', handleSetSelected);
+            canvasRef.current.addEventListener('touchstart', stopAnimation);
+            canvasRef.current.addEventListener('touchstart', handleUnsetSelected);
+
+            canvasRef.current.addEventListener('mouseover', beginAnimation);
+            canvasRef.current.addEventListener('mouseover', handleSetSelected);
+            canvasRef.current.addEventListener('mouseout', stopAnimation);
+            canvasRef.current.addEventListener('mouseout', handleUnsetSelected);
+
+        }
 
         // set up canvas/coords and initialize drawing
         coordsRef.current = new CanvasCoordinates({ canvas: canvasRef.current, padding: .02 });;
         contextRef.current = canvasRef.current.getContext('2d');
+        setStyles();
         updateCanvas(0, false, false);
+
+        if (!listen) {
+            beginAnimation();
+        }
 
         // cleanup
         return () => {
             stopAnimation();
-            canvasRef.current.removeEventListener('touchstart', beginAnimation);
-            canvasRef.current.removeEventListener('touchstart', handleSetSelected);
-            canvasRef.current.removeEventListener('touchstart', stopAnimation);
-            canvasRef.current.removeEventListener('touchstart', handleUnsetSelected);
+            if (listen) {
+                canvasRef.current.removeEventListener('touchstart', beginAnimation);
+                canvasRef.current.removeEventListener('touchstart', handleSetSelected);
+                canvasRef.current.removeEventListener('touchstart', stopAnimation);
+                canvasRef.current.removeEventListener('touchstart', handleUnsetSelected);
 
-            canvasRef.current.removeEventListener('mouseover', beginAnimation);
-            canvasRef.current.removeEventListener('mouseover', handleSetSelected);
-            canvasRef.current.removeEventListener('mouseout', stopAnimation);
-            canvasRef.current.removeEventListener('mouseout', handleUnsetSelected);
+                canvasRef.current.removeEventListener('mouseover', beginAnimation);
+                canvasRef.current.removeEventListener('mouseover', handleSetSelected);
+                canvasRef.current.removeEventListener('mouseout', stopAnimation);
+                canvasRef.current.removeEventListener('mouseout', handleUnsetSelected);
+            }
         }
 
-    }, [dispatch, props.name, animate]);
+    }, [dispatch, props.name, animate, listen, setCustomStyles]);
 
     return React.useMemo(() => {
         return <Canvas
