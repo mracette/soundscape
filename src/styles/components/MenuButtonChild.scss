@@ -1,7 +1,7 @@
 @import '../settings.scss';
 
 .menu-button-child {
-    transition-duration: 250ms;
+    transition-duration: 200ms;
     position: absolute;
     border-radius: 50%;
     border: vh(.2) solid white;
@@ -15,6 +15,5 @@
     border-left-style: solid;
     border-right-color: transparent;
     border-right-style: solid;
-    border-bottom-color: rgba(255, 255, 255, 0.15);
     border-bottom-style: solid;
   }

@@ -1,17 +1,17 @@
 // libs
-import React, { useState, useEffect, useRef, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 
 // components
 import { MenuButtonChild } from './MenuButtonChild';
-import { Icon } from './Icon';
+import { Icon } from './../Icon';
 
 // contexts
-import { ThemeContext } from '../contexts/contexts';
-import { LayoutContext } from '../contexts/contexts';
-import { MusicPlayerContext } from '../contexts/contexts';
+import { ThemeContext } from '../../contexts/contexts';
+import { LayoutContext } from '../../contexts/contexts';
+import { MusicPlayerContext } from '../../contexts/contexts';
 
 // styles
-import '../styles/components/MenuButtonParent.scss';
+import '../../styles/components/MenuButtonParent.scss';
 
 export const MenuButtonParent = (props) => {
 
@@ -27,43 +27,14 @@ export const MenuButtonParent = (props) => {
     const top = 2.5 * vh;
     const left = top;
 
-    const childHeight = 0.6 * height;
+    const childHeight = 0.7 * height;
     const childWidth = childHeight;
 
     const separation = childWidth;
 
-    // track elements inside the menu
-    const node = useRef();
-
     // set state
     const [isOpen, setIsOpen] = useState(true);
-    const [openChildIndex, setOpenChildIndex] = useState(-1);
     const numOfChildren = props.childButtonProps.length;
-
-    const handleSetOpenChildIndex = React.useCallback((index) => {
-        setOpenChildIndex(index);
-    }, [])
-
-    const handleOutsideClick = React.useCallback((e) => {
-        // handle click events outside of the node's dom
-        if (!node.current.contains(e.target)) {
-            // if no children are open close the parent
-            if (openChildIndex === -1) {
-                setIsOpen(false);
-                // otherwise close the child
-            } else {
-                setOpenChildIndex(-1);
-            }
-        }
-    }, [openChildIndex])
-
-    // add and remove event listeners to handle outside clicks
-    useEffect(() => {
-        document.addEventListener('mousedown', handleOutsideClick);
-        return () => {
-            document.removeEventListener('mousedown', handleOutsideClick);
-        };
-    }, [handleOutsideClick]);
 
     return (
 
@@ -74,9 +45,7 @@ export const MenuButtonParent = (props) => {
                 left,
                 visibility: isLoading ? 'hidden' : 'visible'
             }}
-            ref={node}
         >
-
             <button
                 className={isOpen ? `menu-button-parent menu-button-parent-open` : `menu-button-parent`}
                 style={{
@@ -87,8 +56,7 @@ export const MenuButtonParent = (props) => {
                 }}
                 onClick={(e) => {
                     e.preventDefault();
-                    isOpen && setOpenChildIndex(-1);
-                    props.clickToOpen && setIsOpen(!isOpen);
+                    setIsOpen(!isOpen);
                 }}
             >
                 <Icon
@@ -109,8 +77,6 @@ export const MenuButtonParent = (props) => {
 
                     // button behavior
                     index={index + 1}
-                    openChildIndex={openChildIndex}
-                    setOpenChildIndex={handleSetOpenChildIndex}
                     parentIsOpen={isOpen}
                     autoOpen={child.autoOpen}
 

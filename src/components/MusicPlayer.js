@@ -5,7 +5,7 @@ import React from 'react';
 import { CanvasViz } from './CanvasViz';
 import { EffectsPanel } from './EffectsPanel';
 import { FreqBands } from './FreqBands';
-import { MenuButtonParent } from './MenuButtonParent';
+import { MenuButtonParent } from './menu-button/MenuButtonParent';
 import { SongInfoPanel } from './SongInfoPanel';
 import { ToggleButtonPanel } from './toggle-button/ToggleButtonPanel';
 import { AudioPlayerWrapper } from '../classes/AudioPlayerWrapper';
@@ -181,7 +181,6 @@ export const MusicPlayer = () => {
                 direction='right'
                 separation='6rem'
                 parentSize='5rem'
-                clickToOpen={true}
                 childButtonProps={[{
                     autoOpen: true,
                     id: 'toggles',

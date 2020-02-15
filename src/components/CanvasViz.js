@@ -41,6 +41,8 @@ export const CanvasViz = () => {
                             () => dispatch({ type: 'setIsLoading', payload: false })
                         );
                         sceneRef.current = newScene;
+                    } else {
+                        dispatch({ type: 'setIsLoading', payload: false });
                     }
                     break;
                 case 'mornings':
@@ -53,6 +55,8 @@ export const CanvasViz = () => {
                             bpm
                         });
                         sceneRef.current = newScene
+                    } else {
+                        dispatch({ type: 'setIsLoading', payload: false });
                     }
                     break;
                 default:
