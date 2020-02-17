@@ -15,7 +15,7 @@ export const HomePanel = (props) => {
             <p>This will stop your current session.</p>
             <div className='flex-row'>
                 <Link to="/">
-                    <button className="grouped-buttons button-white">Proceed</button>
+                    <button style={{ width: '20rem' }} className="grouped-buttons button-white">Proceed</button>
                 </Link>
             </div>
 

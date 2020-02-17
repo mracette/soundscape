@@ -38,7 +38,33 @@ export const EffectsPanel = (props) => {
 
         <div id='effects-panel' className='flex-panel'>
 
-            <h2>Effects</h2>
+            <h2>Background Mode</h2>
+            <p>Automatically varies the music. Ideal for extended listening.</p>
+
+            <div className='flex-row slider-row'>
+                <div className='flex-col'>
+                    <span><h3>Voices:</h3></span>
+                </div>
+                <div className='flex-col' style={{ justifyContent: 'flex-end' }}>
+                    <label className="switch">
+                        <input type="checkbox" />
+                        <span className="slider round"></span>
+                    </label>
+                </div>
+            </div>
+            <div className='flex-row slider-row'>
+                <div className='flex-col'>
+                    <span><h3>Effects:cd</h3></span>
+                </div>
+                <div className='flex-col'>
+                    <label className="switch">
+                        <input type="checkbox" />
+                        <span className="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            <h2 id='effects-controls-row'>Effects Controls</h2>
 
             <div className='flex-row'>
                 <button
@@ -83,7 +109,7 @@ export const EffectsPanel = (props) => {
                 <h3 className='slider-label'>highpass filter</h3>
             </div>
             <div className='flex-row'>
-                <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="hp-slider" ref={hpRef}
+                <input type="range" min="1" max="100" disabled={randomizeEffects} id="hp-slider" ref={hpRef}
                     onInput={(e) => {
                         dispatch({ type: 'setHighpass', payload: { value: parseInt(e.target.value) } });
                     }}
@@ -93,7 +119,7 @@ export const EffectsPanel = (props) => {
                 <h3 className='slider-label'>lowpass filter</h3>
             </div>
             <div className='flex-row'>
-                <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="lp-slider" ref={lpRef}
+                <input type="range" min="1" max="100" disabled={randomizeEffects} id="lp-slider" ref={lpRef}
                     onInput={(e) => {
                         dispatch({ type: 'setLowpass', payload: { value: parseInt(e.target.value) } });
                     }}
@@ -103,7 +129,7 @@ export const EffectsPanel = (props) => {
                 <h3 className='slider-label'>ambience</h3>
             </div>
             <div className='flex-row'>
-                <input type="range" min="1" max="100" disabled={randomizeEffects} className="slider" id="spaciousness-slider" ref={ambienceRef}
+                <input type="range" min="1" max="100" disabled={randomizeEffects} id="spaciousness-slider" ref={ambienceRef}
                     onChange={(e) => {
                         dispatch({ type: 'setAmbience', payload: { value: parseInt(e.target.value) } });
                     }}

@@ -26,7 +26,7 @@ export const ToggleButton = (props) => {
 
     const { vh } = React.useContext(LayoutContext);
     const { id, timeSignature, bpm } = React.useContext(SongContext);
-    const { audioCtx, sampleRate, dispatch, audioCtxInitTime } = React.useContext(MusicPlayerContext);
+    const { audioCtx, dispatch } = React.useContext(MusicPlayerContext);
     const { flags } = React.useContext(TestingContext);
     const { handleUpdatePlayerOrder, handleUpdateOverrides, name, groupName, groupNode, override, length } = props;
 
@@ -123,7 +123,6 @@ export const ToggleButton = (props) => {
         // calculate time till next loop start
         const quantizedStartSeconds = nextSubdivision(
             audioCtx,
-            audioCtxInitTime,
             bpm,
             quantizedStartBeats
         );
@@ -156,7 +155,7 @@ export const ToggleButton = (props) => {
         const animationType = newState === 'stopped' ? 'stop' : 'start';
         runAnimation(animationType, quantizedStartMillis);
 
-    }, [player, audioCtx, audioCtxInitTime, bpm, buttonBorder, buttonRadius, dispatch, quantizedStartBeats, handleUpdatePlayerOrder, name])
+    }, [player, audioCtx, bpm, buttonBorder, buttonRadius, dispatch, quantizedStartBeats, handleUpdatePlayerOrder, name])
 
     /* Initialize Player Hook */
     React.useEffect(() => {
@@ -166,8 +165,12 @@ export const ToggleButton = (props) => {
 
         createAudioPlayer(audioCtx, pathToAudio, {
             offlineRendering: true,
-            renderLength: 44100 * parseInt(length) * timeSignature * 60 / bpm
+            renderLength: audioCtx.sampleRate * parseInt(length) * timeSignature * 60 / bpm
         }).then((audioPlayer) => {
+
+            console.log(audioCtx.sampleRate)
+            console.log(audioCtx.sampleRate * parseInt(length) * timeSignature * 60 / bpm)
+            console.log(audioPlayer.buffer.duration / (92 * 60));
 
             // create the player
             setPlayer(new AudioPlayerWrapper(audioCtx, audioPlayer, {

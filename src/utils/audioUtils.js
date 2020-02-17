@@ -1,13 +1,11 @@
 import { solveExpEquation } from './mathUtils';
 
-export const nextSubdivision = (audioCtx, audioCtxInitTime, bpm, beats) => {
+export const nextSubdivision = (audioCtx, bpm, beats) => {
 
-    console.log(audioCtx, audioCtxInitTime, bpm, beats);
-
-    const timeElapsed = audioCtx.currentTime - audioCtxInitTime;
+    const timeElapsed = audioCtx.currentTime;
     const beatsElapsed = timeElapsed / (60 / bpm);
     const subdivisionsElapsed = Math.floor(beatsElapsed / beats);
-    const nextSubdivision = audioCtxInitTime + (subdivisionsElapsed + 1) * beats * (60 / bpm);
+    const nextSubdivision = (subdivisionsElapsed + 1) * beats * (60 / bpm);
 
     return nextSubdivision;
 

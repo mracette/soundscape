@@ -51,13 +51,21 @@ export const ToggleButtonPanel = (props) => {
                 <button
                     id='toggle-button-panel-randomize'
                     className='button-white grouped-buttons'
+                    onClick={props.handleRandomize}
+                >
+                    Randomize
+                    </button>
+
+                {/* <button
+                    id='toggle-button-panel-randomize'
+                    className='button-white grouped-buttons'
                     style={randomize ? {
                         background: panelRandomizeButton
                     } : undefined}
                     onClick={() => randomize ? dispatch({ type: 'stopRandomize' }) : dispatch({ type: 'startRandomize' })}
                 >
                     Background Mode
-                    </button>
+                    </button> */}
 
                 <button
                     id='toggle-button-panel-mute'

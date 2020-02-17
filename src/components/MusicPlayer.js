@@ -21,20 +21,9 @@ import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
 
 // other
 import { createAudioPlayer } from 'crco-utils';
-// import { initGain } from '../utils/audioUtils';
-// import { Scheduler } from '../classes/Scheduler';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
-
-// // globals
-// const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-//     latencyHint: 'interactive'
-// });
-// const sampleRate = state.audioCtx.sampleRate;
-// const state.premaster = initGain(audioCtx, 1);
-// state.premaster.connect(state.audioCtx.destination);
-// const scheduler = new Scheduler(audioCtx);
 
 export const MusicPlayer = (props) => {
 
@@ -64,9 +53,12 @@ export const MusicPlayer = (props) => {
         ambience: 1
     });
 
-    if (state.audioCtx.state === 'suspended') { state.audioCtx.resume() }
-    const audioCtxInitTimeRef = React.useRef(null);
     const randomizeEventRef = React.useRef(null);
+
+    /* Randomize Callback */
+    const handleRandomize = React.useCallback(() => {
+        state.players.forEach((p) => Math.random() >= 0.5 && p.buttonRef.click());
+    }, [state.players])
 
     /* Reset Callback */
     const handleReset = React.useCallback(() => {
@@ -116,7 +108,6 @@ export const MusicPlayer = (props) => {
                 // should be safe to resume and take the init time here (after user gesture)
                 state.audioCtx.resume();
                 ambientPlayer.start();
-                audioCtxInitTimeRef.current = state.audioCtx.currentTime;
 
             });
 
@@ -171,7 +162,6 @@ export const MusicPlayer = (props) => {
 
         <MusicPlayerContext.Provider value={{
             ...state,
-            audioCtxInitTime: audioCtxInitTimeRef.current,
             dispatch
         }}>
 
@@ -193,9 +183,10 @@ export const MusicPlayer = (props) => {
                     iconName: 'icon-music',
                     content:
                         React.useMemo(() => <ToggleButtonPanel
+                            handleRandomize={handleRandomize}
                             handleReset={handleReset}
                             players={state.players}
-                        />, [handleReset, state.players])
+                        />, [handleRandomize, handleReset, state.players])
                 }, {
                     id: 'effects',
                     iconName: 'icon-equalizer',

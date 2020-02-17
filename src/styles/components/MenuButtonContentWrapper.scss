@@ -8,7 +8,7 @@
 .menu-button-content p {
     margin: vh(1) 0 vh(1) 0;
     display: inline-block;
-    font-size: $m-size;
+    font-size: vh(1.75);
 }
 
 .menu-button-content {
@@ -38,7 +38,7 @@ h2 {
 }
 
 h3 {
-    font-size: vh(2.15);
+    font-size: vh(2.25);
     margin: 0;
     padding: 0 vh(1) 0 0;
     flex: 0 0 content;
