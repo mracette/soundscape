@@ -14,8 +14,6 @@ import '../../styles/components/ToggleButtonPanel.scss';
 
 export const ToggleButtonPanel = (props) => {
 
-    console.log('render');
-
     const {
         panelMuteButton,
         panelRandomizeButton,

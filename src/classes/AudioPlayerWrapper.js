@@ -24,12 +24,10 @@ export class AudioPlayerWrapper {
         this.bufferSource.loopEnd = bufferSource.buffer.duration;
         this.bufferSource.connect(this.destination);
 
-        console.log('sample rate', context.sampleRate);
-        console.log('loopLengthBeats', this.loopLengthBeats);
-        console.log('bpm', this.bpm);
-        console.log('duration', bufferSource.buffer.duration);
-        console.log('length', bufferSource.buffer.length);
+    }
 
+    disconnect() {
+        this.bufferSource.disconnect();
     }
 
     start(time) {

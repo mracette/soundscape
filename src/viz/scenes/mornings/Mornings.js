@@ -16,6 +16,7 @@ import { renderBass } from './renderBass';
 import { renderRhythm } from './renderRhythm';
 import { renderHarmony } from './renderHarmony';
 import { renderMelody } from './renderMelody';
+import { renderAtmosphere } from './renderAtmosphere';
 
 // shaders
 import { rgbaVertex, rgbaFragment } from '../../shaders/rgba';
@@ -26,9 +27,23 @@ export class Mornings extends SceneManager {
 
         super(canvas);
 
+        this.canvas.style = `
+            background-color: none; background: 
+            linear-gradient(
+                to top, 
+                #F0A9B3 45%, 
+                #D8B7B6 55%,
+                #BEBDC3 70%,
+                #A1BCD4 85%,
+                #80BDE8 100%
+            );
+        `;
+
         this.DPRMax = 1.25;
+        this.spectrumFunction = extras.spectrumFunction;
 
         this.colors = {
+            morningLight: new THREE.Color(0xF0A9B3),
             plant: new THREE.Color(0x7B9E53),
             white: new THREE.Color(0xFFFFFF),
             paleBlue: new THREE.Color(0xDEEEFF),
@@ -40,11 +55,10 @@ export class Mornings extends SceneManager {
             'house', 'plant', 'table', 'bookshelf', 'flower'
             // 'table'
         ];
-        this.spectrumFunction = extras.spectrumFunction;
         this.bpm = extras.bpm;
 
         this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
-        this.atmosphereAnalyser = analysers.find(a => a.id === 'atmosphere-analyser');
+        this.atmosphereAnalyser = analysers.find(a => a.id === 'extras-analyser');
         this.harmonyAnalyser = analysers.find(a => a.id === 'harmony-analyser');
         this.melodyAnalyser = analysers.find(a => a.id === 'melody-analyser');
         this.bassAnalyser = analysers.find(a => a.id === 'bass-analyser');
@@ -58,8 +72,23 @@ export class Mornings extends SceneManager {
         ]).then(() => {
             callback();
             this.applySceneSettings();
-            this.render(this.renderList); // render once to get objects in place
-            this.freezeAll(this.scene, ['steam']); // freeze static objects
+            // render once to get objects in place
+            this.render(this.renderList);
+            this.applyAll(this.scene, (child) => {
+                // freeze objects that don't move
+                child.matrixAutoUpdates = false;
+                // lambert material is the most efficient
+                if (child.material && child.material.type === 'MeshStandardMaterial') {
+                    const mat = new THREE.MeshLambertMaterial({
+                        color: child.material.color,
+                        side: THREE.DoubleSide,
+                        emissive: child.material.emissive,
+                        emissiveIntensity: child.material.emissiveIntensity
+                    });
+                    child.material.dispose();
+                    child.material = mat;
+                }
+            }, ['steam', 'van_gogh', 'vonnegut', 'carpet']); // freeze static objects
             super.animate();
         }).catch((err) => {
             console.log(err);
@@ -71,6 +100,7 @@ export class Mornings extends SceneManager {
 
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+        this.renderer.setClearColor(0x000000, 0.0);
 
         this.camera.position.set(-36.792147432025736, 12.295984744079584, 19.50565058881036);
         this.camera.lookAt(46.69487932551039, 2.382592629313793, -34.638979984916375);
@@ -104,7 +134,7 @@ export class Mornings extends SceneManager {
     initScene() {
 
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xcccccc);
+        // scene.background = (this.colors.morningLight.clone()).lerp(new THREE.Color(0x000000), .1);
         return scene;
 
     }
@@ -117,8 +147,8 @@ export class Mornings extends SceneManager {
         // const TILT = (10 / 180) * Math.PI;
 
         const lights = {
-            ambient: new THREE.AmbientLight(0xffffff, .35),
-            sunlight: new THREE.DirectionalLight(0xffffff, 0),
+            ambient: new THREE.AmbientLight(this.colors.morningLight.clone().lerp(this.colors.white, .65), .35),
+            sunlight: new THREE.DirectionalLight(this.colors.white, 0),
             pointOne: new THREE.PointLight(0xffffff, .1)
         }
 
@@ -165,8 +195,10 @@ export class Mornings extends SceneManager {
                     this.subjects.godrays = {};
                     this.subjects.godrays.materials = [];
                     this.subjects.godrays.meshes = [];
+                    this.subjects.stringLights = [];
 
                     this.subjects.godrays.materials.push(new THREE.MeshBasicMaterial({
+                        // color: this.colors.white,
                         color: this.colors.white,
                         opacity: 0.05,
                         transparent: true,
@@ -176,6 +208,21 @@ export class Mornings extends SceneManager {
                     this.helpers.gltfLoader.load(houseModel, (gltf) => {
 
                         gltf.scene.children.forEach((mesh) => {
+
+                            if (mesh.type === 'Group' && mesh.name.includes('string_light')) {
+                                mesh.children[1].material.emissive = mesh.children[1].material.color;
+                                this.subjects.stringLights.push(mesh.children[1]);
+                            }
+
+                            if (mesh.name === 'carpet') {
+                                // console.log(mesh)
+                                mesh.material.side = THREE.FrontSide;
+                            }
+
+                            if (mesh.name === 'bushes') {
+                                mesh.material.emissive = mesh.material.color;
+                                mesh.material.emissiveIntensity = .5;
+                            }
 
                             if (mesh.name === 'god_rays_top' || mesh.name === 'god_rays_bottom') {
                                 mesh.material = this.subjects.godrays.materials[0];
@@ -291,10 +338,25 @@ export class Mornings extends SceneManager {
 
                     const stickLeaves = [];
                     const stickLeavesOne = [];
+                    this.subjects.innerPetals = [];
+                    this.subjects.outerPetals = [];
+
 
                     this.helpers.gltfLoader.load(flowerModel, (gltf) => {
 
                         gltf.scene.children.forEach((mesh) => {
+
+                            if (mesh.name.includes('Inner_Petals')) {
+                                mesh.material.emissive = mesh.material.color;
+                                mesh.material.emissiveIntensity = 0;
+                                this.subjects.innerPetals.push(mesh);
+                            }
+
+                            if (mesh.name.includes('Outer_Petals')) {
+                                mesh.material.emissive = mesh.material.color;
+                                mesh.material.emissiveIntensity = 0;
+                                this.subjects.outerPetals.push(mesh);
+                            }
 
                             if (mesh.name.includes('stick_leaves_one')) {
                                 mesh.material = new THREE.MeshLambertMaterial({
@@ -419,6 +481,8 @@ export class Mornings extends SceneManager {
         this.subjects.steam.rotateY(-.05);
 
         this.renderList.indexOf('table') !== -1 && renderMelody({
+            innerPetals: this.subjects.innerPetals,
+            outerPetals: this.subjects.outerPetals,
             leftPage: this.subjects.leftPage,
             rightPage: this.subjects.rightPage
         }, this.melodyAnalyser, {
@@ -444,6 +508,8 @@ export class Mornings extends SceneManager {
         }, this.harmonyAnalyser, {
             beats: this.elapsedBeats
         });
+
+        renderAtmosphere(this.subjects.stringLights, this.atmosphereAnalyser, { beats: this.elapsedBeats });
 
         this.renderer.render(this.scene, this.camera);
     }

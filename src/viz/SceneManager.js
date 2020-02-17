@@ -54,13 +54,13 @@ export class SceneManager {
         window.cancelAnimationFrame(this.currentFrame);
     }
 
-    freezeAll(obj, exceptions) {
+    applyAll(obj, callback, exceptions) {
         obj.children.forEach((child) => {
             if (child.children.length > 0) {
-                this.freezeAll(child, exceptions);
+                this.applyAll(child, callback, exceptions);
             } else {
                 if (!exceptions.find((ex) => child.name.includes(ex))) {
-                    child.matrixAutoUpdate = false;
+                    callback(child);
                 }
             }
         })

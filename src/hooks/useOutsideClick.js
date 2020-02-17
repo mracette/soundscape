@@ -4,9 +4,6 @@ export const useOutsideClick = (nodeRef, insideCallback, outsideCallback) => {
 
     const handleOutsideClick = React.useCallback((e) => {
 
-        console.log(nodeRef.current, e.target);
-
-
         if (nodeRef.current.contains(e.target)) {
             // the click was inside of the nodeRef hierarchy
             insideCallback && insideCallback();

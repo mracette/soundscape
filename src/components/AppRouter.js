@@ -45,7 +45,11 @@ export const AppRouter = (props) => {
                                 })["info"]
                             }}>
 
-                                <MusicPlayer />
+                                <MusicPlayer
+                                    audioCtx={props.audioCtx}
+                                    scheduler={props.scheduler}
+                                    premaster={props.premaster}
+                                />
 
                             </InfoContext.Provider>
 

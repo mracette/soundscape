@@ -21,7 +21,6 @@ import '../../styles/components/ToggleButton.scss';
 export const ToggleButton = (props) => {
 
     const buttonRef = React.useRef();
-    const playerRef = React.useRef();
     const animationTargetsRef = React.useRef();
     const schedulerRef = React.useRef();
 
@@ -32,6 +31,7 @@ export const ToggleButton = (props) => {
     const { handleUpdatePlayerOrder, handleUpdateOverrides, name, groupName, groupNode, override, length } = props;
 
     const [playerState, setPlayerState] = React.useState('stopped');
+    const [player, setPlayer] = React.useState(null);
 
     const quantizedStartBeats = flags.quantizeSamples ? 4 * timeSignature : 1;
     const buttonRadius = vh ? vh * 3.5 : 0;
@@ -111,7 +111,7 @@ export const ToggleButton = (props) => {
         // update poly count for the group
         handleUpdatePlayerOrder(name, initialState);
 
-        // dispatch initial update to music player
+        // dispatch initial update to music playerRef
         dispatch({
             type: 'updatePlayerState',
             payload: {
@@ -129,8 +129,8 @@ export const ToggleButton = (props) => {
         );
 
         switch (newState) {
-            case 'active': playerRef.current.start(quantizedStartSeconds); break;
-            case 'stopped': playerRef.current.stop(quantizedStartSeconds); break;
+            case 'active': player.start(quantizedStartSeconds); break;
+            case 'stopped': player.stop(quantizedStartSeconds); break;
             default: break;
         }
 
@@ -156,7 +156,7 @@ export const ToggleButton = (props) => {
         const animationType = newState === 'stopped' ? 'stop' : 'start';
         runAnimation(animationType, quantizedStartMillis);
 
-    }, [audioCtx, audioCtxInitTime, bpm, buttonBorder, buttonRadius, dispatch, quantizedStartBeats, handleUpdatePlayerOrder, name])
+    }, [player, audioCtx, audioCtxInitTime, bpm, buttonBorder, buttonRadius, dispatch, quantizedStartBeats, handleUpdatePlayerOrder, name])
 
     /* Initialize Player Hook */
     React.useEffect(() => {
@@ -166,14 +166,14 @@ export const ToggleButton = (props) => {
 
         createAudioPlayer(audioCtx, pathToAudio, {
             offlineRendering: true,
-            renderLength: sampleRate * parseInt(length) * timeSignature * 60 / bpm
+            renderLength: 44100 * parseInt(length) * timeSignature * 60 / bpm
         }).then((audioPlayer) => {
 
             // create the player
-            playerRef.current = new AudioPlayerWrapper(audioCtx, audioPlayer, {
+            setPlayer(new AudioPlayerWrapper(audioCtx, audioPlayer, {
                 destination: groupNode,
                 loop: true
-            });
+            }));
 
             // send reference to music player
             dispatch({
@@ -202,13 +202,24 @@ export const ToggleButton = (props) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    /* Override Hook */
     React.useEffect(() => {
         if (override && (playerState === 'active' || playerState === 'pending-start')) {
             // stop player and remove from the override list
             changePlayerState('stopped');
             handleUpdateOverrides(name);
         }
-    }, [playerState, changePlayerState, handleUpdateOverrides, name, override])
+    }, [playerState, changePlayerState, handleUpdateOverrides, name, override]);
+
+    /* Cleanup Hook */
+    React.useEffect(() => {
+        if (player) {
+            return () => {
+                player.stop();
+                player.disconnect();
+            }
+        }
+    }, [player])
 
     return (
 

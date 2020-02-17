@@ -7,6 +7,10 @@ import { ColorPalette } from 'color-curves'
 // components
 import { AppRouter } from './AppRouter';
 
+// others
+import { initGain } from '../utils/audioUtils';
+import { Scheduler } from '../classes/Scheduler';
+
 // context
 import { LayoutContext } from '../contexts/contexts';
 import { TestingContext } from '../contexts/contexts';
@@ -17,7 +21,7 @@ const appConfig = require('../app-config.json');
 // global behavior flags for testing
 const flags = {
   traceUpdates: true,
-  quantizeSamples: true,
+  quantizeSamples: false,
   showVisuals: true,
   playAmbientTrack: true
 };
@@ -27,6 +31,12 @@ const spectrumFunctions = {
   'moonrise': (n) => new d3Color.color(d3Chromatic.interpolateViridis(n)).brighter(1.5),
   'mornings': (n) => morningsPalette.rgbValueAt(n)
 };
+
+// globals
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+const premaster = initGain(audioCtx, 1);
+premaster.connect(audioCtx.destination);
+const scheduler = new Scheduler(audioCtx);
 
 // inits globals vars, adds listeners, and manages some other settings
 export const AppWrap = () => {
@@ -40,6 +50,8 @@ export const AppWrap = () => {
   // custom vw and vh vars
   const [vw, setvw] = React.useState(viewportWidth / 100);
   const [vh, setvh] = React.useState(viewportHeight / 100);
+
+  const resumeAudio = () => { audioCtx.state === 'suspended' && audioCtx.resume(); }
 
   React.useEffect(() => {
 
@@ -59,12 +71,16 @@ export const AppWrap = () => {
 
     }
 
-    // add listeners
+    // add resize listeners
     window.addEventListener('resize', setViewportVars);
     window.addEventListener('orientationchange', setViewportVars);
     window.addEventListener('fullscreenchange', setViewportVars);
     window.visualViewport && (window.visualViewport.addEventListener('scroll', setViewportVars));
     window.visualViewport && (window.visualViewport.addEventListener('resize', setViewportVars));
+
+    // add listeners to unlock audio
+    document.body.addEventListener('touchstart', resumeAudio);
+    document.body.addEventListener('click', resumeAudio);
 
     return () => {
       window.removeEventListener('resize', setViewportVars);
@@ -72,6 +88,8 @@ export const AppWrap = () => {
       window.removeEventListener('fullscreenchange', setViewportVars);
       window.visualViewport && (window.visualViewport.removeEventListener('scroll', setViewportVars));
       window.visualViewport && (window.visualViewport.removeEventListener('resize', setViewportVars));
+      document.body.removeEventListener('touchstart', resumeAudio);
+      document.body.removeEventListener('click', resumeAudio);
     }
 
   }, []);
@@ -82,6 +100,9 @@ export const AppWrap = () => {
         <AppRouter
           appConfig={appConfig}
           spectrumFunctions={spectrumFunctions}
+          audioCtx={audioCtx}
+          scheduler={scheduler}
+          premaster={premaster}
         />
       </LayoutContext.Provider>
     </TestingContext.Provider>

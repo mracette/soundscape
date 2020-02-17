@@ -21,22 +21,22 @@ import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
 
 // other
 import { createAudioPlayer } from 'crco-utils';
-import { initGain } from '../utils/audioUtils';
-import { Scheduler } from '../classes/Scheduler';
+// import { initGain } from '../utils/audioUtils';
+// import { Scheduler } from '../classes/Scheduler';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
 
-// globals
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-    latencyHint: 'interactive'
-});
-const sampleRate = audioCtx.sampleRate;
-const premaster = initGain(audioCtx, 1);
-premaster.connect(audioCtx.destination);
-const scheduler = new Scheduler(audioCtx);
+// // globals
+// const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+//     latencyHint: 'interactive'
+// });
+// const sampleRate = state.audioCtx.sampleRate;
+// const state.premaster = initGain(audioCtx, 1);
+// state.premaster.connect(state.audioCtx.destination);
+// const scheduler = new Scheduler(audioCtx);
 
-export const MusicPlayer = () => {
+export const MusicPlayer = (props) => {
 
     const { flags } = React.useContext(TestingContext);
 
@@ -49,10 +49,9 @@ export const MusicPlayer = () => {
     } = React.useContext(SongContext);
 
     const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
-        audioCtx,
-        scheduler,
-        premaster,
-        sampleRate,
+        audioCtx: props.audioCtx,
+        scheduler: props.scheduler,
+        premaster: props.premaster,
         isLoading: true,
         randomize: false,
         randomizeEffects: false,
@@ -65,7 +64,8 @@ export const MusicPlayer = () => {
         ambience: 1
     });
 
-    const audioCtxInitTimeRef = React.useRef(state.audioCtx.currentTime);
+    if (state.audioCtx.state === 'suspended') { state.audioCtx.resume() }
+    const audioCtxInitTimeRef = React.useRef(null);
     const randomizeEventRef = React.useRef(null);
 
     /* Reset Callback */
@@ -91,7 +91,7 @@ export const MusicPlayer = () => {
             state.players[randomTwo].buttonRef.click();
         }
 
-    }, [state.players])
+    }, [state.players]);
 
     /* Ambient Track Hook */
     React.useEffect(() => {
@@ -123,7 +123,7 @@ export const MusicPlayer = () => {
         }
 
         return () => {
-            state.audioCtx.close();
+            state.audioCtx.suspend();
             flags.playAmbientTrack && ambientPlayer.stop();
         };
 
@@ -132,31 +132,31 @@ export const MusicPlayer = () => {
     /* Randomize Hook */
     React.useEffect(() => {
         // init event
-        if (state.randomize && !scheduler.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
-            randomizeEventRef.current = scheduler.scheduleRepeating(
+        if (state.randomize && !state.scheduler.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
+            randomizeEventRef.current = state.scheduler.scheduleRepeating(
                 state.audioCtx.currentTime + (60 / bpm),
                 32 * 60 / bpm,
                 triggerRandomVoice
             )
             // update event
         } else if (state.randomize) {
-            scheduler.updateCallback(randomizeEventRef.current, triggerRandomVoice);
+            state.scheduler.updateCallback(randomizeEventRef.current, triggerRandomVoice);
             // stop event
         } else if (!state.randomize) {
-            scheduler.cancel(randomizeEventRef.current);
+            state.scheduler.cancel(randomizeEventRef.current);
         }
 
-    }, [bpm, state.randomize, triggerRandomVoice, state.audioCtx, state.scheduler])
+    }, [bpm, state.randomize, triggerRandomVoice, state.audioCtx, state.scheduler]);
 
     /* Mute Hook */
     React.useEffect(() => {
 
         const startMute = () => {
-            premaster.gain.value = 0;
+            state.premaster.gain.value = 0;
         }
 
         const stopMute = () => {
-            premaster.gain.value = 1;
+            state.premaster.gain.value = 1;
         }
 
         if (state.mute) {
@@ -165,7 +165,7 @@ export const MusicPlayer = () => {
             stopMute();
         }
 
-    }, [state.mute, state.premaster])
+    }, [state.mute, state.premaster]);
 
     return (
 

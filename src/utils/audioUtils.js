@@ -2,6 +2,8 @@ import { solveExpEquation } from './mathUtils';
 
 export const nextSubdivision = (audioCtx, audioCtxInitTime, bpm, beats) => {
 
+    console.log(audioCtx, audioCtxInitTime, bpm, beats);
+
     const timeElapsed = audioCtx.currentTime - audioCtxInitTime;
     const beatsElapsed = timeElapsed / (60 / bpm);
     const subdivisionsElapsed = Math.floor(beatsElapsed / beats);

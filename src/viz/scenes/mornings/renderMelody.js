@@ -9,6 +9,7 @@ const bSin = boundedSin(period, .4, 1);
 export const renderMelody = (subjects, analyser, extras) => {
 
     const data = analyser.getFrequencyData();
+    const vol = (data.reduce((a, b) => (a + b)) / data.length) / 255;
     const leftColors = subjects.leftPage.geometry.attributes.customColor;
     const rightColors = subjects.rightPage.geometry.attributes.customColor;
 
@@ -50,5 +51,15 @@ export const renderMelody = (subjects, analyser, extras) => {
 
     leftColors.needsUpdate = true;
     rightColors.needsUpdate = true;
+
+    for (let i = 0; i < subjects.innerPetals.length; i++) {
+        const s = subjects.innerPetals[i];
+        s.material.emissiveIntensity = vol * 5;
+    }
+
+    for (let i = 0; i < subjects.outerPetals.length; i++) {
+        const s = subjects.outerPetals[i];
+        s.material.emissiveIntensity = vol * 5;
+    }
 
 }
