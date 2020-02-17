@@ -85,6 +85,10 @@ export const MusicPlayer = (props) => {
 
     }, [state.players]);
 
+    // React.useEffect(() => {
+    //     console.log(state.players.map(p => p.buttonRef));
+    // }, [state.players])
+
     /* Ambient Track Hook */
     React.useEffect(() => {
 

@@ -168,10 +168,6 @@ export const ToggleButton = (props) => {
             renderLength: audioCtx.sampleRate * parseInt(length) * timeSignature * 60 / bpm
         }).then((audioPlayer) => {
 
-            console.log(audioCtx.sampleRate)
-            console.log(audioCtx.sampleRate * parseInt(length) * timeSignature * 60 / bpm)
-            console.log(audioPlayer.buffer.duration / (92 * 60));
-
             // create the player
             setPlayer(new AudioPlayerWrapper(audioCtx, audioPlayer, {
                 destination: groupNode,

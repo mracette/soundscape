@@ -35,11 +35,6 @@ export const MusicPlayerReducer = (state, action) => {
                     players: [...state.players, action.payload.player]
                 };
             }
-        case 'addButton':
-            return {
-                ...state,
-                buttons: [...state.buttons, action.payload.button]
-            }
         case 'addAnalyser':
             if (state.analysers.find(a => a.id === action.payload.analyser.id)) {
                 return state;
@@ -75,42 +70,6 @@ export const MusicPlayerReducer = (state, action) => {
                     action.payload.impulseResponse
                 ]
             };
-        case 'addEffect':
-            switch (action.payload.effectType) {
-                case 'highpass':
-                    return {
-                        ...state,
-                        groupEffects: {
-                            ...state.groupEffects,
-                            highpass: [...state.groupEffects.highpass, action.payload.effect]
-                        }
-                    };
-                case 'lowpass':
-                    return {
-                        ...state,
-                        groupEffects: {
-                            ...state.groupEffects,
-                            lowpass: [...state.groupEffects.lowpass, action.payload.effect]
-                        }
-                    };
-                case 'reverb-dry':
-                    return {
-                        ...state,
-                        groupEffects: {
-                            ...state.groupEffects,
-                            reverbDry: [...state.groupEffects.reverbDry, action.payload.effect]
-                        }
-                    };
-                case 'reverb-wet':
-                    return {
-                        ...state,
-                        groupEffects: {
-                            ...state.groupEffects,
-                            reverbWet: [...state.groupEffects.reverbWet, action.payload.effect]
-                        }
-                    };
-                default: return state;
-            }
         case 'incrementHighpass':
             return {
                 ...state,
