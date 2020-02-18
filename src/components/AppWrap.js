@@ -32,7 +32,7 @@ const spectrumFunctions = {
 };
 
 // globals
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'balanced' });
 const premaster = initGain(audioCtx, 1);
 premaster.connect(audioCtx.destination);
 const scheduler = new Scheduler(audioCtx);

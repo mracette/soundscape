@@ -1,8 +1,8 @@
 export class Scheduler {
 
-    constructor(audioCtx) {
+    constructor(audioCtx, id = null) {
 
-        console.log('new sched');
+        this.id = id;
 
         // bind audio context
         this.audioCtx = audioCtx

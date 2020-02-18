@@ -105,7 +105,7 @@ export class SceneManager {
             autoClear: false,
             canvas: this.canvas,
             antialias: true,
-            powerPreference: "high-performance",
+            // powerPreference: "high-performance",
             outputEncoding: THREE.sRGBEncoding
         });
 

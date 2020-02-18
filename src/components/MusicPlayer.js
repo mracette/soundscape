@@ -33,6 +33,7 @@ export const MusicPlayer = (props) => {
         id,
         timeSignature,
         bpm,
+        groups,
         ambientTrack,
         ambientTrackLength,
     } = React.useContext(SongContext);
@@ -57,12 +58,44 @@ export const MusicPlayer = (props) => {
 
     /* Randomize Callback */
     const handleRandomize = React.useCallback(() => {
+
+        const voicesToEnable = [];
+
+        groups.forEach((g) => {
+
+            // get the effective poly; the max number of voices to enable
+            const ePoly = g.polyphony === -1 ? g.voices.length : g.polyphony;
+
+            // ensures 1 voice from each group is enabled
+            const count = Math.ceil(Math.random() * ePoly);
+
+            // keep track of how many are enabled in each group
+            const groupCount = []
+
+            while (groupCount.length < count) {
+                const rand = Math.floor(Math.random() * g.voices.length);
+                const id = g.voices[rand].name;
+                if (groupCount.indexOf(id) === -1) {
+                    groupCount.push(id);
+                    voicesToEnable.push(id);
+                }
+            }
+
+        });
+
         state.players.forEach((p) => {
-            if (Math.random() >= 0.5) {
-                p.buttonRef.click();
+            if (voicesToEnable.indexOf(p.id) !== -1) {
+                if (p.playerState === 'stopped') {
+                    p.buttonRef.click();
+                }
+            } else {
+                if (p.playerState !== 'stopped') {
+                    p.buttonRef.click();
+                }
             }
         });
-    }, [state.players]);
+
+    }, [state.players, groups]);
 
     /* Reset Callback */
     const handleReset = React.useCallback(() => {
@@ -82,7 +115,7 @@ export const MusicPlayer = (props) => {
 
         // trigger an additional voice when less than 1/2 are active
         if (viableOne.length >= state.players.length) {
-            const viableTwo = viableOne.filter((p, i) => i !== randomOne);
+            const viableTwo = viableOne.filter((p, i) => i !== randomOne && p.groupName !== randomOne.groupName);
             const randomTwo = Math.floor(Math.random() * viableTwo.length);
             state.players[randomTwo].buttonRef.click();
         }
@@ -99,9 +132,10 @@ export const MusicPlayer = (props) => {
             const pathToAudio = require(`../audio/${id}/ambient-track.mp3`);
 
             createAudioPlayer(state.audioCtx, pathToAudio, {
-                logLevel: 'debug',
                 offlineRendering: true,
                 renderLength: state.sampleRate * parseInt(ambientTrackLength) * timeSignature * 60 / bpm,
+                fade: true,
+                fadeLength: 0.01
             }).then((audioPlayer) => {
 
                 ambientPlayer = new AudioPlayerWrapper(state.audioCtx, audioPlayer, {

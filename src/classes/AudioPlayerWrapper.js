@@ -9,10 +9,7 @@ export class AudioPlayerWrapper {
 
         // defaults
         const defaults = {
-            bpm: 120,
-            loopLengthBeats: 4 * 4,
             destination: context.destination,
-            fades: false,
             loop: true
         }
 
@@ -46,6 +43,9 @@ export class AudioPlayerWrapper {
     reload() {
         const newSource = this.context.createBufferSource();
         newSource.buffer = this.bufferSource.buffer;
+        newSource.loop = this.loop;
+        newSource.loopStart = 0;
+        newSource.loopEnd = newSource.buffer.duration;
         newSource.connect(this.destination);
         this.bufferSource = newSource;
     }

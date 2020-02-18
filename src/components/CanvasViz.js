@@ -28,14 +28,6 @@ export const CanvasViz = () => {
     const sceneRef = React.useRef(null);
 
     React.useEffect(() => {
-        console.log(pauseVisuals);
-        if (sceneRef.current) {
-            sceneRef.current.pauseVisuals = pauseVisuals;
-            console.log(sceneRef.current);
-        }
-    }, [pauseVisuals])
-
-    React.useEffect(() => {
         if (groups.length === analysers.length) {
 
             let newScene;

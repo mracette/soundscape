@@ -100,67 +100,72 @@ export const ToggleButton = (props) => {
 
         }
 
-        // clear future events for this toggle (necessary to stop a pending start)
-        schedulerRef.current.clear();
+        // clicking a button on pending stop does nothing
+        if (playerState !== 'pending-stop') {
 
-        const initialState = newState === 'active' ? 'pending-start' : 'pending-stop';
+            // clear future events for this toggle (necessary to stop a pending start)
+            schedulerRef.current.clear();
 
-        // dispatch initial update to music player
-        dispatch({
-            type: 'updatePlayerState',
-            payload: {
-                id: name,
-                newState: initialState
-            }
-        });
+            const initialState = newState === 'active' ? 'pending-start' : 'pending-stop';
 
-        // set local state
-        setPlayerState(initialState);
-
-        // update poly count for the group
-        handleUpdatePlayerOrder(name, initialState);
-
-        // calculate time till next loop start
-        const quantizedStartSeconds = nextSubdivision(
-            audioCtx,
-            bpm,
-            quantizedStartBeats
-        );
-
-        switch (newState) {
-            case 'active': player.start(quantizedStartSeconds); break;
-            case 'stopped': player.stop(quantizedStartSeconds); break;
-            default: break;
-        }
-
-        // schedule a status change
-        schedulerRef.current.scheduleOnce(quantizedStartSeconds).then(() => {
-
-            // update local state
-            setPlayerState(newState);
-
-            // dispatch final update to music player
+            // dispatch initial update to music player
             dispatch({
                 type: 'updatePlayerState',
                 payload: {
                     id: name,
-                    newState: newState
+                    newState: initialState
                 }
             });
 
-        });
+            // set local state
+            setPlayerState(initialState);
 
-        // convert to millis for animations
-        const quantizedStartMillis = (quantizedStartSeconds - audioCtx.currentTime) * 1000;
-        const animationType = newState === 'stopped' ? 'stop' : 'start';
-        runAnimation(animationType, quantizedStartMillis);
+            // update poly count for the group
+            handleUpdatePlayerOrder(name, initialState);
 
-    }, [player, audioCtx, bpm, buttonBorder, buttonRadius, dispatch, quantizedStartBeats, handleUpdatePlayerOrder, name])
+            // calculate time till next loop start
+            const quantizedStartSeconds = nextSubdivision(
+                audioCtx,
+                bpm,
+                quantizedStartBeats
+            );
+
+            switch (newState) {
+                case 'active': player.start(quantizedStartSeconds); break;
+                case 'stopped': player.stop(quantizedStartSeconds); break;
+                default: break;
+            }
+
+            // schedule a status change
+            schedulerRef.current.scheduleOnce(quantizedStartSeconds).then(() => {
+
+                // update local state
+                setPlayerState(newState);
+
+                // dispatch final update to music player
+                dispatch({
+                    type: 'updatePlayerState',
+                    payload: {
+                        id: name,
+                        newState: newState
+                    }
+                });
+
+            });
+
+            // convert to millis for animations
+            const quantizedStartMillis = (quantizedStartSeconds - audioCtx.currentTime) * 1000;
+            const animationType = newState === 'stopped' ? 'stop' : 'start';
+            runAnimation(animationType, quantizedStartMillis);
+
+        }
+
+    }, [playerState, player, audioCtx, bpm, buttonBorder, buttonRadius, dispatch, quantizedStartBeats, handleUpdatePlayerOrder, name])
 
     /* Initialize Player Hook */
     React.useEffect(() => {
 
-        schedulerRef.current = new Scheduler(audioCtx);
+        schedulerRef.current = new Scheduler(audioCtx, name);
         const pathToAudio = require(`../../audio/${id}/${name}.mp3`);
 
         createAudioPlayer(audioCtx, pathToAudio, {
