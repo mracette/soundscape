@@ -29,7 +29,7 @@ export class SceneManager {
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
         this.onWindowResize = this.onWindowResize.bind(this);
-        this.showStats = true;
+        this.showStats = false;
 
     }
 
