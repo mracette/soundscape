@@ -36,6 +36,12 @@
     color: $hot-blue;
 }
 
+.filler{
+    display: inline-block;
+    width: 100%;
+    height: 25rem
+}
+
 #song-selection-panel {
     overflow: auto;
     width: vw(100);

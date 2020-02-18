@@ -109,6 +109,8 @@ export const LandingPage = () => {
                         dispatch={dispatch}
                     />
                 </Link>
+                {/* fillers to get the botton link visible on mobile */}
+                <div className='filler'></div>
             </div>
         </div>
     </>)
