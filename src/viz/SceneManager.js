@@ -24,6 +24,7 @@ export class SceneManager {
             depth: 1000
         };
 
+        this.pauseVisuals = false;
         this.currentFrame;
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
@@ -101,10 +102,11 @@ export class SceneManager {
 
         const renderer = new THREE.WebGLRenderer({
             alpha: true,
+            autoClear: false,
             canvas: this.canvas,
             antialias: true,
             powerPreference: "high-performance",
-            // outputEncoding: THREE.sRGBEncoding
+            outputEncoding: THREE.sRGBEncoding
         });
 
         let DPR = Math.min(this.DPRMax || 1.5, (window.devicePixelRatio) ? window.devicePixelRatio : 1);
@@ -198,5 +200,6 @@ export class SceneManager {
         this.camera.aspect = aspectRatio;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(newWidth, newHeight);
+        this.render(true);
     }
 };

@@ -88,7 +88,7 @@ export class Mornings extends SceneManager {
                     child.material.dispose();
                     child.material = mat;
                 }
-            }, ['steam', 'van_gogh', 'vonnegut', 'carpet']); // freeze static objects
+            }, ['steam', 'van_gogh', 'vonnegut', 'carpet', 'god_rays_top', 'god_rays_bottom']); // freeze static objects
             super.animate();
         }).catch((err) => {
             console.log(err);
@@ -192,18 +192,8 @@ export class Mornings extends SceneManager {
             modelList.indexOf('house') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
-                    this.subjects.godrays = {};
-                    this.subjects.godrays.materials = [];
-                    this.subjects.godrays.meshes = [];
                     this.subjects.stringLights = [];
-
-                    this.subjects.godrays.materials.push(new THREE.MeshBasicMaterial({
-                        // color: this.colors.white,
-                        color: this.colors.white,
-                        opacity: 0.05,
-                        transparent: true,
-                        side: THREE.DoubleSide
-                    }));
+                    this.subjects.godRays = []
 
                     this.helpers.gltfLoader.load(houseModel, (gltf) => {
 
@@ -215,8 +205,9 @@ export class Mornings extends SceneManager {
                             }
 
                             if (mesh.name === 'carpet') {
-                                // console.log(mesh)
-                                mesh.material.side = THREE.FrontSide;
+                                mesh.material.side = THREE.DoubleSide;
+                                // mesh.material.needsUpdate = true;
+                                // mesh.material.texture.needsUpdate = true;
                             }
 
                             if (mesh.name === 'bushes') {
@@ -225,17 +216,22 @@ export class Mornings extends SceneManager {
                             }
 
                             if (mesh.name === 'god_rays_top' || mesh.name === 'god_rays_bottom') {
-                                mesh.material = this.subjects.godrays.materials[0];
-                                this.subjects.godrays.meshes.push(mesh);
+                                mesh.material = new THREE.MeshBasicMaterial({
+                                    color: this.colors.white,
+                                    transparent: true,
+                                    side: THREE.DoubleSide,
+                                    opacity: .025
+                                });
+                                this.subjects.godRays.push(mesh);
                             }
 
-                            if (mesh.name === 'house_window_structure' || mesh.name === 'house_walls') {
-                                mesh.castShadow = true;
-                            }
+                            // if (mesh.name === 'house_window_structure' || mesh.name === 'house_walls') {
+                            //     mesh.castShadow = true;
+                            // }
 
-                            if (mesh.name === 'house_floor' || mesh.name === 'carpet') {
-                                mesh.receiveShadow = true;
-                            }
+                            // if (mesh.name === 'house_floor' || mesh.name === 'carpet') {
+                            //     mesh.receiveShadow = true;
+                            // }
 
                         });
 
@@ -473,45 +469,49 @@ export class Mornings extends SceneManager {
 
     }
 
-    render() {
+    render(overridePause) {
 
-        this.elapsedBeats = this.bpm * this.clock.getElapsedTime() / 60;
-        this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
+        if (!this.pauseVisuals || overridePause) {
 
-        this.subjects.steam.rotateY(-.05);
+            this.elapsedBeats = this.bpm * this.clock.getElapsedTime() / 60;
+            this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
 
-        this.renderList.indexOf('table') !== -1 && renderMelody({
-            innerPetals: this.subjects.innerPetals,
-            outerPetals: this.subjects.outerPetals,
-            leftPage: this.subjects.leftPage,
-            rightPage: this.subjects.rightPage
-        }, this.melodyAnalyser, {
-            spectrumFunction: this.spectrumFunction,
-            beats: this.elapsedBeats
-        });
+            this.subjects.steam.rotateY(-.05);
 
-        this.renderList.indexOf('house') !== -1 && renderBass(this.subjects.godrays, this.bassAnalyser, {
-            sunlight: this.lights.sunlight
-        });
+            this.renderList.indexOf('table') !== -1 && renderMelody({
+                innerPetals: this.subjects.innerPetals,
+                outerPetals: this.subjects.outerPetals,
+                leftPage: this.subjects.leftPage,
+                rightPage: this.subjects.rightPage
+            }, this.melodyAnalyser, {
+                spectrumFunction: this.spectrumFunction,
+                beats: this.elapsedBeats
+            });
 
-        this.renderList.indexOf('bookshelf') !== -1 && renderRhythm(this.subjects.books, this.rhythmAnalyser, {
-            spectrumFunction: this.spectrumFunction,
-            beats: this.elapsedBeats
-        });
+            this.renderList.indexOf('house') !== -1 && renderBass(this.subjects.godRays, this.bassAnalyser, {
+                sunlight: this.lights.sunlight
+            });
 
-        this.renderList.indexOf('plant') !== -1 && renderHarmony({
-            leaves: this.subjects.spiralPlantLeaves,
-            stickLeaves: this.subjects.stickLeaves,
-            stickLeavesOne: this.subjects.stickLeavesOne,
-            group: this.subjects.spiralPlantGroup,
-            box: this.subjects.spiralPlantBox
-        }, this.harmonyAnalyser, {
-            beats: this.elapsedBeats
-        });
+            this.renderList.indexOf('bookshelf') !== -1 && renderRhythm(this.subjects.books, this.rhythmAnalyser, {
+                spectrumFunction: this.spectrumFunction,
+                beats: this.elapsedBeats
+            });
 
-        renderAtmosphere(this.subjects.stringLights, this.atmosphereAnalyser, { beats: this.elapsedBeats });
+            this.renderList.indexOf('plant') !== -1 && renderHarmony({
+                leaves: this.subjects.spiralPlantLeaves,
+                stickLeaves: this.subjects.stickLeaves,
+                stickLeavesOne: this.subjects.stickLeavesOne,
+                group: this.subjects.spiralPlantGroup,
+                box: this.subjects.spiralPlantBox
+            }, this.harmonyAnalyser, {
+                beats: this.elapsedBeats
+            });
 
-        this.renderer.render(this.scene, this.camera);
+            renderAtmosphere(this.subjects.stringLights, this.atmosphereAnalyser, { beats: this.elapsedBeats });
+
+            this.renderer.render(this.scene, this.camera);
+
+        }
     }
 
 }

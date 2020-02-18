@@ -39,9 +39,6 @@ export const ToggleButton = (props) => {
 
     const changePlayerState = React.useCallback((newState) => {
 
-        // clear future events for this toggle (necessary to stop a pending start)
-        schedulerRef.current.clear();
-
         const runAnimation = (type, duration) => {
 
             // clear queue
@@ -103,15 +100,12 @@ export const ToggleButton = (props) => {
 
         }
 
+        // clear future events for this toggle (necessary to stop a pending start)
+        schedulerRef.current.clear();
+
         const initialState = newState === 'active' ? 'pending-start' : 'pending-stop';
 
-        // set local state
-        setPlayerState(initialState);
-
-        // update poly count for the group
-        handleUpdatePlayerOrder(name, initialState);
-
-        // dispatch initial update to music playerRef
+        // dispatch initial update to music player
         dispatch({
             type: 'updatePlayerState',
             payload: {
@@ -119,6 +113,12 @@ export const ToggleButton = (props) => {
                 newState: initialState
             }
         });
+
+        // set local state
+        setPlayerState(initialState);
+
+        // update poly count for the group
+        handleUpdatePlayerOrder(name, initialState);
 
         // calculate time till next loop start
         const quantizedStartSeconds = nextSubdivision(
@@ -165,7 +165,9 @@ export const ToggleButton = (props) => {
 
         createAudioPlayer(audioCtx, pathToAudio, {
             offlineRendering: true,
-            renderLength: audioCtx.sampleRate * parseInt(length) * timeSignature * 60 / bpm
+            renderLength: audioCtx.sampleRate * parseInt(length) * timeSignature * 60 / bpm,
+            fade: true,
+            fadeLength: .025
         }).then((audioPlayer) => {
 
             // create the player

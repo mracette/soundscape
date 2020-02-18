@@ -413,181 +413,186 @@ export class Moonrise extends SceneManager {
         });
     }
 
-    render() {
+    render(overridePause) {
 
-        // this.controls.fpc.update(this.clock.getDelta());
+        if (!this.pauseVisuals || overridePause) {
 
-        /* 
-         * RIPPLES
-         */
+            // this.controls.fpc.update(this.clock.getDelta());
 
-        this.rhythmAnalyser.getFrequencyData().forEach((d, i) => {
-            const damping = 180 * (i / this.rhythmAnalyser.frequencyBinCount);
-            this.subjects.ripples.children[i].material.opacity = (d - damping) / 500;
-        });
+            /* 
+             * RIPPLES
+             */
 
-        /* 
-         * STARS
-         */
+            this.rhythmAnalyser.getFrequencyData().forEach((d, i) => {
+                const damping = 180 * (i / this.rhythmAnalyser.frequencyBinCount);
+                this.subjects.ripples.children[i].material.opacity = (d - damping) / 500;
+            });
 
-        const atmosphereFreqDataLeft = this.atmosphereAnalyser.getFrequencyData('left');
-        const atmosphereFreqDataRight = this.atmosphereAnalyser.getFrequencyData('right');
+            /* 
+             * STARS
+             */
 
-        atmosphereFreqDataLeft.slice(1, 9).forEach((d, i) => {
-            this.subjects.stars.leftGroup.children[i].material.opacity = (d / 125);
-        });
+            const atmosphereFreqDataLeft = this.atmosphereAnalyser.getFrequencyData('left');
+            const atmosphereFreqDataRight = this.atmosphereAnalyser.getFrequencyData('right');
 
-        atmosphereFreqDataRight.slice(1, 9).forEach((d, i) => {
-            this.subjects.stars.rightGroup.children[i].material.opacity = (d / 125);
-        });
+            atmosphereFreqDataLeft.slice(1, 9).forEach((d, i) => {
+                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 125);
+            });
 
-        /* 
-         * TREES
-         */
+            atmosphereFreqDataRight.slice(1, 9).forEach((d, i) => {
+                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 125);
+            });
 
-        // only render when sources are on
-        const harmonyFreqData = this.harmonyAnalyser.getFrequencyData();
-        this.subjects.pineTrees.children.forEach((child, i) => {
-            const freqIndex = Math.floor(i / 8);
-            const rawData = harmonyFreqData.slice([1 + freqIndex])[0];
-            const transformedData = Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.060);
+            /* 
+             * TREES
+             */
 
-            const color = new THREE.Color(this.palette.tropicalGreen);
-            color.lerp(new THREE.Color(this.palette.white), -1.5 + (transformedData));
+            // only render when sources are on
+            const harmonyFreqData = this.harmonyAnalyser.getFrequencyData();
+            this.subjects.pineTrees.children.forEach((child, i) => {
+                const freqIndex = Math.floor(i / 8);
+                const rawData = harmonyFreqData.slice([1 + freqIndex])[0];
+                const transformedData = Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.060);
 
-            child.children[0].material.color.set(color);
-        });
+                const color = new THREE.Color(this.palette.tropicalGreen);
+                color.lerp(new THREE.Color(this.palette.white), -1.5 + (transformedData));
 
-        /* 
-         * MOON
-         */
+                child.children[0].material.color.set(color);
+            });
 
-        // only render when meaningful data is coming through the analyser
-        const avgBassVol = this.bassAnalyser.getFrequencyData().reduce((a, b) => { return a + b; }) / this.bassAnalyser.frequencyBinCount;
+            /* 
+             * MOON
+             */
 
-        if (avgBassVol > 0) {
+            // only render when meaningful data is coming through the analyser
+            const avgBassVol = this.bassAnalyser.getFrequencyData().reduce((a, b) => { return a + b; }) / this.bassAnalyser.frequencyBinCount;
 
-            const bassFrequencies = this.bassAnalyser.getFrequencyData().slice(0, this.subjects.moonBeams.userData.numMoonRings);
-            const radius = this.subjects.moon.userData.radius * 0.5;
+            if (avgBassVol > 0) {
 
-            // set just the first moon beam's geometry
-            for (let moonRingIndex = 0; moonRingIndex < this.subjects.moonBeams.userData.numMoonRings; moonRingIndex++) {
-                for (let vertexCount = 0; vertexCount < this.subjects.moonBeams.userData.numVertices; vertexCount++) {
-                    const adj = (1 / (0.15 * (moonRingIndex + 1)));
-                    const rot = bassFrequencies[moonRingIndex] / 255;
-                    const moonRing = this.subjects.moonBeams.children[0].children[moonRingIndex];
+                const bassFrequencies = this.bassAnalyser.getFrequencyData().slice(0, this.subjects.moonBeams.userData.numMoonRings);
+                const radius = this.subjects.moon.userData.radius * 0.5;
 
-                    // TAKE 1: Really pretty shapes
-                    // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/2));
-                    // moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot));
+                // set just the first moon beam's geometry
+                for (let moonRingIndex = 0; moonRingIndex < this.subjects.moonBeams.userData.numMoonRings; moonRingIndex++) {
+                    for (let vertexCount = 0; vertexCount < this.subjects.moonBeams.userData.numVertices; vertexCount++) {
+                        const adj = (1 / (0.15 * (moonRingIndex + 1)));
+                        const rot = bassFrequencies[moonRingIndex] / 255;
+                        const moonRing = this.subjects.moonBeams.children[0].children[moonRingIndex];
 
-                    // TAKE 2: Outward fanning
-                    moonRing.geometry.attributes.position.array[vertexCount * 3] = (radius - 7 + (avgBassVol / 3) * adj) * Math.cos(2 * Math.PI * (vertexCount / this.bassAnalyser.fftSize + rot / 12));
-                    moonRing.geometry.attributes.position.array[vertexCount * 3 + 1] = (radius - 7 + (avgBassVol / 3) * adj) * Math.sin(2 * Math.PI * (vertexCount / this.bassAnalyser.fftSize + rot / 6));
+                        // TAKE 1: Really pretty shapes
+                        // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/2));
+                        // moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot));
 
-                    // TAKE 3: Beam like (original)
-                    // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/6));
-                    // moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/2));
+                        // TAKE 2: Outward fanning
+                        moonRing.geometry.attributes.position.array[vertexCount * 3] = (radius - 7 + (avgBassVol / 3) * adj) * Math.cos(2 * Math.PI * (vertexCount / this.bassAnalyser.fftSize + rot / 12));
+                        moonRing.geometry.attributes.position.array[vertexCount * 3 + 1] = (radius - 7 + (avgBassVol / 3) * adj) * Math.sin(2 * Math.PI * (vertexCount / this.bassAnalyser.fftSize + rot / 6));
 
-                    moonRing.geometry.attributes.position.array[vertexCount * 3 + 2] = -81;
+                        // TAKE 3: Beam like (original)
+                        // moonRing.geometry.attributes.position.array[vertexCount*3] = (radius - 7 + (avgBassVol/3) * adj) * Math.cos(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/6));
+                        // moonRing.geometry.attributes.position.array[vertexCount*3+1] = (radius - 7 + (avgBassVol/3) * adj) * Math.sin(2 * Math.PI * (vertexCount/this.bassAnalyser.fftSize + rot/2));
+
+                        moonRing.geometry.attributes.position.array[vertexCount * 3 + 2] = -81;
+                    }
                 }
-            }
 
-            // copy the single moon beam's geometry into the other position arrays and update
-            this.subjects.moonBeams.children.forEach((moonBeam) => {
-                moonBeam.children.forEach((moonRing, moonRingIndex) => {
-                    moonRing.geometry.attributes.position.array = this.subjects.moonBeams.children[0].children[moonRingIndex].geometry.attributes.position.array;
-                    moonRing.geometry.setDrawRange(0, moonRing.geometry.attributes.position.count);
-                    moonRing.geometry.attributes.position.needsUpdate = true;
+                // copy the single moon beam's geometry into the other position arrays and update
+                this.subjects.moonBeams.children.forEach((moonBeam) => {
+                    moonBeam.children.forEach((moonRing, moonRingIndex) => {
+                        moonRing.geometry.attributes.position.array = this.subjects.moonBeams.children[0].children[moonRingIndex].geometry.attributes.position.array;
+                        moonRing.geometry.setDrawRange(0, moonRing.geometry.attributes.position.count);
+                        moonRing.geometry.attributes.position.needsUpdate = true;
+                    })
                 })
+            } else {
+
+            }
+
+
+            /* 
+             * LILIES
+             */
+
+            const melodyFreqData = this.melodyAnalyser.getFrequencyData();//.slice(5);
+
+            let melodyVolume = 0;
+            let melodyCount = 0;
+
+            for (let i = 0; i < melodyFreqData.length; i++) {
+                melodyVolume += melodyFreqData[i];
+                melodyCount++;
+            }
+
+            const avgMelodyVolume = melodyVolume / melodyCount;
+
+            this.subjects.lilies.children.forEach((lily) => {
+
+                const data = lily.userData;
+                const increment = 0.11;
+
+                if (!data.ignited && avgMelodyVolume !== 0 & avgMelodyVolume * Math.random() > 55) {
+                    data.ignited = true;
+                }
+                if (data.ignited && data.phase === 'waxing' && data.measure < 1) {
+                    data.measure = Math.min(2, data.measure + increment * 70);
+                } else if (data.ignited && data.phase === 'waxing' && data.measure > 1) {
+                    data.phase = 'waning';
+                    data.measure += -1 * increment;
+                } else if (data.ignited && data.phase === 'waning' && data.measure < 0) {
+                    data.ignited = false;
+                    data.phase = 'waxing';
+                } else if (data.ignited && data.phase === 'waning') {
+                    data.measure += -1 * increment;
+                }
+
+                const petalGroup = lily.getObjectByName('petalGroup');
+                petalGroup.children[0].children[0].material.color = lily.userData.petalColor.clone().lerp(new THREE.Color(0xFFFFFF), Math.max(0, (avgMelodyVolume / 105) * data.measure));
+
             })
-        } else {
+
+            this.prevMelodyVolume = avgMelodyVolume;
+
+            /* 
+             * FIREFLIES
+             */
+
+            const flyAmount = .3;
+            const flightNoise = 0.01;
+            this.subjects.fireflies.children.forEach((fly) => {
+                if (fly.userData.state === 'off' && Math.random() < 0.0005) {
+                    fly.userData.state = 'lighting';
+                    fly.userData.flightPath = new THREE.Vector3(-0.5 + Math.random(), -0.5 + Math.random(), -0.5 + Math.random());
+                }
+
+                if (fly.userData.state === 'lighting') {
+                    fly.userData.cycle += 0.1;
+                    if (fly.userData.cycle >= 1) {
+                        fly.userData.state = 'dimming';
+                    }
+                }
+
+                if (fly.userData.state === 'dimming') {
+                    fly.userData.cycle -= 0.025;
+                    if (fly.userData.cycle <= 0) {
+                        fly.userData.state = 'off';
+                    }
+                }
+
+                if (fly.userData.state === 'dimming' || fly.userData.state === 'lighting') {
+                    const newX = Math.min(Math.max(fly.position.x + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, -70), 140);
+                    const newY = Math.min(Math.max(fly.position.y + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, 5), 20);
+                    const newZ = Math.min(Math.max(fly.position.z + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, -20), 70);
+                    fly.position.set(newX, newY, newZ);
+                }
+
+                fly.children[0].intensity = fly.userData.cycle / 2;
+                fly.children[1].material.opacity = fly.userData.cycle;
+
+            })
+
+            this.renderer.render(this.scene, this.camera);
 
         }
 
-
-        /* 
-         * LILIES
-         */
-
-        const melodyFreqData = this.melodyAnalyser.getFrequencyData();//.slice(5);
-
-        let melodyVolume = 0;
-        let melodyCount = 0;
-
-        for (let i = 0; i < melodyFreqData.length; i++) {
-            melodyVolume += melodyFreqData[i];
-            melodyCount++;
-        }
-
-        const avgMelodyVolume = melodyVolume / melodyCount;
-
-        this.subjects.lilies.children.forEach((lily) => {
-
-            const data = lily.userData;
-            const increment = 0.11;
-
-            if (!data.ignited && avgMelodyVolume !== 0 & avgMelodyVolume * Math.random() > 55) {
-                data.ignited = true;
-            }
-            if (data.ignited && data.phase === 'waxing' && data.measure < 1) {
-                data.measure = Math.min(2, data.measure + increment * 70);
-            } else if (data.ignited && data.phase === 'waxing' && data.measure > 1) {
-                data.phase = 'waning';
-                data.measure += -1 * increment;
-            } else if (data.ignited && data.phase === 'waning' && data.measure < 0) {
-                data.ignited = false;
-                data.phase = 'waxing';
-            } else if (data.ignited && data.phase === 'waning') {
-                data.measure += -1 * increment;
-            }
-
-            const petalGroup = lily.getObjectByName('petalGroup');
-            petalGroup.children[0].children[0].material.color = lily.userData.petalColor.clone().lerp(new THREE.Color(0xFFFFFF), Math.max(0, (avgMelodyVolume / 105) * data.measure));
-
-        })
-
-        this.prevMelodyVolume = avgMelodyVolume;
-
-        /* 
-         * FIREFLIES
-         */
-
-        const flyAmount = .3;
-        const flightNoise = 0.01;
-        this.subjects.fireflies.children.forEach((fly) => {
-            if (fly.userData.state === 'off' && Math.random() < 0.0005) {
-                fly.userData.state = 'lighting';
-                fly.userData.flightPath = new THREE.Vector3(-0.5 + Math.random(), -0.5 + Math.random(), -0.5 + Math.random());
-            }
-
-            if (fly.userData.state === 'lighting') {
-                fly.userData.cycle += 0.1;
-                if (fly.userData.cycle >= 1) {
-                    fly.userData.state = 'dimming';
-                }
-            }
-
-            if (fly.userData.state === 'dimming') {
-                fly.userData.cycle -= 0.025;
-                if (fly.userData.cycle <= 0) {
-                    fly.userData.state = 'off';
-                }
-            }
-
-            if (fly.userData.state === 'dimming' || fly.userData.state === 'lighting') {
-                const newX = Math.min(Math.max(fly.position.x + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, -70), 140);
-                const newY = Math.min(Math.max(fly.position.y + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, 5), 20);
-                const newZ = Math.min(Math.max(fly.position.z + (fly.userData.flightPath.x + (flightNoise / -2 + flightNoise)) * flyAmount, -20), 70);
-                fly.position.set(newX, newY, newZ);
-            }
-
-            fly.children[0].intensity = fly.userData.cycle / 2;
-            fly.children[1].material.opacity = fly.userData.cycle;
-
-        })
-
-        this.renderer.render(this.scene, this.camera);
     }
 
 }

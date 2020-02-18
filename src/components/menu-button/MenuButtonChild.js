@@ -7,7 +7,6 @@ import { Icon } from '../../components/Icon';
 
 // contexts
 import { ThemeContext } from '../../contexts/contexts';
-import { LayoutContext } from '../../contexts/contexts';
 
 // hooks
 import { useOutsideClick } from '../../hooks/useOutsideClick';
@@ -28,13 +27,16 @@ export const MenuButtonChild = (props) => {
 
     useOutsideClick(nodeRef,
         React.useCallback(() => { if (!isOpen) setIsOpen(true) }, [isOpen]),
-        React.useCallback(() => { if (isOpen) setIsOpen(false) }, [isOpen])
+        React.useCallback(() => { if (isOpen) setIsOpen(false) }, [isOpen]),
+        ['menu-button-child']
     );
 
-    return (
-        <div ref={nodeRef}>
+    return (<>
+
+        <div id='test' ref={nodeRef}>
 
             <button
+                id='menu-button-child'
                 className='menu-button-child'
                 style={{
                     background: isOpen ? openButtonColor : buttonColor,
@@ -72,7 +74,6 @@ export const MenuButtonChild = (props) => {
                     borderTop: 0,
                 }}
             />
-
             <MenuButtonContentWrapper
                 content={props.content}
                 config={props.config}
@@ -82,6 +83,8 @@ export const MenuButtonChild = (props) => {
             />
 
         </div>
+
+    </>
     )
 
 }

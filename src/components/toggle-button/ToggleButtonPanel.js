@@ -16,10 +16,9 @@ export const ToggleButtonPanel = (props) => {
 
     const {
         panelMuteButton,
-        panelRandomizeButton,
     } = React.useContext(ThemeContext);
 
-    const { dispatch, randomize, mute } = React.useContext(MusicPlayerContext);
+    const { dispatch, mute, backgroundMode } = React.useContext(MusicPlayerContext);
 
     const { groups } = React.useContext(SongContext);
 
@@ -36,7 +35,14 @@ export const ToggleButtonPanel = (props) => {
             className='flex-panel'
         >
 
-            <h2>Voices</h2>
+            <div className='flex-row' style={{ justifyContent: 'space-between' }}>
+                <div className='flex-col'>
+                    <h2>Voices</h2>
+                </div>
+                <div className='flex-col'>
+                    {backgroundMode && <p className='hot-green'>background mode: on</p>}
+                </div>
+            </div>
 
             <div className='flex-row'>
 

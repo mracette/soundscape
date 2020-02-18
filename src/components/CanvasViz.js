@@ -21,11 +21,19 @@ export const CanvasViz = () => {
 
     const { spectrumFunction } = React.useContext(ThemeContext);
     const { id, groups, bpm } = React.useContext(SongContext);
-    const { analysers, dispatch, isLoading } = React.useContext(MusicPlayerContext);
+    const { analysers, dispatch, isLoading, pauseVisuals } = React.useContext(MusicPlayerContext);
     const { flags } = React.useContext(TestingContext);
 
     const canvasRef = React.useRef(null);
     const sceneRef = React.useRef(null);
+
+    React.useEffect(() => {
+        console.log(pauseVisuals);
+        if (sceneRef.current) {
+            sceneRef.current.pauseVisuals = pauseVisuals;
+            console.log(sceneRef.current);
+        }
+    }, [pauseVisuals])
 
     React.useEffect(() => {
         if (groups.length === analysers.length) {

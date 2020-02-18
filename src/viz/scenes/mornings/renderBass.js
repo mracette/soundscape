@@ -21,7 +21,8 @@ export const renderBass = (subjects, analyser, extras) => {
 
     const brightnessFactor = d3.easeQuadInOut(volume * VOL_COEF);
 
-    subjects.materials[0].opacity = MIN_OPACITY + brightnessFactor * (MAX_OPACITY - MIN_OPACITY);
+    subjects[0].material.opacity = MIN_OPACITY + brightnessFactor * (MAX_OPACITY - MIN_OPACITY);
+    subjects[1].material.opacity = MIN_OPACITY + brightnessFactor * (MAX_OPACITY - MIN_OPACITY);
     extras.sunlight.intensity = MIN_SUN + brightnessFactor * (MAX_SUN - MIN_SUN);
 
 }

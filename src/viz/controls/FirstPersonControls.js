@@ -9,8 +9,8 @@ export default class FirstPersonControls {
 
 		this.enabled = true;
 
-		this.movementSpeed = 20;
-		this.lookSpeed = 20;
+		this.movementSpeed = 200;
+		this.lookSpeed = 200;
 
 		this.lookVertical = true;
 		this.autoForward = false;
@@ -109,7 +109,6 @@ export default class FirstPersonControls {
 		targetPosition.z = position.z + 100 * Math.sin(this.phi) * Math.sin(this.theta);
 
 		this.object.lookAt(targetPosition);
-		console.log(this.object.position, targetPosition)
 
 	}
 

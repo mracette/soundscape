@@ -13,8 +13,19 @@ export const EffectsPanel = (props) => {
     const hpRef = React.useRef();
     const lpRef = React.useRef();
     const ambienceRef = React.useRef();
+    const effectsBackgroundModeEventRef = React.useRef();
 
-    const { dispatch, randomizeEffects } = React.useContext(MusicPlayerContext);
+    const {
+        audioCtx,
+        dispatch,
+        randomizeEffects,
+        scheduler,
+        highpass,
+        lowpass,
+        ambience
+    } = React.useContext(MusicPlayerContext);
+
+    const [effectsBackgroundMode, setEffectsBackgroundMode] = React.useState(false);
 
     const handleReset = React.useCallback(() => {
 
@@ -34,6 +45,64 @@ export const EffectsPanel = (props) => {
 
     React.useEffect(() => handleReset(), [handleReset]);
 
+    /* Background Mode Callback */
+    const triggerRandomEffects = React.useCallback(() => {
+
+        let h, l, a;
+
+        if (highpass < 25) {
+            h = Math.random() * 2;
+        } else if (highpass > 75) {
+            h = Math.random() * -2;
+        } else {
+            h = -1 + Math.random() * 2;
+        }
+
+        if (lowpass < 25) {
+            l = Math.random() * 2;
+        } else if (lowpass > 75) {
+            l = Math.random() * -2;
+        } else {
+            l = -1 + Math.random() * 2;
+        }
+
+        if (ambience < 25) {
+            a = Math.random() * 2;
+        } else if (ambience > 75) {
+            a = Math.random() * -2;
+        } else {
+            a = -1 + Math.random() * 2;
+        }
+
+        dispatch({ type: 'setHighpass', payload: { value: highpass + h } });
+        dispatch({ type: 'setLowpass', payload: { value: lowpass + l } });
+        dispatch({ type: 'setAmbience', payload: { value: ambience + a } });
+
+        hpRef.current.value = highpass + h;
+        lpRef.current.value = lowpass + h;
+        ambienceRef.current.value = ambience + h;
+
+    }, [dispatch, highpass, lowpass, ambience]);
+
+    /* Background Mode Hook */
+    React.useEffect(() => {
+        // init event
+        if (effectsBackgroundMode && !scheduler.repeatingQueue.find((e) => e.id === effectsBackgroundModeEventRef.current)) {
+            effectsBackgroundModeEventRef.current = scheduler.scheduleRepeating(
+                audioCtx.currentTime + .5,
+                1,
+                triggerRandomEffects
+            )
+            // update event
+        } else if (effectsBackgroundMode) {
+            scheduler.updateCallback(effectsBackgroundModeEventRef.current, triggerRandomEffects);
+            // stop event
+        } else if (!effectsBackgroundMode) {
+            scheduler.cancel(effectsBackgroundModeEventRef.current);
+        }
+
+    }, [effectsBackgroundMode, scheduler, audioCtx, triggerRandomEffects])
+
     return (
 
         <div id='effects-panel' className='flex-panel'>
@@ -42,29 +111,60 @@ export const EffectsPanel = (props) => {
             <p>Automatically varies the music. Ideal for extended listening.</p>
 
             <div className='flex-row slider-row'>
-                <div className='flex-col'>
-                    <span><h3>Voices:</h3></span>
-                </div>
                 <div className='flex-col' style={{ justifyContent: 'flex-end' }}>
                     <label className="switch">
-                        <input type="checkbox" />
+                        <input type="checkbox" onInput={(e) => {
+                            const checked = e.target.checked;
+                            dispatch({ type: 'setBackgroundMode', payload: checked })
+                        }} />
                         <span className="slider round"></span>
                     </label>
+                </div>
+                <div className='flex-col'>
+                    <span><h3 style={{ marginLeft: '1rem' }}>Voices</h3></span>
                 </div>
             </div>
             <div className='flex-row slider-row'>
                 <div className='flex-col'>
-                    <span><h3>Effects:cd</h3></span>
-                </div>
-                <div className='flex-col'>
                     <label className="switch">
-                        <input type="checkbox" />
+                        <input type="checkbox" onInput={(e) => {
+                            const checked = e.target.checked;
+                            setEffectsBackgroundMode(checked);
+                        }} />
                         <span className="slider round"></span>
                     </label>
                 </div>
+                <div className='flex-col'>
+                    <span><h3 style={{ marginLeft: '1rem' }}>Effects</h3></span>
+                </div>
             </div>
 
-            <h2 id='effects-controls-row'>Effects Controls</h2>
+            <h2 id='effects-controls-row'>Visuals</h2>
+            <p>Change visual settings to improve performance and save power.</p>
+
+            <div className='flex-row slider-row'>
+                <div className='flex-col' style={{ justifyContent: 'flex-end' }}>
+                    <label className="switch">
+                        <input type="checkbox" onInput={(e) => {
+                            const checked = e.target.checked;
+                            dispatch({ type: 'setPauseVisuals', payload: checked })
+                        }} />
+                        <span className="slider round"></span>
+                    </label>
+                </div>
+                <div className='flex-col'>
+                    <span><h3 style={{ marginLeft: '1rem' }}>Pause Visuals</h3></span>
+                </div>
+            </div>
+
+            <div id='effects-controls-row' className='flex-row' style={{ justifyContent: 'space-between' }}>
+                <div className='flex-col'>
+                    <h2>Effects</h2>
+                </div>
+                <div className='flex-col'>
+                    {effectsBackgroundMode && <p className='hot-green'>background mode: on</p>}
+                </div>
+            </div>
 
             <div className='flex-row'>
                 <button
@@ -74,13 +174,6 @@ export const EffectsPanel = (props) => {
                 >
                     Reset
                     </button>
-
-                {/* <button
-                    id='effects-panel-randomize'
-                    onClick={() => dispatch({ type: 'setRandomizeEffects', payload: !randomizeEffects })}
-                >
-                    Background Mode
-                    </button> */}
 
                 <button
                     className='button-white grouped-buttons'
@@ -130,7 +223,7 @@ export const EffectsPanel = (props) => {
             </div>
             <div className='flex-row'>
                 <input type="range" min="1" max="100" disabled={randomizeEffects} id="spaciousness-slider" ref={ambienceRef}
-                    onChange={(e) => {
+                    onInput={(e) => {
                         dispatch({ type: 'setAmbience', payload: { value: parseInt(e.target.value) } });
                     }}
                 ></input>

@@ -34,7 +34,7 @@ export const MusicPlayer = (props) => {
         timeSignature,
         bpm,
         ambientTrack,
-        ambientTrackLength
+        ambientTrackLength,
     } = React.useContext(SongContext);
 
     const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
@@ -42,23 +42,27 @@ export const MusicPlayer = (props) => {
         scheduler: props.scheduler,
         premaster: props.premaster,
         isLoading: true,
-        randomize: false,
+        backgroundMode: false,
         randomizeEffects: false,
+        pauseVisuals: false,
         mute: false,
         players: [],
         analysers: [],
-        groups: [],
         highpass: 1,
         lowpass: 100,
         ambience: 1
     });
 
-    const randomizeEventRef = React.useRef(null);
+    const backgroundModeEventRef = React.useRef(null);
 
     /* Randomize Callback */
     const handleRandomize = React.useCallback(() => {
-        state.players.forEach((p) => Math.random() >= 0.5 && p.buttonRef.click());
-    }, [state.players])
+        state.players.forEach((p) => {
+            if (Math.random() >= 0.5) {
+                p.buttonRef.click();
+            }
+        });
+    }, [state.players]);
 
     /* Reset Callback */
     const handleReset = React.useCallback(() => {
@@ -84,10 +88,6 @@ export const MusicPlayer = (props) => {
         }
 
     }, [state.players]);
-
-    // React.useEffect(() => {
-    //     console.log(state.players.map(p => p.buttonRef));
-    // }, [state.players])
 
     /* Ambient Track Hook */
     React.useEffect(() => {
@@ -118,30 +118,31 @@ export const MusicPlayer = (props) => {
         }
 
         return () => {
+            state.scheduler.clear();
             state.audioCtx.suspend();
             flags.playAmbientTrack && ambientPlayer.stop();
         };
 
-    }, [bpm, id, flags.playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature, state.audioCtx, state.premaster, state.sampleRate]);
+    }, [bpm, id, flags.playAmbientTrack, ambientTrack, ambientTrackLength, timeSignature, state.scheduler, state.audioCtx, state.premaster, state.sampleRate]);
 
-    /* Randomize Hook */
+    /* Background Mode Hook */
     React.useEffect(() => {
         // init event
-        if (state.randomize && !state.scheduler.repeatingQueue.find((e) => e.id === randomizeEventRef.current)) {
-            randomizeEventRef.current = state.scheduler.scheduleRepeating(
+        if (state.backgroundMode && !state.scheduler.repeatingQueue.find((e) => e.id === backgroundModeEventRef.current)) {
+            backgroundModeEventRef.current = state.scheduler.scheduleRepeating(
                 state.audioCtx.currentTime + (60 / bpm),
                 32 * 60 / bpm,
                 triggerRandomVoice
             )
             // update event
-        } else if (state.randomize) {
-            state.scheduler.updateCallback(randomizeEventRef.current, triggerRandomVoice);
+        } else if (state.backgroundMode) {
+            state.scheduler.updateCallback(backgroundModeEventRef.current, triggerRandomVoice);
             // stop event
-        } else if (!state.randomize) {
-            state.scheduler.cancel(randomizeEventRef.current);
+        } else if (!state.backgroundMode) {
+            state.scheduler.cancel(backgroundModeEventRef.current);
         }
 
-    }, [bpm, state.randomize, triggerRandomVoice, state.audioCtx, state.scheduler]);
+    }, [bpm, state.backgroundMode, triggerRandomVoice, state.audioCtx, state.scheduler]);
 
     /* Mute Hook */
     React.useEffect(() => {

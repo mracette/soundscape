@@ -2,6 +2,8 @@ export class Scheduler {
 
     constructor(audioCtx) {
 
+        console.log('new sched');
+
         // bind audio context
         this.audioCtx = audioCtx
 
@@ -18,11 +20,11 @@ export class Scheduler {
 
     scheduleOnce(time, name, callback) {
 
-        // grab the current value of the event id
-        const newEventId = this.eventId;
-
         // increment for the next event
         this.eventId++;
+
+        // grab the current value of the event id
+        const newEventId = this.eventId;
 
         // create a dummy buffer to trigger the event
         const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
@@ -62,11 +64,11 @@ export class Scheduler {
 
     scheduleRepeating(time, frequency, callback) {
 
-        // grab the current value of the event id
-        const newEventId = this.eventId;
-
         // increment for the next event
         this.eventId++;
+
+        // grab the current value of the event id
+        const newEventId = this.eventId;
 
         // create a dummy buffer to trigger the event
         const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);

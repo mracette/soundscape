@@ -5,27 +5,21 @@ export const MusicPlayerReducer = (state, action) => {
                 ...state,
                 isLoading: action.payload
             }
-        case 'startRandomize':
+        case 'startBackgroundMode':
             return {
                 ...state,
-                randomize: true
+                backgroundMode: true
             };
-        case 'stopRandomize':
+        case 'stopBackgroundMode':
             return {
                 ...state,
-                randomize: false
+                backgroundMode: false
             };
-        case 'setRandomizeEffects':
+        case 'setBackgroundMode':
             return {
                 ...state,
-                randomizeEffects: action.payload
+                backgroundMode: action.payload
             };
-        case 'resetPlayers':
-            state.players.forEach((p) => {
-                if (p.instance.state.playerState === 'active') { p.instance.stopPlayer(false, true); }
-                if (p.instance.state.playerState === 'pending-start') { p.instance.pendingStop(false, true); }
-            })
-            return state;
         case 'addPlayer':
             if (state.players.find(p => p.id === action.payload.player.id)) {
                 return state;
@@ -86,14 +80,10 @@ export const MusicPlayerReducer = (state, action) => {
                 ambience: state.ambience + action.payload.value
             };
         case 'setHighpass':
-            // if (state.effectValues.highpass === action.payload.value) {
-            //     return state;
-            // } else {
             return {
                 ...state,
                 highpass: action.payload.value
             }
-        // }
         case 'setLowpass':
             return {
                 ...state,
@@ -103,6 +93,11 @@ export const MusicPlayerReducer = (state, action) => {
             return {
                 ...state,
                 ambience: action.payload.value
+            }
+        case 'setPauseVisuals':
+            return {
+                ...state,
+                pauseVisuals: action.payload
             }
         default: return state;
     }
