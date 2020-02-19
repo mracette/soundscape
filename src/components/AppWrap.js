@@ -50,6 +50,9 @@ export const AppWrap = () => {
   const [vw, setvw] = React.useState(viewportWidth / 100);
   const [vh, setvh] = React.useState(viewportHeight / 100);
 
+  // check for mobile
+  const [isMobile, setIsMobile] = React.useState(viewportWidth <= 760);
+
   const resumeAudio = () => { audioCtx.state === 'suspended' && audioCtx.resume(); }
 
   React.useEffect(() => {
@@ -67,6 +70,9 @@ export const AppWrap = () => {
       // can be accessed in the theme context as vw * n or wh * n
       setvw(viewportWidth / 100);
       setvh(viewportHeight / 100);
+      setIsMobile(viewportWidth <= 760);
+
+      console.log(viewportWidth)
 
     }
 
@@ -95,7 +101,7 @@ export const AppWrap = () => {
 
   return (
     <TestingContext.Provider value={{ flags }}>
-      <LayoutContext.Provider value={{ vw, vh }}>
+      <LayoutContext.Provider value={{ vw, vh, isMobile }}>
         <AppRouter
           appConfig={appConfig}
           spectrumFunctions={spectrumFunctions}

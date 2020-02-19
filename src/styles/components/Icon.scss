@@ -48,6 +48,11 @@
     stroke: white;
 }
 
+.icon-moon {
+    fill: $moon-yellow;
+    stroke: $moon-yellow;
+}
+
 .rotate45 {
     transform: rotateZ(45deg);
 }
