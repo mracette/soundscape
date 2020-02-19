@@ -217,7 +217,7 @@ export const MusicPlayer = (props) => {
                     content:
                         React.useMemo(() => <HomePanel />, [])
                 }, {
-                    autoOpen: true,
+                    autoOpen: false,
                     id: 'toggles',
                     iconName: 'icon-music',
                     content:
@@ -234,6 +234,7 @@ export const MusicPlayer = (props) => {
                         dispatch={dispatch}
                     />, [state.impulseResponse, dispatch])
                 }, {
+                    autoOpen: true,
                     id: 'song-info',
                     iconName: 'icon-info',
                     content:

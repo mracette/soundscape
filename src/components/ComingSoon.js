@@ -13,7 +13,7 @@ export const ComingSoon = () => {
 
     return (
         <div id='coming-soon' className='fullscreen off-black'>
-            <div id='landing-page-header'>
+            <div className='landing-page-header'>
                 <div className='flex-row'><h1 id='landing-page-soundscape-title'>Soundscape</h1></div>
                 <div id='coming-soon-panel' className='flex-col'>
                     <div className='flex-row'><span>Additional content is coming to Soundscape.</span></div>

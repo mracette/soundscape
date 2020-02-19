@@ -13,8 +13,21 @@
     left: 0; 
 }
 
+.sharing-link {
+    padding: vh(1);
+}
+
+.sharing-link img {
+    width: vh(6);
+    height: vh(6);
+}
+
 .icon-row {
     width: 100%;
+}
+
+.info-panel-icon-row {
+    margin: 2vh 0 2vh 0;
 }
 
 .coming-soon-icon-row {

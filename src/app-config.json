@@ -170,11 +170,11 @@
         "info": {
             "credits": [
                 {
-                    "type": "Music, Art & Development: ",
+                    "type": "Music, Art & Development:",
                     "content": "Mark Racette"
                 },
                 {
-                    "type": "Technology: ",
+                    "type": "Technology:",
                     "content": "React, Three.js, Anime.js, ColorCurves"
                 }
             ]
@@ -354,15 +354,19 @@
         "info": {
             "credits": [
                 {
-                    "type": "Music, Art & Development: ",
+                    "type": "Music, Art & Development:",
                     "content": "Mark Racette"
                 },
                 {
-                    "type": "Additional 3D Assets: ",
-                    "content": "Poly by Google"
+                    "type": "Additional 3D Assets:",
+                    "content": "Don Carson, Tiff Eidmann, Poly by Google"
                 },
                 {
-                    "type": "Technology: ",
+                    "type": "Paintings:",
+                    "content": "Kurt Vonnegut, Vincent Van Gogh"
+                },
+                {
+                    "type": "Technology:",
                     "content": "React, Three.js, Anime.js, ColorCurves"
                 }
             ]
