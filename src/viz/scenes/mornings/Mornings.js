@@ -39,7 +39,7 @@ export class Mornings extends SceneManager {
             );
         `;
 
-        this.DPRMax = 1.25;
+        this.DPRMax = 2.25;
         this.spectrumFunction = extras.spectrumFunction;
 
         this.colors = {

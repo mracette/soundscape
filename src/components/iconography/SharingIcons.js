@@ -1,16 +1,13 @@
 // libs
 import React from 'react';
 
-// components
-import { Icon } from '../../components/Icon';
-
 // styles
 import '../../styles/components/Icon.scss';
 
 export const SharingIcons = (props) => {
 
     const url = "https://soundscape.world";
-    const tagline = "Soundscape: a relaxing and beautiful music visualizer for the web";
+    const tagline = "Soundscape: build songs from scratch and watch as your creations light up the world.";
 
     return (
         < div id='sharing-icons' className={'icon-row flex-row ' + props.divClassList} >
