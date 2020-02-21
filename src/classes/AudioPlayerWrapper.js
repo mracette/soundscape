@@ -28,14 +28,20 @@ export class AudioPlayerWrapper {
     }
 
     start(time) {
-        this.bufferSource.start(time);
-        this.bufferSource.onended = () => this.reload();
+        try {
+            this.bufferSource.start(time);
+            this.bufferSource.onended = () => this.reload();
+        } catch (err) {
+            this.reload();
+            console.log(err);
+        }
     }
 
     stop(time) {
         try {
             this.bufferSource.stop(time);
         } catch (err) {
+            this.reload();
             console.log(err)
         }
     }
