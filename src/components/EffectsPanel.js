@@ -108,7 +108,7 @@ export const EffectsPanel = (props) => {
         <div id='effects-panel' className='flex-panel'>
 
             <h2>Background Mode</h2>
-            <p>Automatically varies the music. Ideal for extended listening.</p>
+            <p>Automatically varies the music over time. Ideal for extended listening.</p>
 
             <div className='flex-row slider-row'>
                 <div className='flex-col' style={{ justifyContent: 'flex-end' }}>
@@ -124,7 +124,7 @@ export const EffectsPanel = (props) => {
                     <span><h3 style={{ marginLeft: '1rem' }}>Voices</h3></span>
                 </div>
             </div>
-            <div className='flex-row slider-row'>
+            {/* <div className='flex-row slider-row'>
                 <div className='flex-col'>
                     <label className="switch">
                         <input type="checkbox" onInput={(e) => {
@@ -137,7 +137,7 @@ export const EffectsPanel = (props) => {
                 <div className='flex-col'>
                     <span><h3 style={{ marginLeft: '1rem' }}>Effects</h3></span>
                 </div>
-            </div>
+            </div> */}
 
             <h2 id='effects-controls-row'>Visuals</h2>
             <p>Change visual settings to improve performance and save power.</p>
