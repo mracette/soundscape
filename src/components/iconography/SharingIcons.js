@@ -7,7 +7,7 @@ import '../../styles/components/Icon.scss';
 export const SharingIcons = (props) => {
 
     const url = "https://soundscape.world";
-    const tagline = "Soundscape: build songs from scratch and watch as your creations light up the world.";
+    const tagline = "Soundscape: the immersive music visualizer that lets you build your own beats.";
 
     return (
         < div id='sharing-icons' className={'icon-row flex-row ' + props.divClassList} >
