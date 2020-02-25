@@ -31,10 +31,9 @@ export class AudioPlayerWrapper {
     start(time) {
         try {
             this.bufferSource.start(time);
-            this.bufferSource.onended = () => this.reload();
         } catch (err) {
             this.reload();
-            console.log(err);
+            this.bufferSource.start(time);
         }
     }
 
@@ -42,7 +41,6 @@ export class AudioPlayerWrapper {
         try {
             this.bufferSource.stop(time);
         } catch (err) {
-            this.reload();
             console.log(err)
         }
     }
