@@ -76,10 +76,12 @@ export class Scheduler {
         dummySource.buffer = dummyBuffer;
 
         // assign callback
-        dummySource.onended = callback;
-
-        // create timer
-        const timer = window.setInterval(() => { this.updateQueue() }, (frequency / 4) * 1000);
+        dummySource.onended = () => {
+            callback();
+            // add the next occurence
+            const {time, frequency} = this.getEvent(newEventId);
+            this.scheduleRepeating(time + frequency, frequency, callback)
+        };
 
         dummySource.start(
             // ensure the start time is positive
@@ -92,7 +94,6 @@ export class Scheduler {
             time,
             type: 'repeating',
             frequency,
-            timer,
             source: dummySource
         });
 
@@ -146,7 +147,6 @@ export class Scheduler {
                     time: event.time + event.frequency,
                     type: 'repeating',
                     frequency: event.frequency,
-                    timer: event.timer,
                     source: dummySource
                 });
 
@@ -181,7 +181,6 @@ export class Scheduler {
         });
 
         this.repeatingQueue.forEach((event) => {
-            window.clearInterval(event.timer);
             event.source.onended = null;
             event.source.stop();
         })
