@@ -440,7 +440,7 @@ export class Mornings extends SceneManager {
 
             this.subjects.steam.rotateY(-.05);
 
-            renderMelody({
+            (this.playerState.melody || overridePause) && renderMelody({
                 innerPetals: this.subjects.innerPetals,
                 outerPetals: this.subjects.outerPetals,
                 leftPage: this.subjects.leftPage,
@@ -450,16 +450,16 @@ export class Mornings extends SceneManager {
                 beats: this.elapsedBeats
             });
 
-            renderBass(this.subjects.godRays, this.bassAnalyser, {
+            (this.playerState.bass || overridePause) && renderBass(this.subjects.godRays, this.bassAnalyser, {
                 sunlight: this.lights.sunlight
             });
 
-            renderRhythm(this.subjects.books, this.rhythmAnalyser, {
+            (this.playerState.rhythm || overridePause) && renderRhythm(this.subjects.books, this.rhythmAnalyser, {
                 spectrumFunction: this.spectrumFunction,
                 beats: this.elapsedBeats
             });
 
-            renderHarmony({
+            (this.playerState.harmony || overridePause) && renderHarmony({
                 leaves: this.subjects.spiralPlantLeaves,
                 stickLeaves: this.subjects.stickLeaves,
                 stickLeavesOne: this.subjects.stickLeavesOne,
@@ -469,10 +469,13 @@ export class Mornings extends SceneManager {
                 beats: this.elapsedBeats
             });
 
-            renderAtmosphere(
-                this.subjects.stringLights, 
-                this.atmosphereAnalyser, 
-                { beats: this.elapsedBeats }
+            (this.playerState.extras || overridePause) && renderAtmosphere(
+                this.subjects.stringLights,
+                this.atmosphereAnalyser,
+                {
+                    beats: this.elapsedBeats,
+                    enabled: this.playerState.extras
+                }
             );
 
             this.renderer.render(this.scene, this.camera);

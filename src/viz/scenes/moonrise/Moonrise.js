@@ -423,47 +423,55 @@ export class Moonrise extends SceneManager {
              * RIPPLES
              */
 
-            this.rhythmAnalyser.getFrequencyData()
-            this.rhythmAnalyser.fftData.forEach((d, i) => {
-                const damping = 180 * (i / this.rhythmAnalyser.frequencyBinCount);
-                this.subjects.ripples.children[i].material.opacity = (d - damping) / 500;
-            });
+            if (this.playerState.rhythm) {
+                this.rhythmAnalyser.getFrequencyData()
+                this.rhythmAnalyser.fftData.forEach((d, i) => {
+                    const damping = 180 * (i / this.rhythmAnalyser.frequencyBinCount);
+                    this.subjects.ripples.children[i].material.opacity = (d - damping) / 500;
+                });
+            }
 
             /* 
              * STARS
              */
 
-            this.atmosphereAnalyser.getFrequencyData('left');
-            this.atmosphereAnalyser.getFrequencyData('right');
+            if (this.playerState.atmosphere) {
+                this.atmosphereAnalyser.getFrequencyData('left');
+                this.atmosphereAnalyser.getFrequencyData('right');
 
-            this.atmosphereAnalyser.fftData['left'].slice(1, 9).forEach((d, i) => {
-                this.subjects.stars.leftGroup.children[i].material.opacity = (d / 125);
-            });
+                this.atmosphereAnalyser.fftData['left'].slice(1, 9).forEach((d, i) => {
+                    this.subjects.stars.leftGroup.children[i].material.opacity = (d / 125);
+                });
 
-            this.atmosphereAnalyser.fftData['right'].slice(1, 9).forEach((d, i) => {
-                this.subjects.stars.rightGroup.children[i].material.opacity = (d / 125);
-            });
+                this.atmosphereAnalyser.fftData['right'].slice(1, 9).forEach((d, i) => {
+                    this.subjects.stars.rightGroup.children[i].material.opacity = (d / 125);
+                });
+            }
 
             /* 
              * TREES
              */
 
-            this.harmonyAnalyser.getFrequencyData();
+            if (this.playerState.harmony) {
+                this.harmonyAnalyser.getFrequencyData();
 
-            this.subjects.pineTrees.children.forEach((child, i) => {
-                const freqIndex = Math.floor(i / 8);
-                const rawData = this.harmonyAnalyser.fftData.slice([1 + freqIndex])[0];
-                const transformedData = Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.060);
+                this.subjects.pineTrees.children.forEach((child, i) => {
+                    const freqIndex = Math.floor(i / 8);
+                    const rawData = this.harmonyAnalyser.fftData.slice([1 + freqIndex])[0];
+                    const transformedData = Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.060);
 
-                const color = new THREE.Color(this.palette.tropicalGreen);
-                color.lerp(new THREE.Color(this.palette.white), -1.5 + (transformedData));
+                    const color = new THREE.Color(this.palette.tropicalGreen);
+                    color.lerp(new THREE.Color(this.palette.white), -1.5 + (transformedData));
 
-                child.children[0].material.color.set(color);
-            });
+                    child.children[0].material.color.set(color);
+                });
+            }
 
             /* 
              * MOON
              */
+
+            if (this.playerState.bass) {
 
                 this.bassAnalyser.getFrequencyData();
                 const avgBassVol = this.bassAnalyser.fftData.reduce((a, b) => { return a + b; }) / this.bassAnalyser.frequencyBinCount;
@@ -495,49 +503,55 @@ export class Moonrise extends SceneManager {
                     })
                 });
 
+            }
+
 
             /* 
              * LILIES
              */
 
-            this.melodyAnalyser.getFrequencyData();//.slice(5);
+            if (this.playerState.melody) {
 
-            let melodyVolume = 0;
-            let melodyCount = 0;
+                this.melodyAnalyser.getFrequencyData();//.slice(5);
 
-            for (let i = 0; i < this.melodyAnalyser.fftData.length; i++) {
-                melodyVolume += this.melodyAnalyser.fftData[i];
-                melodyCount++;
+                let melodyVolume = 0;
+                let melodyCount = 0;
+
+                for (let i = 0; i < this.melodyAnalyser.fftData.length; i++) {
+                    melodyVolume += this.melodyAnalyser.fftData[i];
+                    melodyCount++;
+                }
+
+                const avgMelodyVolume = melodyVolume / melodyCount;
+
+                this.subjects.lilies.children.forEach((lily) => {
+
+                    const data = lily.userData;
+                    const increment = 0.11;
+
+                    if (!data.ignited && avgMelodyVolume !== 0 & avgMelodyVolume * Math.random() > 55) {
+                        data.ignited = true;
+                    }
+                    if (data.ignited && data.phase === 'waxing' && data.measure < 1) {
+                        data.measure = Math.min(2, data.measure + increment * 70);
+                    } else if (data.ignited && data.phase === 'waxing' && data.measure > 1) {
+                        data.phase = 'waning';
+                        data.measure += -1 * increment;
+                    } else if (data.ignited && data.phase === 'waning' && data.measure < 0) {
+                        data.ignited = false;
+                        data.phase = 'waxing';
+                    } else if (data.ignited && data.phase === 'waning') {
+                        data.measure += -1 * increment;
+                    }
+
+                    const petalGroup = lily.getObjectByName('petalGroup');
+                    petalGroup.children[0].children[0].material.color = lily.userData.petalColor.clone().lerp(new THREE.Color(0xFFFFFF), Math.max(0, (avgMelodyVolume / 105) * data.measure));
+
+                })
+
+                this.prevMelodyVolume = avgMelodyVolume;
+
             }
-
-            const avgMelodyVolume = melodyVolume / melodyCount;
-
-            this.subjects.lilies.children.forEach((lily) => {
-
-                const data = lily.userData;
-                const increment = 0.11;
-
-                if (!data.ignited && avgMelodyVolume !== 0 & avgMelodyVolume * Math.random() > 55) {
-                    data.ignited = true;
-                }
-                if (data.ignited && data.phase === 'waxing' && data.measure < 1) {
-                    data.measure = Math.min(2, data.measure + increment * 70);
-                } else if (data.ignited && data.phase === 'waxing' && data.measure > 1) {
-                    data.phase = 'waning';
-                    data.measure += -1 * increment;
-                } else if (data.ignited && data.phase === 'waning' && data.measure < 0) {
-                    data.ignited = false;
-                    data.phase = 'waxing';
-                } else if (data.ignited && data.phase === 'waning') {
-                    data.measure += -1 * increment;
-                }
-
-                const petalGroup = lily.getObjectByName('petalGroup');
-                petalGroup.children[0].children[0].material.color = lily.userData.petalColor.clone().lerp(new THREE.Color(0xFFFFFF), Math.max(0, (avgMelodyVolume / 105) * data.measure));
-
-            })
-
-            this.prevMelodyVolume = avgMelodyVolume;
 
             /* 
              * FIREFLIES
@@ -545,7 +559,7 @@ export class Moonrise extends SceneManager {
 
             const flyAmount = .3;
             const flightNoise = 0.01;
-            
+
             this.subjects.fireflies.children.forEach((fly) => {
 
                 if (fly.userData.state === 'off' && Math.random() < 0.0005) {
