@@ -48,11 +48,11 @@ export const FreqBands = () => {
         // clear previous draw
         context.clearRect(0, 0, canvas.height, canvas.height);
 
-        // get time domain data
-        const dataArray = analyserRef.current.getFrequencyData();
+        // refresh fft data
+        analyserRef.current.getFrequencyData();
 
         // map time domain data to canvas draw actions
-        dataArray.forEach((d, i) => {
+        analyserRef.current.fftData.forEach((d, i) => {
 
             const vol = (d / 255);
             const cx = canvas.width / 2 + radius * Math.cos((i / analyserRef.current.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));

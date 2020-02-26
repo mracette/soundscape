@@ -8,8 +8,8 @@ const bSin = boundedSin(period, .4, 1);
 
 export const renderMelody = (subjects, analyser, extras) => {
 
-    const data = analyser.getFrequencyData();
-    const vol = (data.reduce((a, b) => (a + b)) / data.length) / 255;
+    analyser.getFrequencyData();
+    const vol = (analyser.fftData.reduce((a, b) => (a + b)) / analyser.fftData.length) / 255;
     const leftColors = subjects.leftPage.geometry.attributes.customColor;
     const rightColors = subjects.rightPage.geometry.attributes.customColor;
 
@@ -20,7 +20,7 @@ export const renderMelody = (subjects, analyser, extras) => {
         const s = bSin(extras.beats - (x / w) * (y / w) * period);
         const c = grey.clone().lerp(
             new THREE.Color(extras.spectrumFunction(1 - (y / w))),
-            data[Math.ceil(y)] / 255
+            analyser.fftData[Math.ceil(y)] / 255
         );
 
         if (y % 4 === 0) {

@@ -88,7 +88,7 @@ export class Mornings extends SceneManager {
                     child.material.dispose();
                     child.material = mat;
                 }
-            }, ['steam', 'van_gogh', 'vonnegut', 'carpet', 'god_rays_top', 'god_rays_bottom']); // freeze static objects
+            }, ['steam', 'van_gogh', 'vonnegut', 'carpet', 'god_rays_top', 'god_rays_bottom']);
             super.animate();
         }).catch((err) => {
             console.log(err);
@@ -98,7 +98,7 @@ export class Mornings extends SceneManager {
 
     applySceneSettings() {
 
-        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.enabled = false;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
         this.renderer.setClearColor(0x000000, 0.0);
 
@@ -134,17 +134,11 @@ export class Mornings extends SceneManager {
     initScene() {
 
         const scene = new THREE.Scene();
-        // scene.background = (this.colors.morningLight.clone()).lerp(new THREE.Color(0x000000), .1);
         return scene;
 
     }
 
     initLights() {
-
-        // const MAPSIZE = 512;
-        // const CAMERASIZE = 20;
-        // const OPP_RATIO = -1 * Math.sin(TILT);
-        // const TILT = (10 / 180) * Math.PI;
 
         const lights = {
             ambient: new THREE.AmbientLight(this.colors.morningLight.clone().lerp(this.colors.white, .65), .35),
@@ -152,26 +146,8 @@ export class Mornings extends SceneManager {
             pointOne: new THREE.PointLight(0xffffff, .1)
         }
 
-        // const sunX = 20;
-        // const sunZ = -100
-        // const sunY = sunZ * OPP_RATIO;
-
-        // lights.sunlight.position.copy(new THREE.Vector3(sunX, sunY, sunZ));
-        // lights.sunlight.target.position.copy(new THREE.Vector3(sunX, 0, 0));
-        // lights.sunlight.castShadow = true;
-        // lights.sunlight.shadow.bias = 0.0001;
-        // lights.sunlight.shadow.mapSize.height = MAPSIZE;
-        // lights.sunlight.shadow.mapSize.width = MAPSIZE;
-        // lights.sunlight.shadow.camera.top = CAMERASIZE;
-        // lights.sunlight.shadow.camera.bottom = -1 * CAMERASIZE;
-        // lights.sunlight.shadow.camera.left = -1 * CAMERASIZE;
-        // lights.sunlight.shadow.camera.right = CAMERASIZE;
 
         lights.pointOne.position.set(-36.792147432025736, 12.295984744079584, 19.50565058881036);
-        // lights.pointOne.castShadow = true;
-        // lights.pointOne.shadow.bias = 0.0001;
-        // lights.pointOne.shadow.mapSize.height = MAPSIZE;
-        // lights.pointOne.shadow.mapSize.Width = MAPSIZE;
 
         this.scene.add(lights.ambient);
         this.scene.add(lights.sunlight);
@@ -204,12 +180,6 @@ export class Mornings extends SceneManager {
                                 this.subjects.stringLights.push(mesh.children[1]);
                             }
 
-                            if (mesh.name === 'carpet') {
-                                mesh.material.side = THREE.DoubleSide;
-                                // mesh.material.needsUpdate = true;
-                                // mesh.material.texture.needsUpdate = true;
-                            }
-
                             if (mesh.name === 'bushes') {
                                 mesh.material.emissive = mesh.material.color;
                                 mesh.material.emissiveIntensity = .5;
@@ -224,14 +194,6 @@ export class Mornings extends SceneManager {
                                 });
                                 this.subjects.godRays.push(mesh);
                             }
-
-                            // if (mesh.name === 'house_window_structure' || mesh.name === 'house_walls') {
-                            //     mesh.castShadow = true;
-                            // }
-
-                            // if (mesh.name === 'house_floor' || mesh.name === 'carpet') {
-                            //     mesh.receiveShadow = true;
-                            // }
 
                         });
 
@@ -478,7 +440,7 @@ export class Mornings extends SceneManager {
 
             this.subjects.steam.rotateY(-.05);
 
-            this.renderList.indexOf('table') !== -1 && renderMelody({
+            renderMelody({
                 innerPetals: this.subjects.innerPetals,
                 outerPetals: this.subjects.outerPetals,
                 leftPage: this.subjects.leftPage,
@@ -488,16 +450,16 @@ export class Mornings extends SceneManager {
                 beats: this.elapsedBeats
             });
 
-            this.renderList.indexOf('house') !== -1 && renderBass(this.subjects.godRays, this.bassAnalyser, {
+            renderBass(this.subjects.godRays, this.bassAnalyser, {
                 sunlight: this.lights.sunlight
             });
 
-            this.renderList.indexOf('bookshelf') !== -1 && renderRhythm(this.subjects.books, this.rhythmAnalyser, {
+            renderRhythm(this.subjects.books, this.rhythmAnalyser, {
                 spectrumFunction: this.spectrumFunction,
                 beats: this.elapsedBeats
             });
 
-            this.renderList.indexOf('plant') !== -1 && renderHarmony({
+            renderHarmony({
                 leaves: this.subjects.spiralPlantLeaves,
                 stickLeaves: this.subjects.stickLeaves,
                 stickLeavesOne: this.subjects.stickLeavesOne,
@@ -507,7 +469,11 @@ export class Mornings extends SceneManager {
                 beats: this.elapsedBeats
             });
 
-            renderAtmosphere(this.subjects.stringLights, this.atmosphereAnalyser, { beats: this.elapsedBeats });
+            renderAtmosphere(
+                this.subjects.stringLights, 
+                this.atmosphereAnalyser, 
+                { beats: this.elapsedBeats }
+            );
 
             this.renderer.render(this.scene, this.camera);
 
