@@ -72,8 +72,6 @@ export const AppWrap = () => {
       setvh(viewportHeight / 100);
       setIsMobile(viewportWidth <= 760);
 
-      console.log(viewportWidth)
-
     }
 
     // add resize listeners

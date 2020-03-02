@@ -21,7 +21,7 @@ export const CanvasViz = () => {
 
     const { spectrumFunction } = React.useContext(ThemeContext);
     const { id, groups, bpm } = React.useContext(SongContext);
-    const { analysers, dispatch, isLoading, pauseVisuals } = React.useContext(MusicPlayerContext);
+    const { players, analysers, dispatch, isLoading, pauseVisuals } = React.useContext(MusicPlayerContext);
     const { flags } = React.useContext(TestingContext);
 
     const canvasRef = React.useRef(null);
@@ -30,6 +30,17 @@ export const CanvasViz = () => {
     React.useEffect(() => {
         sceneRef.current && (sceneRef.current.pauseVisuals = pauseVisuals);
     }, [pauseVisuals])
+
+    // tell the scene which players are active so it can render elements selectively
+    React.useEffect(() => {
+        if(sceneRef.current) {
+        const playerState = {}
+        groups.forEach((g) => {
+            playerState[g.name] = players.filter((p) => p.groupName === g.name && p.playerState === 'active').length > 0;
+        });
+        sceneRef.current.playerState = playerState;
+        }
+    }, [groups, players])
 
     React.useEffect(() => {
         if (groups.length === analysers.length) {

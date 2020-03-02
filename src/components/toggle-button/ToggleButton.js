@@ -233,7 +233,7 @@ export const ToggleButton = (props) => {
             className='toggle-button'
             ref={buttonRef}
             onClick={(e) => {
-                e.preventDefault();
+                // e.preventDefault();
                 switch (playerState) {
                     case 'stopped': // start if stopped
                         changePlayerState('active');

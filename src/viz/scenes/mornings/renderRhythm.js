@@ -5,7 +5,7 @@ const bSin = boundedSin(period, .2, .3);
 
 export const renderRhythm = (subjects, analyser, extras) => {
 
-    const freqData = analyser.getFrequencyBuckets();
+    analyser.getFrequencyBuckets();
 
     for (let i = 0; i < subjects.length; i++) {
 
@@ -20,7 +20,7 @@ export const renderRhythm = (subjects, analyser, extras) => {
                 const mod = (i + k) % 4 / 4;
                 const p = bSin(extras.beats + mod * period / 4)
                 const book = row[k];
-                book.material.emissiveIntensity = p * freqData[j] / 255;
+                book.material.emissiveIntensity = p * analyser.bucketData[j] / 255;
 
             }
 

@@ -11,11 +11,11 @@ export const renderBass = (subjects, analyser, extras) => {
 
     let volume = 0;
 
-    const freqData = analyser.getFrequencyData();
+    analyser.getFrequencyData();
 
     for (let i = 0, n = analyser.frequencyBinCount; i < n; i++) {
 
-        volume += freqData[i];
+        volume += analyser.fftData[i];
 
     }
 

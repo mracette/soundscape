@@ -17,7 +17,6 @@ export class Analyser {
             smoothingTimeConstant: 0.8,
             numBuckets: 10,
             split: false,
-            aWeighted: false,
             xEasing: undefined,
             yEasing: undefined,
             binMethod: 'center'
@@ -67,7 +66,6 @@ export class Analyser {
 
         this.createAudioNodes();
         this.createDataStructure();
-        this.aWeighted && this.createAWeights();
 
     }
 
@@ -136,38 +134,14 @@ export class Analyser {
 
     }
 
-    createAWeights() {
-
-        const a = (f) => {
-            var f2 = f * f;
-            return 1.2588966 * 148840000 * f2 * f2 /
-                ((f2 + 424.36) * Math.sqrt((f2 + 11599.29) * (f2 + 544496.41)) * (f2 + 148840000));
-        };
-
-        // get the center point of each frequency bin
-        const bins = [];
-        const binSize = this.nyquist / this.frequencyBinCount;
-
-        for (let i = 0; i < this.frequencyBinCount; i++) {
-            bins[i] = (i + 0.5) * binSize;
-        }
-
-        this.aWeights = bins.map(f => a(f));
-
-    }
-
     getFrequencyData(channel) {
 
         if (channel === 'left' || channel === 'right') {
             this.analyser[channel].getByteFrequencyData(this.fftData[channel]); // refresh in place
             this.yEasing && this.fftData[channel].forEach((d, i, a) => a[i] = 255 * this.yEasing(d / 255)); // map in place
-            this.aWeights && this.fftData[channel].forEach((d, i, a) => a[i] = this.aWeights[i] * d); // map in place
-            return this.fftData[channel];
         } else {
             this.analyser.getByteFrequencyData(this.fftData); // refresh in place
             this.yEasing && this.fftData.forEach((d, i, a) => a[i] = 255 * this.yEasing(d / 255)); // map in place
-            this.aWeighted && this.fftData.forEach((d, i, a) => a[i] = this.aWeights[i] * d); // map in place
-            return this.fftData;
         }
 
     }
@@ -190,7 +164,7 @@ export class Analyser {
 
     getFrequencyBuckets(channel) {
 
-        const data = this.getFrequencyData(channel);
+        this.getFrequencyData(channel);
 
         // reset buckets
         this.bucketData.forEach((d, i, a) => {
@@ -203,14 +177,12 @@ export class Analyser {
                 Math.floor(this.xEasing(i / (this.binMax - this.binMin + 1)) * this.numBuckets) :
                 Math.floor((i / (this.binMax - this.binMin + 1)) * this.numBuckets);
 
-            this.bucketData[n] += data[i];
+            this.bucketData[n] += this.fftData[i];
             this.bucketCounts[n] += 1;
 
         }
 
         this.bucketData.forEach((d, i, a) => a[i] = d / this.bucketCounts[i]);
-
-        return this.bucketData;
 
     }
 

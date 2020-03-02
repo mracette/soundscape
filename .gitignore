@@ -7,6 +7,7 @@
 
 # testing
 /coverage
+/profiling
 
 # production
 /build
@@ -22,6 +23,9 @@
 .env.development.local
 .env.test.local
 .env.production.local
+
+# vscode
+/.vscode
 
 npm-debug.log*
 yarn-debug.log*

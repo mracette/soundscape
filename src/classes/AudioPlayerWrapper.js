@@ -6,6 +6,7 @@ export class AudioPlayerWrapper {
         // bind
         this.context = context;
         this.bufferSource = bufferSource;
+        this.buffer = this.bufferSource.buffer;
 
         // defaults
         const defaults = {
@@ -28,8 +29,12 @@ export class AudioPlayerWrapper {
     }
 
     start(time) {
-        this.bufferSource.start(time);
-        this.bufferSource.onended = () => this.reload();
+        try {
+            this.bufferSource.start(time);
+        } catch (err) {
+            this.reload();
+            this.bufferSource.start(time);
+        }
     }
 
     stop(time) {
@@ -41,12 +46,16 @@ export class AudioPlayerWrapper {
     }
 
     reload() {
+        // disconnect buffer source to allow garbage collection
+        this.disconnect();
+
         const newSource = this.context.createBufferSource();
-        newSource.buffer = this.bufferSource.buffer;
+        newSource.buffer = this.buffer;
         newSource.loop = this.loop;
         newSource.loopStart = 0;
-        newSource.loopEnd = newSource.buffer.duration;
+        newSource.loopEnd = this.buffer.duration;
         newSource.connect(this.destination);
+        
         this.bufferSource = newSource;
     }
 
