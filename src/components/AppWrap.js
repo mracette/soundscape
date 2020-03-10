@@ -16,6 +16,15 @@ import { LayoutContext } from '../contexts/contexts';
 import { TestingContext } from '../contexts/contexts';
 
 const morningsPalette = new ColorPalette('{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.125,"y":-0.081},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.142,"angleOffset":5.781,"radius":0.5}', '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":0.5,"y":0.5},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.424,"angleOffset":0.628,"radius":0.25}', '{"start":0,"end":1}');// load the app config flat file
+const morningsPaletteDiscrete = [];
+const moonrisePaletteDiscrete = [];
+
+// instead of querying the full palettes, use a discrete, in-memory versions to save compute
+for (let i = 0; i <= 255; i++) {
+  morningsPaletteDiscrete.push(morningsPalette.rgbValueAt(i / 255));
+  moonrisePaletteDiscrete.push(new d3Color.color(d3Chromatic.interpolateViridis(i / 255)).brighter(1.5));
+}
+
 const appConfig = require('../app-config.json');
 
 // global behavior flags for testing
@@ -27,8 +36,8 @@ const flags = {
 
 // define spectrum functions here since they don't do well in json
 const spectrumFunctions = {
-  'moonrise': (n) => new d3Color.color(d3Chromatic.interpolateViridis(n)).brighter(1.5),
-  'mornings': (n) => morningsPalette.rgbValueAt(n)
+  'moonrise': (n) => moonrisePaletteDiscrete[Math.round(n * 255)],
+  'mornings': (n) => morningsPaletteDiscrete[Math.round(n * 255)]
 };
 
 // globals
