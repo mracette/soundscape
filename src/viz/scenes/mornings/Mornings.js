@@ -4,12 +4,12 @@ import { SceneManager } from '../../SceneManager';
 import FirstPersonControls from '../../controls/FirstPersonControls';
 
 // models
-import houseModel from '../../models/mornings/house.glb';
-import tableModel from '../../models/mornings/table.glb';
-import flowerModel from '../../models/mornings/flowers.glb';
-import spiralPlantModel from '../../models/mornings/spiral_plant.glb';
-import bookcaseModel from '../../models/mornings/bookcase.glb';
-import paintingsModel from '../../models/mornings/paintings.glb';
+import houseModel from '../../models/mornings/glb/house.glb';
+import tableModel from '../../models/mornings/glb/table.glb';
+import flowerModel from '../../models/mornings/glb/flowers.glb';
+import spiralPlantModel from '../../models/mornings/glb/spiral_plant.glb';
+import bookcaseModel from '../../models/mornings/glb/bookcase.glb';
+import paintingsModel from '../../models/mornings/glb/paintings.glb';
 
 // rendering
 import { renderBass } from './renderBass';
@@ -41,6 +41,7 @@ export class Mornings extends SceneManager {
 
         this.DPRMax = 2.25;
         this.spectrumFunction = extras.spectrumFunction;
+        this.songId = 'mornings';
 
         this.colors = {
             morningLight: new THREE.Color(0xF0A9B3),

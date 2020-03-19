@@ -24,6 +24,10 @@
 .env.test.local
 .env.production.local
 
+# models
+/src/viz/models/moonrise/*
+/src/viz/models/mornings/*
+
 # vscode
 /.vscode
 

@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import * as THREE from 'three';
 import Stats from 'stats.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
@@ -25,7 +23,6 @@ export class SceneManager {
         };
 
         this.pauseVisuals = false;
-        this.currentFrame;
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
         this.onWindowResize = this.onWindowResize.bind(this);
@@ -133,6 +130,7 @@ export class SceneManager {
                 let f = frustrum || 50;
                 camera = new THREE.OrthographicCamera(-f, f, f / aspect, -f / aspect, nearPlane, farPlane);
                 break;
+            default: break;
         }
 
         camera.aspect = aspect;
@@ -179,7 +177,7 @@ export class SceneManager {
 
         const helpers = {
             stats: stats,
-            gltfLoader: new GLTFLoader()
+            gltfLoader: new GLTFLoader(),
         }
 
         return helpers;
@@ -202,4 +200,42 @@ export class SceneManager {
         this.renderer.setSize(newWidth, newHeight);
         this.render(true);
     }
+
+    loadModel(options = {}) {
+
+        const { name, format, index } = options;
+
+        let ext;
+
+        if (format === 'glb') {
+            ext = '.glb';
+        } else {
+            ext = '.gltf';
+        }
+
+        return new Promise((resolve, reject) => {
+
+            let url;
+
+            if (process.env.REACT_APP_ASSET_LOCATION === 'local') {
+
+                url = index[format];
+
+            } else if (process.env.REACT_APP_ASSET_LOCATION === 's3') {
+
+                url = `https://soundscape-public.s3.us-east-2.amazonaws.com/app/models/${this.songId}/${format}/${name}${ext}`;
+
+            }
+
+            this.helpers.gltfLoader.load(
+                url,
+                (model) => resolve(model),
+                null,
+                (err) => reject(err)
+            );
+
+        });
+
+    }
+
 };

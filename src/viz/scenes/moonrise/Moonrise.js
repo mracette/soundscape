@@ -4,12 +4,10 @@ import * as d3Chromatic from 'd3-scale-chromatic';
 import { linToLog } from '../../../utils/mathUtils';
 import { regularPolygon } from 'crco-utils';
 
-
 import { SceneManager } from '../../SceneManager';
 import { StarQuandrants } from '../../subjects/StarQuandrants';
-import lilyModel from '../../models/moonrise/lily.gltf';
-import landscapeModel from '../../models/moonrise/landscape.gltf';
-import pineTreeModel from '../../models/moonrise/pine-tree.gltf';
+
+import { lily, pineTree, landscape } from '../../models/assetIndex';
 
 export class Moonrise extends SceneManager {
 
@@ -17,6 +15,7 @@ export class Moonrise extends SceneManager {
 
         super(canvas);
 
+        this.songId = 'moonrise';
         this.DPRMax = 2.5;
 
         this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
@@ -39,7 +38,6 @@ export class Moonrise extends SceneManager {
         this.currentMelodyVolume = 0;
         this.lilyColors = [this.palette.dustyViolet, this.palette.pansyPurple, this.palette.funGreen, this.palette.hibiscus, this.palette.yellow]
 
-        // TODO: parameterize
         super.init().then(() => {
             window.addEventListener('resize', () => {
                 this.onWindowResize(window.innerWidth, window.innerHeight)
@@ -136,12 +134,12 @@ export class Moonrise extends SceneManager {
                 this.scene.add(fireFlyGroup);
 
                 // add some rocks
-                this.helpers.gltfLoader.load(landscapeModel, (model) => {
+                this.loadModel({ name: 'landscape', index: landscape, format: process.env.REACT_APP_ASSET_FORMAT }).then((model) => {
                     this.subjects.rocks = model.scene.children.find((e) => e.name = 'rockGroup');
                     this.subjects.rocks.children.forEach((rock) => { rock.material.color.setRGB(0.06, 0.06, 0.06) });
                     this.scene.add(this.subjects.rocks);
-                }, undefined, (err) => {
-                    if (err) { reject(err) }
+                }).catch((err) => {
+                    reject(err);
                 })
 
                 resolve();
@@ -215,7 +213,10 @@ export class Moonrise extends SceneManager {
     initLakeTrees() {
         return new Promise((resolve, reject) => {
             // load gltf tree models
-            this.helpers.gltfLoader.load(pineTreeModel, (model) => {
+            this.loadModel({ name: 'pine-tree', index: pineTree, format: process.env.REACT_APP_ASSET_FORMAT }).then((model) => {
+
+                console.log(model);
+
                 const basePineTree = model.scenes[0].children[0];
 
                 // generate simple tree formation
@@ -255,9 +256,10 @@ export class Moonrise extends SceneManager {
                 this.subjects.pineTrees = pineTreeGroup;
                 this.scene.add(pineTreeGroup);
                 resolve();
-            }, undefined, (err) => {
+
+            }).catch((err) => {
                 reject(err);
-            });
+            })
         });
     }
 
@@ -324,17 +326,16 @@ export class Moonrise extends SceneManager {
 
     initLakeLilies() {
         return new Promise((resolve, reject) => {
+            this.loadModel({ name: 'lily', index: lily, format: process.env.REACT_APP_ASSET_FORMAT }).then((model) => {
 
-            this.helpers.gltfLoader.load(lilyModel, (gltf) => {
-
-                const model = gltf.scene.children[1];
+                const lily = model.scene.children.find((c) => c.name === 'Group');
 
                 // breakdown
-                const lowerPetal = model.children[0].clone();
-                const upperPetal = model.children[1].clone();
-                const sphere = model.children[2].clone();
+                const lowerPetal = lily.children[0].clone();
+                const upperPetal = lily.children[1].clone();
+                const sphere = lily.children[2].clone();
                 sphere.name = 'sphere';
-                const lilyPad = model.children[3].clone();
+                const lilyPad = lily.children[3].clone();
                 lilyPad.name = 'lilyPad';
 
                 // initialize base lily
@@ -407,7 +408,7 @@ export class Moonrise extends SceneManager {
                 this.scene.add(lilyGroup);
 
                 resolve();
-            }, undefined, (err) => {
+            }).catch((err) => {
                 reject(err);
             });
         });
