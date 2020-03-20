@@ -4,6 +4,7 @@ import React from 'react';
 // scenes
 import { Moonrise } from '../viz/scenes/moonrise/Moonrise';
 import { Mornings } from '../viz/scenes/mornings/Mornings';
+import { Swamp } from '../viz/scenes/swamp/Swamp';
 
 // components
 import { LoadingScreen } from '../components/LoadingScreen';
@@ -33,12 +34,12 @@ export const CanvasViz = () => {
 
     // tell the scene which players are active so it can render elements selectively
     React.useEffect(() => {
-        if(sceneRef.current) {
-        const playerState = {}
-        groups.forEach((g) => {
-            playerState[g.name] = players.filter((p) => p.groupName === g.name && p.playerState === 'active').length > 0;
-        });
-        sceneRef.current.playerState = playerState;
+        if (sceneRef.current) {
+            const playerState = {}
+            groups.forEach((g) => {
+                playerState[g.name] = players.filter((p) => p.groupName === g.name && p.playerState === 'active').length > 0;
+            });
+            sceneRef.current.playerState = playerState;
         }
     }, [groups, players])
 
@@ -72,6 +73,17 @@ export const CanvasViz = () => {
                         sceneRef.current = newScene
                     } else {
                         dispatch({ type: 'setIsLoading', payload: false });
+                    }
+                    break;
+                case 'swamp':
+                    if (flags.showVisuals) {
+                        newScene = new Swamp(
+                            canvasRef.current,
+                            null,
+                            () => dispatch({ type: 'setIsLoading', payload: false }), {
+                        }
+                        )
+                        sceneRef.current = newScene;
                     }
                     break;
                 default:

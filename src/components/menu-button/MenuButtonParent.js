@@ -78,7 +78,7 @@ export const MenuButtonParent = (props) => {
                     // button behavior
                     index={index + 1}
                     parentIsOpen={isOpen}
-                    autoOpen={child.autoOpen}
+                    // autoOpen={child.autoOpen}
 
                     // button appearance
                     iconName={child.iconName}

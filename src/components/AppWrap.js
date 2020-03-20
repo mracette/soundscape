@@ -37,7 +37,8 @@ const flags = {
 // define spectrum functions here since they don't do well in json
 const spectrumFunctions = {
   'moonrise': (n) => moonrisePaletteDiscrete[Math.round(n * 255)],
-  'mornings': (n) => morningsPaletteDiscrete[Math.round(n * 255)]
+  'mornings': (n) => morningsPaletteDiscrete[Math.round(n * 255)],
+  'swamp': (n) => '#000000'
 };
 
 // globals

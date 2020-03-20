@@ -30,3 +30,11 @@ export const landscape = {
     gltf: require(`./moonrise/gltf/landscape.gltf`),
     draco: require(`./moonrise/draco/landscape-draco.gltf`),
 }
+
+/* 
+    SWAMP
+*/
+
+export const swamp = {
+    glb: require('./swamp/glb/swamp.glb')
+}

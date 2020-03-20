@@ -371,5 +371,30 @@
                 }
             ]
         }
+    },
+    {
+        "id": "swamp",
+        "audio": {
+            "name": "Swamp",
+            "bpm": 95,
+            "timeSignature": 4,
+            "keySignature": "A Minor",
+            "ambientTrack": false,
+            "ambientTrackLength": "8m",
+            "groups": []
+        },
+        "themes": {
+            "buttonColor": "rgba(31, 38, 47, 1)",
+            "openButtonColor": "rgba(255, 255, 255, 0.15)",
+            "contentPanelColor": "rgba(31, 38, 47, 0.65)",
+            "panelResetButton": "rgba(255, 255, 255, 0.3)",
+            "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
+            "panelMuteButton": "rgba(255, 255, 255, 0.3)",
+            "groupSoloButton": "rgba(90.5, 162.2, 240.8, 0.5)",
+            "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
+        },
+        "info": {
+            "credits": []
+        }
     }
 ]
