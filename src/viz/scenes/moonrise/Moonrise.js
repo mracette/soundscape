@@ -7,8 +7,6 @@ import { regularPolygon } from 'crco-utils';
 import { SceneManager } from '../../SceneManager';
 import { StarQuandrants } from '../../subjects/StarQuandrants';
 
-import { lily, pineTree, landscape } from '../../models/assetIndex';
-
 export class Moonrise extends SceneManager {
 
     constructor(canvas, analysers, callback, extras) {
@@ -134,7 +132,7 @@ export class Moonrise extends SceneManager {
                 this.scene.add(fireFlyGroup);
 
                 // add some rocks
-                this.loadModel({ name: 'landscape', index: landscape, format: process.env.REACT_APP_ASSET_FORMAT }).then((model) => {
+                this.loadModel({ name: 'landscape' }).then((model) => {
                     this.subjects.rocks = model.scene.children.find((e) => e.name = 'rockGroup');
                     this.subjects.rocks.children.forEach((rock) => { rock.material.color.setRGB(0.06, 0.06, 0.06) });
                     this.scene.add(this.subjects.rocks);
@@ -213,9 +211,7 @@ export class Moonrise extends SceneManager {
     initLakeTrees() {
         return new Promise((resolve, reject) => {
             // load gltf tree models
-            this.loadModel({ name: 'pine-tree', index: pineTree, format: process.env.REACT_APP_ASSET_FORMAT }).then((model) => {
-
-                console.log(model);
+            this.loadModel({ name: 'pine-tree' }).then((model) => {
 
                 const basePineTree = model.scenes[0].children[0];
 
@@ -326,7 +322,7 @@ export class Moonrise extends SceneManager {
 
     initLakeLilies() {
         return new Promise((resolve, reject) => {
-            this.loadModel({ name: 'lily', index: lily, format: process.env.REACT_APP_ASSET_FORMAT }).then((model) => {
+            this.loadModel({ name: 'lily' }).then((model) => {
 
                 const lily = model.scene.children.find((c) => c.name === 'Group');
 

@@ -3,14 +3,6 @@ import * as THREE from 'three';
 import { SceneManager } from '../../SceneManager';
 import FirstPersonControls from '../../controls/FirstPersonControls';
 
-// models
-import houseModel from '../../models/mornings/glb/house.glb';
-import tableModel from '../../models/mornings/glb/table.glb';
-import flowerModel from '../../models/mornings/glb/flowers.glb';
-import spiralPlantModel from '../../models/mornings/glb/spiral_plant.glb';
-import bookcaseModel from '../../models/mornings/glb/bookcase.glb';
-import paintingsModel from '../../models/mornings/glb/paintings.glb';
-
 // rendering
 import { renderBass } from './renderBass';
 import { renderRhythm } from './renderRhythm';
@@ -53,8 +45,7 @@ export class Mornings extends SceneManager {
             blueGrey: new THREE.Color(0xB0B1B6)
         };
         this.renderList = [
-            'house', 'plant', 'table', 'bookshelf', 'flower'
-            // 'table'
+            'house', 'plant', 'table', 'bookcase', 'flower'
         ];
         this.bpm = extras.bpm;
 
@@ -172,9 +163,9 @@ export class Mornings extends SceneManager {
                     this.subjects.stringLights = [];
                     this.subjects.godRays = []
 
-                    this.helpers.gltfLoader.load(houseModel, (gltf) => {
+                    this.loadModel({ name: 'house' }).then((model) => {
 
-                        gltf.scene.children.forEach((mesh) => {
+                        model.scene.children.forEach((mesh) => {
 
                             if (mesh.type === 'Group' && mesh.name.includes('string_light')) {
                                 mesh.children[1].material.emissive = mesh.children[1].material.color;
@@ -198,11 +189,10 @@ export class Mornings extends SceneManager {
 
                         });
 
-                        this.scene.add(gltf.scene);
+                        this.scene.add(model.scene);
                         resolve();
 
-                    }, null, (err) => reject(err));
-
+                    });
                 })
             );
 
@@ -210,19 +200,19 @@ export class Mornings extends SceneManager {
             modelList.indexOf('house') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
-                    this.helpers.gltfLoader.load(paintingsModel, (gltf) => {
+                    this.loadModel({ name: 'paintings' }).then((model) => {
 
-                        gltf.scene.children.forEach((mesh) => {
+                        model.scene.children.forEach((mesh) => {
 
                             mesh.name === 'vonnegut_self_portrait' && (mesh.material.side = THREE.FrontSide);
                             mesh.name === 'van_gogh' && (mesh.material.side = THREE.BackSide);
 
                         });
 
-                        this.scene.add(gltf.scene);
+                        this.scene.add(model.scene);
                         resolve();
 
-                    }, null, (err) => reject(err));
+                    });
 
                 })
             );
@@ -231,12 +221,12 @@ export class Mornings extends SceneManager {
             modelList.indexOf('table') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
-                    this.helpers.gltfLoader.load(tableModel, (gltf) => {
+                    this.loadModel({ name: 'table' }).then((model) => {
 
                         const pageGeo = new THREE.PlaneBufferGeometry(1.9, 1.8, 64, 64);
                         pageGeo.rotateX(-Math.PI / 2);
 
-                        gltf.scene.children.forEach((mesh) => {
+                        model.scene.children.forEach((mesh) => {
 
                             if (mesh.name.includes('mug_coffee')) {
                                 mesh.material = new THREE.MeshBasicMaterial({
@@ -282,12 +272,12 @@ export class Mornings extends SceneManager {
 
                         });
 
-                        gltf.scene.children.filter(c => c.name.includes('page')).forEach(mesh => gltf.scene.remove(mesh));
-                        this.scene.add(gltf.scene);
+                        model.scene.children.filter(c => c.name.includes('page')).forEach(mesh => model.scene.remove(mesh));
+                        this.scene.add(model.scene);
 
                         resolve();
 
-                    }, null, (err) => reject(err))
+                    });
                 })
             );
 
@@ -301,9 +291,9 @@ export class Mornings extends SceneManager {
                     this.subjects.outerPetals = [];
 
 
-                    this.helpers.gltfLoader.load(flowerModel, (gltf) => {
+                    this.loadModel({ name: 'flowers' }).then((model) => {
 
-                        gltf.scene.children.forEach((mesh) => {
+                        model.scene.children.forEach((mesh) => {
 
                             if (mesh.name.includes('Inner_Petals')) {
                                 mesh.material.emissive = mesh.material.color;
@@ -338,11 +328,11 @@ export class Mornings extends SceneManager {
                         this.subjects.stickLeaves = stickLeaves;
                         this.subjects.stickLeavesOne = stickLeavesOne;
 
-                        this.scene.add(gltf.scene);
+                        this.scene.add(model.scene);
 
                         resolve();
 
-                    }, null, () => reject())
+                    });
                 })
             );
 
@@ -350,11 +340,11 @@ export class Mornings extends SceneManager {
             modelList.indexOf('plant') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
-                    this.helpers.gltfLoader.load(spiralPlantModel, (gltf) => {
+                    this.loadModel({ name: 'spiral_plant' }).then((model) => {
 
                         const leaves = [];
 
-                        gltf.scene.children
+                        model.scene.children
                             .filter(mesh => mesh.name.includes('spiral_plant_leaf'))
                             .forEach(mesh => {
                                 mesh.material = new THREE.MeshLambertMaterial({
@@ -367,26 +357,26 @@ export class Mornings extends SceneManager {
 
                         this.subjects.spiralPlantLeaves = leaves;
 
-                        this.scene.add(gltf.scene);
+                        this.scene.add(model.scene);
 
                         resolve();
 
-                    }, null, (err) => reject(err))
+                    });
                 })
             );
 
             // bookshelf
-            modelList.indexOf('bookshelf') !== -1 && loadPromiseArray.push(
+            modelList.indexOf('bookcase') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
 
                     // 3d array: columns, rows, books in cell
                     this.subjects.books = new Array(4).fill(null).map(d => new Array(5).fill(null).map(d => []));
 
-                    this.helpers.gltfLoader.load(bookcaseModel, (gltf) => {
+                    this.loadModel({ name: 'bookcase' }).then((model) => {
 
                         const pageMat = new THREE.MeshLambertMaterial({ color: 0xE7DACA, side: THREE.DoubleSide });
 
-                        gltf.scene.children.forEach((mesh) => {
+                        model.scene.children.forEach((mesh) => {
 
                             if (mesh.name.includes('book') && !mesh.name.includes('bookcase') && mesh.type === 'Group') {
 
@@ -414,11 +404,11 @@ export class Mornings extends SceneManager {
 
                         });
 
-                        this.scene.add(gltf.scene);
+                        this.scene.add(model.scene);
 
                         resolve();
 
-                    }, null, (err) => reject(err))
+                    });
                 })
             );
 
