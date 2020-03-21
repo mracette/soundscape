@@ -204,8 +204,14 @@ export class Mornings extends SceneManager {
 
                         model.scene.children.forEach((mesh) => {
 
-                            mesh.name === 'vonnegut_self_portrait' && (mesh.material.side = THREE.FrontSide);
-                            mesh.name === 'van_gogh' && (mesh.material.side = THREE.BackSide);
+                            if (mesh.name === 'vonnegut_self_portrait') {
+                                mesh.material.side = THREE.FrontSide;
+                                mesh.material.map.minFilter = THREE.LinearFilter;
+                            };
+                            if (mesh.name === 'van_gogh') {
+                                mesh.material.side = THREE.BackSide;
+                                mesh.material.map.minFilter = THREE.LinearFilter;
+                            };
 
                         });
 
