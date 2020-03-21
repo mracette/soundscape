@@ -204,7 +204,7 @@ export class SceneManager {
     loadModel(options = {}) {
 
         const { name } = options;
-        const format = process.env.REACT_APP_ASSET_FORMAT;
+        const format = process.env.REACT_APP_MODEL_FORMAT;
 
         let ext;
 
@@ -227,8 +227,6 @@ export class SceneManager {
                 url = `https://soundscape-public.s3.us-east-2.amazonaws.com/app/models/${this.songId}/${format}/${name}${ext}`;
 
             }
-
-            console.log(url);
 
             this.helpers.gltfLoader.load(
                 url,

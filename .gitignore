@@ -24,8 +24,9 @@
 .env.test.local
 .env.production.local
 
-# models (only necessary for local development)
+# static assets
 public/models/*
+public/audio/*
 
 # vscode
 /.vscode

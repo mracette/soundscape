@@ -21,6 +21,7 @@ import { MusicPlayerReducer } from '../reducers/MusicPlayerReducer';
 
 // other
 import { createAudioPlayer } from 'crco-utils';
+import { getPathToAudio } from '../utils/audioUtils';
 
 // styles
 import '../styles/components/MusicPlayer.scss';
@@ -129,7 +130,7 @@ export const MusicPlayer = (props) => {
 
         if (flags.playAmbientTrack && ambientTrack) {
 
-            const pathToAudio = require(`../audio/${id}/ambient-track.mp3`);
+            const pathToAudio = getPathToAudio(id, 'ambient-track', 'vbr');
 
             createAudioPlayer(state.audioCtx, pathToAudio, {
                 offlineRendering: true,
