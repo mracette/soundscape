@@ -420,7 +420,7 @@ export class Moonrise extends SceneManager {
              * RIPPLES
              */
 
-            if (this.playerState.rhythm) {
+            if (this.playerState && this.playerState.rhythm) {
                 this.rhythmAnalyser.getFrequencyData()
                 this.rhythmAnalyser.fftData.forEach((d, i) => {
                     const damping = 180 * (i / this.rhythmAnalyser.frequencyBinCount);
@@ -432,7 +432,7 @@ export class Moonrise extends SceneManager {
              * STARS
              */
 
-            if (this.playerState.atmosphere) {
+            if (this.playerState && this.playerState.atmosphere) {
                 this.atmosphereAnalyser.getFrequencyData('left');
                 this.atmosphereAnalyser.getFrequencyData('right');
 
@@ -449,7 +449,7 @@ export class Moonrise extends SceneManager {
              * TREES
              */
 
-            if (this.playerState.harmony) {
+            if (this.playerState && this.playerState.harmony) {
                 this.harmonyAnalyser.getFrequencyData();
 
                 this.subjects.pineTrees.children.forEach((child, i) => {
@@ -468,7 +468,7 @@ export class Moonrise extends SceneManager {
              * MOON
              */
 
-            if (this.playerState.bass) {
+            if (this.playerState && this.playerState.bass) {
 
                 this.bassAnalyser.getFrequencyData();
                 const avgBassVol = this.bassAnalyser.fftData.reduce((a, b) => { return a + b; }) / this.bassAnalyser.frequencyBinCount;
@@ -507,7 +507,7 @@ export class Moonrise extends SceneManager {
              * LILIES
              */
 
-            if (this.playerState.melody) {
+            if (this.playerState && this.playerState.melody) {
 
                 this.melodyAnalyser.getFrequencyData();//.slice(5);
 
