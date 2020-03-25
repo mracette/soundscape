@@ -66,12 +66,19 @@ export const ToggleButton = (props) => {
 
             }
 
-            // run cirle animation
+            // run cirle animation ('complete' prop corrects mid-animation resize)
             anime({
                 targets: animationTargetsRef.current.circleSvg,
                 strokeDashoffset,
                 duration,
-                easing: 'linear'
+                easing: 'linear',
+                complete: () => {
+                    const r = parseFloat(animationTargetsRef.current.circleSvgElement.r.baseVal.value);
+                    console.log(r);
+                    animationTargetsRef.current.circleSvgElement.strokeDasharray = 2 * Math.PI * r;
+                    animationTargetsRef.current.circleSvg.strokeDashoffset =
+                        playerState === 'active' || playerState === 'pending-active' ? 2 * Math.PI * r : 0;
+                }
             });
 
             // run icon animation
@@ -200,6 +207,7 @@ export const ToggleButton = (props) => {
         animationTargetsRef.current = {
             button: buttonRef.current,
             circleSvg: buttonRef.current.children[0],
+            circleSvgElement: buttonRef.current.children[0].children[0],
             iconDiv: buttonRef.current.children[1],
             iconSvg: buttonRef.current.children[1].children[0],
             iconPoly: buttonRef.current.children[1].children[0].children[0],
