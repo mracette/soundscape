@@ -203,7 +203,8 @@ export class SceneManager {
 
     loadModel(options = {}) {
 
-        const { name, format, index } = options;
+        const { name } = options;
+        const format = process.env.REACT_APP_MODEL_FORMAT;
 
         let ext;
 
@@ -219,7 +220,7 @@ export class SceneManager {
 
             if (process.env.REACT_APP_ASSET_LOCATION === 'local') {
 
-                url = index[format];
+                url = `${process.env.PUBLIC_URL}/models/${this.songId}/${name}${ext}`;
 
             } else if (process.env.REACT_APP_ASSET_LOCATION === 's3') {
 

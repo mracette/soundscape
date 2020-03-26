@@ -1,5 +1,21 @@
 import { solveExpEquation } from './mathUtils';
 
+export const getPathToAudio = (id, name, format, debug = false) => {
+
+    const ext = (format === 'wav' ? 'wav' : 'mp3');
+
+    if (process.env.REACT_APP_ASSET_LOCATION === 'local') {
+        const path = `${process.env.PUBLIC_URL}/audio/${format}/${id}/${name}.${ext}`
+        debug && console.log(path);
+        return path
+    } else if (process.env.REACT_APP_ASSET_LOCATION === 's3') {
+        const path = `https://soundscape-public.s3.us-east-2.amazonaws.com/app/audio/${format}/${id}/${name}.${ext}`;
+        debug && console.log(path);
+        return path;
+    }
+
+}
+
 export const nextSubdivision = (audioCtx, bpm, beats) => {
 
     const timeElapsed = audioCtx.currentTime;

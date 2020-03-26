@@ -12,7 +12,7 @@ import { MusicPlayerContext } from '../../contexts/contexts';
 // other
 import { Analyser } from '../../classes/Analyser';
 import { loadArrayBuffer } from 'crco-utils';
-import { initGain, initHighpass, initLowpass, effectParams } from '../../utils/audioUtils';
+import { initGain, initHighpass, initLowpass, effectParams, getPathToAudio } from '../../utils/audioUtils';
 
 // styles
 import '../../styles/components/ToggleButtonGroup.scss';
@@ -42,7 +42,7 @@ export const ToggleButtonGroup = (props) => {
     React.useEffect(() => {
 
         // load impulse response to be used in convolution reverb
-        const pathToAudio = require('../../audio/application/impulse-response.wav');
+        const pathToAudio = getPathToAudio('application', 'impulse-response', 'wav');
 
         loadArrayBuffer(pathToAudio).then((arrayBuffer) => {
             audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {

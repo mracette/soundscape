@@ -10,7 +10,7 @@ import { LayoutContext } from '../../contexts/contexts';
 
 // other
 import { createAudioPlayer } from 'crco-utils';
-import { nextSubdivision } from '../../utils/audioUtils';
+import { nextSubdivision, getPathToAudio } from '../../utils/audioUtils';
 import { AudioPlayerWrapper } from '../../classes/AudioPlayerWrapper';
 import { Scheduler } from '../../classes/Scheduler';
 
@@ -166,7 +166,7 @@ export const ToggleButton = (props) => {
     React.useEffect(() => {
 
         schedulerRef.current = new Scheduler(audioCtx, name);
-        const pathToAudio = require(`../../audio/${id}/${name}.mp3`);
+        const pathToAudio = getPathToAudio(id, name, 'vbr');
 
         createAudioPlayer(audioCtx, pathToAudio, {
             offlineRendering: true,

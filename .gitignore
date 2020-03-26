@@ -24,9 +24,9 @@
 .env.test.local
 .env.production.local
 
-# models
-/src/viz/models/moonrise/*
-/src/viz/models/mornings/*
+# static assets
+public/models/*
+public/audio/*
 
 # vscode
 /.vscode
