@@ -88,12 +88,12 @@ export class Stars {
       colors.push(color.r, color.g, color.b, 1);
     }
 
-    geometry.setAttribute(
+    geometry.addAttribute(
       "position",
       new THREE.Float32BufferAttribute(positions, 3)
     );
-    geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 4));
-    geometry.setAttribute(
+    geometry.addAttribute("color", new THREE.Float32BufferAttribute(colors, 4));
+    geometry.addAttribute(
       "intensity",
       new THREE.Float32BufferAttribute(intensities, 1)
     );

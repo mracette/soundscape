@@ -264,7 +264,7 @@ export class Mornings extends SceneManager {
 
                   const newMesh = mesh.clone();
                   newMesh.geometry = pageGeo.clone();
-                  newMesh.geometry.setAttribute(
+                  newMesh.geometry.addAttribute(
                     "customColor",
                     new THREE.Float32BufferAttribute(colors, 4)
                   );

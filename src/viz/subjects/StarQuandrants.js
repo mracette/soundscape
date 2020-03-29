@@ -52,11 +52,11 @@ export class StarQuandrants {
       colors.push(color.r, color.g, color.b);
     }
 
-    geometry.setAttribute(
+    geometry.addAttribute(
       "position",
       new THREE.Float32BufferAttribute(positions, 3)
     );
-    geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+    geometry.addAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
     geometry.setDrawRange(0, n);
 
     let material = new THREE.PointsMaterial({

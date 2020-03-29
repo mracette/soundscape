@@ -197,7 +197,7 @@ export class Moonrise extends SceneManager {
         for (let j = 0; j < numMoonRings; j++) {
           const moonRingGeo = new THREE.BufferGeometry();
           const positions = new Float32Array(numVertices * 3);
-          moonRingGeo.setAttribute(
+          moonRingGeo.addAttribute(
             "position",
             new THREE.BufferAttribute(positions, 3)
           );
@@ -308,7 +308,7 @@ export class Moonrise extends SceneManager {
 
         const baseGeoGroup = new THREE.Group();
         const baseGeo = new THREE.BufferGeometry();
-        baseGeo.setAttribute(
+        baseGeo.addAttribute(
           "position",
           new THREE.BufferAttribute(polygonPoints, 3)
         );
