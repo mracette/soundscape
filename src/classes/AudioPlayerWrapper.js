@@ -1,62 +1,57 @@
-
 export class AudioPlayerWrapper {
+  constructor(context, bufferSource, options) {
+    // bind
+    this.context = context;
+    this.bufferSource = bufferSource;
+    this.buffer = this.bufferSource.buffer;
 
-    constructor(context, bufferSource, options) {
+    // defaults
+    const defaults = {
+      destination: context.destination,
+      loop: true,
+    };
 
-        // bind
-        this.context = context;
-        this.bufferSource = bufferSource;
-        this.buffer = this.bufferSource.buffer;
+    Object.assign(this, { ...defaults, ...options });
 
-        // defaults
-        const defaults = {
-            destination: context.destination,
-            loop: true
-        }
+    // setup
+    this.bufferSource.loop = this.loop;
+    this.bufferSource.loopStart = 0;
+    this.bufferSource.loopEnd = bufferSource.buffer.duration;
+    this.bufferSource.connect(this.destination);
+  }
 
-        Object.assign(this, { ...defaults, ...options });
+  disconnect() {
+    this.bufferSource.disconnect();
+  }
 
-        // setup
-        this.bufferSource.loop = this.loop;
-        this.bufferSource.loopStart = 0;
-        this.bufferSource.loopEnd = bufferSource.buffer.duration;
-        this.bufferSource.connect(this.destination);
-
+  start(time) {
+    try {
+      this.bufferSource.start(time);
+    } catch (err) {
+      this.reload();
+      this.bufferSource.start(time);
     }
+  }
 
-    disconnect() {
-        this.bufferSource.disconnect();
+  stop(time) {
+    try {
+      this.bufferSource.stop(time);
+    } catch (err) {
+      console.log(err);
     }
+  }
 
-    start(time) {
-        try {
-            this.bufferSource.start(time);
-        } catch (err) {
-            this.reload();
-            this.bufferSource.start(time);
-        }
-    }
+  reload() {
+    // disconnect buffer source to allow garbage collection
+    this.disconnect();
 
-    stop(time) {
-        try {
-            this.bufferSource.stop(time);
-        } catch (err) {
-            console.log(err)
-        }
-    }
+    const newSource = this.context.createBufferSource();
+    newSource.buffer = this.buffer;
+    newSource.loop = this.loop;
+    newSource.loopStart = 0;
+    newSource.loopEnd = this.buffer.duration;
+    newSource.connect(this.destination);
 
-    reload() {
-        // disconnect buffer source to allow garbage collection
-        this.disconnect();
-
-        const newSource = this.context.createBufferSource();
-        newSource.buffer = this.buffer;
-        newSource.loop = this.loop;
-        newSource.loopStart = 0;
-        newSource.loopEnd = this.buffer.duration;
-        newSource.connect(this.destination);
-        
-        this.bufferSource = newSource;
-    }
-
+    this.bufferSource = newSource;
+  }
 }

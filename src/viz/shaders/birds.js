@@ -12,7 +12,7 @@ export const fragmentShaderPos = `
             max( velocity.y, 0.0 ) * delta * 6. ), 62.83 );
         gl_FragColor = vec4( position + velocity * delta * 15. , phase );
     }
-`
+`;
 
 export const fragmentShaderVel = `
     uniform float time;
@@ -118,7 +118,7 @@ export const fragmentShaderVel = `
         }
         gl_FragColor = vec4( velocity, 1.0 );
     }
-`
+`;
 
 export const vertexShader = `
     attribute vec2 reference;
@@ -163,7 +163,7 @@ export const vertexShader = `
         vColor = vec4( birdColor, 1.0 );
         gl_Position = projectionMatrix *  viewMatrix  * vec4( newPosition, 1.0 );
     }
-`
+`;
 
 export const geometryShader = `
     varying vec4 vColor;
@@ -174,4 +174,4 @@ export const geometryShader = `
         float z2 = 0.2 + ( 1000. - z ) / 1000. * vColor.x;
         gl_FragColor = vec4( z2, z2, z2, 1. );
     }
-`
+`;

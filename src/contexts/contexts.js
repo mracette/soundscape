@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export const LandingPageContext = React.createContext();
 export const LayoutContext = React.createContext();

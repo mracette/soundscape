@@ -6,11 +6,11 @@ export const rgbaVertex = `
         vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
         gl_Position = projectionMatrix * mvPosition;
     }
-`
+`;
 
 export const rgbaFragment = `
     varying vec4 vColor;
     void main() {
         gl_FragColor = vColor;
     }
-`
+`;
