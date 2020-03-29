@@ -26,7 +26,7 @@ export class SceneManager {
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
         this.onWindowResize = this.onWindowResize.bind(this);
-        this.showStats = false;
+        this.showStats = true;
 
     }
 
@@ -52,7 +52,7 @@ export class SceneManager {
         window.cancelAnimationFrame(this.currentFrame);
     }
 
-    applyAll(obj, callback, exceptions) {
+    applyAll(obj, callback, exceptions = []) {
         obj.children.forEach((child) => {
             if (child.children.length > 0) {
                 this.applyAll(child, callback, exceptions);
@@ -102,7 +102,6 @@ export class SceneManager {
             autoClear: false,
             canvas: this.canvas,
             antialias: true,
-            //powerPreference: "high-performance",
             outputEncoding: THREE.sRGBEncoding
         });
 

@@ -2,7 +2,6 @@
 import * as THREE from 'three';
 import { SceneManager } from '../../SceneManager';
 import FirstPersonControls from '../../controls/FirstPersonControls';
-import { swamp } from '../../models/assetIndex';
 
 // rendering
 
@@ -37,18 +36,15 @@ export class Swamp extends SceneManager {
 
     applySceneSettings() {
 
-        // this.renderer.shadowMap.enabled = false;
-        // this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+        // https://github.com/mrdoob/three.js/blob/master/examples/webgl_postprocessing_ssao.html
+
+        this.renderer.shadowMap.enabled = false;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
 
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.physicallyCorrectLights = true;
 
         this.renderer.setClearColor(0x000000, 0.0);
-
-        // this.camera.position.set(-36.792147432025736, 12.295984744079584, 19.50565058881036);
-        // this.camera.lookAt(46.69487932551039, 2.382592629313793, -34.638979984916375);
-        // this.camera.fov = this.getNewFov(window.innerWidth / window.innerHeight);
-        // this.camera.updateProjectionMatrix();
 
         this.onWindowResize()
 
@@ -85,7 +81,28 @@ export class Swamp extends SceneManager {
 
     initLights() {
 
-        // return lights;
+        const lights = {
+            ambient: new THREE.AmbientLight(0xffffff, .1)
+        }
+        this.scene.add(lights.ambient);
+        this.lights = lights;
+    }
+
+
+    preProcessSceneObjects(sceneObjects) {
+
+        const lightIntensityAdj = 1 / 10;
+
+        this.applyAll(sceneObjects, (obj) => {
+            if (obj.type.toLowerCase().includes('light')) {
+                obj.intensity *= lightIntensityAdj;
+                obj.castShadow = true;
+                console.log(obj);
+            } else if (obj.type === 'Mesh') {
+                obj.castShadow = true;
+                obj.receiveShadow = true;
+            }
+        })
 
     }
 
@@ -95,12 +112,11 @@ export class Swamp extends SceneManager {
 
             const loadPromiseArray = [];
 
-            // house and god rays
             modelList.indexOf('swamp') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
-
-                    this.loadModel({ name: 'swamp', index: swamp, format: process.env.REACT_APP_ASSET_FORMAT }).then((model) => {
+                    this.loadModel({ name: 'swamp' }).then((model) => {
                         console.log(model);
+                        this.preProcessSceneObjects(model.scene)
                         this.scene.add(model.scene);
                         this.camera = model.cameras[0];
                         resolve();
