@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import anime from "animejs/lib/anime.es.js";
+import { gsap } from "gsap";
 
 // context
 import { MusicPlayerContext } from "../../contexts/contexts";
@@ -19,14 +19,6 @@ import "../../styles/components/Icon.scss";
 import "../../styles/components/ToggleButton.scss";
 
 export const ToggleButton = (props) => {
-  const buttonRef = React.useRef();
-  const animationTargetsRef = React.useRef();
-  const schedulerRef = React.useRef();
-
-  const { vh } = React.useContext(LayoutContext);
-  const { id, timeSignature, bpm } = React.useContext(SongContext);
-  const { audioCtx, dispatch } = React.useContext(MusicPlayerContext);
-  const { flags } = React.useContext(TestingContext);
   const {
     handleUpdatePlayerOrder,
     handleUpdateOverrides,
@@ -36,6 +28,16 @@ export const ToggleButton = (props) => {
     override,
     length,
   } = props;
+
+  const buttonRef = React.useRef();
+  const animationTargetsRef = React.useRef();
+  const animationsRef = React.useRef([]);
+  const schedulerRef = React.useRef();
+
+  const { vh } = React.useContext(LayoutContext);
+  const { id, timeSignature, bpm } = React.useContext(SongContext);
+  const { audioCtx, dispatch } = React.useContext(MusicPlayerContext);
+  const { flags } = React.useContext(TestingContext);
 
   const [playerState, setPlayerState] = React.useState("stopped");
   const [player, setPlayer] = React.useState(null);
@@ -47,13 +49,6 @@ export const ToggleButton = (props) => {
   const changePlayerState = React.useCallback(
     (newState) => {
       const runAnimation = (type, duration) => {
-        // clear queue
-        anime.remove(animationTargetsRef.current.circleSvg);
-        anime.remove(animationTargetsRef.current.iconPoly);
-        anime.remove(animationTargetsRef.current.iconDiv);
-        anime.remove(animationTargetsRef.current.iconDiv.children);
-        anime.remove(animationTargetsRef.current.button);
-
         let strokeDashoffset, points, backgroundColor, rotateZ;
 
         if (type === "start") {
@@ -84,40 +79,50 @@ export const ToggleButton = (props) => {
           ];
         }
 
+        // clear previous
+        animationsRef.current.forEach((animation) => animation.kill());
+        animationsRef.current.length = 0;
+
         // run cirle animation
-        anime({
-          targets: animationTargetsRef.current.circleSvg,
-          strokeDashoffset,
-          duration,
-          easing: "linear",
-        });
+        animationsRef.current.push(
+          gsap.to(animationTargetsRef.current.circleSvg, {
+            strokeDashoffset,
+            duration,
+            ease: "linear",
+          })
+        );
 
         // run icon animation
-        anime({
-          targets: animationTargetsRef.current.iconPoly,
-          points,
-          duration,
-          easing: "linear",
-        });
+        // anime({
+        //   targets: animationTargetsRef.current.iconPoly,
+        //   points,
+        //   duration,
+        //   easing: "linear",
+        // });
 
         // run rotate animation
-        anime({
-          targets: [
-            animationTargetsRef.current.iconDiv,
-            animationTargetsRef.current.iconDiv.children,
-          ],
-          rotateZ,
-          duration,
-          easing: "linear",
-        });
+        animationsRef.current.push(
+          gsap.to(
+            [
+              animationTargetsRef.current.iconDiv,
+              animationTargetsRef.current.iconDiv.children,
+            ],
+            {
+              rotateZ,
+              duration,
+              ease: "linear",
+            }
+          )
+        );
 
         // run button animation
-        anime({
-          targets: animationTargetsRef.current.button,
-          backgroundColor,
-          duration,
-          easing: "easeInCubic",
-        });
+        animationsRef.current.push(
+          gsap.to(animationTargetsRef.current.button, {
+            backgroundColor,
+            duration,
+            easing: "easeInCubic",
+          })
+        );
       };
 
       // clicking a button on pending stop does nothing
@@ -177,10 +182,9 @@ export const ToggleButton = (props) => {
         });
 
         // convert to millis for animations
-        const quantizedStartMillis =
-          (quantizedStartSeconds - audioCtx.currentTime) * 1000;
+        const secondsToNextStart = quantizedStartSeconds - audioCtx.currentTime;
         const animationType = newState === "stopped" ? "stop" : "start";
-        runAnimation(animationType, quantizedStartMillis);
+        runAnimation(animationType, secondsToNextStart);
       }
     },
     [
