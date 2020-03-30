@@ -129,15 +129,17 @@ export class SceneManager {
         );
         break;
       case "orthographic":
-        let f = frustrum || 50;
-        camera = new THREE.OrthographicCamera(
-          -f,
-          f,
-          f / aspect,
-          -f / aspect,
-          nearPlane,
-          farPlane
-        );
+        {
+          let f = frustrum || 50;
+          camera = new THREE.OrthographicCamera(
+            -f,
+            f,
+            f / aspect,
+            -f / aspect,
+            nearPlane,
+            farPlane
+          );
+        }
         break;
       default:
         break;

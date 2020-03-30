@@ -40,16 +40,16 @@ export class Mornings extends SceneManager {
       paleBlue: new THREE.Color(0xdeeeff),
       coffee: new THREE.Color(0x260e00),
       deepBlue: new THREE.Color(0x213058),
-      blueGrey: new THREE.Color(0xb0b1b6)
+      blueGrey: new THREE.Color(0xb0b1b6),
     };
     this.renderList = ["house", "plant", "table", "bookcase", "flower"];
     this.bpm = extras.bpm;
 
-    this.rhythmAnalyser = analysers.find(a => a.id === "rhythm-analyser");
-    this.atmosphereAnalyser = analysers.find(a => a.id === "extras-analyser");
-    this.harmonyAnalyser = analysers.find(a => a.id === "harmony-analyser");
-    this.melodyAnalyser = analysers.find(a => a.id === "melody-analyser");
-    this.bassAnalyser = analysers.find(a => a.id === "bass-analyser");
+    this.rhythmAnalyser = analysers.find((a) => a.id === "rhythm-analyser");
+    this.atmosphereAnalyser = analysers.find((a) => a.id === "extras-analyser");
+    this.harmonyAnalyser = analysers.find((a) => a.id === "harmony-analyser");
+    this.melodyAnalyser = analysers.find((a) => a.id === "melody-analyser");
+    this.bassAnalyser = analysers.find((a) => a.id === "bass-analyser");
 
     this.fovAdjust = true;
     this.fpcControl = false;
@@ -62,7 +62,7 @@ export class Mornings extends SceneManager {
         this.render(this.renderList);
         this.applyAll(
           this.scene,
-          child => {
+          (child) => {
             // freeze objects that don't move
             child.matrixAutoUpdates = false;
             // lambert material is the most efficient
@@ -74,7 +74,7 @@ export class Mornings extends SceneManager {
                 color: child.material.color,
                 side: THREE.DoubleSide,
                 emissive: child.material.emissive,
-                emissiveIntensity: child.material.emissiveIntensity
+                emissiveIntensity: child.material.emissiveIntensity,
               });
               child.material.dispose();
               child.material = mat;
@@ -86,12 +86,12 @@ export class Mornings extends SceneManager {
             "vonnegut",
             "carpet",
             "god_rays_top",
-            "god_rays_bottom"
+            "god_rays_bottom",
           ]
         );
         super.animate();
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -149,7 +149,7 @@ export class Mornings extends SceneManager {
         0.35
       ),
       sunlight: new THREE.DirectionalLight(this.colors.white, 0),
-      pointOne: new THREE.PointLight(0xffffff, 0.1)
+      pointOne: new THREE.PointLight(0xffffff, 0.1),
     };
 
     lights.pointOne.position.set(
@@ -177,8 +177,8 @@ export class Mornings extends SceneManager {
             this.subjects.stringLights = [];
             this.subjects.godRays = [];
 
-            this.loadModel({ name: "house" }).then(model => {
-              model.scene.children.forEach(mesh => {
+            this.loadModel({ name: "house" }).then((model) => {
+              model.scene.children.forEach((mesh) => {
                 if (
                   mesh.type === "Group" &&
                   mesh.name.includes("string_light")
@@ -201,7 +201,7 @@ export class Mornings extends SceneManager {
                     color: this.colors.white,
                     transparent: true,
                     side: THREE.DoubleSide,
-                    opacity: 0.025
+                    opacity: 0.025,
                   });
                   this.subjects.godRays.push(mesh);
                 }
@@ -217,8 +217,8 @@ export class Mornings extends SceneManager {
       modelList.indexOf("house") !== -1 &&
         loadPromiseArray.push(
           new Promise((resolve, reject) => {
-            this.loadModel({ name: "paintings" }).then(model => {
-              model.scene.children.forEach(mesh => {
+            this.loadModel({ name: "paintings" }).then((model) => {
+              model.scene.children.forEach((mesh) => {
                 if (mesh.name === "vonnegut_self_portrait") {
                   mesh.material.side = THREE.FrontSide;
                   mesh.material.map.minFilter = THREE.LinearFilter;
@@ -239,14 +239,14 @@ export class Mornings extends SceneManager {
       modelList.indexOf("table") !== -1 &&
         loadPromiseArray.push(
           new Promise((resolve, reject) => {
-            this.loadModel({ name: "table" }).then(model => {
+            this.loadModel({ name: "table" }).then((model) => {
               const pageGeo = new THREE.PlaneBufferGeometry(1.9, 1.8, 64, 64);
               pageGeo.rotateX(-Math.PI / 2);
 
-              model.scene.children.forEach(mesh => {
+              model.scene.children.forEach((mesh) => {
                 if (mesh.name.includes("mug_coffee")) {
                   mesh.material = new THREE.MeshBasicMaterial({
-                    color: this.colors.coffee
+                    color: this.colors.coffee,
                   });
                 }
 
@@ -273,7 +273,7 @@ export class Mornings extends SceneManager {
                     side: THREE.DoubleSide,
                     vertexShader: rgbaVertex,
                     fragmentShader: rgbaFragment,
-                    vertexColors: THREE.VertexColors
+                    vertexColors: THREE.VertexColors,
                   });
 
                   this.scene.add(newMesh);
@@ -289,15 +289,15 @@ export class Mornings extends SceneManager {
                     color: this.colors.white,
                     transparent: true,
                     side: THREE.DoubleSide,
-                    opacity: 0.025
+                    opacity: 0.025,
                   });
                   this.subjects.steam = mesh;
                 }
               });
 
               model.scene.children
-                .filter(c => c.name.includes("page"))
-                .forEach(mesh => model.scene.remove(mesh));
+                .filter((c) => c.name.includes("page"))
+                .forEach((mesh) => model.scene.remove(mesh));
               this.scene.add(model.scene);
 
               resolve();
@@ -314,8 +314,8 @@ export class Mornings extends SceneManager {
             this.subjects.innerPetals = [];
             this.subjects.outerPetals = [];
 
-            this.loadModel({ name: "flowers" }).then(model => {
-              model.scene.children.forEach(mesh => {
+            this.loadModel({ name: "flowers" }).then((model) => {
+              model.scene.children.forEach((mesh) => {
                 if (mesh.name.includes("Inner_Petals")) {
                   mesh.material.emissive = mesh.material.color;
                   mesh.material.emissiveIntensity = 0;
@@ -332,14 +332,14 @@ export class Mornings extends SceneManager {
                   mesh.material = new THREE.MeshLambertMaterial({
                     color: this.colors.plant,
                     emissive: this.colors.plant,
-                    emissiveIntensity: 0
+                    emissiveIntensity: 0,
                   });
                   stickLeavesOne.push(mesh);
                 } else if (mesh.name.includes("stick_leaves")) {
                   mesh.material = new THREE.MeshLambertMaterial({
                     color: this.colors.plant,
                     emissive: this.colors.plant,
-                    emissiveIntensity: 0
+                    emissiveIntensity: 0,
                   });
                   stickLeaves.push(mesh);
                 }
@@ -359,16 +359,16 @@ export class Mornings extends SceneManager {
       modelList.indexOf("plant") !== -1 &&
         loadPromiseArray.push(
           new Promise((resolve, reject) => {
-            this.loadModel({ name: "spiral_plant" }).then(model => {
+            this.loadModel({ name: "spiral_plant" }).then((model) => {
               const leaves = [];
 
               model.scene.children
-                .filter(mesh => mesh.name.includes("spiral_plant_leaf"))
-                .forEach(mesh => {
+                .filter((mesh) => mesh.name.includes("spiral_plant_leaf"))
+                .forEach((mesh) => {
                   mesh.material = new THREE.MeshLambertMaterial({
                     color: this.colors.plant,
                     emissive: this.colors.plant,
-                    emissiveIntensity: 0
+                    emissiveIntensity: 0,
                   });
                   leaves.push(mesh);
                 });
@@ -389,15 +389,15 @@ export class Mornings extends SceneManager {
             // 3d array: columns, rows, books in cell
             this.subjects.books = new Array(4)
               .fill(null)
-              .map(d => new Array(5).fill(null).map(d => []));
+              .map((d) => new Array(5).fill(null).map((d) => []));
 
-            this.loadModel({ name: "bookcase" }).then(model => {
+            this.loadModel({ name: "bookcase" }).then((model) => {
               const pageMat = new THREE.MeshLambertMaterial({
                 color: 0xe7daca,
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
               });
 
-              model.scene.children.forEach(mesh => {
+              model.scene.children.forEach((mesh) => {
                 if (
                   mesh.name.includes("book") &&
                   !mesh.name.includes("bookcase") &&
@@ -416,10 +416,10 @@ export class Mornings extends SceneManager {
                     this.spectrumFunction(1 - (r + y + 0.5) / 5)
                   );
 
-                  const bookMesh = mesh.children.find(mesh =>
+                  const bookMesh = mesh.children.find((mesh) =>
                     mesh.material.name.includes("book")
                   );
-                  const pageMesh = mesh.children.find(mesh =>
+                  const pageMesh = mesh.children.find((mesh) =>
                     mesh.material.name.includes("page")
                   );
 
@@ -428,7 +428,7 @@ export class Mornings extends SceneManager {
                     color: c,
                     side: THREE.DoubleSide,
                     emissive: c,
-                    emissiveIntensity: 0.1
+                    emissiveIntensity: 0.1,
                   });
 
                   this.subjects.books[x][y][z] = bookMesh;
@@ -446,7 +446,7 @@ export class Mornings extends SceneManager {
         .then(() => {
           resolve();
         })
-        .catch(err => {
+        .catch((err) => {
           reject(`Error loading models: ${err}`);
         });
     });
@@ -466,26 +466,26 @@ export class Mornings extends SceneManager {
             innerPetals: this.subjects.innerPetals,
             outerPetals: this.subjects.outerPetals,
             leftPage: this.subjects.leftPage,
-            rightPage: this.subjects.rightPage
+            rightPage: this.subjects.rightPage,
           },
           this.melodyAnalyser,
           {
             spectrumFunction: this.spectrumFunction,
-            beats: this.elapsedBeats
+            beats: this.elapsedBeats,
           }
         );
 
       this.playerState &&
         (this.playerState.bass || overridePause) &&
         renderBass(this.subjects.godRays, this.bassAnalyser, {
-          sunlight: this.lights.sunlight
+          sunlight: this.lights.sunlight,
         });
 
       this.playerState &&
         (this.playerState.rhythm || overridePause) &&
         renderRhythm(this.subjects.books, this.rhythmAnalyser, {
           spectrumFunction: this.spectrumFunction,
-          beats: this.elapsedBeats
+          beats: this.elapsedBeats,
         });
 
       this.playerState &&
@@ -496,11 +496,11 @@ export class Mornings extends SceneManager {
             stickLeaves: this.subjects.stickLeaves,
             stickLeavesOne: this.subjects.stickLeavesOne,
             group: this.subjects.spiralPlantGroup,
-            box: this.subjects.spiralPlantBox
+            box: this.subjects.spiralPlantBox,
           },
           this.harmonyAnalyser,
           {
-            beats: this.elapsedBeats
+            beats: this.elapsedBeats,
           }
         );
 
@@ -508,7 +508,7 @@ export class Mornings extends SceneManager {
         (this.playerState.extras || overridePause) &&
         renderAtmosphere(this.subjects.stringLights, this.atmosphereAnalyser, {
           beats: this.elapsedBeats,
-          enabled: this.playerState.extras
+          enabled: this.playerState.extras,
         });
 
       this.renderer.render(this.scene, this.camera);

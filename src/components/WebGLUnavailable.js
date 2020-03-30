@@ -1,7 +1,7 @@
 import React from "react";
 
 export const WebGLUnavailable = () => {
-  const unsupportedType = !!window.WebGLRenderingContext
+  const unsupportedType = window.WebGLRenderingContext
     ? "graphics card"
     : "browser";
 

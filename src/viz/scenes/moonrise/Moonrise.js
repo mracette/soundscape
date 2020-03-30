@@ -14,13 +14,13 @@ export class Moonrise extends SceneManager {
     this.songId = "moonrise";
     this.DPRMax = 2.5;
 
-    this.rhythmAnalyser = analysers.find(a => a.id === "rhythm-analyser");
+    this.rhythmAnalyser = analysers.find((a) => a.id === "rhythm-analyser");
     this.atmosphereAnalyser = analysers.find(
-      a => a.id === "atmosphere-analyser"
+      (a) => a.id === "atmosphere-analyser"
     );
-    this.harmonyAnalyser = analysers.find(a => a.id === "harmony-analyser");
-    this.melodyAnalyser = analysers.find(a => a.id === "melody-analyser");
-    this.bassAnalyser = analysers.find(a => a.id === "bass-analyser");
+    this.harmonyAnalyser = analysers.find((a) => a.id === "harmony-analyser");
+    this.melodyAnalyser = analysers.find((a) => a.id === "melody-analyser");
+    this.bassAnalyser = analysers.find((a) => a.id === "bass-analyser");
 
     this.palette = {
       white: 0xffffff,
@@ -28,7 +28,7 @@ export class Moonrise extends SceneManager {
       lightning: 0xeee6ab,
       moonYellow: 0xf6f2d5,
       tropicalGreen: 0x70a491,
-      deepInk: 0x030c22
+      deepInk: 0x030c22,
     };
 
     // lily vars
@@ -39,7 +39,7 @@ export class Moonrise extends SceneManager {
       this.palette.pansyPurple,
       this.palette.funGreen,
       this.palette.hibiscus,
-      this.palette.yellow
+      this.palette.yellow,
     ];
 
     super.init().then(() => {
@@ -57,7 +57,7 @@ export class Moonrise extends SceneManager {
         this.initLakeRipples(),
         this.initLakeStars(),
         this.initLakeLilies(),
-        this.initLakeMoon()
+        this.initLakeMoon(),
       ]).then(() => {
         callback();
         super.animate();
@@ -82,7 +82,7 @@ export class Moonrise extends SceneManager {
         lakeGeo.translate(0, 0, 70);
         const lakeMat = new THREE.MeshBasicMaterial({
           color: this.palette.deepInk,
-          fog: false
+          fog: false,
         });
         const lakeMesh = new THREE.Mesh(lakeGeo, lakeMat);
         this.subjects.lake = lakeMesh;
@@ -94,7 +94,7 @@ export class Moonrise extends SceneManager {
         groundGeo.translate(0, -1, 0);
         const groundMat = new THREE.MeshBasicMaterial({
           color: 0x022a1e,
-          fog: false
+          fog: false,
         });
         groundMat.color.lerp(new THREE.Color(0x000000), 0.75); // TODO: figure out the color issue
         const groundMesh = new THREE.Mesh(groundGeo, groundMat);
@@ -125,7 +125,7 @@ export class Moonrise extends SceneManager {
           const sphereMat = new THREE.MeshBasicMaterial({
             color: this.palette.lightning,
             fog: false,
-            transparent: true
+            transparent: true,
           });
 
           g.add(new THREE.Mesh(sphereGeo, sphereMat));
@@ -146,16 +146,16 @@ export class Moonrise extends SceneManager {
 
         // add some rocks
         this.loadModel({ name: "landscape" })
-          .then(model => {
+          .then((model) => {
             this.subjects.rocks = model.scene.children.find(
-              e => (e.name = "rockGroup")
+              (e) => (e.name = "rockGroup")
             );
-            this.subjects.rocks.children.forEach(rock => {
+            this.subjects.rocks.children.forEach((rock) => {
               rock.material.color.setRGB(0.06, 0.06, 0.06);
             });
             this.scene.add(this.subjects.rocks);
           })
-          .catch(err => {
+          .catch((err) => {
             reject(err);
           });
 
@@ -180,7 +180,7 @@ export class Moonrise extends SceneManager {
         );
         const moonMat = new THREE.MeshBasicMaterial({
           color: this.palette.moonYellow,
-          fog: false
+          fog: false,
         });
 
         const moonMesh = new THREE.Mesh(moonGeo, moonMat);
@@ -206,7 +206,7 @@ export class Moonrise extends SceneManager {
           const moonRingMat = new THREE.PointsMaterial({
             color: this.palette.moonYellow,
             transparent: true,
-            opacity: 0.1 + j / 7
+            opacity: 0.1 + j / 7,
           });
 
           const moonRing = new THREE.Points(moonRingGeo, moonRingMat);
@@ -236,7 +236,7 @@ export class Moonrise extends SceneManager {
     return new Promise((resolve, reject) => {
       // load gltf tree models
       this.loadModel({ name: "pine-tree" })
-        .then(model => {
+        .then((model) => {
           const basePineTree = model.scenes[0].children[0];
 
           // generate simple tree formation
@@ -271,7 +271,7 @@ export class Moonrise extends SceneManager {
               color: new THREE.Color(this.palette.tropicalGreen).lerp(
                 new THREE.Color(this.palette.white),
                 -1.5
-              )
+              ),
             });
 
             clone.position.copy(new THREE.Vector3(x, -2, z + 70));
@@ -283,7 +283,7 @@ export class Moonrise extends SceneManager {
           this.scene.add(pineTreeGroup);
           resolve();
         })
-        .catch(err => {
+        .catch((err) => {
           reject(err);
         });
     });
@@ -330,7 +330,7 @@ export class Moonrise extends SceneManager {
               new THREE.LineBasicMaterial({
                 color: this.palette.moonYellow,
                 transparent: true,
-                opacity: 0
+                opacity: 0,
               })
             )
           );
@@ -360,7 +360,7 @@ export class Moonrise extends SceneManager {
             height: 225,
             depth: 190,
             center: new THREE.Vector3(0, -13, -300),
-            colorPalette: d3Chromatic.interpolateCool
+            colorPalette: d3Chromatic.interpolateCool,
           }
         );
         resolve();
@@ -373,8 +373,8 @@ export class Moonrise extends SceneManager {
   initLakeLilies() {
     return new Promise((resolve, reject) => {
       this.loadModel({ name: "lily" })
-        .then(model => {
-          const lily = model.scene.children.find(c => c.name === "Group");
+        .then((model) => {
+          const lily = model.scene.children.find((c) => c.name === "Group");
 
           // breakdown
           const lowerPetal = lily.children[0].clone();
@@ -407,11 +407,11 @@ export class Moonrise extends SceneManager {
           const lilyGroup = new THREE.Group();
 
           const flowerMat = new THREE.MeshBasicMaterial({
-            color: new THREE.Color(0xffffff)
+            color: new THREE.Color(0xffffff),
           });
 
           const padMat = new THREE.MeshBasicMaterial({
-            color: new THREE.Color(0x022a1e).lerp(new THREE.Color(0x000000), 1)
+            color: new THREE.Color(0x022a1e).lerp(new THREE.Color(0x000000), 1),
           });
 
           for (let i = 1; i <= numLilies; i++) {
@@ -421,12 +421,14 @@ export class Moonrise extends SceneManager {
               d3Chromatic.interpolateViridis(Math.random())
             );
             const petalMat = new THREE.MeshBasicMaterial({
-              color: petalColor
+              color: petalColor,
             });
 
-            clone.getObjectByName("petalGroup").children.forEach(petalGroup => {
-              petalGroup.children[0].material = petalMat;
-            });
+            clone
+              .getObjectByName("petalGroup")
+              .children.forEach((petalGroup) => {
+                petalGroup.children[0].material = petalMat;
+              });
 
             clone.getObjectByName("lilyPad").material = padMat;
             clone.getObjectByName("sphere").material = flowerMat;
@@ -458,7 +460,7 @@ export class Moonrise extends SceneManager {
 
           resolve();
         })
-        .catch(err => {
+        .catch((err) => {
           reject(err);
         });
     });
@@ -508,7 +510,7 @@ export class Moonrise extends SceneManager {
         this.subjects.pineTrees.children.forEach((child, i) => {
           const freqIndex = Math.floor(i / 8);
           const rawData = this.harmonyAnalyser.fftData.slice([
-            1 + freqIndex
+            1 + freqIndex,
           ])[0];
           const transformedData =
             Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.06);
@@ -578,7 +580,7 @@ export class Moonrise extends SceneManager {
         }
 
         // copy the single moon beam's geometry into the other position arrays and update
-        this.subjects.moonBeams.children.forEach(moonBeam => {
+        this.subjects.moonBeams.children.forEach((moonBeam) => {
           moonBeam.children.forEach((moonRing, moonRingIndex) => {
             moonRing.geometry.attributes.position.array = this.subjects.moonBeams.children[0].children[
               moonRingIndex
@@ -609,7 +611,7 @@ export class Moonrise extends SceneManager {
 
         const avgMelodyVolume = melodyVolume / melodyCount;
 
-        this.subjects.lilies.children.forEach(lily => {
+        this.subjects.lilies.children.forEach((lily) => {
           const data = lily.userData;
           const increment = 0.11;
 
@@ -658,7 +660,7 @@ export class Moonrise extends SceneManager {
       const flyAmount = 0.3;
       const flightNoise = 0.01;
 
-      this.subjects.fireflies.children.forEach(fly => {
+      this.subjects.fireflies.children.forEach((fly) => {
         if (fly.userData.state === "off" && Math.random() < 0.0005) {
           fly.userData.state = "lighting";
           fly.userData.flightPath = new THREE.Vector3(

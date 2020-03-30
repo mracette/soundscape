@@ -30,7 +30,7 @@ export class Stars {
         minOrbitRadius: 500,
         maxOrbitRadius: 1000,
         orbitSpeed: 0.1,
-        rotateVector: new THREE.Vector3(1, 1, 1)
+        rotateVector: new THREE.Vector3(1, 1, 1),
       },
       params
     );
@@ -57,7 +57,7 @@ export class Stars {
     return {
       x: nX,
       y: nY,
-      z: nZ
+      z: nZ,
     };
   }
 
@@ -102,7 +102,7 @@ export class Stars {
     let material = new THREE.PointsMaterial({
       vertexColors: THREE.VertexColors,
       transparent: true,
-      opacity: 1
+      opacity: 1,
     });
 
     let starField = new THREE.Points(geometry, material);

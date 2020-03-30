@@ -24,6 +24,7 @@ export const EffectsPanel = (props) => {
     ambience,
   } = React.useContext(MusicPlayerContext);
 
+  /* eslint-disable no-unused-vars */
   const [effectsBackgroundMode, setEffectsBackgroundMode] = React.useState(
     false
   );

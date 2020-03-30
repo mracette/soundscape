@@ -63,7 +63,7 @@ export class StarQuandrants {
       vertexColors: THREE.VertexColors,
       transparent: true,
       opacity: 0,
-      fog: false
+      fog: false,
     });
 
     if (channel === "left") {
