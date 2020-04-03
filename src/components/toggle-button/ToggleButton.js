@@ -7,6 +7,7 @@ import { MusicPlayerContext } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
+import { WAW } from "../AppWrap";
 
 // other
 import { createAudioPlayer } from "crco-utils";
@@ -21,21 +22,22 @@ import "../../styles/components/ToggleButton.scss";
 export const ToggleButton = (props) => {
   const buttonRef = React.useRef();
   const animationTargetsRef = React.useRef();
-  const schedulerRef = React.useRef();
 
   const { vh } = React.useContext(LayoutContext);
   const { id, timeSignature, bpm } = React.useContext(SongContext);
-  const { audioCtx, dispatch } = React.useContext(MusicPlayerContext);
+  const { dispatch } = React.useContext(MusicPlayerContext);
   const { flags } = React.useContext(TestingContext);
   const {
     handleUpdatePlayerOrder,
     handleUpdateOverrides,
     name,
     groupName,
-    groupNode,
     override,
     length,
   } = props;
+
+  const { scheduler, audioCtx } = WAW;
+  const groupNode = WAW.getEffects()[id].groupNodes[props.groupName];
 
   const [playerState, setPlayerState] = React.useState("stopped");
   const [player, setPlayer] = React.useState(null);
@@ -123,7 +125,7 @@ export const ToggleButton = (props) => {
       // clicking a button on pending stop does nothing
       if (playerState !== "pending-stop") {
         // clear future events for this toggle (necessary to stop a pending start)
-        schedulerRef.current.clear();
+        scheduler.current.clear();
 
         const initialState =
           newState === "active" ? "pending-start" : "pending-stop";
@@ -162,7 +164,7 @@ export const ToggleButton = (props) => {
         }
 
         // schedule a status change
-        schedulerRef.current.scheduleOnce(quantizedStartSeconds).then(() => {
+        scheduler.current.scheduleOnce(quantizedStartSeconds).then(() => {
           // update local state
           setPlayerState(newState);
 
@@ -185,21 +187,22 @@ export const ToggleButton = (props) => {
     },
     [
       playerState,
-      player,
+      buttonRadius,
+      buttonBorder,
+      scheduler,
+      dispatch,
+      name,
+      handleUpdatePlayerOrder,
       audioCtx,
       bpm,
-      buttonBorder,
-      buttonRadius,
-      dispatch,
       quantizedStartBeats,
-      handleUpdatePlayerOrder,
-      name,
+      player,
     ]
   );
 
   /* Initialize Player Hook */
   React.useEffect(() => {
-    schedulerRef.current = new Scheduler(audioCtx, name);
+    scheduler.current = new Scheduler(audioCtx, name);
     const pathToAudio = getPathToAudio(id, name, "vbr");
 
     createAudioPlayer(audioCtx, pathToAudio, {

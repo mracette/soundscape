@@ -7,13 +7,15 @@ import { ColorPalette } from "color-curves";
 // components
 import { AppRouter } from "./AppRouter";
 
-// others
-import { initGain } from "../utils/audioUtils";
-import { Scheduler } from "../classes/Scheduler";
-
 // context
 import { LayoutContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
+
+// classes
+import { WebAudioWrapper } from "../classes/WebAudioWrapper";
+
+// utils
+import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 
 const morningsPalette = new ColorPalette(
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.125,"y":-0.081},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.142,"angleOffset":5.781,"radius":0.5}',
@@ -33,6 +35,9 @@ for (let i = 0; i <= 255; i++) {
 
 const appConfig = require("../app-config.json");
 
+export const WAW = new WebAudioWrapper(appConfig);
+WAW.initAppState();
+
 // global behavior flags for testing
 const flags = {
   quantizeSamples: true,
@@ -45,14 +50,6 @@ const spectrumFunctions = {
   moonrise: (n) => moonrisePaletteDiscrete[Math.round(n * 255)],
   mornings: (n) => morningsPaletteDiscrete[Math.round(n * 255)],
 };
-
-// globals
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-  latencyHint: "balanced",
-});
-const premaster = initGain(audioCtx, 1);
-premaster.connect(audioCtx.destination);
-const scheduler = new Scheduler(audioCtx);
 
 // inits globals vars, adds listeners, and manages some other settings
 export const AppWrap = () => {
@@ -75,11 +72,11 @@ export const AppWrap = () => {
   // check for mobile
   const [isMobile, setIsMobile] = React.useState(viewportWidth <= 760);
 
-  const resumeAudio = () => {
-    audioCtx.state === "suspended" && audioCtx.resume();
-  };
-
   React.useEffect(() => {
+    const resumeAudio = () => {
+      WAW.audioCtx.state === "suspended" && WAW.audioCtx.resume();
+    };
+
     // gets the inner height/width to act as viewport dimensions (cross-platform benefits)
     const setViewportVars = () => {
       const viewportWidth = window.innerWidth;
@@ -102,26 +99,14 @@ export const AppWrap = () => {
     };
 
     // add resize listeners
-    window.addEventListener("resize", setViewportVars);
-    window.addEventListener("orientationchange", setViewportVars);
-    window.addEventListener("fullscreenchange", setViewportVars);
-    window.visualViewport &&
-      window.visualViewport.addEventListener("scroll", setViewportVars);
-    window.visualViewport &&
-      window.visualViewport.addEventListener("resize", setViewportVars);
+    addWindowListeners(setViewportVars);
 
     // add listeners to unlock audio
     document.body.addEventListener("touchstart", resumeAudio);
     document.body.addEventListener("click", resumeAudio);
 
     return () => {
-      window.removeEventListener("resize", setViewportVars);
-      window.removeEventListener("orientationchange", setViewportVars);
-      window.removeEventListener("fullscreenchange", setViewportVars);
-      window.visualViewport &&
-        window.visualViewport.removeEventListener("scroll", setViewportVars);
-      window.visualViewport &&
-        window.visualViewport.removeEventListener("resize", setViewportVars);
+      removeWindowListeners(setViewportVars);
       document.body.removeEventListener("touchstart", resumeAudio);
       document.body.removeEventListener("click", resumeAudio);
     };
@@ -133,9 +118,6 @@ export const AppWrap = () => {
         <AppRouter
           appConfig={appConfig}
           spectrumFunctions={spectrumFunctions}
-          audioCtx={audioCtx}
-          scheduler={scheduler}
-          premaster={premaster}
         />
       </LayoutContext.Provider>
     </TestingContext.Provider>

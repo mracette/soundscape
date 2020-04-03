@@ -1,0 +1,1 @@
+avoid reinit of the same song

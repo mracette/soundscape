@@ -9,52 +9,39 @@ import { MenuButtonParent } from "./menu-button/MenuButtonParent";
 import { SongInfoPanel } from "./SongInfoPanel";
 import { ToggleButtonPanel } from "./toggle-button/ToggleButtonPanel";
 import { HomePanel } from "./HomePanel";
-import { AudioPlayerWrapper } from "../classes/AudioPlayerWrapper";
 
 // context
 import { MusicPlayerContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
+import { WAW } from "./AppWrap";
 
 // reducers
 import { MusicPlayerReducer } from "../reducers/MusicPlayerReducer";
 
-// other
-import { createAudioPlayer } from "crco-utils";
-import { getPathToAudio } from "../utils/audioUtils";
-
 // styles
 import "../styles/components/MusicPlayer.scss";
 
-export const MusicPlayer = (props) => {
+export const MusicPlayer = () => {
   const { flags } = React.useContext(TestingContext);
+  const { id, bpm, groups, ambientTrack } = React.useContext(SongContext);
 
-  const {
-    id,
-    timeSignature,
-    bpm,
-    groups,
-    ambientTrack,
-    ambientTrackLength,
-  } = React.useContext(SongContext);
-
+  const backgroundModeEventRef = React.useRef(null);
+  const [wawIsLoading, setWawIsLoading] = React.useState(true);
   const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
-    audioCtx: props.audioCtx,
-    scheduler: props.scheduler,
-    premaster: props.premaster,
     isLoading: true,
     backgroundMode: false,
     randomizeEffects: false,
     pauseVisuals: false,
     mute: false,
     players: [],
-    analysers: [],
-    highpass: 1,
-    lowpass: 100,
-    ambience: 1,
   });
 
-  const backgroundModeEventRef = React.useRef(null);
+  // initialize web audio state
+  wawIsLoading &&
+    WAW.initSongState(id).then(() => {
+      setWawIsLoading(false);
+    });
 
   /* Randomize Callback */
   const handleRandomize = React.useCallback(() => {
@@ -120,101 +107,88 @@ export const MusicPlayer = (props) => {
     }
   }, [state.players]);
 
-  /* Ambient Track Hook */
   React.useEffect(() => {
-    let ambientPlayer;
+    console.log(wawIsLoading);
+    if (!wawIsLoading) {
+      console.log(Object.keys(WAW.getVoices(id)));
+      // should be safe to resume and take the init time here (after user gesture)
+      if (flags.playAmbientTrack && ambientTrack) {
+        WAW.audioCtx.resume();
+        WAW.getVoices(id).ambient.start();
+      }
 
-    if (flags.playAmbientTrack && ambientTrack) {
-      const pathToAudio = getPathToAudio(id, "ambient-track", "vbr");
-
-      createAudioPlayer(state.audioCtx, pathToAudio, {
-        offlineRendering: true,
-        renderLength:
-          (state.sampleRate *
-            parseInt(ambientTrackLength) *
-            timeSignature *
-            60) /
-          bpm,
-        fade: true,
-        fadeLength: 0.01,
-      }).then((audioPlayer) => {
-        ambientPlayer = new AudioPlayerWrapper(state.audioCtx, audioPlayer, {
-          destination: state.premaster,
-          loop: true,
-        });
-
-        // should be safe to resume and take the init time here (after user gesture)
-        state.audioCtx.resume();
-        ambientPlayer.start();
-      });
+      // music player cleanup
+      return () => {
+        WAW.scheduler.clear();
+        WAW.audioCtx.suspend();
+        flags.playAmbientTrack && WAW.getVoices(id).ambient.stop();
+      };
     }
-
-    return () => {
-      state.scheduler.clear();
-      state.audioCtx.suspend();
-      flags.playAmbientTrack && ambientPlayer.stop();
-    };
-  }, [
-    bpm,
-    id,
-    flags.playAmbientTrack,
-    ambientTrack,
-    ambientTrackLength,
-    timeSignature,
-    state.scheduler,
-    state.audioCtx,
-    state.premaster,
-    state.sampleRate,
-  ]);
+  }, [ambientTrack, flags.playAmbientTrack, id, wawIsLoading]);
 
   /* Background Mode Hook */
   React.useEffect(() => {
-    // init event
-    if (
-      state.backgroundMode &&
-      !state.scheduler.repeatingQueue.find(
-        (e) => e.id === backgroundModeEventRef.current
-      )
-    ) {
-      backgroundModeEventRef.current = state.scheduler.scheduleRepeating(
-        state.audioCtx.currentTime + 60 / bpm,
-        (32 * 60) / bpm,
-        triggerRandomVoice
-      );
-      // update event
-    } else if (state.backgroundMode) {
-      state.scheduler.updateCallback(
-        backgroundModeEventRef.current,
-        triggerRandomVoice
-      );
-      // stop event
-    } else if (!state.backgroundMode) {
-      state.scheduler.cancel(backgroundModeEventRef.current);
+    if (!wawIsLoading) {
+      // init event
+      if (
+        state.backgroundMode &&
+        !WAW.scheduler.repeatingQueue.find(
+          (e) => e.id === backgroundModeEventRef.current
+        )
+      ) {
+        backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
+          WAW.audioCtx.currentTime + 60 / bpm,
+          (32 * 60) / bpm,
+          triggerRandomVoice
+        );
+        // update event
+      } else if (state.backgroundMode) {
+        WAW.scheduler.updateCallback(
+          backgroundModeEventRef.current,
+          triggerRandomVoice
+        );
+        // stop event
+      } else if (!state.backgroundMode) {
+        WAW.scheduler.cancel(backgroundModeEventRef.current);
+      }
     }
-  }, [
-    bpm,
-    state.backgroundMode,
-    triggerRandomVoice,
-    state.audioCtx,
-    state.scheduler,
-  ]);
+  }, [bpm, state.backgroundMode, triggerRandomVoice, wawIsLoading]);
 
   /* Mute Hook */
   React.useEffect(() => {
-    const startMute = () => {
-      state.premaster.gain.value = 0;
-    };
+    if (!wawIsLoading) {
+      const startMute = () => {
+        WAW.getEffects().premaster.gain.value = 0;
+      };
 
-    const stopMute = () => {
-      state.premaster.gain.value = 1;
-    };
+      const stopMute = () => {
+        WAW.getEffects().premaster.gain.value = 1;
+      };
 
-    if (state.mute) {
-      startMute();
-    } else {
-      stopMute();
+      if (state.mute) {
+        startMute();
+      } else {
+        stopMute();
+      }
     }
-  }, [state.mute, state.premaster]);
+  }, [state.mute, state.premaster, wawIsLoading]);
+
+  const HomePanelMemo = React.useMemo(() => <HomePanel />, []);
+  const SongInfoPanelMemo = React.useMemo(() => <SongInfoPanel />, []);
+  const EffectsPanelMemo = React.useMemo(
+    () => <EffectsPanel dispatch={dispatch} />,
+    [dispatch]
+  );
+  const ToggleButtonPanelMemo = React.useMemo(
+    () => (
+      <ToggleButtonPanel
+        handleRandomize={handleRandomize}
+        handleReset={handleReset}
+        players={state.players}
+      />
+    ),
+    [handleRandomize, handleReset, state.players]
+  );
 
   return (
     <MusicPlayerContext.Provider
@@ -223,56 +197,43 @@ export const MusicPlayer = (props) => {
         dispatch,
       }}
     >
-      <FreqBands />
+      {wawIsLoading ? undefined : (
+        <>
+          <FreqBands />
 
-      <MenuButtonParent
-        name="Menu"
-        direction="right"
-        separation="6rem"
-        parentSize="5rem"
-        childButtonProps={[
-          {
-            id: "home",
-            iconName: "icon-home",
-            content: React.useMemo(() => <HomePanel />, []),
-          },
-          {
-            autoOpen: true,
-            id: "toggles",
-            iconName: "icon-music",
-            content: React.useMemo(
-              () => (
-                <ToggleButtonPanel
-                  handleRandomize={handleRandomize}
-                  handleReset={handleReset}
-                  players={state.players}
-                />
-              ),
-              [handleRandomize, handleReset, state.players]
-            ),
-          },
-          {
-            id: "effects",
-            iconName: "icon-equalizer",
-            content: React.useMemo(
-              () => (
-                <EffectsPanel
-                  impulseResponse={state.impulseResponse}
-                  dispatch={dispatch}
-                />
-              ),
-              [state.impulseResponse, dispatch]
-            ),
-          },
-          {
-            id: "song-info",
-            iconName: "icon-info",
-            content: React.useMemo(() => <SongInfoPanel />, []),
-          },
-        ]}
-      />
+          {/* <MenuButtonParent
+            name="Menu"
+            direction="right"
+            separation="6rem"
+            parentSize="5rem"
+            childButtonProps={[
+              {
+                id: "home",
+                iconName: "icon-home",
+                content: HomePanelMemo,
+              },
+              {
+                autoOpen: true,
+                id: "toggles",
+                iconName: "icon-music",
+                content: ToggleButtonPanelMemo,
+              },
+              {
+                id: "effects",
+                iconName: "icon-equalizer",
+                content: EffectsPanelMemo,
+              },
+              {
+                id: "song-info",
+                iconName: "icon-info",
+                content: SongInfoPanelMemo,
+              },
+            ]}
+          /> */}
 
-      <CanvasViz />
+          {/* <CanvasViz /> */}
+        </>
+      )}
     </MusicPlayerContext.Provider>
   );
 };

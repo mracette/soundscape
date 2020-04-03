@@ -26,45 +26,43 @@ export const AppRouter = (props) => {
         <Route
           exact
           path={"/play/:songId"}
-          render={(routeProps) => (
-            <ThemeContext.Provider
-              value={{
-                // provide the song's theme context
-                id: routeProps.match.params.songId,
-                spectrumFunction:
-                  props.spectrumFunctions[routeProps.match.params.songId],
-                ...props.appConfig.find((song) => {
-                  return song.id === routeProps.match.params.songId;
-                })["themes"],
-              }}
-            >
-              <SongContext.Provider
+          render={(routeProps) => {
+            return (
+              <ThemeContext.Provider
                 value={{
-                  // provide the song context
+                  // provide the song's theme context
                   id: routeProps.match.params.songId,
+                  spectrumFunction:
+                    props.spectrumFunctions[routeProps.match.params.songId],
                   ...props.appConfig.find((song) => {
                     return song.id === routeProps.match.params.songId;
-                  })["audio"],
+                  })["themes"],
                 }}
               >
-                <InfoContext.Provider
+                <SongContext.Provider
                   value={{
-                    // provide extra information about the song
+                    // provide the song context
                     id: routeProps.match.params.songId,
                     ...props.appConfig.find((song) => {
                       return song.id === routeProps.match.params.songId;
-                    })["info"],
+                    })["audio"],
                   }}
                 >
-                  <MusicPlayer
-                    audioCtx={props.audioCtx}
-                    scheduler={props.scheduler}
-                    premaster={props.premaster}
-                  />
-                </InfoContext.Provider>
-              </SongContext.Provider>
-            </ThemeContext.Provider>
-          )}
+                  <InfoContext.Provider
+                    value={{
+                      // provide extra information about the song
+                      id: routeProps.match.params.songId,
+                      ...props.appConfig.find((song) => {
+                        return song.id === routeProps.match.params.songId;
+                      })["info"],
+                    }}
+                  >
+                    <MusicPlayer />
+                  </InfoContext.Provider>
+                </SongContext.Provider>
+              </ThemeContext.Provider>
+            );
+          }}
         />
         <Redirect to="/" />
       </Switch>

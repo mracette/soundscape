@@ -34,13 +34,14 @@ export const Oscilloscope = (props) => {
   const canvasRef = React.useRef(null);
   const contextRef = React.useRef(null);
   const analyserRef = React.useRef(
-    new Analyser(audioCtx, filter.current, {
-      id: `${props.name}-oscilloscope-analyser`,
-      power: 5,
-      minDecibels: -120,
-      maxDecibels: 0,
-      smoothingTimeConstant: 0,
-    })
+    (() =>
+      new Analyser(audioCtx, filter.current, {
+        id: `${props.name}-oscilloscope-analyser`,
+        power: 5,
+        minDecibels: -120,
+        maxDecibels: 0,
+        smoothingTimeConstant: 0,
+      }))()
   );
 
   const { spectrumFunction } = React.useContext(ThemeContext);

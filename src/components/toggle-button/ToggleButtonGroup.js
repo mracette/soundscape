@@ -7,138 +7,39 @@ import { Oscilloscope } from "../Oscilloscope";
 
 // contexts
 import { ThemeContext } from "../../contexts/contexts";
-import { MusicPlayerContext } from "../../contexts/contexts";
-
-// other
-import { Analyser } from "../../classes/Analyser";
-import { loadArrayBuffer } from "crco-utils";
-import {
-  initGain,
-  initHighpass,
-  initLowpass,
-  effectParams,
-  getPathToAudio,
-} from "../../utils/audioUtils";
+import { SongContext } from "../../contexts/contexts";
+import { WAW } from "../AppWrap";
 
 // styles
 import "../../styles/components/ToggleButtonGroup.scss";
 import "../../styles/components/Oscilloscope.scss";
 
 export const ToggleButtonGroup = (props) => {
+  const { id } = React.useContext(SongContext);
   const { groupMuteButton, groupSoloButton } = React.useContext(ThemeContext);
-  const {
-    audioCtx,
-    premaster,
-    dispatch,
-    lowpass,
-    highpass,
-    ambience,
-  } = React.useContext(MusicPlayerContext);
-
-  // initialize audio effects
-  const groupNodeRef = React.useRef(initGain(audioCtx, 1));
-  const effectsChainEntryRef = React.useRef(initGain(audioCtx, 1));
-  const effectsChainExitRef = React.useRef(initGain(audioCtx, 1));
-  const hpFilterRef = React.useRef(initHighpass(audioCtx));
-  const lpFilterRef = React.useRef(initLowpass(audioCtx));
-  const reverbDryRef = React.useRef(initGain(audioCtx, 1));
-  const reverbWetRef = React.useRef(initGain(audioCtx, 0));
-  const reverbRef = React.useRef(audioCtx.createConvolver());
 
   const [solo, setSolo] = React.useState(false);
   const [mute, setMute] = React.useState(false);
   const [playerOrder, setPlayerOrder] = React.useState([]);
   const [playerOverrides, setPlayerOverrides] = React.useState([]);
 
-  /* Audio effects setup */
-  React.useEffect(() => {
-    // load impulse response to be used in convolution reverb
-    const pathToAudio = getPathToAudio(
-      "application",
-      "impulse-response",
-      "wav"
-    );
-
-    loadArrayBuffer(pathToAudio).then((arrayBuffer) => {
-      audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
-        reverbRef.current.buffer = audioBuffer;
-        dispatch({
-          type: "impulseResponse",
-          payload: {
-            name: "standard",
-            buffer: audioBuffer,
-          },
-        });
-      });
-    });
-
-    // link effects chain
-    groupNodeRef.current.connect(effectsChainEntryRef.current);
-    effectsChainEntryRef.current.connect(lpFilterRef.current);
-    lpFilterRef.current.connect(hpFilterRef.current);
-    hpFilterRef.current.connect(reverbDryRef.current);
-    hpFilterRef.current.connect(reverbWetRef.current);
-    reverbDryRef.current.connect(effectsChainExitRef.current);
-    reverbWetRef.current.connect(reverbRef.current);
-    reverbRef.current.connect(effectsChainExitRef.current);
-    effectsChainExitRef.current.connect(premaster);
-
-    const groupAnalyser = new Analyser(audioCtx, effectsChainExitRef.current, {
-      id: `${props.name}-analyser`,
-      ...props.analyserParams,
-    });
-
-    dispatch({
-      type: "addAnalyser",
-      payload: {
-        analyser: groupAnalyser,
-      },
-    });
-  }, [audioCtx, dispatch, props.analyserParams, props.name, premaster]);
-
-  /* Effects Hooks */
-  React.useEffect(() => {
-    const freqParams = effectParams.hpFilter.expFreqParams;
-    const QParams = effectParams.hpFilter.expQParams;
-    hpFilterRef.current.frequency.value =
-      freqParams.a * Math.pow(freqParams.b, highpass);
-    hpFilterRef.current.Q.value = QParams.a * Math.pow(QParams.b, highpass);
-  }, [highpass]);
-
-  React.useEffect(() => {
-    const freqParams = effectParams.lpFilter.expFreqParams;
-    const QParams = effectParams.lpFilter.expQParams;
-    lpFilterRef.current.frequency.value =
-      freqParams.a * Math.pow(freqParams.b, lowpass);
-    lpFilterRef.current.Q.value = QParams.a * Math.pow(QParams.b, lowpass);
-  }, [lowpass]);
-
-  React.useEffect(() => {
-    const wet =
-      effectParams.ambience.minWet +
-      ((effectParams.ambience.maxWet - effectParams.ambience.minWet) *
-        (ambience - 1)) /
-        99;
-
-    reverbDryRef.current.gain.value = 1 - wet;
-    reverbWetRef.current.gain.value = wet;
-  }, [ambience]);
+  const groupNode = WAW.getEffects()[id].groupNodes[props.name];
 
   React.useEffect(() => {
     // solo overrides mute, so only mute when it's exclusive state
     if (mute && !solo) {
-      groupNodeRef.current.gain.value = 0;
+      groupNode.current.gain.value = 0;
 
       // when mute is turned off, add volume if group is not also overridden by another group's solo
     } else if (!mute && !props.soloOverride) {
-      groupNodeRef.current.gain.value = 1;
+      groupNode.current.gain.value = 1;
     }
 
     // if solo is turned on ...
     if (solo) {
       // add override and turn volume on
       props.handleAddSolo(props.name);
-      groupNodeRef.current.gain.value = 1;
+      groupNode.current.gain.value = 1;
     }
 
     if (props.soloOverride === props.name && !solo) {
@@ -146,23 +47,23 @@ export const ToggleButtonGroup = (props) => {
       props.handleAddSolo(false);
       // if this group was also on mute, return the volume to that state
       if (mute) {
-        groupNodeRef.current.gain.value = 0;
+        groupNode.current.gain.value = 0;
       }
     }
-  }, [mute, solo, props]);
+  }, [mute, solo, props, groupNode]);
 
   React.useEffect(() => {
     // if this group has been overriden by another solo ...
     if (props.soloOverride && props.soloOverride !== props.name) {
       setSolo(false);
-      groupNodeRef.current.gain.value = 0;
+      groupNode.current.gain.value = 0;
     }
 
     // if override has been undone
     if (!props.soloOverride && !mute) {
-      groupNodeRef.current.gain.value = 1;
+      groupNode.current.gain.value = 1;
     }
-  }, [props.soloOverride, mute, props.name]);
+  }, [props.soloOverride, mute, props.name, groupNode]);
 
   const handleUpdatePlayerOrder = React.useCallback(
     (playerId, newState) => {
@@ -202,7 +103,6 @@ export const ToggleButtonGroup = (props) => {
         </h3>
 
         <Oscilloscope
-          input={effectsChainExitRef.current}
           index={props.index}
           groupCount={props.groupCount}
           gradient={true}
@@ -249,7 +149,6 @@ export const ToggleButtonGroup = (props) => {
             handleUpdatePlayerOrder={handleUpdatePlayerOrder}
             handleUpdateOverrides={handleUpdateOverrides}
             override={playerOverrides.indexOf(voice.name) !== -1}
-            groupNode={groupNodeRef.current}
           />
         ))}
       </div>
