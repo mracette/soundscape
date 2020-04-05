@@ -10,7 +10,7 @@ import { useAnimationFrame } from "../hooks/useAnimationFrame";
 // contexts
 import { ThemeContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
-import { WAW } from "../components/AppWrap";
+import { WebAudioContext } from "../contexts/contexts";
 
 // styles
 import "../styles/components/FreqBands.scss";
@@ -18,6 +18,7 @@ import "../styles/components/FreqBands.scss";
 export const FreqBands = () => {
   const { spectrumFunction } = React.useContext(ThemeContext);
   const { bpm, timeSignature } = React.useContext(SongContext);
+  const { WAW } = React.useContext(WebAudioContext);
   const analyser = WAW.getAnalysers().premaster;
 
   const secondsPerBar = (60 / bpm) * timeSignature;
@@ -28,7 +29,7 @@ export const FreqBands = () => {
   const render = React.useCallback(
     (canvas, context, time) => {
       const radius =
-        canvas.height / 2 - canvas.height / analyser.current.frequencyBinCount;
+        canvas.height / 2 - canvas.height / analyser.frequencyBinCount;
 
       // calculate cycle time
       const cycleTime = time / 1000 / (secondsPerBar * 4);
@@ -37,31 +38,29 @@ export const FreqBands = () => {
       context.clearRect(0, 0, canvas.height, canvas.height);
 
       // refresh fft data
-      analyser.current.getFrequencyData();
+      analyser.getFrequencyData();
 
       // map time domain data to canvas draw actions
-      analyser.current.fftData.forEach((d, i) => {
+      analyser.fftData.forEach((d, i) => {
         const vol = d / 255;
         const cx =
           canvas.width / 2 +
           radius *
             Math.cos(
-              (i / analyser.current.frequencyBinCount) * 2 * Math.PI +
+              (i / analyser.frequencyBinCount) * 2 * Math.PI +
                 cycleTime * Math.PI * 2
             );
         const cy =
           canvas.height / 2 +
           radius *
             Math.sin(
-              (i / analyser.current.frequencyBinCount) * 2 * Math.PI +
+              (i / analyser.frequencyBinCount) * 2 * Math.PI +
                 cycleTime * Math.PI * 2
             );
 
         context.beginPath();
 
-        context.fillStyle = spectrumFunction(
-          i / analyser.current.frequencyBinCount
-        );
+        context.fillStyle = spectrumFunction(i / analyser.frequencyBinCount);
 
         context.globalAlphs = vol;
 
@@ -70,7 +69,7 @@ export const FreqBands = () => {
         context.arc(
           cx,
           cy,
-          (canvas.height / analyser.current.frequencyBinCount) * vol,
+          (canvas.height / analyser.frequencyBinCount) * vol,
           0,
           Math.PI * 2
         );

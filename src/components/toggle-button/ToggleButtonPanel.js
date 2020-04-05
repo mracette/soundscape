@@ -94,17 +94,8 @@ export const ToggleButtonPanel = (props) => {
           key={group.name}
           name={group.name}
           groupCount={groups.length}
-          currentPolyphony={
-            props.players.filter(
-              (p) =>
-                p.groupName === group.name &&
-                (p.playerState === "active" ||
-                  p.playerState === "pending-start")
-            ).length
-          }
           polyphony={group.polyphony}
           voices={group.voices}
-          analyserParams={group.analyser}
         />
       ))}
     </div>

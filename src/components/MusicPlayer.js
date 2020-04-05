@@ -14,7 +14,7 @@ import { HomePanel } from "./HomePanel";
 import { MusicPlayerContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
-import { WAW } from "./AppWrap";
+import { WebAudioContext } from "../contexts/contexts";
 
 // reducers
 import { MusicPlayerReducer } from "../reducers/MusicPlayerReducer";
@@ -25,23 +25,49 @@ import "../styles/components/MusicPlayer.scss";
 export const MusicPlayer = () => {
   const { flags } = React.useContext(TestingContext);
   const { id, bpm, groups, ambientTrack } = React.useContext(SongContext);
+  const { WAW, wawLoadStatus } = React.useContext(WebAudioContext);
 
   const backgroundModeEventRef = React.useRef(null);
-  const [wawIsLoading, setWawIsLoading] = React.useState(true);
+
+  const [songLoadStatus, setSongLoadStatus] = React.useState(false);
   const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
     isLoading: true,
     backgroundMode: false,
     randomizeEffects: false,
     pauseVisuals: false,
     mute: false,
-    players: [],
   });
 
-  // initialize web audio state
-  wawIsLoading &&
-    WAW.initSongState(id).then(() => {
-      setWawIsLoading(false);
-    });
+  React.useEffect(() => {
+    if (wawLoadStatus && !songLoadStatus) {
+      WAW.initSongState(id).then(() => {
+        setSongLoadStatus(true);
+      });
+    }
+
+    // safe to resume and take the init time here (after user gesture)
+    if (songLoadStatus && flags.playAmbientTrack && ambientTrack) {
+      WAW.audioCtx.resume();
+      WAW.getVoices(id)["ambient"].start();
+      console.log(WAW.getVoices(id)["ambient"]);
+    }
+
+    // music player cleanup
+    if (songLoadStatus) {
+      return () => {
+        WAW.scheduler.clear();
+        WAW.audioCtx.suspend();
+        flags.playAmbientTrack && WAW.getVoices(id).ambient.stop();
+      };
+    }
+  }, [
+    WAW,
+    wawLoadStatus,
+    ambientTrack,
+    flags.playAmbientTrack,
+    id,
+    songLoadStatus,
+  ]);
 
   /* Randomize Callback */
   const handleRandomize = React.useCallback(() => {
@@ -107,71 +133,54 @@ export const MusicPlayer = () => {
     }
   }, [state.players]);
 
-  React.useEffect(() => {
-    console.log(wawIsLoading);
-    if (!wawIsLoading) {
-      console.log(Object.keys(WAW.getVoices(id)));
-      // should be safe to resume and take the init time here (after user gesture)
-      if (flags.playAmbientTrack && ambientTrack) {
-        WAW.audioCtx.resume();
-        WAW.getVoices(id).ambient.start();
-      }
-
-      // music player cleanup
-      return () => {
-        WAW.scheduler.clear();
-        WAW.audioCtx.suspend();
-        flags.playAmbientTrack && WAW.getVoices(id).ambient.stop();
-      };
-    }
-  }, [ambientTrack, flags.playAmbientTrack, id, wawIsLoading]);
-
   /* Background Mode Hook */
   React.useEffect(() => {
-    if (!wawIsLoading) {
-      // init event
-      if (
-        state.backgroundMode &&
-        !WAW.scheduler.repeatingQueue.find(
-          (e) => e.id === backgroundModeEventRef.current
-        )
-      ) {
-        backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
-          WAW.audioCtx.currentTime + 60 / bpm,
-          (32 * 60) / bpm,
-          triggerRandomVoice
-        );
-        // update event
-      } else if (state.backgroundMode) {
-        WAW.scheduler.updateCallback(
-          backgroundModeEventRef.current,
-          triggerRandomVoice
-        );
-        // stop event
-      } else if (!state.backgroundMode) {
-        WAW.scheduler.cancel(backgroundModeEventRef.current);
-      }
+    // init event
+    if (
+      state.backgroundMode &&
+      !WAW.scheduler.repeatingQueue.find(
+        (e) => e.id === backgroundModeEventRef.current
+      )
+    ) {
+      backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
+        WAW.audioCtx.currentTime + 60 / bpm,
+        (32 * 60) / bpm,
+        triggerRandomVoice
+      );
+      // update event
+    } else if (state.backgroundMode) {
+      WAW.scheduler.updateCallback(
+        backgroundModeEventRef.current,
+        triggerRandomVoice
+      );
+      // stop event
+    } else if (!state.backgroundMode) {
+      WAW.scheduler.cancel(backgroundModeEventRef.current);
     }
-  }, [bpm, state.backgroundMode, triggerRandomVoice, wawIsLoading]);
+  }, [
+    WAW.audioCtx.currentTime,
+    WAW.scheduler,
+    bpm,
+    state.backgroundMode,
+    triggerRandomVoice,
+  ]);
 
   /* Mute Hook */
   React.useEffect(() => {
-    if (!wawIsLoading) {
-      const startMute = () => {
-        WAW.getEffects().premaster.gain.value = 0;
-      };
+    const startMute = () => {
+      WAW.getEffects().premaster.gain.value = 0;
+    };
 
-      const stopMute = () => {
-        WAW.getEffects().premaster.gain.value = 1;
-      };
+    const stopMute = () => {
+      WAW.getEffects().premaster.gain.value = 1;
+    };
 
-      if (state.mute) {
-        startMute();
-      } else {
-        stopMute();
-      }
+    if (state.mute) {
+      startMute();
+    } else {
+      stopMute();
     }
-  }, [state.mute, state.premaster, wawIsLoading]);
+  }, [WAW, state.mute, state.premaster]);
 
   const HomePanelMemo = React.useMemo(() => <HomePanel />, []);
   const SongInfoPanelMemo = React.useMemo(() => <SongInfoPanel />, []);
@@ -197,11 +206,10 @@ export const MusicPlayer = () => {
         dispatch,
       }}
     >
-      {wawIsLoading ? undefined : (
+      {songLoadStatus && (
         <>
           <FreqBands />
-
-          {/* <MenuButtonParent
+          <MenuButtonParent
             name="Menu"
             direction="right"
             separation="6rem"
@@ -229,7 +237,7 @@ export const MusicPlayer = () => {
                 content: SongInfoPanelMemo,
               },
             ]}
-          /> */}
+          />
 
           {/* <CanvasViz /> */}
         </>

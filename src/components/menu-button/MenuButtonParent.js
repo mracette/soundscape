@@ -16,7 +16,6 @@ import "../../styles/components/MenuButtonParent.scss";
 export const MenuButtonParent = (props) => {
   const { vh } = useContext(LayoutContext);
   const { buttonColor } = useContext(ThemeContext);
-  const { isLoading } = useContext(MusicPlayerContext);
 
   // parent button dimensions
   const height = 7 * vh;
@@ -41,7 +40,6 @@ export const MenuButtonParent = (props) => {
       style={{
         top,
         left,
-        visibility: isLoading ? "hidden" : "visible",
       }}
     >
       <button

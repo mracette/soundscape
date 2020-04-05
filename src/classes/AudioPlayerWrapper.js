@@ -1,23 +1,47 @@
+import { createAudioPlayer } from "crco-utils";
+
 export class AudioPlayerWrapper {
-  constructor(context, bufferSource, options) {
+  constructor(context, path, options) {
     // bind
     this.context = context;
-    this.bufferSource = bufferSource;
-    this.buffer = this.bufferSource.buffer;
+    this.path = path;
 
     // defaults
     const defaults = {
       destination: context.destination,
+      renderLength: null,
+      offlineRendering: true,
+      fade: true,
+      fadeLength: 0.001,
       loop: true,
     };
 
     Object.assign(this, { ...defaults, ...options });
+  }
 
-    // setup
-    this.bufferSource.loop = this.loop;
-    this.bufferSource.loopStart = 0;
-    this.bufferSource.loopEnd = bufferSource.buffer.duration;
-    this.bufferSource.connect(this.destination);
+  init() {
+    return new Promise((resolve, reject) => {
+      // setup
+      createAudioPlayer(this.context, this.path, {
+        offlineRendering: this.offlineRendering,
+        renderLength: this.renderLength,
+        fade: this.fade,
+        fadeLength: this.fadeLength,
+      })
+        .then((bufferSource) => {
+          bufferSource.disconnect();
+          console.log(bufferSource);
+          bufferSource.loop = this.loop;
+          bufferSource.loopStart = 0;
+          bufferSource.loopEnd = bufferSource.buffer.duration;
+          bufferSource.connect(this.destination);
+          this.bufferSource = bufferSource;
+          resolve();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   }
 
   disconnect() {
@@ -25,6 +49,7 @@ export class AudioPlayerWrapper {
   }
 
   start(time) {
+    console.log(this.bufferSource);
     try {
       this.bufferSource.start(time);
     } catch (err) {
@@ -46,10 +71,10 @@ export class AudioPlayerWrapper {
     this.disconnect();
 
     const newSource = this.context.createBufferSource();
-    newSource.buffer = this.buffer;
+    newSource.buffer = this.bufferSource.buffer;
     newSource.loop = this.loop;
     newSource.loopStart = 0;
-    newSource.loopEnd = this.buffer.duration;
+    newSource.loopEnd = this.bufferSource.buffer.duration;
     newSource.connect(this.destination);
 
     this.bufferSource = newSource;

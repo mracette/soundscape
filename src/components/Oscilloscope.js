@@ -6,7 +6,8 @@ import { Canvas } from "../components/Canvas";
 
 // context
 import { ThemeContext } from "../contexts/contexts";
-import { MusicPlayerContext } from "../contexts/contexts";
+import { WebAudioContext } from "../contexts/contexts";
+import { SongContext } from "../contexts/contexts";
 
 // hooks
 import { useAnimationFrame } from "../hooks/useAnimationFrame";
@@ -18,33 +19,12 @@ import { Analyser } from "../classes/Analyser";
 import "../styles/components/Oscilloscope.scss";
 
 export const Oscilloscope = (props) => {
-  const { audioCtx } = React.useContext(MusicPlayerContext);
-
-  const filter = React.useRef(
-    (() => {
-      const filter = audioCtx.createBiquadFilter();
-      filter.type = "lowshelf";
-      filter.frequency.value = 120;
-      filter.gain.value = -12;
-      props.input.connect(filter);
-      return filter;
-    })()
-  );
-
+  const { WAW } = React.useContext(WebAudioContext);
+  const { spectrumFunction } = React.useContext(ThemeContext);
+  const { id } = React.useContext(SongContext);
+  const analyser = WAW.getAnalysers(id).groupAnalysers[props.name];
   const canvasRef = React.useRef(null);
   const contextRef = React.useRef(null);
-  const analyserRef = React.useRef(
-    (() =>
-      new Analyser(audioCtx, filter.current, {
-        id: `${props.name}-oscilloscope-analyser`,
-        power: 5,
-        minDecibels: -120,
-        maxDecibels: 0,
-        smoothingTimeConstant: 0,
-      }))()
-  );
-
-  const { spectrumFunction } = React.useContext(ThemeContext);
 
   const render = React.useCallback(
     (canvas, context) => {
@@ -54,7 +34,7 @@ export const Oscilloscope = (props) => {
       context.clearRect(0, 0, canvas.width, canvas.height);
 
       // get time domain data
-      const dataArray = analyserRef.current.getTimeData();
+      const dataArray = analyser.getTimeData();
 
       const sliceWidth = canvas.width / (dataArray.length - 1);
 
@@ -91,7 +71,7 @@ export const Oscilloscope = (props) => {
         context.stroke();
       });
     },
-    [props, spectrumFunction]
+    [analyser, props.gradient, props.groupCount, props.index, spectrumFunction]
   );
 
   useAnimationFrame(() => render(canvasRef.current, contextRef.current));

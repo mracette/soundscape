@@ -3,17 +3,13 @@ import React from "react";
 import anime from "animejs/lib/anime.es.js";
 
 // context
-import { MusicPlayerContext } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
-import { WAW } from "../AppWrap";
+import { WebAudioContext } from "../../contexts/contexts";
 
 // other
-import { createAudioPlayer } from "crco-utils";
-import { nextSubdivision, getPathToAudio } from "../../utils/audioUtils";
-import { AudioPlayerWrapper } from "../../classes/AudioPlayerWrapper";
-import { Scheduler } from "../../classes/Scheduler";
+import { nextSubdivision } from "../../utils/audioUtils";
 
 // styles
 import "../../styles/components/Icon.scss";
@@ -23,24 +19,16 @@ export const ToggleButton = (props) => {
   const buttonRef = React.useRef();
   const animationTargetsRef = React.useRef();
 
+  const { WAW } = React.useContext(WebAudioContext);
   const { vh } = React.useContext(LayoutContext);
   const { id, timeSignature, bpm } = React.useContext(SongContext);
-  const { dispatch } = React.useContext(MusicPlayerContext);
   const { flags } = React.useContext(TestingContext);
-  const {
-    handleUpdatePlayerOrder,
-    handleUpdateOverrides,
-    name,
-    groupName,
-    override,
-    length,
-  } = props;
+  const { dispatch, name, override } = props;
 
   const { scheduler, audioCtx } = WAW;
-  const groupNode = WAW.getEffects()[id].groupNodes[props.groupName];
+  const player = WAW.getVoices(id)[name];
 
   const [playerState, setPlayerState] = React.useState("stopped");
-  const [player, setPlayer] = React.useState(null);
 
   const quantizedStartBeats = flags.quantizeSamples ? 4 * timeSignature : 1;
   const buttonRadius = vh ? vh * 3.5 : 0;
@@ -125,7 +113,7 @@ export const ToggleButton = (props) => {
       // clicking a button on pending stop does nothing
       if (playerState !== "pending-stop") {
         // clear future events for this toggle (necessary to stop a pending start)
-        scheduler.current.clear();
+        scheduler.clear();
 
         const initialState =
           newState === "active" ? "pending-start" : "pending-stop";
@@ -143,7 +131,13 @@ export const ToggleButton = (props) => {
         setPlayerState(initialState);
 
         // update poly count for the group
-        handleUpdatePlayerOrder(name, initialState);
+        dispatch({
+          type: "updatePlayerOrder",
+          payload: {
+            playerId: name,
+            newState: initialState,
+          },
+        });
 
         // calculate time till next loop start
         const quantizedStartSeconds = nextSubdivision(
@@ -164,7 +158,7 @@ export const ToggleButton = (props) => {
         }
 
         // schedule a status change
-        scheduler.current.scheduleOnce(quantizedStartSeconds).then(() => {
+        scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
           // update local state
           setPlayerState(newState);
 
@@ -192,7 +186,6 @@ export const ToggleButton = (props) => {
       scheduler,
       dispatch,
       name,
-      handleUpdatePlayerOrder,
       audioCtx,
       bpm,
       quantizedStartBeats,
@@ -200,40 +193,8 @@ export const ToggleButton = (props) => {
     ]
   );
 
-  /* Initialize Player Hook */
+  /* Initialize Hook */
   React.useEffect(() => {
-    scheduler.current = new Scheduler(audioCtx, name);
-    const pathToAudio = getPathToAudio(id, name, "vbr");
-
-    createAudioPlayer(audioCtx, pathToAudio, {
-      offlineRendering: true,
-      renderLength:
-        (audioCtx.sampleRate * parseInt(length) * timeSignature * 60) / bpm,
-      fade: true,
-      fadeLength: 0.025,
-    }).then((audioPlayer) => {
-      // create the player
-      setPlayer(
-        new AudioPlayerWrapper(audioCtx, audioPlayer, {
-          destination: groupNode,
-          loop: true,
-        })
-      );
-
-      // send reference to music player
-      dispatch({
-        type: "addPlayer",
-        payload: {
-          player: {
-            id: name,
-            groupName: groupName,
-            playerState,
-            buttonRef: buttonRef.current,
-          },
-        },
-      });
-    });
-
     // store the animation targets based on their relative positions in the DOM
     animationTargetsRef.current = {
       button: buttonRef.current,
@@ -243,20 +204,31 @@ export const ToggleButton = (props) => {
       iconPoly: buttonRef.current.children[1].children[0].children[0],
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    dispatch({
+      type: "addPlayer",
+      payload: {
+        player: {
+          id: props.name,
+          playerState: "stopped",
+          ref: buttonRef,
+        },
+      },
+    });
+  }, [dispatch, id, props.name]);
 
   /* Override Hook */
   React.useEffect(() => {
+    console.log(override, playerState);
     if (
       override &&
       (playerState === "active" || playerState === "pending-start")
     ) {
+      console.log("override");
       // stop player and remove from the override list
       changePlayerState("stopped");
-      handleUpdateOverrides(name);
+      dispatch({ type: "updatePlayerOverrides", payload: { playerId: name } });
     }
-  }, [playerState, changePlayerState, handleUpdateOverrides, name, override]);
+  }, [playerState, changePlayerState, name, override, dispatch]);
 
   /* Cleanup Hook */
   React.useEffect(() => {

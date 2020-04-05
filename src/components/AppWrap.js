@@ -10,6 +10,7 @@ import { AppRouter } from "./AppRouter";
 // context
 import { LayoutContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
+import { WebAudioContext } from "../contexts/contexts";
 
 // classes
 import { WebAudioWrapper } from "../classes/WebAudioWrapper";
@@ -34,15 +35,13 @@ for (let i = 0; i <= 255; i++) {
 }
 
 const appConfig = require("../app-config.json");
-
-export const WAW = new WebAudioWrapper(appConfig);
-WAW.initAppState();
+const webAudioWrapper = new WebAudioWrapper(appConfig);
 
 // global behavior flags for testing
 const flags = {
-  quantizeSamples: true,
+  quantizeSamples: false,
   showVisuals: true,
-  playAmbientTrack: true,
+  playAmbientTrack: false,
 };
 
 // define spectrum functions here since they don't do well in json
@@ -53,6 +52,9 @@ const spectrumFunctions = {
 
 // inits globals vars, adds listeners, and manages some other settings
 export const AppWrap = () => {
+  const [wawLoadStatus, setWawLoadStatus] = React.useState(false);
+  webAudioWrapper.initAppState().then(() => setWawLoadStatus(true));
+
   // run once before the dom is drawn
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
@@ -74,7 +76,8 @@ export const AppWrap = () => {
 
   React.useEffect(() => {
     const resumeAudio = () => {
-      WAW.audioCtx.state === "suspended" && WAW.audioCtx.resume();
+      webAudioWrapper.audioCtx.state === "suspended" &&
+        webAudioWrapper.audioCtx.resume();
     };
 
     // gets the inner height/width to act as viewport dimensions (cross-platform benefits)
@@ -113,13 +116,15 @@ export const AppWrap = () => {
   }, []);
 
   return (
-    <TestingContext.Provider value={{ flags }}>
-      <LayoutContext.Provider value={{ vw, vh, isMobile }}>
-        <AppRouter
-          appConfig={appConfig}
-          spectrumFunctions={spectrumFunctions}
-        />
-      </LayoutContext.Provider>
-    </TestingContext.Provider>
+    <WebAudioContext.Provider value={{ WAW: webAudioWrapper, wawLoadStatus }}>
+      <TestingContext.Provider value={{ flags }}>
+        <LayoutContext.Provider value={{ vw, vh, isMobile }}>
+          <AppRouter
+            appConfig={appConfig}
+            spectrumFunctions={spectrumFunctions}
+          />
+        </LayoutContext.Provider>
+      </TestingContext.Provider>
+    </WebAudioContext.Provider>
   );
 };

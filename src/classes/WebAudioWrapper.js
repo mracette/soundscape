@@ -13,6 +13,7 @@ import { AudioPlayerWrapper } from "./AudioPlayerWrapper";
 
 export class WebAudioWrapper {
   constructor(appConfig) {
+    console.log("creating new web audio wrapper");
     const props = {
       config: {},
       nodes: {},
@@ -47,9 +48,14 @@ export class WebAudioWrapper {
      * These are WebAudio nodes that will be used across songs, and should persist
      * for the duration of the session.
      */
-    await this._initAppEffectValues();
-    await this._initAppEffects();
-    await this._initAppAnalysers();
+    if (!this.status.app) {
+      console.log("initializing app state");
+      await this._initAppEffectValues();
+      await this._initAppEffects();
+      await this._initAppAnalysers();
+      this.status.app = true;
+    }
+    return true;
   }
 
   async initSongState(id) {
@@ -58,12 +64,14 @@ export class WebAudioWrapper {
      * persist across the session to avoid re-initialization if a user re-visits
      * a page, but they can be lazily loaded.
      */
+    console.log("initializing song state: " + id);
     if (!this.status[id]) {
       await this._initSongEffects(id);
       await this._initSongAnalysers(id);
       await this._initSongVoices(id);
       this.status[id] = true;
     }
+    return true;
   }
 
   _initAppEffects() {
@@ -89,8 +97,14 @@ export class WebAudioWrapper {
       effects.reverbWet.connect(effects.reverb);
       effects.reverb.connect(effects.effectsChainExit);
       effects.effectsChainExit.connect(effects.premaster);
+      effects.premaster.connect(this.audioCtx.destination);
 
       this.nodes.effects = effects;
+
+      // set initial filter values
+      this.setEffects("lp", 100);
+      this.setEffects("hp", 1);
+      this.setEffects("am", 1);
 
       // impulse response for reverb
       const pathToAudio = getPathToAudio(
@@ -158,9 +172,9 @@ export class WebAudioWrapper {
       amValues.push((min + (max - min) * (i - 1)) / 99);
     }
 
-    this.values.lpValues = lpValues;
-    this.values.hpValues = hpValues;
-    this.values.amValues = amValues;
+    this.values.lp = lpValues;
+    this.values.hp = hpValues;
+    this.values.am = amValues;
   }
 
   _initAppAnalysers() {
@@ -192,6 +206,11 @@ export class WebAudioWrapper {
         const groupNodes = {};
         this.config[id].groups.forEach((group) => {
           groupNodes[group.name] = initGain(this.audioCtx, 1);
+          groupNodes[group.name].connect(this.nodes.effects.effectsChainEntry);
+          console.log(
+            groupNodes[group.name],
+            this.nodes.effects.effectsChainEntry
+          );
         });
         this.nodes.effects[id] = { groupNodes };
         resolve();
@@ -228,10 +247,11 @@ export class WebAudioWrapper {
     return new Promise((resolve, reject) => {
       try {
         const voices = {};
+        const promises = [];
         // ambient track
         if (this.config[id].ambientTrack) {
           const pathToAudio = getPathToAudio(id, "ambient-track", "vbr");
-          createAudioPlayer(this.audioCtx, pathToAudio, {
+          const player = new AudioPlayerWrapper(this.audioCtx, pathToAudio, {
             offlineRendering: true,
             renderLength:
               (this.audioCtx.sampleRate *
@@ -241,22 +261,17 @@ export class WebAudioWrapper {
               this.config[id].bpm,
             fade: true,
             fadeLength: this.values.FADE_LENGTH_AMBIENT,
-          }).then((audioPlayer) => {
-            voices["ambient"] = new AudioPlayerWrapper(
-              this.audioCtx,
-              audioPlayer,
-              {
-                destination: this.nodes.effects.premaster,
-                loop: true,
-              }
-            );
+            destination: this.nodes.effects.premaster,
+            loop: true,
           });
+          voices["ambient"] = player;
+          promises.push(player.init());
         }
         // song voices
         this.config[id].groups.forEach((group) => {
           group.voices.forEach((voice) => {
             const pathToAudio = getPathToAudio(id, voice.name, "vbr");
-            createAudioPlayer(this.audioCtx, pathToAudio, {
+            const player = new AudioPlayerWrapper(this.audioCtx, pathToAudio, {
               offlineRendering: true,
               renderLength:
                 (this.audioCtx.sampleRate *
@@ -266,33 +281,30 @@ export class WebAudioWrapper {
                 this.config[id].bpm,
               fade: true,
               fadeLength: this.values.FADE_LENGTH,
-            }).then((audioPlayer) => {
-              voices[voice.name] = new AudioPlayerWrapper(
-                this.audioCtx,
-                audioPlayer,
-                {
-                  destination: this.nodes.effects[id].groupNodes[group.name],
-                  loop: true,
-                }
-              );
+              destination: this.nodes.effects[id].groupNodes[group.name],
+              loop: true,
             });
+            voices[voice.name] = player;
+            promises.push(player.init());
           });
         });
         this.nodes.voices || (this.nodes.voices = {});
         this.nodes.voices[id] = voices;
-        resolve();
+        Promise.all(promises)
+          .then(() => resolve())
+          .catch((err) => reject(err));
       } catch (err) {
         reject(err);
       }
     });
   }
 
-  getAnalysers() {
-    return this.nodes.analysers;
+  getAnalysers(songId = null) {
+    return songId ? this.nodes.analysers[songId] : this.nodes.analysers;
   }
 
-  getEffects() {
-    return this.nodes.effects;
+  getEffects(songId = null) {
+    return songId ? this.nodes.effects[songId] : this.nodes.effects;
   }
 
   getValues() {
@@ -305,5 +317,31 @@ export class WebAudioWrapper {
 
   getConfig(songId) {
     return this.config[songId];
+  }
+
+  setEffects(name, value) {
+    console.log(this.values);
+    switch (name) {
+      case "lp": {
+        const v = this.values.lp[Math.round(value) - 1];
+        this.nodes.effects.lpFilter.frequency.value = v.f;
+        this.nodes.effects.lpFilter.Q.value = v.q;
+        break;
+      }
+      case "hp": {
+        const v = this.values.hp[Math.round(value) - 1];
+        this.nodes.effects.hpFilter.frequency.value = v.f;
+        this.nodes.effects.hpFilter.Q.value = v.q;
+        break;
+      }
+      case "am": {
+        const wet = this.values.am[Math.round(value) - 1];
+        this.nodes.effects.reverbWet = wet;
+        this.nodes.effects.reverbDry = 1 - wet;
+        break;
+      }
+      default:
+        break;
+    }
   }
 }
