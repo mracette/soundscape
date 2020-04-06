@@ -30,7 +30,6 @@ export class AudioPlayerWrapper {
       })
         .then((bufferSource) => {
           bufferSource.disconnect();
-          console.log(bufferSource);
           bufferSource.loop = this.loop;
           bufferSource.loopStart = 0;
           bufferSource.loopEnd = bufferSource.buffer.duration;
@@ -49,7 +48,6 @@ export class AudioPlayerWrapper {
   }
 
   start(time) {
-    console.log(this.bufferSource);
     try {
       this.bufferSource.start(time);
     } catch (err) {
@@ -62,7 +60,7 @@ export class AudioPlayerWrapper {
     try {
       this.bufferSource.stop(time);
     } catch (err) {
-      console.log(err);
+      return;
     }
   }
 

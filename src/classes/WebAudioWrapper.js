@@ -6,14 +6,13 @@ import {
   getPathToAudio,
 } from "../utils/audioUtils";
 
-import { loadArrayBuffer, createAudioPlayer } from "crco-utils";
+import { loadArrayBuffer } from "crco-utils";
 import { Analyser } from "./Analyser";
 import { Scheduler } from "./Scheduler";
 import { AudioPlayerWrapper } from "./AudioPlayerWrapper";
 
 export class WebAudioWrapper {
   constructor(appConfig) {
-    console.log("creating new web audio wrapper");
     const props = {
       config: {},
       nodes: {},
@@ -49,7 +48,6 @@ export class WebAudioWrapper {
      * for the duration of the session.
      */
     if (!this.status.app) {
-      console.log("initializing app state");
       await this._initAppEffectValues();
       await this._initAppEffects();
       await this._initAppAnalysers();
@@ -64,7 +62,6 @@ export class WebAudioWrapper {
      * persist across the session to avoid re-initialization if a user re-visits
      * a page, but they can be lazily loaded.
      */
-    console.log("initializing song state: " + id);
     if (!this.status[id]) {
       await this._initSongEffects(id);
       await this._initSongAnalysers(id);
@@ -207,10 +204,6 @@ export class WebAudioWrapper {
         this.config[id].groups.forEach((group) => {
           groupNodes[group.name] = initGain(this.audioCtx, 1);
           groupNodes[group.name].connect(this.nodes.effects.effectsChainEntry);
-          console.log(
-            groupNodes[group.name],
-            this.nodes.effects.effectsChainEntry
-          );
         });
         this.nodes.effects[id] = { groupNodes };
         resolve();
@@ -225,12 +218,25 @@ export class WebAudioWrapper {
       try {
         const groupAnalysers = {};
         this.config[id].groups.forEach((group) => {
+          // one analyser for 3D vizualizations
           groupAnalysers[group.name] = new Analyser(
             this.audioCtx,
             this.nodes.effects[id].groupNodes[group.name],
             {
               id: `${id}-${group.name}-analyser`,
               ...group.analyser,
+            }
+          );
+          // one analyser for oscilloscopes
+          groupAnalysers[group.name + "-osc"] = new Analyser(
+            this.audioCtx,
+            this.nodes.effects[id].groupNodes[group.name],
+            {
+              id: `${id}-${group.name}-analyser-osc`,
+              power: 5,
+              minDecibels: -120,
+              maxDecibels: 0,
+              smoothingTimeConstant: 0,
             }
           );
         });
@@ -320,7 +326,6 @@ export class WebAudioWrapper {
   }
 
   setEffects(name, value) {
-    console.log(this.values);
     switch (name) {
       case "lp": {
         const v = this.values.lp[Math.round(value) - 1];
@@ -336,8 +341,8 @@ export class WebAudioWrapper {
       }
       case "am": {
         const wet = this.values.am[Math.round(value) - 1];
-        this.nodes.effects.reverbWet = wet;
-        this.nodes.effects.reverbDry = 1 - wet;
+        this.nodes.effects.reverbWet.gain.value = wet;
+        this.nodes.effects.reverbDry.gain.value = 1 - wet;
         break;
       }
       default:

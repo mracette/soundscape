@@ -12,9 +12,6 @@ import { SongContext } from "../contexts/contexts";
 // hooks
 import { useAnimationFrame } from "../hooks/useAnimationFrame";
 
-// other
-import { Analyser } from "../classes/Analyser";
-
 // styles
 import "../styles/components/Oscilloscope.scss";
 
@@ -22,28 +19,20 @@ export const Oscilloscope = (props) => {
   const { WAW } = React.useContext(WebAudioContext);
   const { spectrumFunction } = React.useContext(ThemeContext);
   const { id } = React.useContext(SongContext);
-  const analyser = WAW.getAnalysers(id).groupAnalysers[props.name];
+  const analyser = WAW.getAnalysers(id).groupAnalysers[props.name + "-osc"];
   const canvasRef = React.useRef(null);
   const contextRef = React.useRef(null);
 
   const render = React.useCallback(
     (canvas, context) => {
       contextRef.current.lineWidth = canvas.height / 20;
-
-      // clear previous draw
       context.clearRect(0, 0, canvas.width, canvas.height);
-
-      // get time domain data
       const dataArray = analyser.getTimeData();
-
       const sliceWidth = canvas.width / (dataArray.length - 1);
-
-      let x = 0;
       let prevX, prevY;
-
+      let x = 0;
       dataArray.forEach((d, i) => {
         context.beginPath();
-
         if (props.gradient) {
           context.strokeStyle = spectrumFunction(
             props.index / props.groupCount +
@@ -52,7 +41,6 @@ export const Oscilloscope = (props) => {
         }
 
         const v = d / 128.0;
-
         const y = (v * canvas.height) / 2;
 
         if (x === 0) {
@@ -62,12 +50,9 @@ export const Oscilloscope = (props) => {
         }
 
         context.lineTo(x, y);
-
         prevX = x;
         prevY = y;
-
         x += sliceWidth;
-
         context.stroke();
       });
     },

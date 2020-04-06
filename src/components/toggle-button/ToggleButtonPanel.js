@@ -21,12 +21,6 @@ export const ToggleButtonPanel = (props) => {
 
   const { groups } = React.useContext(SongContext);
 
-  const [soloOverride, setSoloOverride] = React.useState(false);
-
-  const handleAddSolo = React.useCallback((value) => {
-    setSoloOverride(value);
-  }, []);
-
   return (
     <div id="toggle-button-panel" className="flex-panel">
       <div className="flex-row" style={{ justifyContent: "space-between" }}>
@@ -89,8 +83,6 @@ export const ToggleButtonPanel = (props) => {
       {groups.map((group, index) => (
         <ToggleButtonGroup
           index={index}
-          handleAddSolo={handleAddSolo}
-          soloOverride={soloOverride}
           key={group.name}
           name={group.name}
           groupCount={groups.length}

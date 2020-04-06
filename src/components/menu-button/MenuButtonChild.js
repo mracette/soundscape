@@ -77,8 +77,10 @@ export const MenuButtonChild = (props) => {
             display: !isOpen && "none",
             top: props.height + (props.parentHeight - props.height) / 2,
             left: marginStyle + (props.parentWidth - props.width) / 2,
-            borderWidth: props.width / 2,
-            borderTop: 0,
+            borderLeftWidth: props.width / 2,
+            borderRightWidth: props.width / 2,
+            borderBottomWidth: props.width / 2,
+            borderTopWidth: 0,
           }}
         />
         <MenuButtonContentWrapper

@@ -24,18 +24,24 @@ import "../styles/components/MusicPlayer.scss";
 
 export const MusicPlayer = () => {
   const { flags } = React.useContext(TestingContext);
-  const { id, bpm, groups, ambientTrack } = React.useContext(SongContext);
+  const { id, bpm, ambientTrack } = React.useContext(SongContext);
   const { WAW, wawLoadStatus } = React.useContext(WebAudioContext);
 
   const backgroundModeEventRef = React.useRef(null);
 
   const [songLoadStatus, setSongLoadStatus] = React.useState(false);
   const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
+    players: [],
+    voices: [],
+    groupSolos: [],
+    resetCallbacks: [],
+    randomizeCallbacks: [],
     isLoading: true,
     backgroundMode: false,
     randomizeEffects: false,
     pauseVisuals: false,
     mute: false,
+    soloOverride: false,
   });
 
   React.useEffect(() => {
@@ -49,7 +55,6 @@ export const MusicPlayer = () => {
     if (songLoadStatus && flags.playAmbientTrack && ambientTrack) {
       WAW.audioCtx.resume();
       WAW.getVoices(id)["ambient"].start();
-      console.log(WAW.getVoices(id)["ambient"]);
     }
 
     // music player cleanup
@@ -69,69 +74,35 @@ export const MusicPlayer = () => {
     songLoadStatus,
   ]);
 
-  /* Randomize Callback */
-  const handleRandomize = React.useCallback(() => {
-    const voicesToEnable = [];
-
-    groups.forEach((g) => {
-      // get the effective poly; the max number of voices to enable
-      const ePoly = g.polyphony === -1 ? g.voices.length : g.polyphony;
-
-      // ensures 1 voice from each group is enabled
-      const count = Math.ceil(Math.random() * ePoly);
-
-      // keep track of how many are enabled in each group
-      const groupCount = [];
-
-      while (groupCount.length < count) {
-        const rand = Math.floor(Math.random() * g.voices.length);
-        const id = g.voices[rand].name;
-        if (groupCount.indexOf(id) === -1) {
-          groupCount.push(id);
-          voicesToEnable.push(id);
-        }
-      }
-    });
-
-    state.players.forEach((p) => {
-      if (voicesToEnable.indexOf(p.id) !== -1) {
-        if (p.playerState === "stopped") {
-          p.buttonRef.click();
-        }
-      } else {
-        if (p.playerState !== "stopped") {
-          p.buttonRef.click();
-        }
-      }
-    });
-  }, [state.players, groups]);
-
-  /* Reset Callback */
   const handleReset = React.useCallback(() => {
-    // take the simple route - click the players!
-    const activePlayers = state.players.filter(
-      (p) => p.playerState === "active" || p.playerState === "pending-start"
-    );
-    activePlayers.forEach((p) => p.buttonRef.click());
-  }, [state.players]);
+    state.resetCallbacks.forEach((obj) => {
+      obj.resetCallback();
+    });
+  }, [state.resetCallbacks]);
+
+  const handleRandomize = React.useCallback(() => {
+    state.randomizeCallbacks.forEach((obj) => {
+      obj.randomizeCallback();
+    });
+  }, [state.randomizeCallbacks]);
 
   /* Background Mode Callback */
   const triggerRandomVoice = React.useCallback(() => {
-    const viableOne = state.players.filter(
-      (p) => !p.playerState.includes("pending")
+    const viableOne = state.voices.filter(
+      (v) => !v.voiceState.includes("pending")
     );
     const randomOne = Math.floor(Math.random() * viableOne.length);
-    state.players[randomOne].buttonRef.click();
+    state.voices[randomOne].ref.click();
 
     // trigger an additional voice when less than 1/2 are active
-    if (viableOne.length >= state.players.length) {
+    if (viableOne.length >= state.voices.length) {
       const viableTwo = viableOne.filter(
         (p, i) => i !== randomOne && p.groupName !== randomOne.groupName
       );
       const randomTwo = Math.floor(Math.random() * viableTwo.length);
-      state.players[randomTwo].buttonRef.click();
+      state.voices[randomTwo].ref.click();
     }
-  }, [state.players]);
+  }, [state.voices]);
 
   /* Background Mode Hook */
   React.useEffect(() => {
@@ -157,13 +128,8 @@ export const MusicPlayer = () => {
     } else if (!state.backgroundMode) {
       WAW.scheduler.cancel(backgroundModeEventRef.current);
     }
-  }, [
-    WAW.audioCtx.currentTime,
-    WAW.scheduler,
-    bpm,
-    state.backgroundMode,
-    triggerRandomVoice,
-  ]);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [bpm, state.backgroundMode, triggerRandomVoice]);
 
   /* Mute Hook */
   React.useEffect(() => {
@@ -193,10 +159,9 @@ export const MusicPlayer = () => {
       <ToggleButtonPanel
         handleRandomize={handleRandomize}
         handleReset={handleReset}
-        players={state.players}
       />
     ),
-    [handleRandomize, handleReset, state.players]
+    [handleRandomize, handleReset]
   );
 
   return (
@@ -239,7 +204,7 @@ export const MusicPlayer = () => {
             ]}
           />
 
-          {/* <CanvasViz /> */}
+          <CanvasViz />
         </>
       )}
     </MusicPlayerContext.Provider>

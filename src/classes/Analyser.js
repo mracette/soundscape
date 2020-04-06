@@ -34,8 +34,6 @@ export class Analyser {
         ? 1
         : 0.5;
 
-    console.log("creating new analyser: " + this.id);
-
     // represents the first and last bin to take to stay true to frequency bounds
     // errs on the side of preserving more data
     this.binMin = Math.floor(this.minFrequency / this.binSize);

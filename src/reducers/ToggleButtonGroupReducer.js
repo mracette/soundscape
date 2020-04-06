@@ -27,7 +27,6 @@ export const ToggleButtonGroupReducer = (state, action) => {
       } else {
         increment = 0;
       }
-      console.log(state.players);
       return {
         ...state,
         polyphony: state.polyphony + increment,
@@ -41,7 +40,6 @@ export const ToggleButtonGroupReducer = (state, action) => {
       };
     }
     case "updatePlayerOrder": {
-      console.log(state);
       if (action.payload.newState === "pending-start") {
         if (
           state.maxPolyphony === -1 ||

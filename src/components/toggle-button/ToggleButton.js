@@ -7,6 +7,7 @@ import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
+import { MusicPlayerContext } from "../../contexts/contexts";
 
 // other
 import { nextSubdivision } from "../../utils/audioUtils";
@@ -15,14 +16,30 @@ import { nextSubdivision } from "../../utils/audioUtils";
 import "../../styles/components/Icon.scss";
 import "../../styles/components/ToggleButton.scss";
 
+const START_PARAMS = {
+  rotateZ: "-180",
+  backgroundColor: "rgba(255, 255, 255, .3)",
+  points:
+    "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188",
+};
+
+const STOP_PARAMS = {
+  rotateZ: "0",
+  backgroundColor: "rgba(255, 255, 255, 0)",
+  points:
+    "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100",
+};
+
 export const ToggleButton = (props) => {
   const buttonRef = React.useRef();
   const animationTargetsRef = React.useRef();
+  const animationEventRef = React.useRef();
 
   const { WAW } = React.useContext(WebAudioContext);
   const { vh } = React.useContext(LayoutContext);
   const { id, timeSignature, bpm } = React.useContext(SongContext);
   const { flags } = React.useContext(TestingContext);
+  const musicPlayerDispatch = React.useContext(MusicPlayerContext).dispatch;
   const { dispatch, name, override } = props;
 
   const { scheduler, audioCtx } = WAW;
@@ -47,29 +64,27 @@ export const ToggleButton = (props) => {
         let strokeDashoffset, points, backgroundColor, rotateZ;
 
         if (type === "start") {
-          rotateZ = "-180";
-          backgroundColor = "rgba(255, 255, 255, .3)";
+          rotateZ = START_PARAMS.rotateZ;
+          backgroundColor = START_PARAMS.backgroundColor;
           strokeDashoffset = [
             0,
             2 * Math.PI * (buttonRadius - buttonBorder / 2),
           ];
           points = [
             {
-              value:
-                "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188",
+              value: START_PARAMS.points,
             },
           ];
         } else if (type === "stop") {
-          rotateZ = "0";
-          backgroundColor = "rgba(255, 255, 255, 0)";
+          rotateZ = STOP_PARAMS.rotateZ;
+          backgroundColor = STOP_PARAMS.backgroundColor;
           strokeDashoffset = [
             animationTargetsRef.current.circleSvg.style.strokeDashoffset,
             0,
           ];
           points = [
             {
-              value:
-                "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100",
+              value: STOP_PARAMS.points,
             },
           ];
         }
@@ -110,58 +125,64 @@ export const ToggleButton = (props) => {
         });
       };
 
-      // clicking a button on pending stop does nothing
-      if (playerState !== "pending-stop") {
-        // clear future events for this toggle (necessary to stop a pending start)
-        scheduler.clear();
+      // cancel current event for this toggle (necessary to stop a pending start)
+      scheduler.cancel(animationEventRef.current);
 
-        const initialState =
-          newState === "active" ? "pending-start" : "pending-stop";
+      const initialState =
+        newState === "active" ? "pending-start" : "pending-stop";
 
-        // dispatch initial update to music player
-        dispatch({
-          type: "updatePlayerState",
-          payload: {
-            id: name,
-            newState: initialState,
-          },
-        });
+      dispatch({
+        type: "updatePlayerState",
+        payload: {
+          id: name,
+          newState: initialState,
+        },
+      });
 
-        // set local state
-        setPlayerState(initialState);
+      musicPlayerDispatch({
+        type: "updateVoiceState",
+        payload: {
+          id: props.name,
+          newState: initialState,
+        },
+      });
 
-        // update poly count for the group
-        dispatch({
-          type: "updatePlayerOrder",
-          payload: {
-            playerId: name,
-            newState: initialState,
-          },
-        });
+      setPlayerState(initialState);
 
-        // calculate time till next loop start
-        const quantizedStartSeconds = nextSubdivision(
-          audioCtx,
-          bpm,
-          quantizedStartBeats
-        );
+      dispatch({
+        type: "updatePlayerOrder",
+        payload: {
+          playerId: name,
+          newState: initialState,
+        },
+      });
 
-        switch (newState) {
-          case "active":
-            player.start(quantizedStartSeconds);
-            break;
-          case "stopped":
-            player.stop(quantizedStartSeconds);
-            break;
-          default:
-            break;
-        }
+      // calculate time till next loop start
+      const quantizedStartSeconds = nextSubdivision(
+        audioCtx,
+        bpm,
+        quantizedStartBeats
+      );
 
-        // schedule a status change
-        scheduler.scheduleOnce(quantizedStartSeconds).then(() => {
+      switch (newState) {
+        case "active":
+          player.start(quantizedStartSeconds);
+          break;
+        case "stopped":
+          player.stop(quantizedStartSeconds);
+          break;
+        default:
+          break;
+      }
+
+      // schedule a status change
+      console.log("scheduling " + newState);
+      animationEventRef.current = scheduler.scheduleOnce(
+        quantizedStartSeconds,
+        () => {
           // update local state
           setPlayerState(newState);
-
+          console.log("setting state as " + newState);
           // dispatch final update to music player
           dispatch({
             type: "updatePlayerState",
@@ -170,26 +191,34 @@ export const ToggleButton = (props) => {
               newState: newState,
             },
           });
-        });
+          musicPlayerDispatch({
+            type: "updateVoiceState",
+            payload: {
+              id: props.name,
+              newState,
+            },
+          });
+        }
+      );
 
-        // convert to millis for animations
-        const quantizedStartMillis =
-          (quantizedStartSeconds - audioCtx.currentTime) * 1000;
-        const animationType = newState === "stopped" ? "stop" : "start";
-        runAnimation(animationType, quantizedStartMillis);
-      }
+      // convert to millis for animations
+      const quantizedStartMillis =
+        (quantizedStartSeconds - audioCtx.currentTime) * 1000;
+      const animationType = newState === "stopped" ? "stop" : "start";
+      runAnimation(animationType, quantizedStartMillis);
     },
     [
-      playerState,
-      buttonRadius,
-      buttonBorder,
       scheduler,
       dispatch,
       name,
       audioCtx,
       bpm,
       quantizedStartBeats,
+      buttonRadius,
+      buttonBorder,
       player,
+      musicPlayerDispatch,
+      props.name,
     ]
   );
 
@@ -210,20 +239,28 @@ export const ToggleButton = (props) => {
         player: {
           id: props.name,
           playerState: "stopped",
-          ref: buttonRef,
+          ref: buttonRef.current,
         },
       },
     });
-  }, [dispatch, id, props.name]);
+
+    musicPlayerDispatch({
+      type: "addVoice",
+      payload: {
+        id: props.name,
+        group: props.groupName,
+        voiceState: "stopped",
+        ref: buttonRef.current,
+      },
+    });
+  }, [dispatch, id, musicPlayerDispatch, props.groupName, props.name]);
 
   /* Override Hook */
   React.useEffect(() => {
-    console.log(override, playerState);
     if (
       override &&
       (playerState === "active" || playerState === "pending-start")
     ) {
-      console.log("override");
       // stop player and remove from the override list
       changePlayerState("stopped");
       dispatch({ type: "updatePlayerOverrides", payload: { playerId: name } });
@@ -301,7 +338,7 @@ export const ToggleButton = (props) => {
           <polygon
             id="icon-play3-poly"
             className={`icon icon-white`}
-            points="6.69872981 0 46.650635094 25 93.01270188 50 46.650635094 75 6.69872981 100"
+            points={STOP_PARAMS.points}
           />
         </svg>
       </div>

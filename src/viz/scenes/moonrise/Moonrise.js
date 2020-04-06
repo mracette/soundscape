@@ -14,13 +14,11 @@ export class Moonrise extends SceneManager {
     this.songId = "moonrise";
     this.DPRMax = 2.5;
 
-    this.rhythmAnalyser = analysers.find((a) => a.id === "rhythm-analyser");
-    this.atmosphereAnalyser = analysers.find(
-      (a) => a.id === "atmosphere-analyser"
-    );
-    this.harmonyAnalyser = analysers.find((a) => a.id === "harmony-analyser");
-    this.melodyAnalyser = analysers.find((a) => a.id === "melody-analyser");
-    this.bassAnalyser = analysers.find((a) => a.id === "bass-analyser");
+    this.rhythmAnalyser = analysers["rhythm"];
+    this.atmosphereAnalyser = analysers["atmosphere"];
+    this.harmonyAnalyser = analysers["harmony"];
+    this.melodyAnalyser = analysers["melody"];
+    this.bassAnalyser = analysers["bass"];
 
     this.palette = {
       white: 0xffffff,

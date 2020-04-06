@@ -104,6 +104,9 @@ export const EffectsPanel = (props) => {
             hpRef.current.value = 1;
             lpRef.current.value = 100;
             ambienceRef.current.value = 1;
+            WAW.setEffects("hp", 1);
+            WAW.setEffects("lp", 100);
+            WAW.setEffects("am", 1);
           }}
         >
           Reset
@@ -119,6 +122,9 @@ export const EffectsPanel = (props) => {
             hpRef.current.value = h;
             lpRef.current.value = l;
             ambienceRef.current.value = a;
+            WAW.setEffects("hp", h);
+            WAW.setEffects("lp", l);
+            WAW.setEffects("am", a);
           }}
         >
           Randomize
@@ -133,6 +139,7 @@ export const EffectsPanel = (props) => {
           type="range"
           min="1"
           max="100"
+          defaultValue={1}
           disabled={randomizeEffects}
           id="hp-slider"
           ref={hpRef}
@@ -149,6 +156,7 @@ export const EffectsPanel = (props) => {
           type="range"
           min="1"
           max="100"
+          defaultValue={100}
           disabled={randomizeEffects}
           id="lp-slider"
           ref={lpRef}
@@ -165,6 +173,7 @@ export const EffectsPanel = (props) => {
           type="range"
           min="1"
           max="100"
+          defaultValue={1}
           disabled={randomizeEffects}
           id="spaciousness-slider"
           ref={ambienceRef}

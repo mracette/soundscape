@@ -45,11 +45,11 @@ export class Mornings extends SceneManager {
     this.renderList = ["house", "plant", "table", "bookcase", "flower"];
     this.bpm = extras.bpm;
 
-    this.rhythmAnalyser = analysers.find((a) => a.id === "rhythm-analyser");
-    this.atmosphereAnalyser = analysers.find((a) => a.id === "extras-analyser");
-    this.harmonyAnalyser = analysers.find((a) => a.id === "harmony-analyser");
-    this.melodyAnalyser = analysers.find((a) => a.id === "melody-analyser");
-    this.bassAnalyser = analysers.find((a) => a.id === "bass-analyser");
+    this.rhythmAnalyser = analysers["rhythm"];
+    this.atmosphereAnalyser = analysers["extras"];
+    this.harmonyAnalyser = analysers["harmony"];
+    this.melodyAnalyser = analysers["melody"];
+    this.bassAnalyser = analysers["bass"];
 
     this.fovAdjust = true;
     this.fpcControl = false;

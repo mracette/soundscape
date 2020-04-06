@@ -13,7 +13,7 @@ export class Scheduler {
     this.eventId = 0;
   }
 
-  scheduleOnce(time, name, callback) {
+  scheduleOnce(time, callback) {
     // increment for the next event
     this.eventId++;
 
@@ -28,7 +28,6 @@ export class Scheduler {
     // add to schedule queue
     this.queue.push({
       id: newEventId,
-      name: name || null,
       time,
       type: "single",
       source: dummySource,
@@ -104,39 +103,6 @@ export class Scheduler {
 
     if (event) {
       event.source.onended = callback;
-    }
-  }
-
-  updateQueue() {
-    for (let i = this.repeatingQueue.length - 1; i >= 0; i--) {
-      const event = this.repeatingQueue[i];
-
-      if (event.time < this.audioCtx.currentTime) {
-        this.repeatingQueue.splice(i, 1);
-
-        // create a dummy buffer to trigger the event
-        const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
-        const dummySource = this.audioCtx.createBufferSource();
-        dummySource.buffer = dummyBuffer;
-
-        // assign callback (same as previous event)
-        dummySource.onended = event.source.onended;
-
-        // start
-        dummySource.start(
-          // ensure the start time is positive
-          Math.max(0, event.time + event.frequency - dummyBuffer.duration)
-        );
-
-        // update the parameters and push a copy of the event to the queue
-        this.repeatingQueue.push({
-          id: event.id,
-          time: event.time + event.frequency,
-          type: "repeating",
-          frequency: event.frequency,
-          source: dummySource,
-        });
-      }
     }
   }
 
