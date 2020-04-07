@@ -15,6 +15,9 @@ import { TestingContext } from '../contexts/contexts';
 import { MusicPlayerContext } from '../contexts/contexts';
 import { ThemeContext } from '../contexts/contexts';
 
+// utils
+import { cinematicResize, addWindowListeners, removeWindowListeners } from '../utils/jsUtils';
+
 // styles
 import '../styles/components/CanvasViz.scss';
 
@@ -45,9 +48,7 @@ export const CanvasViz = () => {
 
     React.useEffect(() => {
         if (groups.length === analysers.length) {
-
             let newScene;
-
             switch (id) {
                 case 'moonrise':
                     if (flags.showVisuals) {
@@ -90,23 +91,19 @@ export const CanvasViz = () => {
                     throw new Error('Song not found');
             }
 
+            let removeCinematicResize;
+
             if (flags.showVisuals) {
-                window.addEventListener('resize', sceneRef.current.onWindowResize);
-                window.addEventListener('orientationchange', sceneRef.current.onWindowResize);
-                window.addEventListener('fullscreenchange', sceneRef.current.onWindowResize);
-                window.visualViewport && (window.visualViewport.addEventListener('scroll', sceneRef.current.onWindowResize));
-                window.visualViewport && (window.visualViewport.addEventListener('resize', sceneRef.current.onWindowResize));
+                // addWindowListeners(sceneRef.current.onWindowResize);
+                removeCinematicResize = cinematicResize(canvasRef.current);
             }
 
             return () => {
                 if (flags.showVisuals) {
                     newScene.stop();
                     newScene.disposeAll(newScene.scene);
-                    window.removeEventListener('resize', sceneRef.current.onWindowResize);
-                    window.removeEventListener('orientationchange', sceneRef.current.onWindowResize);
-                    window.removeEventListener('fullscreenchange', sceneRef.current.onWindowResize);
-                    window.visualViewport && (window.visualViewport.removeEventListener('scroll', sceneRef.current.onWindowResize));
-                    window.visualViewport && (window.visualViewport.removeEventListener('resize', sceneRef.current.onWindowResize));
+                    // removeWindowListeners(sceneRef.current.onWindowResize)
+                    removeCinematicResize();
                 }
             }
 
@@ -115,7 +112,9 @@ export const CanvasViz = () => {
 
     return (<>
         {isLoading && <LoadingScreen />}
-        <canvas id='canvas-viz' className='fullscreen' ref={canvasRef}></canvas>
+        <div id='canvas-viz-parent' className='fullscreen'>
+            <canvas id='canvas-viz' ref={canvasRef}></canvas>
+        </div>
     </>)
 
 }
