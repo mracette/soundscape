@@ -176,13 +176,11 @@ export const ToggleButton = (props) => {
       }
 
       // schedule a status change
-      console.log("scheduling " + newState);
       animationEventRef.current = scheduler.scheduleOnce(
         quantizedStartSeconds,
         () => {
           // update local state
           setPlayerState(newState);
-          console.log("setting state as " + newState);
           // dispatch final update to music player
           dispatch({
             type: "updatePlayerState",

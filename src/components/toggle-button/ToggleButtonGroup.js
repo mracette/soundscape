@@ -191,17 +191,20 @@ export const ToggleButtonGroup = (props) => {
       </div>
 
       <div className="toggle-buttons flex-row">
-        {props.voices.map((voice) => (
-          <ToggleButton
-            dispatch={dispatch}
-            key={voice.name}
-            name={voice.name}
-            groupName={name}
-            length={voice.length}
-            quantizeLength={voice.quantizeLength}
-            override={state.playerOverrides.indexOf(voice.name) !== -1}
-          />
-        ))}
+        {React.useCallback(
+          props.voices.map((voice) => (
+            <ToggleButton
+              dispatch={dispatch}
+              key={voice.name}
+              name={voice.name}
+              groupName={name}
+              length={voice.length}
+              quantizeLength={voice.quantizeLength}
+              override={state.playerOverrides.indexOf(voice.name) !== -1}
+            />
+          )),
+          [props.voices, name, state.playerOverrides, dispatch]
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style >
+        #test {
+            background-color: red;
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+    </head>
+
+<body>
+  <button id = 'button'>Click me</button>
+  <div id = 'test'></div>
+
+<script>
+
+const ctx = new (window.AudioContext || window.webkitAudioContext)({
+      latencyHint: "balanced",
+    });
+const buff = ctx.createBuffer(1, 32, ctx.sampleRate);
+const buffSource = ctx.createBufferSource();
+buffSource.buffer = buff;
+buffSource.loop = false;
+buffSource.addEventListener('ended', () => {
+    console.log("ended");
+    document.getElementById('test').style.backgroundColor = 'blue';    
+});
+
+buffSource.addEventListener('onended', () => {
+    console.log("onended");
+    document.getElementById('test').style.backgroundColor = 'blue';    
+});
+// buffSource.onended = function(){
+//     console.log("onended");
+//     document.getElementById('test').style.backgroundColor = 'blue';
+// }.bind(this);
+// buffSource.endedEvent = () => {
+//     console.log("ended event");
+//     document.getElementById('test').style.backgroundColor = 'blue';
+// }
+
+document.getElementById('button').onclick = (e) => {
+    console.log(e);
+    ctx.resume();
+    buffSource.start();
+};
+
+</script>
+
+</body>
+
+</html>

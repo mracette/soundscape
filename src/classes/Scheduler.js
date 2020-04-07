@@ -11,9 +11,14 @@ export class Scheduler {
 
     // event id
     this.eventId = 0;
+
+    this.dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
   }
 
   scheduleOnce(time, callback) {
+    console.log("scheduling event for " + time);
+    console.log("current time is " + this.audioCtx.currentTime);
+
     // increment for the next event
     this.eventId++;
 
@@ -21,9 +26,9 @@ export class Scheduler {
     const newEventId = this.eventId;
 
     // create a dummy buffer to trigger the event
-    const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
     const dummySource = this.audioCtx.createBufferSource();
-    dummySource.buffer = dummyBuffer;
+    dummySource.loop = false;
+    dummySource.buffer = this.dummyBuffer;
 
     // add to schedule queue
     this.queue.push({
@@ -37,7 +42,9 @@ export class Scheduler {
       dummySource.onended = callback;
 
       // start buffer
-      dummySource.start(time - dummyBuffer.duration);
+      dummySource.start(time - this.dummyBuffer.duration);
+      console.log(dummySource);
+      console.log(time - this.dummyBuffer.duration);
 
       return newEventId;
     } else {
@@ -49,7 +56,7 @@ export class Scheduler {
       );
 
       // start buffer
-      dummySource.start(time - dummyBuffer.duration);
+      dummySource.start(time - this.dummyBuffer.duration);
 
       return promise;
     }
@@ -63,9 +70,8 @@ export class Scheduler {
     const newEventId = this.eventId;
 
     // create a dummy buffer to trigger the event
-    const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
     const dummySource = this.audioCtx.createBufferSource();
-    dummySource.buffer = dummyBuffer;
+    dummySource.buffer = this.dummyBuffer;
 
     // assign callback
     dummySource.onended = () => {
@@ -77,7 +83,7 @@ export class Scheduler {
 
     dummySource.start(
       // ensure the start time is positive
-      Math.max(0, time - dummyBuffer.duration)
+      Math.max(0, time - this.dummyBuffer.duration)
     );
 
     // initialize the event queue with the first event

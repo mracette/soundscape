@@ -5,9 +5,6 @@ import React from "react";
 import { Moonrise } from "../viz/scenes/moonrise/Moonrise";
 import { Mornings } from "../viz/scenes/mornings/Mornings";
 
-// components
-import { LoadingScreen } from "../components/LoadingScreen";
-
 // context
 import { SongContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
@@ -18,17 +15,14 @@ import { WebAudioContext } from "../contexts/contexts";
 // styles
 import "../styles/components/CanvasViz.scss";
 
-export const CanvasViz = () => {
+export const CanvasViz = (props) => {
+  const { songLoadStatus, handleSetCanvasLoadStatus } = props;
   const { spectrumFunction } = React.useContext(ThemeContext);
   const { id, groups, bpm } = React.useContext(SongContext);
-  const { WAW, wawLoadStatus } = React.useContext(WebAudioContext);
-  const {
-    voices,
-    analysers,
-    dispatch,
-    isLoading,
-    pauseVisuals,
-  } = React.useContext(MusicPlayerContext);
+  const { WAW } = React.useContext(WebAudioContext);
+  const { voices, analysers, dispatch, pauseVisuals } = React.useContext(
+    MusicPlayerContext
+  );
   const { flags } = React.useContext(TestingContext);
 
   const canvasRef = React.useRef(null);
@@ -59,11 +53,11 @@ export const CanvasViz = () => {
           newScene = new Moonrise(
             canvasRef.current,
             WAW.getAnalysers(id).groupAnalysers,
-            () => dispatch({ type: "setIsLoading", payload: false })
+            () => handleSetCanvasLoadStatus(true)
           );
           sceneRef.current = newScene;
         } else {
-          dispatch({ type: "setIsLoading", payload: false });
+          handleSetCanvasLoadStatus(true);
         }
         break;
       case "mornings":
@@ -71,7 +65,7 @@ export const CanvasViz = () => {
           newScene = new Mornings(
             canvasRef.current,
             WAW.getAnalysers(id).groupAnalysers,
-            () => dispatch({ type: "setIsLoading", payload: false }),
+            () => handleSetCanvasLoadStatus(true),
             {
               spectrumFunction,
               bpm,
@@ -79,7 +73,7 @@ export const CanvasViz = () => {
           );
           sceneRef.current = newScene;
         } else {
-          dispatch({ type: "setIsLoading", payload: false });
+          handleSetCanvasLoadStatus(true);
         }
         break;
       default:
@@ -142,12 +136,11 @@ export const CanvasViz = () => {
     analysers,
     dispatch,
     WAW,
+    songLoadStatus,
+    handleSetCanvasLoadStatus,
   ]);
 
   return (
-    <>
-      {isLoading && <LoadingScreen />}
-      <canvas id="canvas-viz" className="fullscreen" ref={canvasRef}></canvas>
-    </>
+    <canvas id="canvas-viz" className="fullscreen" ref={canvasRef}></canvas>
   );
 };

@@ -9,6 +9,7 @@ import { MenuButtonParent } from "./menu-button/MenuButtonParent";
 import { SongInfoPanel } from "./SongInfoPanel";
 import { ToggleButtonPanel } from "./toggle-button/ToggleButtonPanel";
 import { HomePanel } from "./HomePanel";
+import { LoadingScreen } from "../components/LoadingScreen";
 
 // context
 import { MusicPlayerContext } from "../contexts/contexts";
@@ -30,6 +31,14 @@ export const MusicPlayer = () => {
   const backgroundModeEventRef = React.useRef(null);
 
   const [songLoadStatus, setSongLoadStatus] = React.useState(false);
+  const [canvasLoadStatus, setCanvasLoadStatus] = React.useState(false);
+  const handleSetCanvasLoadStatus = React.useCallback(
+    (status) => {
+      setCanvasLoadStatus(status);
+    },
+    [setCanvasLoadStatus]
+  );
+
   const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
     players: [],
     voices: [],
@@ -203,9 +212,11 @@ export const MusicPlayer = () => {
               },
             ]}
           />
-
-          <CanvasViz />
+          <CanvasViz handleSetCanvasLoadStatus={handleSetCanvasLoadStatus} />
         </>
+      )}
+      {(!canvasLoadStatus || !wawLoadStatus || !songLoadStatus) && (
+        <LoadingScreen />
       )}
     </MusicPlayerContext.Provider>
   );
