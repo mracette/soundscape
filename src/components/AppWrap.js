@@ -39,7 +39,7 @@ const webAudioWrapper = new WebAudioWrapper(appConfig);
 
 // global behavior flags for testing
 const flags = {
-  quantizeSamples: true,
+  quantizeSamples: false,
   showVisuals: true,
   playAmbientTrack: true,
 };

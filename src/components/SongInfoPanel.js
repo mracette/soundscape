@@ -31,14 +31,13 @@ export const SongInfoPanel = (props) => {
             <div class="fb-share-button" data-href="https://soundscape.world" data-layout="button" data-size="small"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fsoundscape.world%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">Share</a></div> */}
       <SharingIcons />
       <h2 className="padded-row">Connect</h2>
-      <p className="flex-row">
+      {/* <p className="flex-row">
         We are seeking<span className="hot-green">&nbsp;3D artists&nbsp;</span>
         to collaborate with on new content. Please get in touch if you have any
         leads!
-      </p>
+      </p> */}
       <SocialIcons
-        divClassList="info-panel-icon-row"
-        svgClassList="icon icon-white"
+        svgClassList="icon icon-white info-panel-icon"
       />
     </div>
   );

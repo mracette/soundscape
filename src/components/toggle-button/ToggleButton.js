@@ -175,6 +175,8 @@ export const ToggleButton = (props) => {
           break;
       }
 
+      console.log(`scheduler: ${scheduler}`);
+
       // schedule a status change
       animationEventRef.current = scheduler.scheduleOnce(
         quantizedStartSeconds,

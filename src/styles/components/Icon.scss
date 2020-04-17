@@ -22,12 +22,13 @@
     height: vh(6);
 }
 
-.icon-row {
-    width: 100%;
+.info-panel-icon {
+    width: vh(5);
+    height: vh(5);
 }
 
-.info-panel-icon-row {
-    margin: 2vh 0 2vh 0;
+.icon-row {
+    width: 100%;
 }
 
 .coming-soon-icon-row {
@@ -35,9 +36,12 @@
 }
 
 .icon-row-child {
-    width: 3rem;
-    height: 3rem;
-    margin: 0 1.5rem 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: vh(6);
+    height: vh(6);
+    padding: vh(1);
 }
 
 .icon-row-child:first-child {

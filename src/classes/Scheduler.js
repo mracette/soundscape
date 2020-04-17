@@ -16,7 +16,7 @@ export class Scheduler {
 
     }
 
-    scheduleOnce(time, name, callback) {
+    scheduleOnce(time, callback) {
 
         // increment for the next event
         this.eventId++;
@@ -33,7 +33,6 @@ export class Scheduler {
         // add to schedule queue
         this.queue.push({
             id: newEventId,
-            name: name || null,
             time,
             type: 'single',
             source: dummySource
