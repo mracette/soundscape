@@ -1,110 +1,78 @@
 // libs
-import React from 'react';
+import React from "react";
 
 // components
-import { Canvas } from '../components/Canvas';
+import { Canvas } from "../components/Canvas";
 
 // context
-import { ThemeContext } from '../contexts/contexts';
-import { MusicPlayerContext } from '../contexts/contexts';
+import { ThemeContext } from "../contexts/contexts";
+import { WebAudioContext } from "../contexts/contexts";
+import { SongContext } from "../contexts/contexts";
 
 // hooks
-import { useAnimationFrame } from '../hooks/useAnimationFrame';
-
-// other
-import { Analyser } from '../classes/Analyser';
+import { useAnimationFrame } from "../hooks/useAnimationFrame";
 
 // styles
-import '../styles/components/Oscilloscope.scss';
+import "../styles/components/Oscilloscope.scss";
 
 export const Oscilloscope = (props) => {
+  const { WAW } = React.useContext(WebAudioContext);
+  const { spectrumFunction } = React.useContext(ThemeContext);
+  const { id } = React.useContext(SongContext);
+  const analyser = WAW.getAnalysers(id).groupAnalysers[props.name + "-osc"];
+  const canvasRef = React.useRef(null);
+  const contextRef = React.useRef(null);
 
-    const { audioCtx } = React.useContext(MusicPlayerContext);
+  const render = React.useCallback(
+    (canvas, context) => {
+      contextRef.current.lineWidth = canvas.height / 20;
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      const dataArray = analyser.getTimeData();
+      const sliceWidth = canvas.width / (dataArray.length - 1);
+      let prevX, prevY;
+      let x = 0;
+      dataArray.forEach((d, i) => {
+        context.beginPath();
+        if (props.gradient) {
+          context.strokeStyle = spectrumFunction(
+            props.index / props.groupCount +
+              i / (dataArray.length * props.groupCount)
+          );
+        }
 
-    const filter = React.useRef((() => {
-        const filter = audioCtx.createBiquadFilter();
-        filter.type = 'lowshelf';
-        filter.frequency.value = 120;
-        filter.gain.value = -12;
-        props.input.connect(filter);
-        return filter;
-    })());
+        const v = d / 128.0;
+        const y = (v * canvas.height) / 2;
 
-    const canvasRef = React.useRef(null);
-    const contextRef = React.useRef(null);
-    const analyserRef = React.useRef(new Analyser(
-        audioCtx,
-        filter.current, {
-        id: `${props.name}-oscilloscope-analyser`,
-        power: 5,
-        minDecibels: -120,
-        maxDecibels: 0,
-        smoothingTimeConstant: 0
-    }));
+        if (x === 0) {
+          context.moveTo(x, y);
+        } else {
+          context.moveTo(prevX, prevY);
+        }
 
+        context.lineTo(x, y);
+        prevX = x;
+        prevY = y;
+        x += sliceWidth;
+        context.stroke();
+      });
+    },
+    [analyser, props.gradient, props.groupCount, props.index, spectrumFunction]
+  );
 
+  useAnimationFrame(() => render(canvasRef.current, contextRef.current));
 
-    const { spectrumFunction } = React.useContext(ThemeContext);
-
-    const render = React.useCallback((canvas, context) => {
-
-        contextRef.current.lineWidth = canvas.height / 20;
-
-        // clear previous draw
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        // get time domain data
-        const dataArray = analyserRef.current.getTimeData();
-
-        const sliceWidth = canvas.width / (dataArray.length - 1);
-
-        let x = 0;
-        let prevX, prevY
-
-
-        dataArray.forEach((d, i) => {
-
-            context.beginPath();
-
-            if (props.gradient) {
-                context.strokeStyle = spectrumFunction(props.index / props.groupCount + i / (dataArray.length * props.groupCount));
-            }
-
-            const v = d / 128.0;
-
-            const y = v * canvas.height / 2;
-
-            if (x === 0) {
-                context.moveTo(x, y);
-            } else {
-                context.moveTo(prevX, prevY);
-            }
-
-            context.lineTo(x, y);
-
-            prevX = x;
-            prevY = y;
-
-            x += sliceWidth;
-
-            context.stroke();
-
-        });
-
-    }, [props, spectrumFunction]);
-
-    useAnimationFrame(() => render(canvasRef.current, contextRef.current));
-
-    return React.useMemo(() => (
-        <div id='oscilloscope'>
-            <Canvas
-                id='oscilloscope-canvas'
-                onLoad={(canvas) => {
-                    canvasRef.current = canvas;
-                    contextRef.current = canvas.getContext('2d');
-                }}
-            />
-        </div>
-    ), []);
-
-}
+  return React.useMemo(
+    () => (
+      <div id="oscilloscope">
+        <Canvas
+          id="oscilloscope-canvas"
+          onLoad={(canvas) => {
+            canvasRef.current = canvas;
+            contextRef.current = canvas.getContext("2d");
+          }}
+        />
+      </div>
+    ),
+    []
+  );
+};

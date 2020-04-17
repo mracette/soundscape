@@ -1,68 +1,55 @@
 // libs
-import React from 'react';
+import React from "react";
 
 // components
-import { ToggleButtonGroup } from './ToggleButtonGroup';
+import { ToggleButtonGroup } from "./ToggleButtonGroup";
 
 // contexts
-import { ThemeContext } from '../../contexts/contexts';
-import { MusicPlayerContext } from '../../contexts/contexts';
-import { SongContext } from '../../contexts/contexts';
+import { ThemeContext } from "../../contexts/contexts";
+import { MusicPlayerContext } from "../../contexts/contexts";
+import { SongContext } from "../../contexts/contexts";
 
 // styles
-import '../../styles/components/ToggleButtonPanel.scss';
+import "../../styles/components/ToggleButtonPanel.scss";
 
 export const ToggleButtonPanel = (props) => {
+  const { panelMuteButton } = React.useContext(ThemeContext);
 
-    const {
-        panelMuteButton,
-    } = React.useContext(ThemeContext);
+  const { dispatch, mute, backgroundMode } = React.useContext(
+    MusicPlayerContext
+  );
 
-    const { dispatch, mute, backgroundMode } = React.useContext(MusicPlayerContext);
+  const { groups } = React.useContext(SongContext);
 
-    const { groups } = React.useContext(SongContext);
+  return (
+    <div id="toggle-button-panel" className="flex-panel">
+      <div className="flex-row" style={{ justifyContent: "space-between" }}>
+        <div className="flex-col">
+          <h2>Voices</h2>
+        </div>
+        <div className="flex-col">
+          {backgroundMode && <p className="hot-green">background mode: on</p>}
+        </div>
+      </div>
 
-    const [soloOverride, setSoloOverride] = React.useState(false);
-
-    const handleAddSolo = React.useCallback((value) => {
-        setSoloOverride(value);
-    }, []);
-
-    return (
-
-        <div
-            id='toggle-button-panel'
-            className='flex-panel'
+      <div className="flex-row">
+        <button
+          className="button-white grouped-buttons"
+          id="toggle-button-panel-reset"
+          onClick={props.handleReset}
         >
+          Reset
+        </button>
 
-            <div className='flex-row' style={{ justifyContent: 'space-between' }}>
-                <div className='flex-col'>
-                    <h2>Voices</h2>
-                </div>
-                <div className='flex-col'>
-                    {backgroundMode && <p className='hot-green'>background mode: on</p>}
-                </div>
-            </div>
+        <button
+          id="toggle-button-panel-randomize"
+          className="button-white grouped-buttons"
+          onClick={props.handleRandomize}
+        >
+          Randomize
+        </button>
 
-            <div className='flex-row'>
-
-                <button
-                    className='button-white grouped-buttons'
-                    id='toggle-button-panel-reset'
-                    onClick={props.handleReset}
-                >
-                    Reset
-                    </button>
-
-                <button
-                    id='toggle-button-panel-randomize'
-                    className='button-white grouped-buttons'
-                    onClick={props.handleRandomize}
-                >
-                    Randomize
-                    </button>
-
-                {/* <button
+        {/* <button
                     id='toggle-button-panel-randomize'
                     className='button-white grouped-buttons'
                     style={randomize ? {
@@ -73,37 +60,36 @@ export const ToggleButtonPanel = (props) => {
                     Background Mode
                     </button> */}
 
-                <button
-                    id='toggle-button-panel-mute'
-                    className='button-white grouped-buttons'
-                    style={mute ? {
-                        background: panelMuteButton
-                    } : undefined}
-                    onClick={() => mute ? dispatch({ type: 'stopMute' }) : dispatch({ type: 'startMute' })}
-                >
-                    Mute
-                    </button>
+        <button
+          id="toggle-button-panel-mute"
+          className="button-white grouped-buttons"
+          style={
+            mute
+              ? {
+                  background: panelMuteButton,
+                }
+              : undefined
+          }
+          onClick={() =>
+            mute
+              ? dispatch({ type: "stopMute" })
+              : dispatch({ type: "startMute" })
+          }
+        >
+          Mute
+        </button>
+      </div>
 
-            </div>
-
-            {groups.map((group, index) => (
-                <ToggleButtonGroup
-                    index={index}
-                    handleAddSolo={handleAddSolo}
-                    soloOverride={soloOverride}
-                    key={group.name}
-                    name={group.name}
-                    groupCount={groups.length}
-                    currentPolyphony={props.players.filter((p) => (
-                        p.groupName === group.name && (
-                            p.playerState === 'active' || p.playerState === 'pending-start'
-                        ))).length}
-                    polyphony={group.polyphony}
-                    voices={group.voices}
-                    analyserParams={group.analyser}
-                />
-            ))}
-
-        </div>
-    );
-}
+      {groups.map((group, index) => (
+        <ToggleButtonGroup
+          index={index}
+          key={group.name}
+          name={group.name}
+          groupCount={groups.length}
+          polyphony={group.polyphony}
+          voices={group.voices}
+        />
+      ))}
+    </div>
+  );
+};

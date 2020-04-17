@@ -1,97 +1,101 @@
 // libs
-import React from 'react';
+import React from "react";
 
 // components
-import { Canvas } from '../components/Canvas';
+import { Canvas } from "../components/Canvas";
 
 // hooks
-import { useAnimationFrame } from '../hooks/useAnimationFrame';
+import { useAnimationFrame } from "../hooks/useAnimationFrame";
 
 // contexts
-import { ThemeContext } from '../contexts/contexts';
-import { SongContext } from '../contexts/contexts';
-import { MusicPlayerContext } from '../contexts/contexts';
-
-// other
-import { Analyser } from '../classes/Analyser';
+import { ThemeContext } from "../contexts/contexts";
+import { SongContext } from "../contexts/contexts";
+import { WebAudioContext } from "../contexts/contexts";
 
 // styles
-import '../styles/components/FreqBands.scss';
+import "../styles/components/FreqBands.scss";
 
 export const FreqBands = () => {
+  const { spectrumFunction } = React.useContext(ThemeContext);
+  const { bpm, timeSignature } = React.useContext(SongContext);
+  const { WAW } = React.useContext(WebAudioContext);
+  const analyser = WAW.getAnalysers().premaster;
 
-    const { audioCtx, premaster } = React.useContext(MusicPlayerContext);
-    const { spectrumFunction } = React.useContext(ThemeContext);
-    const { bpm, timeSignature } = React.useContext(SongContext);
+  const secondsPerBar = (60 / bpm) * timeSignature;
 
-    const secondsPerBar = 60 / bpm * timeSignature;
+  const canvasRef = React.useRef(null);
+  const contextRef = React.useRef(null);
 
-    const canvasRef = React.useRef(null);
-    const contextRef = React.useRef(null);
-    const analyserRef = React.useRef(new Analyser(
-        audioCtx,
-        premaster,
-        {
-            power: 6,
-            minDecibels: -120,
-            maxDecibels: 0,
-            smoothingTimeConstanct: 0.25
-        }))
+  const render = React.useCallback(
+    (canvas, context, time) => {
+      const radius =
+        canvas.height / 2 - canvas.height / analyser.frequencyBinCount;
 
-    const render = React.useCallback((canvas, context, time) => {
+      // calculate cycle time
+      const cycleTime = time / 1000 / (secondsPerBar * 4);
 
-        const radius = canvas.height / 2 - (canvas.height / analyserRef.current.frequencyBinCount);
+      // clear previous draw
+      context.clearRect(0, 0, canvas.height, canvas.height);
 
-        // calculate cycle time 
-        const cycleTime = (time / 1000) / (secondsPerBar * 4);
+      // refresh fft data
+      analyser.getFrequencyData();
 
-        // clear previous draw
-        context.clearRect(0, 0, canvas.height, canvas.height);
-
-        // refresh fft data
-        analyserRef.current.getFrequencyData();
-
-        // map time domain data to canvas draw actions
-        analyserRef.current.fftData.forEach((d, i) => {
-
-            const vol = (d / 255);
-            const cx = canvas.width / 2 + radius * Math.cos((i / analyserRef.current.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
-            const cy = canvas.height / 2 + radius * Math.sin((i / analyserRef.current.frequencyBinCount * 2 * Math.PI + (cycleTime * Math.PI * 2)));
-
-            context.beginPath();
-
-            context.fillStyle = spectrumFunction(i / analyserRef.current.frequencyBinCount);
-
-            context.globalAlphs = vol;
-
-            context.moveTo(cx, cy);
-
-            context.arc(
-                cx,
-                cy,
-                (canvas.height / analyserRef.current.frequencyBinCount) * vol,
-                0,
-                Math.PI * 2
+      // map time domain data to canvas draw actions
+      analyser.fftData.forEach((d, i) => {
+        const vol = d / 255;
+        const cx =
+          canvas.width / 2 +
+          radius *
+            Math.cos(
+              (i / analyser.frequencyBinCount) * 2 * Math.PI +
+                cycleTime * Math.PI * 2
+            );
+        const cy =
+          canvas.height / 2 +
+          radius *
+            Math.sin(
+              (i / analyser.frequencyBinCount) * 2 * Math.PI +
+                cycleTime * Math.PI * 2
             );
 
-            context.fill();
+        context.beginPath();
 
-        });
+        context.fillStyle = spectrumFunction(i / analyser.frequencyBinCount);
 
-    }, [spectrumFunction, secondsPerBar]);
+        context.globalAlphs = vol;
 
-    useAnimationFrame((t) => render(canvasRef.current, contextRef.current, t.time))
+        context.moveTo(cx, cy);
 
-    return React.useMemo(() => (
-        <div id='freq-bands'>
-            <Canvas
-                id='freq-bands-canvas'
-                onLoad={(canvas) => {
-                    canvasRef.current = canvas;
-                    contextRef.current = canvas.getContext('2d');
-                }}
-            />
-        </div>
-    ), []);
+        context.arc(
+          cx,
+          cy,
+          (canvas.height / analyser.frequencyBinCount) * vol,
+          0,
+          Math.PI * 2
+        );
 
-}
+        context.fill();
+      });
+    },
+    [analyser, secondsPerBar, spectrumFunction]
+  );
+
+  useAnimationFrame((t) =>
+    render(canvasRef.current, contextRef.current, t.time)
+  );
+
+  return React.useMemo(
+    () => (
+      <div id="freq-bands">
+        <Canvas
+          id="freq-bands-canvas"
+          onLoad={(canvas) => {
+            canvasRef.current = canvas;
+            contextRef.current = canvas.getContext("2d");
+          }}
+        />
+      </div>
+    ),
+    []
+  );
+};
