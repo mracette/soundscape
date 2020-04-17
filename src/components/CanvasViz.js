@@ -4,7 +4,7 @@ import React from 'react';
 // scenes
 import { Moonrise } from '../viz/scenes/moonrise/Moonrise';
 import { Mornings } from '../viz/scenes/mornings/Mornings';
-import { Swamp } from '../viz/scenes/swamp/Swamp';
+import { Mire } from '../viz/scenes/mire/Mire';
 
 // components
 import { LoadingScreen } from '../components/LoadingScreen';
@@ -76,9 +76,9 @@ export const CanvasViz = () => {
                         dispatch({ type: 'setIsLoading', payload: false });
                     }
                     break;
-                case 'swamp':
+                case 'mire':
                     if (flags.showVisuals) {
-                        newScene = new Swamp(
+                        newScene = new Mire(
                             canvasRef.current,
                             null,
                             () => dispatch({ type: 'setIsLoading', payload: false }), {
@@ -91,19 +91,25 @@ export const CanvasViz = () => {
                     throw new Error('Song not found');
             }
 
-            let removeCinematicResize;
+            let resizeFunction;
 
             if (flags.showVisuals) {
-                // addWindowListeners(sceneRef.current.onWindowResize);
-                removeCinematicResize = cinematicResize(canvasRef.current);
+                if(newScene.resizeMethod === 'cinematic') {
+                    resizeFunction = cinematicResize(canvasRef.current);
+                    resizeFunction();
+                    addWindowListeners(resizeFunction);
+                }
+                addWindowListeners(sceneRef.current.onWindowResize);
             }
 
             return () => {
                 if (flags.showVisuals) {
                     newScene.stop();
                     newScene.disposeAll(newScene.scene);
-                    // removeWindowListeners(sceneRef.current.onWindowResize)
-                    removeCinematicResize();
+                    if(newScene.resizeMethod === 'cinematic') {
+                        resizeFunction();
+                    }
+                    removeWindowListeners(sceneRef.current.onWindowResize);
                 }
             }
 

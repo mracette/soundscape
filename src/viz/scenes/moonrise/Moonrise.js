@@ -15,6 +15,7 @@ export class Moonrise extends SceneManager {
 
         this.songId = 'moonrise';
         this.DPRMax = 2.5;
+        this.resizeMethod = 'fullscreen';
 
         this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
         this.atmosphereAnalyser = analysers.find(a => a.id === 'atmosphere-analyser');

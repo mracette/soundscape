@@ -158,6 +158,7 @@
             ]
         },
         "themes": {
+            "resizeType": "fullscreen",
             "buttonColor": "rgba(31, 38, 47, 1)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
             "contentPanelColor": "rgba(31, 38, 47, 0.65)",
@@ -341,6 +342,7 @@
             ]
         },
         "themes": {
+            "resizeType": "fullscreen",
             "buttonColor": "rgba(55, 55, 55, 0.45)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
             "contentPanelColor": "rgba(55, 55, 55, 0.45)",
@@ -373,9 +375,9 @@
         }
     },
     {
-        "id": "swamp",
+        "id": "mire",
         "audio": {
-            "name": "Swamp",
+            "name": "Mire",
             "bpm": 95,
             "timeSignature": 4,
             "keySignature": "A Minor",
@@ -384,6 +386,7 @@
             "groups": []
         },
         "themes": {
+            "resizeType": "cinematic",
             "buttonColor": "rgba(31, 38, 47, 1)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
             "contentPanelColor": "rgba(31, 38, 47, 0.65)",
