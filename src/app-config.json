@@ -158,6 +158,7 @@
             ]
         },
         "themes": {
+            "resizeType": "fullscreen",
             "buttonColor": "rgba(31, 38, 47, 1)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
             "contentPanelColor": "rgba(31, 38, 47, 0.65)",
@@ -341,6 +342,7 @@
             ]
         },
         "themes": {
+            "resizeType": "fullscreen",
             "buttonColor": "rgba(55, 55, 55, 0.45)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
             "contentPanelColor": "rgba(55, 55, 55, 0.45)",
@@ -370,6 +372,32 @@
                     "content": "React, Three.js, Anime.js, ColorCurves, Ableton Live, Yamaha P-125"
                 }
             ]
+        }
+    },
+    {
+        "id": "mire",
+        "audio": {
+            "name": "Mire",
+            "bpm": 95,
+            "timeSignature": 4,
+            "keySignature": "A Minor",
+            "ambientTrack": false,
+            "ambientTrackLength": "8m",
+            "groups": []
+        },
+        "themes": {
+            "resizeType": "cinematic",
+            "buttonColor": "rgba(31, 38, 47, 1)",
+            "openButtonColor": "rgba(255, 255, 255, 0.15)",
+            "contentPanelColor": "rgba(31, 38, 47, 0.65)",
+            "panelResetButton": "rgba(255, 255, 255, 0.3)",
+            "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
+            "panelMuteButton": "rgba(255, 255, 255, 0.3)",
+            "groupSoloButton": "rgba(90.5, 162.2, 240.8, 0.5)",
+            "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
+        },
+        "info": {
+            "credits": []
         }
     }
 ]

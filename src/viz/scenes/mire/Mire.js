@@ -1,11 +1,8 @@
 // libs
 import * as THREE from 'three';
+import chroma from 'chroma-js';
 import { SceneManager } from '../../SceneManager';
 import FirstPersonControls from '../../controls/FirstPersonControls';
-
-// rendering
-
-// shaders
 
 export class Mire extends SceneManager {
 
@@ -13,38 +10,93 @@ export class Mire extends SceneManager {
 
         super(canvas);
 
-        this.DPRMax = 5;
+        this.DPRMax = 2.25;
+        this.fov = 20;
+        // this.fovMin = 25;
+        // this.fovMax = 50;
+        // this.aspectMin = 0.5;
+        // this.aspectMax = 3;
+        this.spectrumFunction = extras.spectrumFunction;
         this.songId = 'mire';
-
+        this.resizeMethod = 'cinematic';
+        this.bpm = extras.bpm;
+        this.renderList = 'mire';
         this.fovAdjust = false;
         this.fpcControl = false;
-        this.resizeMethod = 'cinematic'
 
-        this.renderList = ['swamp'];
+        this.colors = {
+            // vine: chroma("#142A1F").darken(.8).hex(),
+            vine: chroma("#010503").darken(.8).hex(),
+            tree: chroma("#0A0805").darken(.085).hex(),
+            fog: chroma("#cccccc").hex(),
+            lily: chroma("LightPink").darken(4.5).hex(),
+            chimney: chroma("#040404").darken(1).hex(),
+            roof: chroma("#0E0F0C").hex(),
+        }
+
+        // this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
+        // this.atmosphereAnalyser = analysers.find(a => a.id === 'extras-analyser');
+        // this.harmonyAnalyser = analysers.find(a => a.id === 'harmony-analyser');
+        // this.melodyAnalyser = analysers.find(a => a.id === 'melody-analyser');
+        // this.bassAnalyser = analysers.find(a => a.id === 'bass-analyser');
 
         super.init().then(() => {
-            this.loadModels(this.renderList).then(() => {
+            this.loadModels(this.renderList);
+        }).then(() => {
             callback();
-            this.applySceneSettings();
+            // render once to get objects in place
+            this.render(this.renderList);
             super.animate();
         }).catch((err) => {
             console.log(err);
-        });
         });
 
     }
 
     applySceneSettings() {
 
-        // https://github.com/mrdoob/three.js/blob/master/examples/webgl_postprocessing_ssao.html
-
-        this.renderer.shadowMap.enabled = false;
-        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
-
         this.renderer.outputEncoding = THREE.sRGBEncoding;
         this.renderer.physicallyCorrectLights = true;
+        this.renderer.setClearColor(0x000000, 0);
+        this.onWindowResize(this.resizeMethod);
 
-        this.renderer.setClearColor(0x000000, 0.0);
+    }
+
+    preProcessSceneObjects(sceneObjects) {
+
+        const lightIntensityAdj = 1 / 5;
+        const vineMat = new THREE.MeshBasicMaterial({color: this.colors.vine});
+        const treeMat = new THREE.MeshBasicMaterial({color: this.colors.tree});
+        const lilyMat = new THREE.MeshBasicMaterial({color: this.colors.lily});
+        const roofMat = new THREE.MeshBasicMaterial({color: this.colors.roof});
+        const chimneyMat = new THREE.MeshBasicMaterial({color: this.colors.chimney});
+
+        this.applyAll(sceneObjects, (obj) => {
+            const type = obj.type.toLowerCase();
+            const name = obj.name;
+            if (type.includes('light')) {
+                obj.intensity *= lightIntensityAdj;
+            } else if (type.includes('camera')) {
+                obj.fov = this.fov || 45;
+                obj.updateProjectionMatrix();
+            } else if (type.includes('mesh')) {
+                if(name.includes('background')) {
+                    console.log(obj);
+                    obj.material = new THREE.MeshBasicMaterial({color: 0x000000});
+                    obj.material.side = THREE.DoubleSide;
+                } else if (name.includes('vine')) {
+                    obj.material = vineMat;
+                } else if (name.includes('tree') && obj.material.map === null) {
+                    obj.material = treeMat;
+                } else if (name.includes('flower')) {
+                    obj.material = lilyMat;
+                } else if (name.includes('roof')) {
+                    obj.material = roofMat;
+                } else if (name.includes('chimney')) {
+                    obj.material = chimneyMat;
+                }
+            }
+        })
 
     }
 
@@ -73,6 +125,8 @@ export class Mire extends SceneManager {
     initScene() {
 
         const scene = new THREE.Scene();
+        // scene.fog = new THREE.FogExp2(0xcccccc, .005);
+        scene.fog = new THREE.Fog(this.colors.fog, 1, 280);
         return scene;
 
     }
@@ -80,29 +134,13 @@ export class Mire extends SceneManager {
     initLights() {
 
         const lights = {
-            ambient: new THREE.AmbientLight(0xffffff, .5)
+            // ambient: new THREE.AmbientLight(0xffffff, 2),
+            hemisphere: new THREE.HemisphereLight(0xffffff, 0xffffff, 10.5),
         }
-        this.scene.add(lights.ambient);
-        this.lights = lights;
-    }
 
+        this.scene.add(lights.ambient, lights.hemisphere);
 
-    preProcessSceneObjects(sceneObjects) {
-
-        const lightIntensityAdj = 1 / 10;
-
-        this.applyAll(sceneObjects, (obj) => {
-            if (obj.type.toLowerCase().includes('light')) {
-                obj.intensity *= lightIntensityAdj;
-                obj.castShadow = true;
-                console.log(obj);
-            } else if (obj.type === 'Mesh') {
-                obj.material.side = THREE.DoubleSide;
-                // obj.material.map.minFilter = THREE.LinearFilter;
-                // obj.castShadow = true;
-                // obj.receiveShadow = true;
-            }
-        })
+        return lights;
 
     }
 
@@ -110,15 +148,17 @@ export class Mire extends SceneManager {
 
         return new Promise((resolve, reject) => {
 
-            const loadPromiseArray = [];
+            const loadPromiseArray = []
 
-            modelList.indexOf('swamp') !== -1 && loadPromiseArray.push(
+            // paintings
+            modelList.indexOf('mire') !== -1 && loadPromiseArray.push(
                 new Promise((resolve, reject) => {
-                    this.loadModel({ name: 'swamp-v3-test' }).then((model) => {
-                        console.log(model);
+
+                    this.loadModel({ name: 'mire' }).then((model) => {
                         this.preProcessSceneObjects(model.scene)
                         this.scene.add(model.scene);
                         this.camera = model.cameras[0];
+                        this.applySceneSettings();
                         resolve();
                     });
 
@@ -136,8 +176,14 @@ export class Mire extends SceneManager {
     }
 
     render(overridePause) {
-        // this.controls.fpc.update(this.clock.getDelta());
-        this.renderer.render(this.scene, this.camera);
+
+        if (!this.pauseVisuals || overridePause) {
+
+            this.elapsedBeats = this.bpm * this.clock.getElapsedTime() / 60;
+            this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
+            this.renderer.render(this.scene, this.camera);
+
+        }
     }
 
 }

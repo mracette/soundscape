@@ -8,79 +8,252 @@ import { SceneManager } from "../../SceneManager";
 import { StarQuandrants } from "../../subjects/StarQuandrants";
 
 export class Moonrise extends SceneManager {
-  constructor(canvas, analysers, callback, extras) {
-    super(canvas);
 
-    this.songId = "moonrise";
-    this.DPRMax = 2.5;
+    constructor(canvas, analysers, callback, extras) {
 
-    this.rhythmAnalyser = analysers["rhythm"];
-    this.atmosphereAnalyser = analysers["atmosphere"];
-    this.harmonyAnalyser = analysers["harmony"];
-    this.melodyAnalyser = analysers["melody"];
-    this.bassAnalyser = analysers["bass"];
+        super(canvas);
 
-    this.palette = {
-      white: 0xffffff,
-      rockGrey: 0x9d978e,
-      lightning: 0xeee6ab,
-      moonYellow: 0xf6f2d5,
-      tropicalGreen: 0x70a491,
-      deepInk: 0x030c22,
-    };
+        this.songId = 'moonrise';
+        this.DPRMax = 2.5;
+        this.resizeMethod = 'fullscreen';
 
-    // lily vars
-    this.prevMelodyVolume = 0;
-    this.currentMelodyVolume = 0;
-    this.lilyColors = [
-      this.palette.dustyViolet,
-      this.palette.pansyPurple,
-      this.palette.funGreen,
-      this.palette.hibiscus,
-      this.palette.yellow,
-    ];
+        this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
+        this.atmosphereAnalyser = analysers.find(a => a.id === 'atmosphere-analyser');
+        this.harmonyAnalyser = analysers.find(a => a.id === 'harmony-analyser');
+        this.melodyAnalyser = analysers.find(a => a.id === 'melody-analyser');
+        this.bassAnalyser = analysers.find(a => a.id === 'bass-analyser');
 
-    super.init().then(() => {
-      window.addEventListener("resize", () => {
-        this.onWindowResize(window.innerWidth, window.innerHeight);
-      });
-      this.scene.fog = new THREE.Fog(0xffffff, 10, 470);
-      this.scene.background = new THREE.Color("#1F262F").lerp(
-        new THREE.Color(0x000000),
-        0.2
-      );
-      Promise.all([
-        this.initLakeTrees(),
-        this.initLakeScene(),
-        this.initLakeRipples(),
-        this.initLakeStars(),
-        this.initLakeLilies(),
-        this.initLakeMoon(),
-      ]).then(() => {
-        callback();
-        super.animate();
-      });
-    });
-  }
+        this.palette = {
+            white: 0xffffff,
+            rockGrey: 0x9d978e,
+            lightning: 0xEEE6AB,
+            moonYellow: 0xf6f2d5,
+            tropicalGreen: 0x70A491,
+            deepInk: 0x030C22
+        };
 
-  initLakeScene() {
-    return new Promise((resolve, reject) => {
-      try {
-        // hexagon shape for the lake body
-        const lakeShapePoints = regularPolygon(6, 110, 0, 0, true, false, true);
-        const lakeShapeVectors = [];
-        for (let i = 0; i < lakeShapePoints.length; i += 2) {
-          lakeShapeVectors.push(
-            new THREE.Vector2(lakeShapePoints[i], lakeShapePoints[i + 1])
-          );
-        }
-        const lakeShape = new THREE.Shape(lakeShapeVectors);
-        const lakeGeo = new THREE.ShapeBufferGeometry(lakeShape);
-        lakeGeo.rotateX(-Math.PI / 2);
-        lakeGeo.translate(0, 0, 70);
-        const lakeMat = new THREE.MeshBasicMaterial({
-          color: this.palette.deepInk,
-          fog: false,
+        // lily vars
+        this.prevMelodyVolume = 0;
+        this.currentMelodyVolume = 0;
+        this.lilyColors = [this.palette.dustyViolet, this.palette.pansyPurple, this.palette.funGreen, this.palette.hibiscus, this.palette.yellow]
+
+        super.init().then(() => {
+            this.scene.fog = new THREE.Fog(0xffffff, 10, 470);
+            this.scene.background = new THREE.Color('#1F262F').lerp(new THREE.Color(0x000000), 0.2);
+            Promise.all([
+                this.initLakeTrees(),
+                this.initLakeScene(),
+                this.initLakeRipples(),
+                this.initLakeStars(),
+                this.initLakeLilies(),
+                this.initLakeMoon()
+            ]).then(() => {
+                callback();
+                super.animate();
+            })
+        })
+    }
+
+    initLakeScene() {
+        return new Promise((resolve, reject) => {
+            try {
+
+                // hexagon shape for the lake body
+                const lakeShapePoints = regularPolygon(6, 110, 0, 0, true, false, true);
+                const lakeShapeVectors = []
+                for (let i = 0; i < lakeShapePoints.length; i += 2) {
+                    lakeShapeVectors.push(new THREE.Vector2(lakeShapePoints[i], lakeShapePoints[i + 1]));
+                }
+                const lakeShape = new THREE.Shape(lakeShapeVectors);
+                const lakeGeo = new THREE.ShapeBufferGeometry(lakeShape);
+                lakeGeo.rotateX(-Math.PI / 2);
+                lakeGeo.translate(0, 0, 70);
+                const lakeMat = new THREE.MeshBasicMaterial({
+                    color: this.palette.deepInk,
+                    fog: false
+                });
+                const lakeMesh = new THREE.Mesh(lakeGeo, lakeMat);
+                this.subjects.lake = lakeMesh;
+                this.scene.add(lakeMesh);
+
+                // basic rectangle for the ground
+                const groundGeo = new THREE.PlaneBufferGeometry(550, 350);
+                groundGeo.rotateX(-Math.PI / 2);
+                groundGeo.translate(0, -1, 0);
+                const groundMat = new THREE.MeshBasicMaterial({
+                    color: 0x022A1E,
+                    fog: false
+                });
+                groundMat.color.lerp(new THREE.Color(0x000000), 0.75); // TODO: figure out the color issue
+                const groundMesh = new THREE.Mesh(groundGeo, groundMat)
+                this.subjects.ground = groundMesh;
+                this.scene.add(groundMesh);
+
+                const moonGuard = new THREE.Mesh(new THREE.PlaneBufferGeometry(60, 30), groundMat);
+                moonGuard.translateZ(-79);
+
+                this.scene.add(moonGuard);
+
+                // directional light
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.18);
+                directionalLight.position.set(0, 10, 0);
+                this.scene.add(directionalLight);
+
+                // point light fireflies
+                const fireflyCount = 16;
+                const fireFlyGroup = new THREE.Group();
+                for (let i = 0; i < fireflyCount; i++) {
+                    const g = new THREE.Group();
+                    g.add(new THREE.PointLight(this.palette.moonYellow, 0.1));
+
+                    const sphereGeo = new THREE.SphereBufferGeometry(0.25);
+                    const sphereMat = new THREE.MeshBasicMaterial({
+                        color: this.palette.lightning,
+                        fog: false,
+                        transparent: true
+                    });
+
+                    g.add(new THREE.Mesh(sphereGeo, sphereMat));
+
+                    g.position.set(
+                        -70 + Math.random() * 140,
+                        5 + Math.random() * 15,
+                        40 - Math.random() * 70
+                    );
+
+                    g.userData.cycle = 0;
+                    g.userData.state = 'off';
+                    fireFlyGroup.add(g);
+                }
+
+                this.subjects.fireflies = fireFlyGroup;
+                this.scene.add(fireFlyGroup);
+
+                // add some rocks
+                this.loadModel({ name: 'landscape' }).then((model) => {
+                    this.subjects.rocks = model.scene.children.find((e) => e.name = 'rockGroup');
+                    this.subjects.rocks.children.forEach((rock) => { rock.material.color.setRGB(0.06, 0.06, 0.06) });
+                    this.scene.add(this.subjects.rocks);
+                }).catch((err) => {
+                    reject(err);
+                })
+
+                resolve();
+
+            } catch (err) {
+                reject(err)
+            }
+        });
+    }
+
+    initLakeMoon() {
+        return new Promise((resolve, reject) => {
+            try {
+
+                const moonRadius = 25;
+                const numVertices = this.bassAnalyser.fftSize;
+                const numMoonRings = 5;
+
+                const moonGeo = new THREE.CircleBufferGeometry(moonRadius, numVertices, numVertices);
+                const moonMat = new THREE.MeshBasicMaterial({
+                    color: this.palette.moonYellow,
+                    fog: false
+                });
+
+                const moonMesh = new THREE.Mesh(moonGeo, moonMat);
+                moonMesh.userData.radius = moonRadius;
+                moonMesh.position.set(0, 35, -80);
+
+                this.subjects.moon = moonMesh;
+                this.scene.add(moonMesh);
+
+                const moonRings = new THREE.Group(); // moonRings = group of numMoonRings(5) rings
+                const moonBeams = new THREE.Group(); // moonBeams = group of 16 moonRings
+
+                // 5 rings in the moonRings group
+                for (let j = 0; j < numMoonRings; j++) {
+                    const moonRingGeo = new THREE.BufferGeometry();
+                    const positions = new Float32Array(numVertices * 3);
+                    moonRingGeo.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+                    moonRingGeo.setDrawRange(0, 0);
+
+                    const moonRingMat = new THREE.PointsMaterial({
+                        color: this.palette.moonYellow,
+                        transparent: true,
+                        opacity: 0.1 + (j / 7)
+                    });
+
+                    const moonRing = new THREE.Points(moonRingGeo, moonRingMat);
+                    moonRings.add(moonRing);
+                }
+
+                for (let k = 0; k < 8; k++) {
+                    const newMoonRings = moonRings.clone();
+                    newMoonRings.translateY(moonMesh.position.y);
+                    newMoonRings.rotateZ(2 * Math.PI * (k / 16));
+                    moonBeams.add(newMoonRings);
+                }
+
+                this.subjects.moonBeams = moonBeams;
+                this.subjects.moonBeams.userData.numMoonRings = numMoonRings;
+                this.subjects.moonBeams.userData.numVertices = numVertices;
+                this.scene.add(moonBeams);
+
+                resolve();
+            } catch (err) {
+                reject(err)
+            }
+        })
+    }
+
+    initLakeTrees() {
+        return new Promise((resolve, reject) => {
+            // load gltf tree models
+            this.loadModel({ name: 'pine-tree' }).then((model) => {
+
+                const basePineTree = model.scenes[0].children[0];
+
+                // generate simple tree formation
+                const pineTreeGroup = new THREE.Group();
+                const numPineTrees = 64;
+                const xMin = -100;
+                const xMax = 100;
+                const xNoise = 5;
+                const zNoise = 10;
+                const scaleNoise = 0.3;
+
+                for (let i = 1; i <= numPineTrees; i++) {
+                    const x = xMin + i / numPineTrees * (xMax - xMin) + (Math.random() * xNoise - xNoise / 2);
+
+                    // z(x) is piecewise and is calculated using the coordinates of the lake hexagon
+                    let z;
+                    if (x < -55) {
+                        z = -1 * ((95 / 55) * x + 190) - (Math.random() * zNoise);
+                    } else if (x >= -55 && x < 55) {
+                        z = -95 - (Math.random() * zNoise);
+                    } else if (x >= 55) {
+                        z = -1 * (-(95 / 55) * x + 190) - (Math.random() * zNoise);
+                    }
+
+                    const clone = basePineTree.clone();
+                    const scale = 1 - (scaleNoise * Math.random());
+
+                    clone.children[0].material = new THREE.MeshBasicMaterial({
+                        color: new THREE.Color(this.palette.tropicalGreen).lerp(new THREE.Color(this.palette.white), -1.5)
+                    });;
+
+                    clone.position.copy(new THREE.Vector3(x, -2, z + 70));
+                    clone.scale.copy(new THREE.Vector3(scale, scale, scale));
+                    clone.rotateY(Math.random() * 2 * Math.PI);
+                    pineTreeGroup.add(clone);
+                }
+                this.subjects.pineTrees = pineTreeGroup;
+                this.scene.add(pineTreeGroup);
+                resolve();
+
+            }).catch((err) => {
+                reject(err);
+            })
         });
         const lakeMesh = new THREE.Mesh(lakeGeo, lakeMat);
         this.subjects.lake = lakeMesh;
