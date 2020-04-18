@@ -8,6 +8,7 @@ export class LandingPageScene extends SceneManager {
     constructor(canvas) {
         super(canvas);
         this.DPRMax = 2.5;
+        this.resizeMethod = 'fullscreen';
     }
 
     initScene() {
@@ -20,7 +21,7 @@ export class LandingPageScene extends SceneManager {
         const fieldOfView = 60;
         const nearPlane = 1;
         const farPlane = 1000;
-        const aspect = this.screenDimensions.width / this.screenDimensions.height;
+        const aspect = this.sceneDimensions.width / this.sceneDimensions.height;
         let camera;
         camera = new THREE.PerspectiveCamera(fieldOfView, 1, nearPlane, farPlane);
         camera.aspect = aspect;

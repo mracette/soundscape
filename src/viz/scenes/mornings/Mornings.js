@@ -32,8 +32,13 @@ export class Mornings extends SceneManager {
         `;
 
         this.DPRMax = 2.25;
+        this.fovMin = 25;
+        this.fovMax = 50;
+        this.aspectMin = 0.5;
+        this.aspectMax = 3;
         this.spectrumFunction = extras.spectrumFunction;
         this.songId = 'mornings';
+        this.resizeMethod = 'fullscreen';
 
         this.colors = {
             morningLight: new THREE.Color(0xF0A9B3),
@@ -96,19 +101,12 @@ export class Mornings extends SceneManager {
 
         this.camera.position.set(-36.792147432025736, 12.295984744079584, 19.50565058881036);
         this.camera.lookAt(46.69487932551039, 2.382592629313793, -34.638979984916375);
-        this.camera.fov = this.getNewFov(window.innerWidth / window.innerHeight);
+        this.camera.fov = this.getNewFov(
+            window.innerWidth / window.innerHeight,
+            this.fovMin, this.fovMax, this.aspectMin, this.aspectMax
+        );
         this.camera.updateProjectionMatrix();
 
-    }
-
-    getNewFov(aspectRatio) {
-        const fovMin = 25;
-        const fovMax = 50;
-        const aspectMin = 0.5;
-        const aspectMax = 3;
-        const aspectAdj = Math.max(aspectMin, Math.min(aspectRatio, aspectMax));
-        const newFov = fovMax - (fovMax - fovMin) * (aspectAdj - aspectMin) / (aspectMax - aspectMin);
-        return newFov;
     }
 
     initControls() {

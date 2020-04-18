@@ -28,6 +28,7 @@ export class Scheduler {
         const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
         const dummySource = this.audioCtx.createBufferSource();
         dummySource.buffer = dummyBuffer;
+        dummySource.connect(this.audioCtx.destination);
 
         // add to schedule queue
         this.queue.push({
@@ -40,7 +41,10 @@ export class Scheduler {
 
         if (callback) {
 
-            dummySource.onended = callback;
+            dummySource.onended = () => {
+                callback();
+                this.cancel(newEventId); // ensures GC
+            };
 
             // start buffer
             dummySource.start(time - dummyBuffer.duration);
@@ -72,13 +76,15 @@ export class Scheduler {
         const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
         const dummySource = this.audioCtx.createBufferSource();
         dummySource.buffer = dummyBuffer;
+        dummySource.connect(this.audioCtx.destination);
 
         // assign callback
         dummySource.onended = () => {
             callback();
             // add the next occurence
             const {time, frequency} = this.getEvent(newEventId);
-            this.scheduleRepeating(time + frequency, frequency, callback)
+            this.scheduleRepeating(time + frequency, frequency, callback);
+            this.cancel(newEventId); // ensures GC
         };
 
         dummySource.start(
@@ -129,6 +135,7 @@ export class Scheduler {
                 const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
                 const dummySource = this.audioCtx.createBufferSource();
                 dummySource.buffer = dummyBuffer;
+                dummySource.connect(this.audioCtx.destination);
 
                 // assign callback (same as previous event)
                 dummySource.onended = event.source.onended;
@@ -197,7 +204,14 @@ export class Scheduler {
             if (event) {
 
                 event.source.onended = null;
-                event.source.stop();
+
+                try {
+                    event.source.stop();
+                } catch(e) {
+                    
+                }
+
+                event.source.disconnect();
 
                 this.queue = this.queue.filter((e) => e.id !== event.id);
                 this.repeatingQueue = this.repeatingQueue.filter((e) => e.id !== event.id);

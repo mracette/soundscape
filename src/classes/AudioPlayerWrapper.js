@@ -41,7 +41,6 @@ export class AudioPlayerWrapper {
         try {
             this.bufferSource.stop(time);
         } catch (err) {
-            console.log(err)
         }
     }
 

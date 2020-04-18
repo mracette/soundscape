@@ -15,6 +15,7 @@ export class Moonrise extends SceneManager {
 
         this.songId = 'moonrise';
         this.DPRMax = 2.5;
+        this.resizeMethod = 'fullscreen';
 
         this.rhythmAnalyser = analysers.find(a => a.id === 'rhythm-analyser');
         this.atmosphereAnalyser = analysers.find(a => a.id === 'atmosphere-analyser');
@@ -37,9 +38,6 @@ export class Moonrise extends SceneManager {
         this.lilyColors = [this.palette.dustyViolet, this.palette.pansyPurple, this.palette.funGreen, this.palette.hibiscus, this.palette.yellow]
 
         super.init().then(() => {
-            window.addEventListener('resize', () => {
-                this.onWindowResize(window.innerWidth, window.innerHeight)
-            });
             this.scene.fog = new THREE.Fog(0xffffff, 10, 470);
             this.scene.background = new THREE.Color('#1F262F').lerp(new THREE.Color(0x000000), 0.2);
             Promise.all([

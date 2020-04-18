@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import Stats from 'stats.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import FirstPersonControls from './controls/FirstPersonControls';
+import { cinematicResize } from '../utils/jsUtils';
 
 export class SceneManager {
 
@@ -11,9 +12,9 @@ export class SceneManager {
 
         this.clock = new THREE.Clock(true);
 
-        this.screenDimensions = {
-            width: window.innerWidth,
-            height: window.innerHeight
+        this.sceneDimensions = {
+            width: this.resizeMethod === 'cinematic' ? canvas.width : window.innerWidth,
+            height: this.resizeMethod === 'cinematic' ? canvas.height : window.innerHeight,
         }
 
         this.worldDimensions = {
@@ -22,11 +23,12 @@ export class SceneManager {
             depth: 1000
         };
 
+        this.resizeMethod = null;
         this.pauseVisuals = false;
         this.animate = this.animate.bind(this);
         this.render = this.render.bind(this);
         this.onWindowResize = this.onWindowResize.bind(this);
-        this.showStats = false;
+        this.showStats = true;
 
     }
 
@@ -52,7 +54,7 @@ export class SceneManager {
         window.cancelAnimationFrame(this.currentFrame);
     }
 
-    applyAll(obj, callback, exceptions) {
+    applyAll(obj, callback, exceptions = []) {
         obj.children.forEach((child) => {
             if (child.children.length > 0) {
                 this.applyAll(child, callback, exceptions);
@@ -102,16 +104,16 @@ export class SceneManager {
             autoClear: false,
             canvas: this.canvas,
             antialias: true,
-            //powerPreference: "high-performance",
             outputEncoding: THREE.sRGBEncoding
         });
 
         let DPR = Math.min(this.DPRMax || 1.5, (window.devicePixelRatio) ? window.devicePixelRatio : 1);
 
         renderer.setPixelRatio(DPR);
-        renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
+        renderer.setSize(this.sceneDimensions.width, this.sceneDimensions.height);
 
         return renderer;
+        
     }
 
     initCamera(type, frustrum) {
@@ -119,7 +121,7 @@ export class SceneManager {
         const fieldOfView = 60;
         const nearPlane = 1;
         const farPlane = 10000;
-        const aspect = this.screenDimensions.width / this.screenDimensions.height;
+        const aspect = this.sceneDimensions.width / this.sceneDimensions.height;
         let camera;
 
         switch (type || 'perspective') {
@@ -184,16 +186,40 @@ export class SceneManager {
 
     }
 
+    getNewFov(aspectRatio) {
+        // if(this.resizeMethod === 'fullscreen') {
+            const aspectAdj = Math.max(this.aspectMin, Math.min(aspectRatio, this.aspectMax));
+            const newFov = this.fovMax - (this.fovMax - this.fovMin) * (aspectAdj - this.aspectMin) / (this.aspectMax - this.aspectMin);
+            return newFov;
+        // } else if (this.resizeMethod === 'cinematic') {
+
+        // }
+    }
+
     onWindowResize() {
-        const newWidth = window.innerWidth;
-        const newHeight = window.innerHeight;
-        this.screenDimensions.width = newWidth;
-        this.screenDimensions.height = newHeight;
+
+        this.resizeMethod === 'cinematic' && cinematicResize(this.canvas);
+
+        const newWidth = (this.resizeMethod === 'cinematic') ? 
+            this.canvas.width : 
+            window.innerWidth;
+
+        const newHeight = (this.resizeMethod === 'cinematic') ? 
+            this.canvas.height : 
+            window.innerHeight;
+
+        this.sceneDimensions.width = newWidth;
+        this.sceneDimensions.height = newHeight;
+
         const aspectRatio = newWidth / newHeight;
 
         if (this.fovAdjust) {
-            this.camera.fov = this.getNewFov(aspectRatio);
+            this.camera.fov = this.getNewFov(aspectRatio)
+        } else {
+            this.camera.fov = this.fov;
         }
+
+        console.log(newWidth, newHeight);
 
         this.camera.aspect = aspectRatio;
         this.camera.updateProjectionMatrix();
@@ -204,7 +230,8 @@ export class SceneManager {
     loadModel(options = {}) {
 
         const { name } = options;
-        const format = process.env.REACT_APP_MODEL_FORMAT;
+        const format = process.env[`REACT_APP_MODEL_FORMAT_${this.songId.toUpperCase()}`] ||
+            process.env.REACT_APP_MODEL_FORMAT;
 
         let ext;
 
@@ -227,6 +254,8 @@ export class SceneManager {
                 url = `https://soundscape-public.s3.us-east-2.amazonaws.com/app/models/${this.songId}/${format}/${name}${ext}`;
 
             }
+
+            console.log(url);
 
             this.helpers.gltfLoader.load(
                 url,
