@@ -34,6 +34,7 @@ export const MusicPlayer = () => {
   const [canvasLoadStatus, setCanvasLoadStatus] = React.useState(false);
   const handleSetCanvasLoadStatus = React.useCallback(
     (status) => {
+      console.log(status);
       setCanvasLoadStatus(status);
     },
     [setCanvasLoadStatus]
@@ -71,7 +72,9 @@ export const MusicPlayer = () => {
       return () => {
         WAW.scheduler.clear();
         WAW.audioCtx.suspend();
-        flags.playAmbientTrack && WAW.getVoices(id).ambient.stop();
+        flags.playAmbientTrack &&
+          ambientTrack &&
+          WAW.getVoices(id).ambient.stop();
       };
     }
   }, [

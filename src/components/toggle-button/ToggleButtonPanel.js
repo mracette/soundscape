@@ -20,6 +20,7 @@ export const ToggleButtonPanel = (props) => {
   );
 
   const { groups } = React.useContext(SongContext);
+  console.log(groups);
 
   return (
     <div id="toggle-button-panel" className="flex-panel">

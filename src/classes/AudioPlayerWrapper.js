@@ -68,26 +68,12 @@ export class AudioPlayerWrapper {
     // disconnect buffer source to allow garbage collection
     this.disconnect();
 
-    stop(time) {
-        try {
-            this.bufferSource.stop(time);
-        } catch (err) {
-        }
-    }
-
-    reload() {
-        // disconnect buffer source to allow garbage collection
-        this.disconnect();
-
-        const newSource = this.context.createBufferSource();
-        newSource.buffer = this.buffer;
-        newSource.loop = this.loop;
-        newSource.loopStart = 0;
-        newSource.loopEnd = this.buffer.duration;
-        newSource.connect(this.destination);
-        
-        this.bufferSource = newSource;
-    }
+    const newSource = this.context.createBufferSource();
+    newSource.buffer = this.bufferSource.buffer;
+    newSource.loop = this.loop;
+    newSource.loopStart = 0;
+    newSource.loopEnd = this.bufferSource.buffer.duration;
+    newSource.connect(this.destination);
 
     this.bufferSource = newSource;
   }

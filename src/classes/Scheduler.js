@@ -57,53 +57,54 @@ export class Scheduler {
 
       return promise;
     }
+  }
 
-    scheduleOnce(time, name, callback) {
+  scheduleRepeating(time, frequency, callback) {
+    // increment for the next event
+    this.eventId++;
 
-        // increment for the next event
-        this.eventId++;
+    // grab the current value of the event id
+    const newEventId = this.eventId;
 
-        // grab the current value of the event id
-        const newEventId = this.eventId;
+    // create a dummy buffer to trigger the event
+    const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
+    const dummySource = this.audioCtx.createBufferSource();
+    dummySource.buffer = dummyBuffer;
+    dummySource.connect(this.audioCtx.destination);
 
-        // create a dummy buffer to trigger the event
-        const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
-        const dummySource = this.audioCtx.createBufferSource();
-        dummySource.buffer = dummyBuffer;
-        dummySource.connect(this.audioCtx.destination);
+    // assign callback
+    dummySource.onended = () => {
+      callback();
+      // add the next occurence
+      const { time, frequency } = this.getEvent(newEventId);
+      this.scheduleRepeating(time + frequency, frequency, callback);
+      this.cancel(newEventId); // ensures GC
+    };
 
-        // add to schedule queue
-        this.queue.push({
-            id: newEventId,
-            name: name || null,
-            time,
-            type: 'single',
-            source: dummySource
-        });
+    dummySource.start(
+      // ensure the start time is positive
+      Math.max(0, time - dummyBuffer.duration)
+    );
 
-        if (callback) {
+    // initialize the event queue with the first event
+    this.repeatingQueue.push({
+      id: newEventId,
+      time,
+      type: "repeating",
+      frequency,
+      source: dummySource,
+    });
 
-            dummySource.onended = () => {
-                callback();
-                this.cancel(newEventId); // ensures GC
-            };
+    return newEventId;
+  }
 
-            // start buffer
-            dummySource.start(time - dummyBuffer.duration);
+  updateCallback(id, callback) {
+    let event;
 
-            return newEventId;
+    event = this.queue.find((e) => e.id === id);
 
-        } else {
-
-            const promise = new Promise(resolve => dummySource.onended = () => { resolve(newEventId) });
-
-            // start buffer
-            dummySource.start(time - dummyBuffer.duration);
-
-            return promise;
-
-        }
-
+    if (!event) {
+      event = this.repeatingQueue.find((e) => e.id === id);
     }
 
     if (event) {
@@ -124,14 +125,8 @@ export class Scheduler {
         dummySource.buffer = dummyBuffer;
         dummySource.connect(this.audioCtx.destination);
 
-        // assign callback
-        dummySource.onended = () => {
-            callback();
-            // add the next occurence
-            const {time, frequency} = this.getEvent(newEventId);
-            this.scheduleRepeating(time + frequency, frequency, callback);
-            this.cancel(newEventId); // ensures GC
-        };
+        // assign callback (same as previous event)
+        dummySource.onended = event.source.onended;
 
         // start
         dummySource.start(
@@ -166,21 +161,11 @@ export class Scheduler {
     }
   }
 
-    updateQueue() {
-
-        for (let i = this.repeatingQueue.length - 1; i >= 0; i--) {
-
-            const event = this.repeatingQueue[i];
-
-            if (event.time < this.audioCtx.currentTime) {
-
-                this.repeatingQueue.splice(i, 1);
-
-                // create a dummy buffer to trigger the event
-                const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
-                const dummySource = this.audioCtx.createBufferSource();
-                dummySource.buffer = dummyBuffer;
-                dummySource.connect(this.audioCtx.destination);
+  clear() {
+    this.queue.forEach((event) => {
+      event.source.onended = null;
+      event.source.stop();
+    });
 
     this.repeatingQueue.forEach((event) => {
       event.source.onended = null;
@@ -202,66 +187,7 @@ export class Scheduler {
           event.source.stop();
         } catch (e) {}
 
-    }
-
-    getEvent(id) {
-
-        let event = this.queue.find((e) => e.id === id);
-
-        if (event) {
-            return event;
-        } else {
-            let event = this.repeatingQueue.find((e) => e.id === id);
-            if (event) {
-                return event;
-            } else {
-                return false;
-            }
-        }
-
-    }
-
-    clear() {
-
-        this.queue.forEach((event) => {
-            event.source.onended = null;
-            event.source.stop();
-        });
-
-        this.repeatingQueue.forEach((event) => {
-            event.source.onended = null;
-            event.source.stop();
-        })
-
-        this.queue = [];
-        this.repeatingQueue = [];
-
-    }
-
-    cancel(id) {
-
-        if (typeof id !== 'undefined') {
-
-            const event = this.getEvent(id);
-
-            if (event) {
-
-                event.source.onended = null;
-
-                try {
-                    event.source.stop();
-                } catch(e) {
-                    
-                }
-
-                event.source.disconnect();
-
-                this.queue = this.queue.filter((e) => e.id !== event.id);
-                this.repeatingQueue = this.repeatingQueue.filter((e) => e.id !== event.id);
-
-            }
-
-        }
+        event.source.disconnect();
 
         this.queue = this.queue.filter((e) => e.id !== event.id);
         this.repeatingQueue = this.repeatingQueue.filter(
