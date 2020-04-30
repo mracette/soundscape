@@ -4,17 +4,17 @@ import chroma from "chroma-js";
 import { SceneManager } from "../../SceneManager";
 import FirstPersonControls from "../../controls/FirstPersonControls";
 
-export class Mire extends SceneManager {
+export class Swamp extends SceneManager {
   constructor(canvas, analysers, callback, extras) {
     super(canvas);
 
     this.DPRMax = 2.25;
     this.fov = 20;
     this.spectrumFunction = extras.spectrumFunction;
-    this.songId = "mire";
+    this.songId = "swamp";
     this.resizeMethod = "cinematic";
     this.bpm = extras.bpm;
-    this.renderList = "mire";
+    this.renderList = "swamp";
     this.fovAdjust = false;
     this.fpcControl = false;
 
@@ -137,10 +137,10 @@ export class Mire extends SceneManager {
     return new Promise((resolve, reject) => {
       const loadPromiseArray = [];
 
-      modelList.indexOf("mire") !== -1 &&
+      modelList.indexOf("swamp") !== -1 &&
         loadPromiseArray.push(
           new Promise((resolve, reject) => {
-            this.loadModel({ name: "mire" }).then((model) => {
+            this.loadModel({ name: "swamp" }).then((model) => {
               this.preProcessSceneObjects(model.scene).then(() => {
                 this.scene.add(model.scene);
                 this.camera = model.cameras[0];

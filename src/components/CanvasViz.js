@@ -4,7 +4,7 @@ import React from "react";
 // scenes
 import { Moonrise } from "../viz/scenes/moonrise/Moonrise";
 import { Mornings } from "../viz/scenes/mornings/Mornings";
-import { Mire } from "../viz/scenes/mire/Mire";
+import { Swamp } from "../viz/scenes/swamp/Swamp";
 
 // context
 import { SongContext } from "../contexts/contexts";
@@ -85,9 +85,9 @@ export const CanvasViz = (props) => {
           handleSetCanvasLoadStatus(true);
         }
         break;
-      case "mire":
+      case "swamp":
         if (flags.showVisuals) {
-          newScene = new Mire(
+          newScene = new Swamp(
             canvasRef.current,
             null, //WAW.getAnalysers(id).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),

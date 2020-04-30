@@ -33,6 +33,12 @@ export const landingPageReducer = (state, action) => {
         bpm: "92",
         key: "Eb Major",
       };
+    case "swamp":
+      return {
+        name: "Swamp",
+        bpm: "???",
+        key: "Eb Minor",
+      };
     case "coming-soon":
       return {
         name: "The future of Soundscape...",
@@ -155,6 +161,19 @@ export const LandingPage = () => {
               </div>
             )}
             <MoonriseIcon name="moonrise" dispatch={dispatch} />
+          </Link>
+          <Link className="song-link" id="song-link-swamp" to="/play/swamp">
+            {isMobile && (
+              <div className="landing-page-header">
+                <div className="flex-row">
+                  <span id="landing-page-song-title">Swamp</span>
+                  &nbsp;|&nbsp;
+                  <span id="landing-page-bpm">???</span>&nbsp;|&nbsp;
+                  <span id="landing-page-key">Eb Minor</span>
+                </div>
+              </div>
+            )}
+            <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
           </Link>
           <Link
             className="song-link"

@@ -375,12 +375,12 @@
         }
     },
     {
-        "id": "mire",
+        "id": "swamp",
         "audio": {
-            "name": "Mire",
+            "name": "Swamp",
             "bpm": 95,
             "timeSignature": 4,
-            "keySignature": "A Minor",
+            "keySignature": "Eb Minor",
             "ambientTrack": false,
             "ambientTrackLength": "8m",
             "groups": []
