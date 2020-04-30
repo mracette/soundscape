@@ -23,6 +23,8 @@ export class SceneManager {
       depth: 1000,
     };
 
+    this.fov = 60;
+
     this.resizeMethod = null;
     this.pauseVisuals = false;
     this.animate = this.animate.bind(this);
@@ -257,8 +259,6 @@ export class SceneManager {
       } else if (process.env.REACT_APP_ASSET_LOCATION === "s3") {
         url = `https://soundscape-public.s3.us-east-2.amazonaws.com/app/models/${this.songId}/${format}/${name}${ext}`;
       }
-
-      console.log(url);
 
       this.helpers.gltfLoader.load(
         url,

@@ -13,6 +13,9 @@ import { LayoutContext } from "../contexts/contexts";
 // styles
 import "../styles/components/LandingPage.scss";
 
+// utils
+import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
+
 // other
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
 
@@ -62,31 +65,13 @@ export const LandingPage = () => {
     if (canvasRef.current) {
       scene = new LandingPageScene(canvasRef.current);
       scene.init().then(() => scene.animate());
-      window.addEventListener("resize", scene.onWindowResize);
-      window.addEventListener("orientationchange", scene.onWindowResize);
-      window.addEventListener("fullscreenchange", scene.onWindowResize);
-      window.visualViewport &&
-        window.visualViewport.addEventListener("scroll", scene.onWindowResize);
-      window.visualViewport &&
-        window.visualViewport.addEventListener("resize", scene.onWindowResize);
+      addWindowListeners(scene.onWindowResize);
     }
 
     return () => {
       scene.stop();
       scene.disposeAll(scene.scene);
-      window.removeEventListener("resize", scene.onWindowResize);
-      window.removeEventListener("orientationchange", scene.onWindowResize);
-      window.removeEventListener("fullscreenchange", scene.onWindowResize);
-      window.visualViewport &&
-        window.visualViewport.removeEventListener(
-          "scroll",
-          scene.onWindowResize
-        );
-      window.visualViewport &&
-        window.visualViewport.removeEventListener(
-          "resize",
-          scene.onWindowResize
-        );
+      removeWindowListeners(scene.onWindowResize);
     };
   }, []);
 

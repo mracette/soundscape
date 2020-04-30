@@ -35,8 +35,9 @@ export class Mire extends SceneManager {
       })
       .then(() => {
         // render once to get objects in place
-        this.render(this.renderList);
+        // this.render(this.renderList);
         super.animate();
+        callback();
         console.log("resolve");
       })
       .catch((err) => {
@@ -52,40 +53,43 @@ export class Mire extends SceneManager {
   }
 
   preProcessSceneObjects(sceneObjects) {
-    const lightIntensityAdj = 1 / 5;
-    const vineMat = new THREE.MeshBasicMaterial({ color: this.colors.vine });
-    const treeMat = new THREE.MeshBasicMaterial({ color: this.colors.tree });
-    const lilyMat = new THREE.MeshBasicMaterial({ color: this.colors.lily });
-    const roofMat = new THREE.MeshBasicMaterial({ color: this.colors.roof });
-    const chimneyMat = new THREE.MeshBasicMaterial({
-      color: this.colors.chimney,
-    });
+    return new Promise((resolve, reject) => {
+      const lightIntensityAdj = 1 / 5;
+      const vineMat = new THREE.MeshBasicMaterial({ color: this.colors.vine });
+      const treeMat = new THREE.MeshBasicMaterial({ color: this.colors.tree });
+      const lilyMat = new THREE.MeshBasicMaterial({ color: this.colors.lily });
+      const roofMat = new THREE.MeshBasicMaterial({ color: this.colors.roof });
+      const chimneyMat = new THREE.MeshBasicMaterial({
+        color: this.colors.chimney,
+      });
 
-    this.applyAll(sceneObjects, (obj) => {
-      const type = obj.type.toLowerCase();
-      const name = obj.name;
-      if (type.includes("light")) {
-        obj.intensity *= lightIntensityAdj;
-      } else if (type.includes("camera")) {
-        obj.fov = this.fov || 45;
-        obj.updateProjectionMatrix();
-      } else if (type.includes("mesh")) {
-        if (name.includes("background")) {
-          console.log(obj);
-          obj.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-          obj.material.side = THREE.DoubleSide;
-        } else if (name.includes("vine")) {
-          obj.material = vineMat;
-        } else if (name.includes("tree") && obj.material.map === null) {
-          obj.material = treeMat;
-        } else if (name.includes("flower")) {
-          obj.material = lilyMat;
-        } else if (name.includes("roof")) {
-          obj.material = roofMat;
-        } else if (name.includes("chimney")) {
-          obj.material = chimneyMat;
+      this.applyAll(sceneObjects, (obj) => {
+        const type = obj.type.toLowerCase();
+        const name = obj.name;
+        if (type.includes("light")) {
+          obj.intensity *= lightIntensityAdj;
+        } else if (type.includes("camera")) {
+          obj.fov = this.fov || 45;
+          obj.updateProjectionMatrix();
+        } else if (type.includes("mesh")) {
+          if (name.includes("background")) {
+            obj.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            obj.material.side = THREE.DoubleSide;
+          } else if (name.includes("vine")) {
+            obj.material = vineMat;
+          } else if (name.includes("tree") && obj.material.map === null) {
+            obj.material = treeMat;
+          } else if (name.includes("flower")) {
+            obj.material = lilyMat;
+          } else if (name.includes("roof")) {
+            obj.material = roofMat;
+          } else if (name.includes("chimney")) {
+            obj.material = chimneyMat;
+          }
         }
-      }
+      });
+
+      resolve();
     });
   }
 
@@ -137,11 +141,12 @@ export class Mire extends SceneManager {
         loadPromiseArray.push(
           new Promise((resolve, reject) => {
             this.loadModel({ name: "mire" }).then((model) => {
-              this.preProcessSceneObjects(model.scene);
-              this.scene.add(model.scene);
-              this.camera = model.cameras[0];
-              this.applySceneSettings();
-              resolve();
+              this.preProcessSceneObjects(model.scene).then(() => {
+                this.scene.add(model.scene);
+                this.camera = model.cameras[0];
+                this.applySceneSettings();
+                resolve();
+              });
             });
           })
         );
