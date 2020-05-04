@@ -1,44 +1,47 @@
 // libs
 import * as THREE from "three";
-import chroma from "chroma-js";
 import { SceneManager } from "../../SceneManager";
+import chroma from "chroma-js";
 import FirstPersonControls from "../../controls/FirstPersonControls";
+
+// globals
+const COLORS = {
+  // vine: chroma("#142A1F").darken(.8).hex(),
+  vine: chroma("#010503").darken(0.8).hex(),
+  tree: chroma("#0A0805").darken(0.085).hex(),
+  fog: chroma("#cccccc").hex(),
+  lily: chroma("LightPink").darken(4.5).hex(),
+  chimney: chroma("#040404").darken(1).hex(),
+  roof: chroma("#0E0F0C").hex(),
+};
+
+const RENDER_LIST = ["swamp"];
 
 export class Swamp extends SceneManager {
   constructor(canvas, analysers, callback, extras) {
     super(canvas);
 
-    this.DPRMax = 2.25;
-    this.fov = 20;
-    this.spectrumFunction = extras.spectrumFunction;
-    this.songId = "swamp";
-    this.resizeMethod = "cinematic";
-    this.bpm = extras.bpm;
-    this.renderList = "swamp";
-    this.fovAdjust = false;
-    this.fpcControl = false;
-
-    this.colors = {
-      // vine: chroma("#142A1F").darken(.8).hex(),
-      vine: chroma("#010503").darken(0.8).hex(),
-      tree: chroma("#0A0805").darken(0.085).hex(),
-      fog: chroma("#cccccc").hex(),
-      lily: chroma("LightPink").darken(4.5).hex(),
-      chimney: chroma("#040404").darken(1).hex(),
-      roof: chroma("#0E0F0C").hex(),
+    const opts = {
+      dprMax: 2.25,
+      fov: 20,
+      spectrumFunction: extras.spectrumFunction,
+      songId: "swamp",
+      resizeMethod: "cinematic",
+      bpm: extras.bpm,
+      fovAdjust: false,
+      fpcControl: false,
     };
 
-    super
-      .init()
+    Object.assign(this, opts);
+    this.setup(callback);
+  }
+
+  setup(callback) {
+    super.init();
+    this.loadModels(RENDER_LIST)
       .then(() => {
-        this.loadModels(this.renderList);
-      })
-      .then(() => {
-        // render once to get objects in place
-        // this.render(this.renderList);
         super.animate();
         callback();
-        console.log("resolve");
       })
       .catch((err) => {
         console.log(err);
@@ -55,12 +58,12 @@ export class Swamp extends SceneManager {
   preProcessSceneObjects(sceneObjects) {
     return new Promise((resolve, reject) => {
       const lightIntensityAdj = 1 / 5;
-      const vineMat = new THREE.MeshBasicMaterial({ color: this.colors.vine });
-      const treeMat = new THREE.MeshBasicMaterial({ color: this.colors.tree });
-      const lilyMat = new THREE.MeshBasicMaterial({ color: this.colors.lily });
-      const roofMat = new THREE.MeshBasicMaterial({ color: this.colors.roof });
+      const vineMat = new THREE.MeshBasicMaterial({ color: COLORS.vine });
+      const treeMat = new THREE.MeshBasicMaterial({ color: COLORS.tree });
+      const lilyMat = new THREE.MeshBasicMaterial({ color: COLORS.lily });
+      const roofMat = new THREE.MeshBasicMaterial({ color: COLORS.roof });
       const chimneyMat = new THREE.MeshBasicMaterial({
-        color: this.colors.chimney,
+        color: COLORS.chimney,
       });
 
       this.applyAll(sceneObjects, (obj) => {
@@ -117,8 +120,7 @@ export class Swamp extends SceneManager {
 
   initScene() {
     const scene = new THREE.Scene();
-    // scene.fog = new THREE.FogExp2(0xcccccc, .005);
-    scene.fog = new THREE.Fog(this.colors.fog, 1, 280);
+    scene.fog = new THREE.Fog(COLORS.fog, 1, 280);
     return scene;
   }
 

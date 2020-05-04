@@ -80,6 +80,8 @@ export class Stars {
       positions.push(randomCoords.y);
       positions.push(randomCoords.z);
       intensities.push(1);
+      console.log(this.colorPalette);
+      console.log(this.colorPalette(Math.random()));
       if (this.colorPalette) {
         color = new THREE.Color(this.colorPalette(Math.random()));
       } else {

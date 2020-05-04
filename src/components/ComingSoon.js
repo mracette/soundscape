@@ -69,18 +69,6 @@ export const ComingSoon = () => {
               </div>
             </form>
           </div>
-          <span className="flex-row">
-            We are also seeking
-            <span className="hot-pink">&nbsp;3D artists&nbsp;</span> to
-            collaborate with.
-          </span>
-          <span className="flex-row">
-            Please&nbsp;
-            <a className="hot-blue" href="mailto:mark@soundscape.world">
-              get in touch
-            </a>
-            &nbsp;if you have any leads!
-          </span>
           <SocialIcons
             divClassList="coming-soon-icon-row"
             svgClassList="icon icon-moon"

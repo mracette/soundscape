@@ -7,14 +7,28 @@ import { regularPolygon } from "crco-utils";
 import { SceneManager } from "../../SceneManager";
 import { StarQuandrants } from "../../subjects/StarQuandrants";
 
+// globals
+const COLORS = {
+  white: 0xffffff,
+  rockGrey: 0x9d978e,
+  lightning: 0xeee6ab,
+  moonYellow: 0xf6f2d5,
+  tropicalGreen: 0x70a491,
+  deepInk: 0x030c22,
+};
+
 export class Moonrise extends SceneManager {
   constructor(canvas, analysers, callback, extras) {
     super(canvas);
 
-    this.songId = "moonrise";
-    this.resizeMethod = "fullscreen";
-    this.DPRMax = 2.5;
-    this.fov = 60;
+    const opts = {
+      songId: "moonrise",
+      resizeMethod: "fullscreen",
+      dprMax: 2.5,
+      fov: 60,
+    };
+
+    Object.assign(this, opts);
 
     this.rhythmAnalyser = analysers["rhythm"];
     this.atmosphereAnalyser = analysers["atmosphere"];
@@ -22,44 +36,51 @@ export class Moonrise extends SceneManager {
     this.melodyAnalyser = analysers["melody"];
     this.bassAnalyser = analysers["bass"];
 
-    this.palette = {
-      white: 0xffffff,
-      rockGrey: 0x9d978e,
-      lightning: 0xeee6ab,
-      moonYellow: 0xf6f2d5,
-      tropicalGreen: 0x70a491,
-      deepInk: 0x030c22,
-    };
-
     // lily vars
     this.prevMelodyVolume = 0;
     this.currentMelodyVolume = 0;
-    this.lilyColors = [
-      this.palette.dustyViolet,
-      this.palette.pansyPurple,
-      this.palette.funGreen,
-      this.palette.hibiscus,
-      this.palette.yellow,
-    ];
 
-    super.init().then(() => {
-      this.scene.fog = new THREE.Fog(0xffffff, 10, 470);
-      this.scene.background = new THREE.Color("#1F262F").lerp(
-        new THREE.Color(0x000000),
-        0.2
-      );
-      Promise.all([
-        this.initLakeTrees(),
-        this.initLakeScene(),
-        this.initLakeRipples(),
-        this.initLakeStars(),
-        this.initLakeLilies(),
-        this.initLakeMoon(),
-      ]).then(() => {
-        callback();
-        super.animate();
-      });
+    super.init();
+
+    this.scene.fog = new THREE.Fog(0xffffff, 10, 470);
+    this.scene.background = new THREE.Color("#1F262F").lerp(
+      new THREE.Color(0x000000),
+      0.2
+    );
+    Promise.all([
+      this.initLakeTrees(),
+      this.initLakeScene(),
+      this.initLakeRipples(),
+      this.initLakeStars(),
+      this.initLakeLilies(),
+      this.initLakeMoon(),
+    ]).then(() => {
+      callback();
+      super.animate();
     });
+  }
+
+  setup(callback) {
+    this.applySceneSettings();
+    Promise.all([
+      this.initLakeTrees(),
+      this.initLakeScene(),
+      this.initLakeRipples(),
+      this.initLakeStars(),
+      this.initLakeLilies(),
+      this.initLakeMoon(),
+    ]).then(() => {
+      callback();
+      super.animate();
+    });
+  }
+
+  applySceneSettings() {
+    this.scene.fog = new THREE.Fog(0xffffff, 10, 470);
+    this.scene.background = new THREE.Color("#1F262F").lerp(
+      new THREE.Color(0x000000),
+      0.2
+    );
   }
 
   initLakeScene() {
@@ -78,7 +99,7 @@ export class Moonrise extends SceneManager {
         lakeGeo.rotateX(-Math.PI / 2);
         lakeGeo.translate(0, 0, 70);
         const lakeMat = new THREE.MeshBasicMaterial({
-          color: this.palette.deepInk,
+          color: COLORS.deepInk,
           fog: false,
         });
         const lakeMesh = new THREE.Mesh(lakeGeo, lakeMat);
@@ -93,7 +114,7 @@ export class Moonrise extends SceneManager {
           color: 0x022a1e,
           fog: false,
         });
-        groundMat.color.lerp(new THREE.Color(0x000000), 0.75); // TODO: figure out the color issue
+        groundMat.color.lerp(new THREE.Color(0x000000), 0.75);
         const groundMesh = new THREE.Mesh(groundGeo, groundMat);
         this.subjects.ground = groundMesh;
         this.scene.add(groundMesh);
@@ -116,11 +137,11 @@ export class Moonrise extends SceneManager {
         const fireFlyGroup = new THREE.Group();
         for (let i = 0; i < fireflyCount; i++) {
           const g = new THREE.Group();
-          g.add(new THREE.PointLight(this.palette.moonYellow, 0.1));
+          g.add(new THREE.PointLight(COLORS.moonYellow, 0.1));
 
           const sphereGeo = new THREE.SphereBufferGeometry(0.25);
           const sphereMat = new THREE.MeshBasicMaterial({
-            color: this.palette.lightning,
+            color: COLORS.lightning,
             fog: false,
             transparent: true,
           });
@@ -141,7 +162,6 @@ export class Moonrise extends SceneManager {
         this.subjects.fireflies = fireFlyGroup;
         this.scene.add(fireFlyGroup);
 
-        // add some rocks
         this.loadModel({ name: "landscape" })
           .then((model) => {
             this.subjects.rocks = model.scene.children.find(
@@ -176,7 +196,7 @@ export class Moonrise extends SceneManager {
           numVertices
         );
         const moonMat = new THREE.MeshBasicMaterial({
-          color: this.palette.moonYellow,
+          color: COLORS.moonYellow,
           fog: false,
         });
 
@@ -201,7 +221,7 @@ export class Moonrise extends SceneManager {
           moonRingGeo.setDrawRange(0, 0);
 
           const moonRingMat = new THREE.PointsMaterial({
-            color: this.palette.moonYellow,
+            color: COLORS.moonYellow,
             transparent: true,
             opacity: 0.1 + j / 7,
           });
@@ -265,8 +285,8 @@ export class Moonrise extends SceneManager {
             const scale = 1 - scaleNoise * Math.random();
 
             clone.children[0].material = new THREE.MeshBasicMaterial({
-              color: new THREE.Color(this.palette.tropicalGreen).lerp(
-                new THREE.Color(this.palette.white),
+              color: new THREE.Color(COLORS.tropicalGreen).lerp(
+                new THREE.Color(COLORS.white),
                 -1.5
               ),
             });
@@ -325,7 +345,7 @@ export class Moonrise extends SceneManager {
             new THREE.Line(
               geo,
               new THREE.LineBasicMaterial({
-                color: this.palette.moonYellow,
+                color: COLORS.moonYellow,
                 transparent: true,
                 opacity: 0,
               })
@@ -512,11 +532,8 @@ export class Moonrise extends SceneManager {
           const transformedData =
             Math.pow(rawData, 5) / (Math.pow(255, 5) * 0.06);
 
-          const color = new THREE.Color(this.palette.tropicalGreen);
-          color.lerp(
-            new THREE.Color(this.palette.white),
-            -1.5 + transformedData
-          );
+          const color = new THREE.Color(COLORS.tropicalGreen);
+          color.lerp(new THREE.Color(COLORS.white), -1.5 + transformedData);
 
           child.children[0].material.color.set(color);
         });

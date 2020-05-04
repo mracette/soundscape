@@ -21,7 +21,13 @@ export const AppRouter = (props) => {
   return (
     <Router>
       <Switch>
-        <Route exact path="/" component={LandingPage} />
+        <Route
+          exact
+          path="/"
+          render={() => (
+            <LandingPage spectrumFunction={props.spectrumFunctions.stars} />
+          )}
+        />
         <Route exact path="/coming-soon" component={ComingSoon} />
         <Route
           exact

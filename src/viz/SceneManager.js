@@ -6,56 +6,66 @@ import { cinematicResize } from "../utils/jsUtils";
 
 export class SceneManager {
   constructor(canvas) {
-    this.canvas = canvas;
-
-    this.clock = new THREE.Clock(true);
-
-    this.sceneDimensions = {
-      width:
-        this.resizeMethod === "cinematic" ? canvas.width : window.innerWidth,
-      height:
-        this.resizeMethod === "cinematic" ? canvas.height : window.innerHeight,
+    const opts = {
+      songId: null,
+      fov: 60,
+      bpm: null,
+      dprMax: 5,
+      canvas,
+      clock: new THREE.Clock(true),
+      resizeMethod: "fullscreen",
+      pauseVisuals: false,
+      sceneDimensions: {
+        width: null,
+        height: null,
+      },
+      spectrumFunction: (n) => "#FFFFFF",
+      showStats: false,
+      fpcControl: false,
     };
 
-    this.worldDimensions = {
-      width: 1000,
-      height: 1000,
-      depth: 1000,
-    };
-
-    this.fov = 60;
-
-    this.resizeMethod = null;
-    this.pauseVisuals = false;
+    // bind properties to 'this'
+    Object.assign(this, opts);
     this.animate = this.animate.bind(this);
-    this.render = this.render.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
-    this.showStats = true;
+
+    // run initialization functions
+    this.setSceneDimensions();
   }
 
   init() {
-    return new Promise((resolve, reject) => {
-      try {
-        // lights, camera, action
-        this.scene = this.initScene();
-        this.renderer = this.initRender();
-        this.camera = this.initCamera("perspective");
-        this.controls = this.initControls();
-        this.subjects = this.initSubjects();
-        this.lights = this.initLights();
-        this.helpers = this.initHelpers();
-        resolve();
-      } catch (err) {
-        reject(err);
-      }
-    });
+    this.scene = this.initScene();
+    this.renderer = this.initRender();
+    this.camera = this.initCamera();
+    this.controls = this.initControls();
+    this.subjects = this.initSubjects();
+    this.lights = this.initLights();
+    this.helpers = this.initHelpers();
   }
 
   stop() {
     window.cancelAnimationFrame(this.currentFrame);
   }
 
+  setSceneDimensions() {
+    this.sceneDimensions = {
+      width:
+        this.resizeMethod === "cinematic"
+          ? this.canvas.width
+          : this.resizeMethod === "fullscreen"
+          ? window.innerWidth
+          : null,
+      height:
+        this.resizeMethod === "cinematic"
+          ? this.canvas.height
+          : this.resizeMethod === "fullscreen"
+          ? window.innerHeight
+          : null,
+    };
+  }
+
   applyAll(obj, callback, exceptions = []) {
+    // recursively apply callback to all descendants of obj
     obj.children.forEach((child) => {
       if (child.children.length > 0) {
         this.applyAll(child, callback, exceptions);
@@ -75,7 +85,7 @@ export class SceneManager {
     if (obj.geometry) obj.geometry.dispose();
 
     if (obj.material) {
-      //in case of map, bumpMap, normalMap, envMap ...
+      // in case of map, bumpMap, normalMap, envMap ...
       Object.keys(obj.material).forEach((prop) => {
         if (!obj.material[prop]) return;
         if (typeof obj.material[prop].dispose === "function")
@@ -107,7 +117,7 @@ export class SceneManager {
     });
 
     let DPR = Math.min(
-      this.DPRMax || 1.5,
+      this.dprMax || 1.5,
       window.devicePixelRatio ? window.devicePixelRatio : 1
     );
 
@@ -117,38 +127,16 @@ export class SceneManager {
     return renderer;
   }
 
-  initCamera(type, frustrum) {
-    const fieldOfView = 60;
+  initCamera() {
     const nearPlane = 1;
     const farPlane = 10000;
-    const aspect = this.sceneDimensions.width / this.sceneDimensions.height;
-    let camera;
-
-    switch (type || "perspective") {
-      case "perspective":
-        camera = new THREE.PerspectiveCamera(
-          fieldOfView,
-          1,
-          nearPlane,
-          farPlane
-        );
-        break;
-      case "orthographic":
-        let f = frustrum || 50;
-        camera = new THREE.OrthographicCamera(
-          -f,
-          f,
-          f / aspect,
-          -f / aspect,
-          nearPlane,
-          farPlane
-        );
-        break;
-      default:
-        break;
-    }
-
-    camera.aspect = aspect;
+    const camera = new THREE.PerspectiveCamera(
+      this.getFov(),
+      1,
+      nearPlane,
+      farPlane
+    );
+    camera.aspect = this.getAspectRatio();
     camera.position.set(0, 10, 115);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     camera.updateProjectionMatrix();
@@ -157,7 +145,7 @@ export class SceneManager {
 
   initControls() {
     const controls = {};
-    controls.fpc = new FirstPersonControls(this.camera);
+    this.fpcControl && (controls.fpc = new FirstPersonControls(this.camera));
     return controls;
   }
 
@@ -175,65 +163,37 @@ export class SceneManager {
   }
 
   initHelpers() {
-    let stats = null;
-
-    if (this.showStats) {
-      stats = new Stats();
-      stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-      stats.dom.style.left = null;
-      stats.dom.style.right = "0px";
-      document.body.appendChild(stats.dom);
-    }
-
     const helpers = {
-      stats: stats,
       gltfLoader: new GLTFLoader(),
     };
-
+    if (this.showStats) {
+      helpers.stats = new Stats();
+      helpers.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+      helpers.stats.dom.style.left = null;
+      helpers.stats.dom.style.right = "0px";
+      document.body.appendChild(helpers.stats.dom);
+    }
     return helpers;
   }
 
-  getNewFov(aspectRatio) {
-    // if(this.resizeMethod === 'fullscreen') {
-    const aspectAdj = Math.max(
-      this.aspectMin,
-      Math.min(aspectRatio, this.aspectMax)
-    );
-    const newFov =
-      this.fovMax -
-      ((this.fovMax - this.fovMin) * (aspectAdj - this.aspectMin)) /
-        (this.aspectMax - this.aspectMin);
-    return newFov;
-    // } else if (this.resizeMethod === 'cinematic') {
+  getFov() {
+    return this.fov;
+  }
 
-    // }
+  getAspectRatio() {
+    return this.sceneDimensions.width / this.sceneDimensions.height;
   }
 
   onWindowResize() {
+    this.setSceneDimensions();
     this.resizeMethod === "cinematic" && cinematicResize(this.canvas);
-
-    const newWidth =
-      this.resizeMethod === "cinematic" ? this.canvas.width : window.innerWidth;
-
-    const newHeight =
-      this.resizeMethod === "cinematic"
-        ? this.canvas.height
-        : window.innerHeight;
-
-    this.sceneDimensions.width = newWidth;
-    this.sceneDimensions.height = newHeight;
-
-    const aspectRatio = newWidth / newHeight;
-
-    if (this.fovAdjust) {
-      this.camera.fov = this.getNewFov(aspectRatio);
-    } else {
-      this.camera.fov = this.fov;
-    }
-
-    this.camera.aspect = aspectRatio;
+    this.camera.fov = this.getFov();
+    this.camera.aspect = this.getAspectRatio();
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(newWidth, newHeight);
+    this.renderer.setSize(
+      this.sceneDimensions.width,
+      this.sceneDimensions.height
+    );
     this.render(true);
   }
 

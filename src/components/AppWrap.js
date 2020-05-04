@@ -18,13 +18,19 @@ import { WebAudioWrapper } from "../classes/WebAudioWrapper";
 // utils
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 
+const starsPalette = new ColorPalette(
+  '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.182,"y":-0.138},"scale":{"x":1,"y":1},"rotation":0,"angleStart":2.105,"angleEnd":6.283,"angleOffset":0,"radius":0.5}',
+  '{"type":"linear","overflow":"clamp","reverse":false,"translation":{"x":-0.003,"y":0.758},"scale":{"x":1.053,"y":-0.13},"rotation":0}',
+  '{"start":0,"end":1}'
+);
 const morningsPalette = new ColorPalette(
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.125,"y":-0.081},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.142,"angleOffset":5.781,"radius":0.5}',
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":0.5,"y":0.5},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.424,"angleOffset":0.628,"radius":0.25}',
   '{"start":0,"end":1}'
-); // load the app config flat file
+);
 const morningsPaletteDiscrete = [];
 const moonrisePaletteDiscrete = [];
+const starsPaletteDiscrete = [];
 
 // instead of querying the full palettes, use a discrete, in-memory versions to save compute
 for (let i = 0; i <= 255; i++) {
@@ -32,7 +38,16 @@ for (let i = 0; i <= 255; i++) {
   moonrisePaletteDiscrete.push(
     new d3Color.color(d3Chromatic.interpolateViridis(i / 255)).brighter(1.5)
   );
+  starsPaletteDiscrete.push(starsPalette.rgbValueAt(i / 255));
 }
+
+// define spectrum functions here since they don't do well in json
+const spectrumFunctions = {
+  moonrise: (n) => moonrisePaletteDiscrete[Math.round(n * 255)],
+  mornings: (n) => morningsPaletteDiscrete[Math.round(n * 255)],
+  stars: (n) => starsPaletteDiscrete[Math.round(n * 255)],
+  swamp: (n) => "#000000",
+};
 
 const appConfig = require("../app-config.json");
 const webAudioWrapper = new WebAudioWrapper(appConfig);
@@ -42,13 +57,6 @@ const flags = {
   quantizeSamples: true,
   showVisuals: true,
   playAmbientTrack: true,
-};
-
-// define spectrum functions here since they don't do well in json
-const spectrumFunctions = {
-  moonrise: (n) => moonrisePaletteDiscrete[Math.round(n * 255)],
-  mornings: (n) => morningsPaletteDiscrete[Math.round(n * 255)],
-  swamp: (n) => "#000000",
 };
 
 // inits globals vars, adds listeners, and manages some other settings

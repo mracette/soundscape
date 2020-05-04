@@ -54,7 +54,8 @@ export const landingPageReducer = (state, action) => {
   }
 };
 
-export const LandingPage = () => {
+export const LandingPage = (props) => {
+  const { spectrumFunction } = props;
   const [selected, dispatch] = React.useReducer(landingPageReducer, {
     name: null,
     bpm: null,
@@ -69,8 +70,7 @@ export const LandingPage = () => {
     let scene;
 
     if (canvasRef.current) {
-      scene = new LandingPageScene(canvasRef.current);
-      scene.init().then(() => scene.animate());
+      scene = new LandingPageScene(canvasRef.current, { spectrumFunction });
       addWindowListeners(scene.onWindowResize);
     }
 
@@ -79,7 +79,7 @@ export const LandingPage = () => {
       scene.disposeAll(scene.scene);
       removeWindowListeners(scene.onWindowResize);
     };
-  }, []);
+  }, [spectrumFunction]);
 
   return (
     <>

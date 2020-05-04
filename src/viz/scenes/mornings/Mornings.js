@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { SceneManager } from "../../SceneManager";
 import FirstPersonControls from "../../controls/FirstPersonControls";
+import { lerp, normalize } from "crco-utils";
 
 // rendering
 import { renderBass } from "./renderBass";
@@ -13,88 +14,67 @@ import { renderAtmosphere } from "./renderAtmosphere";
 // shaders
 import { rgbaVertex, rgbaFragment } from "../../shaders/rgba";
 
+// globals
+const CANVAS_STYLE = `
+background-color: none; background: 
+linear-gradient(
+    to top, 
+    #F0A9B3 45%, 
+    #D8B7B6 55%,
+    #BEBDC3 70%,
+    #A1BCD4 85%,
+    #80BDE8 100%
+);`;
+
+const COLORS = {
+  morningLight: new THREE.Color(0xf0a9b3),
+  plant: new THREE.Color(0x7b9e53),
+  white: new THREE.Color(0xffffff),
+  paleBlue: new THREE.Color(0xdeeeff),
+  coffee: new THREE.Color(0x260e00),
+  deepBlue: new THREE.Color(0x213058),
+  blueGrey: new THREE.Color(0xb0b1b6),
+};
+
+const RENDER_LIST = ["house", "plant", "table", "bookcase", "flower"];
+
+const FREEZE_EXCEPTIONS = [
+  "steam",
+  "van_gogh",
+  "vonnegut",
+  "carpet",
+  "god_rays_top",
+  "god_rays_bottom",
+];
+
 export class Mornings extends SceneManager {
   constructor(canvas, analysers, callback, extras) {
     super(canvas);
 
-    this.canvas.style = `
-            background-color: none; background: 
-            linear-gradient(
-                to top, 
-                #F0A9B3 45%, 
-                #D8B7B6 55%,
-                #BEBDC3 70%,
-                #A1BCD4 85%,
-                #80BDE8 100%
-            );
-        `;
-
-    this.DPRMax = 2.25;
-    this.fovMin = 25;
-    this.fovMax = 50;
-    this.aspectMin = 0.5;
-    this.aspectMax = 3;
-    this.spectrumFunction = extras.spectrumFunction;
-    this.songId = "mornings";
-    this.resizeMethod = "fullscreen";
-
-    this.colors = {
-      morningLight: new THREE.Color(0xf0a9b3),
-      plant: new THREE.Color(0x7b9e53),
-      white: new THREE.Color(0xffffff),
-      paleBlue: new THREE.Color(0xdeeeff),
-      coffee: new THREE.Color(0x260e00),
-      deepBlue: new THREE.Color(0x213058),
-      blueGrey: new THREE.Color(0xb0b1b6),
+    const opts = {
+      songId: "mornings",
+      spectrumFunction: extras.spectrumFunction,
+      dprMax: 2.25,
+      bpm: extras.bpm,
     };
-    this.renderList = ["house", "plant", "table", "bookcase", "flower"];
-    this.bpm = extras.bpm;
 
+    Object.assign(this, opts);
+    this.canvas.style = CANVAS_STYLE;
     this.rhythmAnalyser = analysers["rhythm"];
     this.atmosphereAnalyser = analysers["extras"];
     this.harmonyAnalyser = analysers["harmony"];
     this.melodyAnalyser = analysers["melody"];
     this.bassAnalyser = analysers["bass"];
 
-    this.fovAdjust = true;
-    this.fpcControl = false;
+    super.init();
 
-    Promise.all([super.init(), this.loadModels(this.renderList)])
+    this.loadModels(RENDER_LIST)
       .then(() => {
-        callback();
         this.applySceneSettings();
-        // render once to get objects in place
-        this.render(this.renderList);
-        this.applyAll(
-          this.scene,
-          (child) => {
-            // freeze objects that don't move
-            child.matrixAutoUpdates = false;
-            // lambert material is the most efficient
-            if (
-              child.material &&
-              child.material.type === "MeshStandardMaterial"
-            ) {
-              const mat = new THREE.MeshLambertMaterial({
-                color: child.material.color,
-                side: THREE.DoubleSide,
-                emissive: child.material.emissive,
-                emissiveIntensity: child.material.emissiveIntensity,
-              });
-              child.material.dispose();
-              child.material = mat;
-            }
-          },
-          [
-            "steam",
-            "van_gogh",
-            "vonnegut",
-            "carpet",
-            "god_rays_top",
-            "god_rays_bottom",
-          ]
-        );
+        this.preProcessSceneObjects();
+        this.render(RENDER_LIST);
         super.animate();
+        callback();
       })
       .catch((err) => {
         console.log(err);
@@ -116,19 +96,34 @@ export class Mornings extends SceneManager {
       2.382592629313793,
       -34.638979984916375
     );
-    this.camera.fov = this.getNewFov(window.innerWidth / window.innerHeight);
-    this.camera.updateProjectionMatrix();
   }
 
-  getNewFov(aspectRatio) {
-    const fovMin = 25;
-    const fovMax = 50;
-    const aspectMin = 0.5;
-    const aspectMax = 3;
-    const aspectAdj = Math.max(aspectMin, Math.min(aspectRatio, aspectMax));
-    const newFov =
-      fovMax -
-      ((fovMax - fovMin) * (aspectAdj - aspectMin)) / (aspectMax - aspectMin);
+  preProcessSceneObjects() {
+    this.applyAll(
+      this.scene,
+      (child) => {
+        // freeze objects that don't move
+        child.matrixAutoUpdates = false;
+        // lambert material is the most efficient
+        if (child.material && child.material.type === "MeshStandardMaterial") {
+          const mat = new THREE.MeshLambertMaterial({
+            color: child.material.color,
+            side: THREE.DoubleSide,
+            emissive: child.material.emissive,
+            emissiveIntensity: child.material.emissiveIntensity,
+          });
+          child.material.dispose();
+          child.material = mat;
+        }
+      },
+      FREEZE_EXCEPTIONS
+    );
+  }
+
+  getFov() {
+    const aspect = this.getAspectRatio();
+    const aspectAmt = normalize(aspect, 0.5, 3, true);
+    const newFov = lerp(50, 25, aspectAmt);
     return newFov;
   }
 
@@ -150,10 +145,10 @@ export class Mornings extends SceneManager {
   initLights() {
     const lights = {
       ambient: new THREE.AmbientLight(
-        this.colors.morningLight.clone().lerp(this.colors.white, 0.65),
+        COLORS.morningLight.clone().lerp(COLORS.white, 0.65),
         0.35
       ),
-      sunlight: new THREE.DirectionalLight(this.colors.white, 0),
+      sunlight: new THREE.DirectionalLight(COLORS.white, 0),
       pointOne: new THREE.PointLight(0xffffff, 0.1),
     };
 
@@ -203,7 +198,7 @@ export class Mornings extends SceneManager {
                   mesh.name === "god_rays_bottom"
                 ) {
                   mesh.material = new THREE.MeshBasicMaterial({
-                    color: this.colors.white,
+                    color: COLORS.white,
                     transparent: true,
                     side: THREE.DoubleSide,
                     opacity: 0.025,
@@ -251,7 +246,7 @@ export class Mornings extends SceneManager {
               model.scene.children.forEach((mesh) => {
                 if (mesh.name.includes("mug_coffee")) {
                   mesh.material = new THREE.MeshBasicMaterial({
-                    color: this.colors.coffee,
+                    color: COLORS.coffee,
                   });
                 }
 
@@ -291,7 +286,7 @@ export class Mornings extends SceneManager {
 
                 if (mesh.name === "steam") {
                   mesh.material = new THREE.MeshBasicMaterial({
-                    color: this.colors.white,
+                    color: COLORS.white,
                     transparent: true,
                     side: THREE.DoubleSide,
                     opacity: 0.025,
@@ -335,15 +330,15 @@ export class Mornings extends SceneManager {
 
                 if (mesh.name.includes("stick_leaves_one")) {
                   mesh.material = new THREE.MeshLambertMaterial({
-                    color: this.colors.plant,
-                    emissive: this.colors.plant,
+                    color: COLORS.plant,
+                    emissive: COLORS.plant,
                     emissiveIntensity: 0,
                   });
                   stickLeavesOne.push(mesh);
                 } else if (mesh.name.includes("stick_leaves")) {
                   mesh.material = new THREE.MeshLambertMaterial({
-                    color: this.colors.plant,
-                    emissive: this.colors.plant,
+                    color: COLORS.plant,
+                    emissive: COLORS.plant,
                     emissiveIntensity: 0,
                   });
                   stickLeaves.push(mesh);
@@ -371,8 +366,8 @@ export class Mornings extends SceneManager {
                 .filter((mesh) => mesh.name.includes("spiral_plant_leaf"))
                 .forEach((mesh) => {
                   mesh.material = new THREE.MeshLambertMaterial({
-                    color: this.colors.plant,
-                    emissive: this.colors.plant,
+                    color: COLORS.plant,
+                    emissive: COLORS.plant,
                     emissiveIntensity: 0,
                   });
                   leaves.push(mesh);
