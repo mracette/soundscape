@@ -2,7 +2,7 @@
 import React from "react";
 
 // components
-import { CanvasViz } from "./CanvasViz";
+import { CanvasViz } from "./canvas/CanvasViz";
 import { EffectsPanel } from "./EffectsPanel";
 import { FreqBands } from "./FreqBands";
 import { MenuButtonParent } from "./menu-button/MenuButtonParent";

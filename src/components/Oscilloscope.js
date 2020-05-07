@@ -2,7 +2,7 @@
 import React from "react";
 
 // components
-import { Canvas } from "../components/Canvas";
+import { Canvas } from "./canvas/Canvas";
 
 // context
 import { ThemeContext } from "../contexts/contexts";

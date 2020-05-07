@@ -158,6 +158,7 @@
             ]
         },
         "themes": {
+            "canvasFade": false,
             "resizeType": "fullscreen",
             "buttonColor": "rgba(31, 38, 47, 1)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
@@ -342,6 +343,7 @@
             ]
         },
         "themes": {
+            "canvasFade": false,
             "resizeType": "fullscreen",
             "buttonColor": "rgba(55, 55, 55, 0.45)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
@@ -386,6 +388,7 @@
             "groups": []
         },
         "themes": {
+            "canvasFade": true,
             "resizeType": "cinematic",
             "buttonColor": "rgba(31, 38, 47, 1)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",

@@ -3,7 +3,7 @@ import React from "react";
 import { CanvasCoordinates } from "crco-utils";
 
 // components
-import { Canvas } from "../Canvas";
+import { Canvas } from "../canvas/Canvas";
 
 // styles
 import "../../styles/components/LandingPage.scss";

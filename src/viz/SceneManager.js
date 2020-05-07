@@ -2,7 +2,6 @@ import * as THREE from "three";
 import Stats from "stats.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
-import { cinematicResize } from "../utils/jsUtils";
 
 export class SceneManager {
   constructor(canvas) {
@@ -20,7 +19,7 @@ export class SceneManager {
         height: null,
       },
       spectrumFunction: (n) => "#FFFFFF",
-      showStats: false,
+      showStats: true,
       fpcControl: false,
     };
 
@@ -185,8 +184,8 @@ export class SceneManager {
   }
 
   onWindowResize() {
+    // this function shouldn't contain any DOM resizing logic, just scene logic
     this.setSceneDimensions();
-    this.resizeMethod === "cinematic" && cinematicResize(this.canvas);
     this.camera.fov = this.getFov();
     this.camera.aspect = this.getAspectRatio();
     this.camera.updateProjectionMatrix();

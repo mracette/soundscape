@@ -2,7 +2,7 @@
 import React from "react";
 
 // components
-import { Canvas } from "../components/Canvas";
+import { Canvas } from "./canvas/Canvas";
 
 // hooks
 import { useAnimationFrame } from "../hooks/useAnimationFrame";

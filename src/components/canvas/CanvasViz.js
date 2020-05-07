@@ -2,30 +2,33 @@
 import React from "react";
 
 // scenes
-import { Moonrise } from "../viz/scenes/moonrise/Moonrise";
-import { Mornings } from "../viz/scenes/mornings/Mornings";
-import { Swamp } from "../viz/scenes/swamp/Swamp";
+import { Moonrise } from "../../viz/scenes/moonrise/Moonrise";
+import { Mornings } from "../../viz/scenes/mornings/Mornings";
+import { Swamp } from "../../viz/scenes/swamp/Swamp";
 
 // context
-import { SongContext } from "../contexts/contexts";
-import { TestingContext } from "../contexts/contexts";
-import { MusicPlayerContext } from "../contexts/contexts";
-import { ThemeContext } from "../contexts/contexts";
-import { WebAudioContext } from "../contexts/contexts";
+import { SongContext } from "../../contexts/contexts";
+import { TestingContext } from "../../contexts/contexts";
+import { MusicPlayerContext } from "../../contexts/contexts";
+import { ThemeContext } from "../../contexts/contexts";
+import { WebAudioContext } from "../../contexts/contexts";
+
+// components
+import { CanvasFade } from "./CanvasFade";
 
 // utils
 import {
   cinematicResize,
   addWindowListeners,
   removeWindowListeners,
-} from "../utils/jsUtils";
+} from "../../utils/jsUtils";
 
 // styles
-import "../styles/components/CanvasViz.scss";
+import "../../styles/components/CanvasViz.scss";
 
 export const CanvasViz = (props) => {
   const { songLoadStatus, handleSetCanvasLoadStatus } = props;
-  const { spectrumFunction } = React.useContext(ThemeContext);
+  const { spectrumFunction, canvasFade } = React.useContext(ThemeContext);
   const { id, groups, bpm } = React.useContext(SongContext);
   const { WAW } = React.useContext(WebAudioContext);
   const { voices, analysers, dispatch, pauseVisuals } = React.useContext(
@@ -46,15 +49,17 @@ export const CanvasViz = (props) => {
       const playerState = {};
       groups.forEach((g) => {
         playerState[g.name] =
-          voices.filter((v) => v.group === g.name && v.voiceState === "active")
-            .length > 0;
+          voices.filter(
+            (v) =>
+              v.group === g.name &&
+              (v.voiceState === "active" || v.voiceState === "pending-stop")
+          ).length > 0;
       });
       sceneRef.current.playerState = playerState;
     }
   }, [groups, voices]);
 
   React.useEffect(() => {
-    console.log("adding new scene");
     let newScene;
     switch (id) {
       case "moonrise":
@@ -142,6 +147,7 @@ export const CanvasViz = (props) => {
   return (
     <div id="canvas-viz-parent" className="fullscreen">
       <canvas id="canvas-viz" ref={canvasRef}></canvas>
+      {canvasFade && <CanvasFade ref={canvasRef} />}
     </div>
   );
 };

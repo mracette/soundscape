@@ -38,6 +38,7 @@ export class Swamp extends SceneManager {
 
   setup(callback) {
     super.init();
+    this.createFadeLayer();
     this.loadModels(RENDER_LIST)
       .then(() => {
         super.animate();
@@ -46,6 +47,17 @@ export class Swamp extends SceneManager {
       .catch((err) => {
         console.log(err);
       });
+  }
+
+  createFadeLayer() {
+    // const clone = this.canvas.cloneNode();
+    // clone.id = "fade-layer";
+    // clone.style.zIndex = 10;
+    // clone.style.backgroundColor = "red";
+    // document.body.appendChild(clone);
+    // this.onWindowResize = () => {
+    //   super.onWindowResize();
+    // };
   }
 
   applySceneSettings() {
