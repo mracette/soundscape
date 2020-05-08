@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 // components
 import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
 import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
+import { SwampIcon } from "./custom-song-icons/SwampIcon";
 import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
 
 // context
@@ -36,7 +37,7 @@ export const landingPageReducer = (state, action) => {
     case "swamp":
       return {
         name: "Swamp",
-        bpm: "???",
+        bpm: "75",
         key: "Eb Minor",
       };
     case "coming-soon":
@@ -128,6 +129,19 @@ export const LandingPage = (props) => {
           </div>
         </div>
         <div id="song-selection-panel">
+          <Link className="song-link" id="song-link-swamp" to="/play/swamp">
+            {isMobile && (
+              <div className="landing-page-header">
+                <div className="flex-row">
+                  <span id="landing-page-song-title">Swamp</span>
+                  &nbsp;|&nbsp;
+                  <span id="landing-page-bpm">75</span>&nbsp;|&nbsp;
+                  <span id="landing-page-key">Eb Minor</span>
+                </div>
+              </div>
+            )}
+            <SwampIcon name="swamp" dispatch={dispatch} />
+          </Link>
           <Link
             className="song-link"
             id="song-link-mornings"
@@ -161,19 +175,6 @@ export const LandingPage = (props) => {
               </div>
             )}
             <MoonriseIcon name="moonrise" dispatch={dispatch} />
-          </Link>
-          <Link className="song-link" id="song-link-swamp" to="/play/swamp">
-            {isMobile && (
-              <div className="landing-page-header">
-                <div className="flex-row">
-                  <span id="landing-page-song-title">Swamp</span>
-                  &nbsp;|&nbsp;
-                  <span id="landing-page-bpm">???</span>&nbsp;|&nbsp;
-                  <span id="landing-page-key">Eb Minor</span>
-                </div>
-              </div>
-            )}
-            <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
           </Link>
           <Link
             className="song-link"

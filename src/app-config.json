@@ -380,7 +380,7 @@
         "id": "swamp",
         "audio": {
             "name": "Swamp",
-            "bpm": 95,
+            "bpm": 75,
             "timeSignature": 4,
             "keySignature": "Eb Minor",
             "ambientTrack": false,
