@@ -38,7 +38,7 @@
                         {
                             "name": "belly-percs[2]",
                             "length": "2m",
-                            "quantizeLength": "2m"
+                            "quantizeLength": "4m"
                         }
                     ]
                 },
@@ -65,7 +65,7 @@
                         {
                             "name": "rhodes-sad[2]",
                             "length": "2m",
-                            "quantizeLength": "2m"
+                            "quantizeLength": "4m"
                         }
                     ]
                 },
@@ -87,7 +87,7 @@
                         {
                             "name": "sub-simple[8]",
                             "length": "8m",
-                            "quantizeLength": "8m"
+                            "quantizeLength": "4m"
                         },
                         {
                             "name": "sub-bouncey[8]",
@@ -277,7 +277,7 @@
                         {
                             "name": "bass-two[4]",
                             "length": "4m",
-                            "quantizeLength": "8m"
+                            "quantizeLength": "4m"
                         },
                         {
                             "name": "bass-three[4]",
@@ -398,7 +398,8 @@
                         {
                             "name": "rhythm-kick[1]",
                             "length": "1m",
-                            "quantizeLength": "2m"
+                            "quantizeLength": "2m",
+                            "noFade": true
                         },
                         {
                             "name": "rhythm-snaps[2]",
@@ -431,7 +432,7 @@
                         {
                             "name": "bass-long[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         },
                         {
                             "name": "bass-sequence[2]",
@@ -454,17 +455,17 @@
                         {
                             "name": "harmony-build[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         },
                         {
                             "name": "harmony-tattletale[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         },
                         {
                             "name": "harmony-triplets[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         }
                     ]
                 },
@@ -477,27 +478,27 @@
                         {
                             "name": "piano-dark[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         },
                         {
                             "name": "piano-dreary[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         },
                         {
                             "name": "piano-theme[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         },
                         {
                             "name": "piano-drips[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         },
                         {
                             "name": "piano-onefour[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         }
                     ]
                 },
@@ -510,12 +511,12 @@
                         {
                             "name": "extras-critters[4]",
                             "length": "4m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         },
                         {
                             "name": "extras-riser[8]",
                             "length": "8m",
-                            "quantizeLength": "4m"
+                            "quantizeLength": "2m"
                         }
                     ]
                 }

@@ -40,14 +40,16 @@ export const ToggleButton = (props) => {
   const { id, timeSignature, bpm } = React.useContext(SongContext);
   const { flags } = React.useContext(TestingContext);
   const musicPlayerDispatch = React.useContext(MusicPlayerContext).dispatch;
-  const { dispatch, name, override } = props;
+  const { dispatch, name, override, quantizeLength } = props;
 
   const { scheduler, audioCtx } = WAW;
   const player = WAW.getVoices(id)[name];
 
   const [playerState, setPlayerState] = React.useState("stopped");
 
-  const quantizedStartBeats = flags.quantizeSamples ? 4 * timeSignature : 1;
+  const quantizedStartBeats = flags.quantizeSamples
+    ? timeSignature * parseInt(quantizeLength)
+    : 1;
   const buttonRadius = vh ? vh * 3.5 : 0;
   const buttonBorder = vh ? (vh * 3.5) / 15 : 0;
 
