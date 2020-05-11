@@ -1,7 +1,5 @@
-for dir in ./wav/*/; do
-    echo "$dir"
-    for file in $dir/*; do
-        filename=$(basename $file)
-        lame -V1 -q0 $dir$filename  ./vbr/$(basename $dir)/${filename%.*}.mp3
-    done
+for file in $1/*; do
+    filename=$(basename $file)
+    echo "$filename"
+    lame -V1 -q0 $1$filename  $2${filename%.*}.mp3
 done

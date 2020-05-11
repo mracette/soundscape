@@ -20,12 +20,17 @@ import { WebAudioContext } from "../contexts/contexts";
 // reducers
 import { MusicPlayerReducer } from "../reducers/MusicPlayerReducer";
 
+// other
+import { nextSubdivision } from "../utils/audioUtils";
+
 // styles
 import "../styles/components/MusicPlayer.scss";
 
 export const MusicPlayer = () => {
   const { flags } = React.useContext(TestingContext);
-  const { id, bpm, ambientTrack } = React.useContext(SongContext);
+  const { id, bpm, ambientTrack, ambientTrackQuantize } = React.useContext(
+    SongContext
+  );
   const { WAW, wawLoadStatus } = React.useContext(WebAudioContext);
 
   const backgroundModeEventRef = React.useRef(null);
@@ -63,8 +68,12 @@ export const MusicPlayer = () => {
 
     // safe to resume and take the init time here (after user gesture)
     if (songLoadStatus && flags.playAmbientTrack && ambientTrack) {
+      let startTime = null;
+      if (ambientTrackQuantize) {
+        startTime = nextSubdivision(WAW.audioCtx, bpm, 4);
+      }
       WAW.audioCtx.resume();
-      WAW.getVoices(id)["ambient"].start();
+      WAW.getVoices(id)["ambient"].start(startTime);
     }
 
     // music player cleanup
@@ -84,6 +93,8 @@ export const MusicPlayer = () => {
     flags.playAmbientTrack,
     id,
     songLoadStatus,
+    ambientTrackQuantize,
+    bpm,
   ]);
 
   const handleReset = React.useCallback(() => {

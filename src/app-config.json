@@ -8,6 +8,7 @@
             "keySignature": "G Minor",
             "ambientTrack": true,
             "ambientTrackLength": "8m",
+            "ambientTrackQuantize": false,
             "groups": [
                 {
                     "name": "rhythm",
@@ -191,6 +192,7 @@
             "keySignature": "Eb Major",
             "ambientTrack": true,
             "ambientTrackLength": "8m",
+            "ambientTrackQuantize": false,
             "groups": [
                 {
                     "name": "rhythm",
@@ -383,9 +385,141 @@
             "bpm": 75,
             "timeSignature": 4,
             "keySignature": "Eb Minor",
-            "ambientTrack": false,
-            "ambientTrackLength": "8m",
-            "groups": []
+            "ambientTrack": true,
+            "ambientTrackLength": "4m",
+            "ambientTrackQuantize": true,
+            "groups": [
+                {
+                    "name": "rhythm",
+                    "polyphony": -1,
+                    "analyser": {
+                    },
+                    "voices": [
+                        {
+                            "name": "rhythm-kick[1]",
+                            "length": "1m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "rhythm-snaps[2]",
+                            "length": "2m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "rhythm-snare[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "rhythm-hats[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "rhythm-breath[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        }
+                    ]
+                },
+                {
+                    "name": "bass",
+                    "polyphony": 1,
+                    "analyser": {
+                    },
+                    "voices": [
+                        {
+                            "name": "bass-long[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "bass-sequence[2]",
+                            "length": "2m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "bass-octave[2]",
+                            "length": "2m",
+                            "quantizeLength": "2m"
+                        }
+                    ]
+                },
+                {
+                    "name": "harmony",
+                    "polyphony": 1,
+                    "analyser": {
+                    },
+                    "voices": [
+                        {
+                            "name": "harmony-build[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "harmony-tattletale[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "harmony-triplets[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "melody",
+                    "polyphony": 1,
+                    "analyser": {
+                    },
+                    "voices": [
+                        {
+                            "name": "piano-dark[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "piano-dreary[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "piano-theme[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "piano-drips[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "piano-onefour[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "extras",
+                    "polyphony": -1,
+                    "analyser": {
+                    },
+                    "voices": [
+                        {
+                            "name": "extras-critters[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "extras-riser[8]",
+                            "length": "8m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                }
+            ]
         },
         "themes": {
             "canvasFade": true,
