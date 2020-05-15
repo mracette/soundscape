@@ -21,7 +21,6 @@ export const removeWindowListeners = (callback) => {
 export const cinematicResize = (element) => {
   return () => {
     const resizeElement = element;
-    const DPR = window.devicePixelRatio || 1;
     const ratioTargets = [
       {
         minRatio: 1,
@@ -51,9 +50,8 @@ export const cinematicResize = (element) => {
       screen.w / target.ratio.x,
       screen.h / target.ratio.y
     );
+
     resizeElement.style.width = target.ratio.x * resizeRatio + "px";
     resizeElement.style.height = target.ratio.y * resizeRatio + "px";
-    resizeElement.width = target.ratio.x * resizeRatio * DPR;
-    resizeElement.height = target.ratio.y * resizeRatio * DPR;
   };
 };

@@ -50,13 +50,13 @@ export class SceneManager {
     this.sceneDimensions = {
       width:
         this.resizeMethod === "cinematic"
-          ? this.canvas.width
+          ? this.canvas.clientWidth
           : this.resizeMethod === "fullscreen"
           ? window.innerWidth
           : null,
       height:
         this.resizeMethod === "cinematic"
-          ? this.canvas.height
+          ? this.canvas.clientHeight
           : this.resizeMethod === "fullscreen"
           ? window.innerHeight
           : null,
@@ -115,12 +115,7 @@ export class SceneManager {
       outputEncoding: THREE.sRGBEncoding,
     });
 
-    let DPR = Math.min(
-      this.dprMax || 1.5,
-      window.devicePixelRatio ? window.devicePixelRatio : 1
-    );
-
-    renderer.setPixelRatio(DPR);
+    renderer.setPixelRatio(this.getPixelRatio());
     renderer.setSize(this.sceneDimensions.width, this.sceneDimensions.height);
 
     return renderer;
@@ -183,16 +178,22 @@ export class SceneManager {
     return this.sceneDimensions.width / this.sceneDimensions.height;
   }
 
+  getPixelRatio() {
+    return Math.min(window.devicePixelRatio || 1, this.dprMax || 4);
+  }
+
   onWindowResize() {
     // this function shouldn't contain any DOM resizing logic, just scene logic
     this.setSceneDimensions();
     this.camera.fov = this.getFov();
     this.camera.aspect = this.getAspectRatio();
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(
-      this.sceneDimensions.width,
-      this.sceneDimensions.height
-    );
+    if (this.resizeMethod === "fullscreen") {
+      this.renderer.setSize(
+        this.sceneDimensions.width,
+        this.sceneDimensions.height
+      );
+    }
     this.render(true);
   }
 
@@ -226,5 +227,23 @@ export class SceneManager {
         (err) => reject(err)
       );
     });
+  }
+
+  convertMaterialToBasic(mat, params = {}) {
+    const newMat = new THREE.MeshBasicMaterial({
+      color: params.color || mat.color,
+      side: params.side || THREE.DoubleSide,
+    });
+    mat.dispose();
+    return newMat;
+  }
+
+  convertMaterialToLambert(mat, params = {}) {
+    const newMat = new THREE.MeshLambertMaterial({
+      color: params.color || mat.color,
+      map: mat.map,
+    });
+    mat.dispose();
+    return newMat;
   }
 }

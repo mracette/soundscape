@@ -39,7 +39,6 @@ export const MusicPlayer = () => {
   const [canvasLoadStatus, setCanvasLoadStatus] = React.useState(false);
   const handleSetCanvasLoadStatus = React.useCallback(
     (status) => {
-      console.log(status);
       setCanvasLoadStatus(status);
     },
     [setCanvasLoadStatus]

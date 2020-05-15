@@ -6,11 +6,10 @@ import { addWindowListeners, removeWindowListeners } from "../../utils/jsUtils";
 
 const trackParentSize = (child, parent) => {
   const rect = parent.getBoundingClientRect();
-  console.log(rect.top);
   child.style.top = `${rect.top}px`;
   child.style.left = `${rect.left}px`;
-  child.style.width = rect.width;
-  child.style.height = rect.height;
+  child.style.width = `${rect.width}px`;
+  child.style.height = `${rect.height}px`;
   child.width = parent.width;
   child.height = parent.height;
 };
@@ -133,7 +132,6 @@ export const CanvasFade = React.forwardRef((props, ref) => {
   const refWidth = ref.current ? ref.current.width : null;
   const refHeight = ref.current ? ref.current.height : null;
   React.useEffect(() => {
-    console.log(ref, canvasRef);
     if (ref && canvasRef) {
       const parent = ref.current;
       const fade = canvasRef.current;

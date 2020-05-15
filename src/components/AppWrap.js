@@ -3,6 +3,8 @@ import React from "react";
 import * as d3Chromatic from "d3-scale-chromatic";
 import * as d3Color from "d3-color";
 import { ColorPalette } from "color-curves";
+import chroma from "chroma-js";
+import { clamp } from "crco-utils";
 
 // components
 import { AppRouter } from "./AppRouter";
@@ -23,11 +25,25 @@ const starsPalette = new ColorPalette(
   '{"type":"linear","overflow":"clamp","reverse":false,"translation":{"x":-0.003,"y":0.758},"scale":{"x":1.053,"y":-0.13},"rotation":0}',
   '{"start":0,"end":1}'
 );
+
 const morningsPalette = new ColorPalette(
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.125,"y":-0.081},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.142,"angleOffset":5.781,"radius":0.5}',
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":0.5,"y":0.5},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.424,"angleOffset":0.628,"radius":0.25}',
   '{"start":0,"end":1}'
 );
+
+const swampPalette = (n) => {
+  const darkBlue = new chroma("#5669AE");
+  const purple = new chroma("#9A4A91");
+  const green = new chroma("#53DD6C");
+  n = clamp(n, 0, 1);
+  if (n <= 0.5) {
+    return chroma.mix(darkBlue, purple, n / 0.5, "rgb");
+  } else {
+    return chroma.mix(purple, green, (n - 0.5) / 0.5);
+  }
+};
+
 const morningsPaletteDiscrete = [];
 const moonrisePaletteDiscrete = [];
 const starsPaletteDiscrete = [];
@@ -46,7 +62,7 @@ const spectrumFunctions = {
   moonrise: (n) => moonrisePaletteDiscrete[Math.round(n * 255)],
   mornings: (n) => morningsPaletteDiscrete[Math.round(n * 255)],
   stars: (n) => starsPaletteDiscrete[Math.round(n * 255)],
-  swamp: (n) => "#000000",
+  swamp: swampPalette,
 };
 
 const appConfig = require("../app-config.json");
@@ -54,7 +70,7 @@ const webAudioWrapper = new WebAudioWrapper(appConfig);
 
 // global behavior flags for testing
 const flags = {
-  quantizeSamples: true,
+  quantizeSamples: false,
   showVisuals: true,
   playAmbientTrack: true,
 };

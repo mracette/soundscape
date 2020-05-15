@@ -393,6 +393,13 @@
                     "name": "rhythm",
                     "polyphony": -1,
                     "analyser": {
+                        "power": 5,
+                        "numBuckets": 5,
+                        "minFrequency": 160,
+                        "maxFrequency": 13100,
+                        "minDecibels": -90,
+                        "maxDecibels": 0,
+                        "smoothingTimeConstant": 0.75
                     },
                     "voices": [
                         {
@@ -524,7 +531,6 @@
         },
         "themes": {
             "canvasFade": true,
-            "resizeType": "cinematic",
             "buttonColor": "rgba(31, 38, 47, 1)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
             "contentPanelColor": "rgba(31, 38, 47, 0.65)",

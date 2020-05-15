@@ -60,6 +60,7 @@ export const CanvasViz = (props) => {
   }, [groups, voices]);
 
   React.useEffect(() => {
+    console.log("effect");
     let newScene;
     switch (id) {
       case "moonrise":
@@ -94,7 +95,7 @@ export const CanvasViz = (props) => {
         if (flags.showVisuals) {
           newScene = new Swamp(
             canvasRef.current,
-            null, //WAW.getAnalysers(id).groupAnalysers,
+            WAW.getAnalysers(id).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {
               spectrumFunction,
@@ -114,6 +115,7 @@ export const CanvasViz = (props) => {
 
     if (flags.showVisuals) {
       if (newScene.resizeMethod === "cinematic") {
+        console.log("cinematic");
         resizeFunction = cinematicResize(canvasRef.current);
         resizeFunction();
         addWindowListeners(resizeFunction);
@@ -126,7 +128,7 @@ export const CanvasViz = (props) => {
         newScene.stop();
         newScene.disposeAll(newScene.scene);
         if (newScene.resizeMethod === "cinematic") {
-          resizeFunction();
+          removeWindowListeners(resizeFunction);
         }
         removeWindowListeners(sceneRef.current.onWindowResize);
       }
