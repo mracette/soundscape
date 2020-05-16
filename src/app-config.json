@@ -395,11 +395,9 @@
                     "analyser": {
                         "power": 5,
                         "numBuckets": 5,
-                        "minFrequency": 160,
-                        "maxFrequency": 13100,
                         "minDecibels": -90,
                         "maxDecibels": 0,
-                        "smoothingTimeConstant": 0.75
+                        "smoothingTimeConstant": 0.5
                     },
                     "voices": [
                         {
@@ -480,6 +478,7 @@
                     "name": "melody",
                     "polyphony": 1,
                     "analyser": {
+                        "power": 6
                     },
                     "voices": [
                         {

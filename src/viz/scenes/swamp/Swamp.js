@@ -3,15 +3,20 @@ import * as THREE from "three";
 import { SceneManager } from "../../SceneManager";
 import chroma from "chroma-js";
 import FirstPersonControls from "../../controls/FirstPersonControls";
+import { Mist } from "./Mist";
 import { renderHut } from "./renderHut";
+import { renderFlowers } from "./renderFlowers";
+import { renderShrooms } from "./renderShrooms";
 
 // globals
 export const COLORS = {
-  // vine: chroma("#142A1F").darken(.8).hex(),
+  black: chroma("#000000").hex(),
   vine: chroma("#010503").darken(0.8).hex(),
   tree: chroma("#0A0805").darken(0.085).hex(),
   fog: chroma("#cccccc").hex(),
-  lily: chroma("LightPink").darken(4.5).hex(),
+  flower: chroma("#DA4167").hex(),
+  darkFlower: chroma("#DA4167").darken(4.5).hex(),
+  mushroom: chroma("#3F250B").darken(2.5).hex(),
   chimney: chroma("#040404").darken(1).hex(),
   roof: chroma("#0E0F0C").hex(),
   darkBlue: chroma("#5669AE").hex(),
@@ -70,59 +75,6 @@ export class Swamp extends SceneManager {
 
   preProcessSceneObjects(sceneObjects) {
     return new Promise((resolve, reject) => {
-      const vineMat = new THREE.MeshBasicMaterial({ color: COLORS.vine });
-      const treeMat = new THREE.MeshBasicMaterial({ color: COLORS.tree });
-      const lilyMat = new THREE.MeshBasicMaterial({ color: COLORS.lily });
-      const roofMat = new THREE.MeshBasicMaterial({ color: COLORS.roof });
-      const chimneyMat = new THREE.MeshBasicMaterial({
-        color: COLORS.chimney,
-      });
-
-      this.applyAll(sceneObjects, (obj) => {
-        const type = obj.type.toLowerCase();
-        const name = obj.name;
-
-        if (type.includes("light")) {
-          if (name.includes("house_light")) {
-            this.lights.houseLight = obj;
-            obj.color = new THREE.Color(COLORS.moonYellow);
-            obj.intensity = 0;
-          } else {
-            // remove light
-            obj.intensity = 0;
-          }
-        } else if (type.includes("camera")) {
-          obj.fov = this.fov || 45;
-          obj.updateProjectionMatrix();
-        } else if (type.includes("mesh")) {
-          obj.material && (obj.material.roughness = 1);
-          if (name.includes("water_001")) {
-            this.subjects.water = obj;
-            // obj.material.roughness = 0;
-          } else if (name.includes("house_base")) {
-            this.subjects.houseBase = obj;
-            obj.material = new THREE.MeshBasicMaterial({
-              color: COLORS.moonYellow,
-            });
-            obj.material.side = THREE.DoubleSide;
-          } else if (name.includes("background")) {
-            this.subjects.background = obj;
-            obj.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            obj.material.side = THREE.DoubleSide;
-          } else if (name.includes("vine")) {
-            obj.material = vineMat;
-          } else if (name.includes("tree") && obj.material.map === null) {
-            obj.material = treeMat;
-          } else if (name.includes("flower")) {
-            obj.material = lilyMat;
-          } else if (name.includes("roof")) {
-            obj.material = roofMat;
-          } else if (name.includes("chimney")) {
-            obj.material = chimneyMat;
-          }
-        }
-      });
-
       resolve();
     });
   }
@@ -151,6 +103,7 @@ export class Swamp extends SceneManager {
 
   initScene() {
     const scene = new THREE.Scene();
+    scene.background = 0x222222;
     scene.fog = new THREE.Fog(COLORS.fog, 1, 280);
     return scene;
   }
@@ -165,24 +118,17 @@ export class Swamp extends SceneManager {
     return lights;
   }
 
+  initSubjects() {
+    return {
+      mist: new Mist(this.scene),
+      shrooms: [],
+      flowers: [],
+    };
+  }
+
   loadModels(modelList) {
     return new Promise((resolve, reject) => {
       const loadPromiseArray = [];
-
-      loadPromiseArray.push(
-        new Promise((resolve, reject) => {
-          this.loadModel({ name: "swamp_test" }).then((model) => {
-            this.preProcessSceneObjects(model.scene).then(() => {
-              this.scene.add(model.scene);
-              this.camera = model.cameras[0];
-              this.camera.layers.enable(1);
-              this.applySceneSettings();
-              resolve();
-            });
-          });
-        })
-      );
-
       Promise.all(loadPromiseArray)
         .then(() => {
           resolve();
@@ -197,18 +143,7 @@ export class Swamp extends SceneManager {
     if (!this.pauseVisuals || overridePause) {
       this.elapsedBeats = (this.bpm * this.clock.getElapsedTime()) / 60;
       this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
-      renderHut(
-        {
-          light: this.lights.houseLight,
-          hut: this.subjects.houseBase,
-          background: this.subjects.background,
-        },
-        this.bassAnalyser,
-        {
-          beats: this.elapsedBeats,
-          colors: [COLORS.green, COLORS.lily, COLORS.purple],
-        }
-      );
+      this.subjects.mist.render(this.melodyAnalyser);
       this.renderer.render(this.scene, this.camera);
     }
   }

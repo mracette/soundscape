@@ -200,10 +200,8 @@ export class Analyser {
   getTimeData(channel) {
     if (channel === "left" || channel === "right") {
       this.analyser[channel].getByteTimeDomainData(this.timeData[channel]);
-      return this.timeData[channel];
     } else {
       this.analyser.getByteTimeDomainData(this.timeData);
-      return this.timeData;
     }
   }
 
