@@ -478,7 +478,8 @@
                     "name": "melody",
                     "polyphony": 1,
                     "analyser": {
-                        "power": 6
+                        "power": 9,
+                        "gainBoost": 12
                     },
                     "voices": [
                         {

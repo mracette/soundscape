@@ -195,7 +195,7 @@ export const MusicPlayer = () => {
     >
       {songLoadStatus && (
         <>
-          <FreqBands />
+          {/* <FreqBands /> */}
           <MenuButtonParent
             name="Menu"
             direction="right"

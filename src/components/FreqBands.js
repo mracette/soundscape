@@ -62,8 +62,6 @@ export const FreqBands = () => {
 
         context.fillStyle = spectrumFunction(i / analyser.frequencyBinCount);
 
-        context.globalAlphs = vol;
-
         context.moveTo(cx, cy);
 
         context.arc(
