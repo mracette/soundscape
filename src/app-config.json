@@ -501,11 +501,6 @@
                             "name": "piano-drips[4]",
                             "length": "4m",
                             "quantizeLength": "2m"
-                        },
-                        {
-                            "name": "piano-onefour[4]",
-                            "length": "4m",
-                            "quantizeLength": "2m"
                         }
                     ]
                 },

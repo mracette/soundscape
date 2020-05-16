@@ -59,7 +59,13 @@ export const Oscilloscope = (props) => {
     [analyser, props.gradient, props.groupCount, props.index, spectrumFunction]
   );
 
-  useAnimationFrame(() => render(canvasRef.current, contextRef.current));
+  React.useEffect(() => {
+    render(canvasRef.current, contextRef.current);
+  }, [render]);
+
+  useAnimationFrame(() =>
+    props.animate ? render(canvasRef.current, contextRef.current) : () => null
+  );
 
   return React.useMemo(
     () => (

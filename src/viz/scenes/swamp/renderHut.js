@@ -3,7 +3,7 @@ import { boundedSin, clamp } from "crco-utils";
 import { COLORS } from "./Swamp";
 
 const bSin = boundedSin(8, 0, 1);
-const intense = 1.5;
+const intense = 1.25;
 
 let prev = null;
 let acc = 0;

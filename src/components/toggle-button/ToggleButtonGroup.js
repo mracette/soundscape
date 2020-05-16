@@ -154,12 +154,13 @@ export const ToggleButtonGroup = (props) => {
           )
         </h3>
 
-        {/* <Oscilloscope
+        <Oscilloscope
           index={props.index}
           groupCount={props.groupCount}
           gradient={true}
           name={name}
-        /> */}
+          animate={false}
+        />
 
         <button
           className="solo-button"
