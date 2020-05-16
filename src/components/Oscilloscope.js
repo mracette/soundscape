@@ -27,16 +27,16 @@ export const Oscilloscope = (props) => {
     (canvas, context) => {
       contextRef.current.lineWidth = canvas.height / 20;
       context.clearRect(0, 0, canvas.width, canvas.height);
-      const dataArray = analyser.getTimeData();
-      const sliceWidth = canvas.width / (dataArray.length - 1);
+      analyser.getTimeData();
+      const sliceWidth = canvas.width / (analyser.timeData.length - 1);
       let prevX, prevY;
       let x = 0;
-      dataArray.forEach((d, i) => {
+      analyser.timeData.forEach((d, i) => {
         context.beginPath();
         if (props.gradient) {
           context.strokeStyle = spectrumFunction(
             props.index / props.groupCount +
-              i / (dataArray.length * props.groupCount)
+              i / (analyser.timeData.length * props.groupCount)
           );
         }
 
