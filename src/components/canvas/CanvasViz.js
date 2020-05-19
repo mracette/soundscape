@@ -60,7 +60,6 @@ export const CanvasViz = (props) => {
   }, [groups, voices]);
 
   React.useEffect(() => {
-    console.log("effect");
     let newScene;
     switch (id) {
       case "moonrise":

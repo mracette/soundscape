@@ -31,6 +31,8 @@ export class Swamp extends SceneManager {
   constructor(canvas, analysers, callback, extras) {
     super(canvas);
 
+    console.log("constructing scene");
+
     const opts = {
       dprMax: 2.25,
       fov: 20,
@@ -104,7 +106,11 @@ export class Swamp extends SceneManager {
           obj.fov = this.fov || 45;
           obj.updateProjectionMatrix();
         } else if (type.includes("mesh")) {
-          obj.material && (obj.material.roughness = 1);
+          // no meshes move !
+          obj.matrixAutoUpdates = false;
+          if (obj.material) {
+            obj.material.roughness = 1;
+          }
           if (name.includes("reference")) {
             const mist = this.subjects.mist.mist;
             mist.rotateY(-Math.PI / 4);

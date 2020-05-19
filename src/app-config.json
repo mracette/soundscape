@@ -526,9 +526,9 @@
         },
         "themes": {
             "canvasFade": true,
-            "buttonColor": "rgba(31, 38, 47, 1)",
-            "openButtonColor": "rgba(255, 255, 255, 0.15)",
-            "contentPanelColor": "rgba(31, 38, 47, 0.65)",
+            "buttonColor": "rgba(0, 0, 0, 0.25)",
+            "openButtonColor": "rgba(255, 255, 255, 0.25)",
+            "contentPanelColor": "rgba(0, 0, 0, 0.25)",
             "panelResetButton": "rgba(255, 255, 255, 0.3)",
             "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
             "panelMuteButton": "rgba(255, 255, 255, 0.3)",

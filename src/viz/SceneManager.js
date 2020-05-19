@@ -76,14 +76,13 @@ export class SceneManager {
     });
   }
 
-  disposeAll(obj) {
+  disposeAll(obj, material = true, geometry = true) {
     while (obj.children.length > 0) {
-      this.disposeAll(obj.children[0]);
+      this.disposeAll(obj.children[0], material, geometry);
       obj.remove(obj.children[0]);
     }
-    if (obj.geometry) obj.geometry.dispose();
-
-    if (obj.material) {
+    if (geometry && obj.geometry) obj.geometry.dispose();
+    if (material && obj.material) {
       // in case of map, bumpMap, normalMap, envMap ...
       Object.keys(obj.material).forEach((prop) => {
         if (!obj.material[prop]) return;
