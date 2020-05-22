@@ -7,6 +7,7 @@ import { Mist } from "./Mist";
 import { renderHut } from "./renderHut";
 import { renderFlowers } from "./renderFlowers";
 import { renderShrooms } from "./renderShrooms";
+import { renderEyes } from "./renderEyes";
 
 // globals
 export const COLORS = {
@@ -15,6 +16,7 @@ export const COLORS = {
   tree: chroma("#0A0805").darken(0.085).hex(),
   fog: chroma("#cccccc").hex(),
   flower: chroma("#DA4167").hex(),
+  darkGreen: chroma("darkgreen").darken(1.95).hex(),
   darkFlower: chroma("#DA4167").darken(4.5).hex(),
   mushroom: chroma("#3F250B").darken(2.5).hex(),
   chimney: chroma("#040404").darken(1).hex(),
@@ -24,8 +26,6 @@ export const COLORS = {
   green: chroma("#53DD6C").hex(),
   moonYellow: chroma("#f6f2d5").hex(),
 };
-
-const RENDER_LIST = ["swamp_test"];
 
 export class Swamp extends SceneManager {
   constructor(canvas, analysers, callback, extras) {
@@ -58,7 +58,7 @@ export class Swamp extends SceneManager {
 
   setup(callback) {
     super.init();
-    this.loadModels(RENDER_LIST)
+    this.loadModels()
       .then(() => {
         super.onWindowResize();
         super.animate();
@@ -83,6 +83,9 @@ export class Swamp extends SceneManager {
         color: COLORS.darkFlower,
         emissive: COLORS.flower,
         emissiveIntensity: 0,
+      });
+      const lilyMat = new THREE.MeshBasicMaterial({
+        color: COLORS.darkGreen,
       });
       const roofMat = new THREE.MeshBasicMaterial({ color: COLORS.roof });
       const chimneyMat = new THREE.MeshBasicMaterial({
@@ -119,7 +122,17 @@ export class Swamp extends SceneManager {
             obj.visible = false;
           } else if (name.includes("water_001")) {
             this.subjects.water = obj;
-            // obj.material.roughness = 0;
+          } else if (
+            (name.includes("sphere") || name.includes("cylinder")) &&
+            obj.material.name.includes("eyes")
+          ) {
+            const halfWay = chroma(this.spectrumFunction(0.35)).hex();
+            obj.material = new THREE.MeshBasicMaterial({
+              color: new THREE.Color(halfWay),
+              side: THREE.DoubleSide,
+            });
+            obj.material.userData.baseColor = halfWay;
+            this.subjects.eyes.push(obj);
           } else if (name.includes("house_base")) {
             this.subjects.houseBase = obj;
             obj.material = new THREE.MeshBasicMaterial({
@@ -131,16 +144,35 @@ export class Swamp extends SceneManager {
             obj.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
             obj.material.side = THREE.DoubleSide;
           } else if (name.includes("vine")) {
-            obj.material = vineMat;
+            this.subjects.vines.push(obj);
+            obj.material = vineMat.clone();
+            // obj.userData.active = false;
+            // obj.userData.activeAmount = 0;
+            // obj.userData.activeBeat = null;
+            // obj.material.userData.color = chroma(
+            //   this.spectrumFunction(Math.random())
+            // ).hex();
           } else if (name.includes("tree") && obj.material.map === null) {
             obj.material = treeMat;
+          } else if (name.includes("lilypad")) {
+            obj.material = lilyMat;
           } else if (name.includes("flower")) {
             obj.material = flowerMat.clone();
             this.subjects.flowers.push(obj);
+          } else if (name.includes("lily")) {
+            obj.material = flowerMat.clone();
           } else if (name.includes("roof")) {
             obj.material = roofMat;
           } else if (name.includes("chimney")) {
             obj.material = chimneyMat;
+          } else if (name.includes("cube")) {
+            if (obj.material.name.includes("lantern_baked")) {
+              obj.material = treeMat.clone();
+            } else if (obj.material.name.includes("lantern_em")) {
+              obj.material = new THREE.MeshBasicMaterial({
+                color: new THREE.Color(COLORS.moonYellow),
+              });
+            }
           } else if (obj.material.name.includes("mushroom")) {
             if (obj.material.name.includes("mushroom_stem")) {
               obj.material = new THREE.MeshBasicMaterial({
@@ -167,6 +199,8 @@ export class Swamp extends SceneManager {
                 baseColor: color,
               });
             }
+          } else {
+            console.log(name, obj);
           }
         }
       });
@@ -198,13 +232,17 @@ export class Swamp extends SceneManager {
 
   initScene() {
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(COLORS.fog, 1, 280);
+    scene.fog = new THREE.Fog(COLORS.fog, 1, 240);
     return scene;
   }
 
   initLights() {
     const lights = {
-      hemisphere: new THREE.HemisphereLight(0xffffff, 0xffffff, 11.5),
+      hemisphere: new THREE.HemisphereLight(
+        new THREE.Color(COLORS.moonYellow),
+        new THREE.Color(COLORS.moonYellow),
+        17.5
+      ),
     };
 
     this.scene.add(lights.hemisphere);
@@ -219,6 +257,8 @@ export class Swamp extends SceneManager {
       }),
       shrooms: [],
       flowers: [],
+      vines: [],
+      eyes: [],
     };
   }
 
@@ -279,11 +319,12 @@ export class Swamp extends SceneManager {
           },
         }
       );
-      renderShrooms(
-        { shrooms: this.subjects.shrooms },
-        this.rhythmAnalyser,
-        {}
-      );
+      renderShrooms({ shrooms: this.subjects.shrooms }, this.rhythmAnalyser, {
+        beats: this.elapsedBeats,
+      });
+      renderEyes({ eyes: this.subjects.eyes }, this.atmosphereAnalyser, {
+        beats: this.elapsedBeats,
+      });
       this.subjects.mist.render();
       this.renderer.render(this.scene, this.camera);
     }

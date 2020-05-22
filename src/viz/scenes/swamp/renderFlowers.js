@@ -3,7 +3,7 @@ import { boundedSin } from "crco-utils";
 
 const cycle = 2;
 const bSin = boundedSin(cycle, 0, 1);
-const intense = 50;
+const intense = 15;
 let acc = 0;
 
 export const renderFlowers = (subjects, analyser, extras) => {
