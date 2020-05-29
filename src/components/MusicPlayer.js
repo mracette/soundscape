@@ -131,16 +131,14 @@ export const MusicPlayer = () => {
     // init event
     if (
       state.backgroundMode &&
-      !WAW.scheduler.repeatingQueue.find(
-        (e) => e.id === backgroundModeEventRef.current
-      )
+      !WAW.scheduler.getEvent(backgroundModeEventRef.current)
     ) {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
         WAW.audioCtx.currentTime + 60 / bpm,
         (32 * 60) / bpm,
         triggerRandomVoice
       );
-      // update event
+      // triggerRandomVoice updates when different voices are on
     } else if (state.backgroundMode) {
       WAW.scheduler.updateCallback(
         backgroundModeEventRef.current,

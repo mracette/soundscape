@@ -6,7 +6,6 @@ const period = 4;
 
 export const renderEyes = (subjects, analyser, extras) => {
   const n = subjects.eyes.length;
-  console.log(extras.beats % period);
   for (let i = 0; i < n; i++) {
     const active = (extras.beats + i) % period > 0.13;
     const eyes = subjects.eyes[i];

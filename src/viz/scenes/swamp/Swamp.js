@@ -31,8 +31,6 @@ export class Swamp extends SceneManager {
   constructor(canvas, analysers, callback, extras) {
     super(canvas);
 
-    console.log("constructing scene");
-
     const opts = {
       dprMax: 2.25,
       fov: 20,
@@ -49,8 +47,6 @@ export class Swamp extends SceneManager {
     this.atmosphereAnalyser = analysers["extras"];
     this.harmonyAnalyser = analysers["harmony"];
     this.melodyAnalyser = analysers["melody"];
-
-    console.log(this.rhythmAnalyser);
     this.bassAnalyser = analysers["bass"];
 
     this.setup(callback);
@@ -95,7 +91,6 @@ export class Swamp extends SceneManager {
       this.applyAll(sceneObjects, (obj) => {
         const type = obj.type.toLowerCase();
         const name = obj.name.toLowerCase();
-        //console.log(obj);
         if (type.includes("light")) {
           if (name.includes("house_light")) {
             this.lights.houseLight = obj;
@@ -199,8 +194,6 @@ export class Swamp extends SceneManager {
                 baseColor: color,
               });
             }
-          } else {
-            console.log(name, obj);
           }
         }
       });
