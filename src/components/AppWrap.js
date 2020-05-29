@@ -123,7 +123,7 @@ export const AppWrap = () => {
       // can be accessed in the theme context as vw * n or wh * n
       setvw(viewportWidth / 100);
       setvh(viewportHeight / 100);
-      setIsMobile(viewportWidth <= 760);
+      setIsMobile(viewportWidth <= 670);
     };
 
     // add resize listeners

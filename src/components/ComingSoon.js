@@ -18,7 +18,7 @@ export const ComingSoon = () => {
         </div>
         <div id="coming-soon-panel" className="flex-col">
           <div className="flex-row">
-            <span>Additional content is coming to Soundscape.</span>
+            <span>Soundscape is constantly changing.</span>
           </div>
           <div className="flex-row">
             <span>
@@ -40,7 +40,7 @@ export const ComingSoon = () => {
                 <input
                   type="email"
                   name="EMAIL"
-                  className="email"
+                  className="email custom-mc-input"
                   id="mce-EMAIL"
                   placeholder="email address"
                   required
@@ -63,7 +63,7 @@ export const ComingSoon = () => {
                     value="Subscribe"
                     name="subscribe"
                     id="mc-embedded-subscribe"
-                    className="button"
+                    className="button info-page-button button-yellow"
                   />
                 </div>
               </div>
@@ -76,7 +76,9 @@ export const ComingSoon = () => {
         </div>
         <div>
           <Link to="/">
-            <button className="button-white">Return Home</button>
+            <button className="info-page-button button-yellow">
+              Return Home
+            </button>
           </Link>
         </div>
       </div>

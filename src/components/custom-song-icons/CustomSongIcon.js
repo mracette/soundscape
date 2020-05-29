@@ -18,7 +18,7 @@ export function CustomSongIcon(props) {
   const animationRef = React.useRef();
   const coordsRef = React.useRef();
 
-  const { animate, id, listen, setCustomStyles, dispatch } = props;
+  const { animate, id, listen, setCustomStyles, dispatch, isNew } = props;
 
   React.useEffect(() => {
     const updateCanvas = (time, loop, reset) => {
@@ -111,12 +111,20 @@ export function CustomSongIcon(props) {
 
   return React.useMemo(() => {
     return (
-      <Canvas
-        id={id}
-        className="custom-song-icon"
-        onLoad={(canvas) => (canvasRef.current = canvas)}
-        resize={false}
-      />
+      <div
+        style={{
+          position: "relative",
+          // border: isNew ? "1px solid" : "0px solid",
+        }}
+      >
+        {isNew && <span className="new-label">New!</span>}
+        <Canvas
+          id={id}
+          className="custom-song-icon"
+          onLoad={(canvas) => (canvasRef.current = canvas)}
+          resize={false}
+        />
+      </div>
     );
-  }, [id]);
+  }, [id, isNew]);
 }

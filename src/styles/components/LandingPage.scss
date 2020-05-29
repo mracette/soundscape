@@ -7,7 +7,7 @@
 #landing-page-soundscape-title {
     font-family: 'Satisfy';
     font-size: $xxl-size;
-    margin: 2%;
+    margin: 2.5rem;
 }
 
 .landing-page-header {
@@ -22,6 +22,10 @@
 
 .landing-page-header .flex-row {
     justify-content: center;
+}
+
+#landing-page {
+    overflow: auto;
 }
 
 #landing-page-song-title {
@@ -42,11 +46,16 @@
     height: 25rem
 }
 
+.mobile-song-icon-wrapper {
+    border-color: $moon-yellow;
+    border-width: 1px;
+    border-style: solid;
+    border-bottom-width: 0px;
+}
 
 #song-selection-panel {
-    overflow: auto;
-    width: vw(100);
-    height: 50rem;
+    width: vw(75);
+    margin: auto;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;

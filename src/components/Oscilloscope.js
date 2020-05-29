@@ -10,7 +10,7 @@ import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 
 // hooks
-import { useAnimationFrame } from "../hooks/useAnimationFrame";
+// import { useAnimationFrame } from "../hooks/useAnimationFrame";
 
 // styles
 import "../styles/components/Oscilloscope.scss";
@@ -25,7 +25,7 @@ export const Oscilloscope = (props) => {
 
   const render = React.useCallback(
     (canvas, context) => {
-      contextRef.current.lineWidth = canvas.height / 20;
+      context.lineWidth = canvas.height / 20;
       context.clearRect(0, 0, canvas.width, canvas.height);
       analyser.getTimeData();
       const sliceWidth = canvas.width / (analyser.timeData.length - 1);
@@ -63,9 +63,9 @@ export const Oscilloscope = (props) => {
     render(canvasRef.current, contextRef.current);
   }, [render]);
 
-  useAnimationFrame(() =>
-    props.animate ? render(canvasRef.current, contextRef.current) : () => null
-  );
+  // useAnimationFrame(() =>
+  //   props.animate ? render(canvasRef.current, contextRef.current) : () => null
+  // );
 
   return React.useMemo(
     () => (
@@ -76,9 +76,10 @@ export const Oscilloscope = (props) => {
             canvasRef.current = canvas;
             contextRef.current = canvas.getContext("2d");
           }}
+          onResize={(canvas) => render(canvas, canvas.getContext("2d"))}
         />
       </div>
     ),
-    []
+    [render]
   );
 };

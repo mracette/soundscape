@@ -36,9 +36,7 @@ export const SongInfoPanel = (props) => {
         to collaborate with on new content. Please get in touch if you have any
         leads!
       </p> */}
-      <SocialIcons
-        svgClassList="icon icon-white info-panel-icon"
-      />
+      <SocialIcons svgClassList="icon icon-white info-panel-icon" />
     </div>
   );
 };
