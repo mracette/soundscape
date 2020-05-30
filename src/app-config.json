@@ -511,6 +511,11 @@
                     },
                     "voices": [
                         {
+                            "name": "extras-texture[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
                             "name": "extras-critters[4]",
                             "length": "4m",
                             "quantizeLength": "2m"
