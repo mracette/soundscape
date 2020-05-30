@@ -70,12 +70,6 @@ export class Scheduler {
       // add the next occurence
       this.incrementRepeating(event);
     };
-    console.log(
-      event.time,
-      event.count,
-      event.frequency,
-      dummySource.buffer.duration
-    );
     dummySource.start(
       event.time + event.count * event.frequency - dummySource.buffer.duration
     );

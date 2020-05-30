@@ -126,7 +126,6 @@ export class Analyser {
       // connect processing nodes if applicable
       const chain = this.createProcessingNodes();
       if (chain) {
-        console.log(chain);
         this.input.connect(chain);
         chain.connect(this.analyser);
       } else {

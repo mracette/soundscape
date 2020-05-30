@@ -10,6 +10,21 @@
   padding-bottom: vh(1);
 }
 
+.canvas-slider {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.canvas-slider-wrapper {
+  cursor: ew-resize;
+  height: vh(6.5);
+  flex: 1 1 0;
+  height: 3vh;
+  width: 100%;
+}
+
 #effects-controls-row {
   margin-top: vh(4);
 }

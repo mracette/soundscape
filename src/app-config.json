@@ -536,7 +536,21 @@
             "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
         },
         "info": {
-            "credits": []
+            "credits": [
+                {
+                    "type": "Music & Development:",
+                    "content": "Mark Racette"
+                },
+                {
+                    "type": "Art & 3D Modeling:",
+                    "link": "https://www.alanaguidry.com/",
+                    "content": "Alana Guidry"
+                },
+                {
+                    "type": "Technology:",
+                    "content": "React, Three.js, Anime.js, ColorCurves, Ableton Live, Yamaha P-125"
+                }
+            ]
         }
     }
 ]

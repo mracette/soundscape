@@ -114,7 +114,6 @@ export const CanvasViz = (props) => {
 
     if (flags.showVisuals) {
       if (newScene.resizeMethod === "cinematic") {
-        console.log("cinematic");
         resizeFunction = cinematicResize(canvasRef.current);
         resizeFunction();
         addWindowListeners(resizeFunction);

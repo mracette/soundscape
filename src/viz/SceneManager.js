@@ -19,7 +19,7 @@ export class SceneManager {
         height: null,
       },
       spectrumFunction: (n) => "#FFFFFF",
-      showStats: true,
+      showStats: false,
       fpcControl: false,
     };
 

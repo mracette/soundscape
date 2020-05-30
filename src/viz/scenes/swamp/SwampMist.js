@@ -47,8 +47,6 @@ export class Swamp extends SceneManager {
     this.atmosphereAnalyser = analysers["extras"];
     this.harmonyAnalyser = analysers["harmony"];
     this.melodyAnalyser = analysers["melody"];
-
-    console.log(this.rhythmAnalyser);
     this.bassAnalyser = analysers["bass"];
 
     this.setup(callback);
