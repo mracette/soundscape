@@ -506,7 +506,7 @@
                 },
                 {
                     "name": "extras",
-                    "polyphony": -1,
+                    "polyphony": 2,
                     "analyser": {
                     },
                     "voices": [

@@ -12,7 +12,6 @@ import { CanvasSlider } from "./canvas/CanvasSlider";
 
 // styles
 import "../styles/components/EffectsPanel.scss";
-import "../styles/CustomSlider.scss";
 
 const EFFECT_INTERVAL = 4; // in beats
 
