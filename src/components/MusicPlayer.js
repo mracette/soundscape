@@ -206,12 +206,12 @@ export const MusicPlayer = () => {
                 content: HomePanelMemo,
               },
               {
+                autoOpen: true,
                 id: "toggles",
                 iconName: "icon-music",
                 content: ToggleButtonPanelMemo,
               },
               {
-                autoOpen: true,
                 id: "effects",
                 iconName: "icon-equalizer",
                 content: EffectsPanelMemo,
