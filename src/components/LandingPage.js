@@ -209,11 +209,7 @@ export const LandingPage = (props) => {
               </div>
             )}
           </Link>
-          <Link
-            className="song-link"
-            id="song-link-coming-soon"
-            to="/coming-soon"
-          >
+          <Link className="song-link" id="song-link-coming-soon" to="/info">
             {!isMobile && (
               <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
             )}

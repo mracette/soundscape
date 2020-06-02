@@ -3,13 +3,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 // components
-import { SocialIcons } from "../components/iconography/SocialIcons";
+import { SocialIcons } from "./iconography/SocialIcons";
 
 // styles
 import "../styles/components/LandingPage.scss";
 import "../styles/components/ComingSoon.scss";
 
-export const ComingSoon = () => {
+export const Information = () => {
   return (
     <div id="coming-soon" className="fullscreen off-black">
       <div className="landing-page-header">

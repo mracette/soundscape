@@ -1,5 +1,6 @@
 // libs
 import React from "react";
+import { Link } from "react-router-dom";
 
 // components
 import { SocialIcons } from "./iconography/SocialIcons";
@@ -37,6 +38,9 @@ export const SongInfoPanel = (props) => {
         leads!
       </p> */}
       <SocialIcons svgClassList="icon icon-white info-panel-icon" />
+      <p>
+        <Link to="/info">{"Sign up for email updates on new content"}</Link>
+      </p>
     </div>
   );
 };

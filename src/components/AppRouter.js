@@ -15,7 +15,7 @@ import { InfoContext } from "../contexts/contexts";
 // components
 import { MusicPlayer } from "./MusicPlayer";
 import { LandingPage } from "./LandingPage";
-import { ComingSoon } from "./ComingSoon";
+import { Information } from "./Information";
 
 export const AppRouter = (props) => {
   return (
@@ -28,7 +28,7 @@ export const AppRouter = (props) => {
             <LandingPage spectrumFunction={props.spectrumFunctions.stars} />
           )}
         />
-        <Route exact path="/coming-soon" component={ComingSoon} />
+        <Route exact path="/info" component={Information} />
         <Route
           exact
           path={"/play/:songId"}
