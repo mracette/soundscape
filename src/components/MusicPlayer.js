@@ -2,7 +2,7 @@
 import React from "react";
 
 // components
-import { CanvasViz } from "./CanvasViz";
+import { CanvasViz } from "./canvas/CanvasViz";
 import { EffectsPanel } from "./EffectsPanel";
 import { FreqBands } from "./FreqBands";
 import { MenuButtonParent } from "./menu-button/MenuButtonParent";
@@ -20,12 +20,17 @@ import { WebAudioContext } from "../contexts/contexts";
 // reducers
 import { MusicPlayerReducer } from "../reducers/MusicPlayerReducer";
 
+// other
+import { nextSubdivision } from "../utils/audioUtils";
+
 // styles
 import "../styles/components/MusicPlayer.scss";
 
 export const MusicPlayer = () => {
   const { flags } = React.useContext(TestingContext);
-  const { id, bpm, ambientTrack } = React.useContext(SongContext);
+  const { id, bpm, ambientTrack, ambientTrackQuantize } = React.useContext(
+    SongContext
+  );
   const { WAW, wawLoadStatus } = React.useContext(WebAudioContext);
 
   const backgroundModeEventRef = React.useRef(null);
@@ -62,8 +67,12 @@ export const MusicPlayer = () => {
 
     // safe to resume and take the init time here (after user gesture)
     if (songLoadStatus && flags.playAmbientTrack && ambientTrack) {
+      let startTime = null;
+      if (ambientTrackQuantize) {
+        startTime = nextSubdivision(WAW.audioCtx, bpm, 4);
+      }
       WAW.audioCtx.resume();
-      WAW.getVoices(id)["ambient"].start();
+      WAW.getVoices(id)["ambient"].start(startTime);
     }
 
     // music player cleanup
@@ -71,7 +80,9 @@ export const MusicPlayer = () => {
       return () => {
         WAW.scheduler.clear();
         WAW.audioCtx.suspend();
-        flags.playAmbientTrack && WAW.getVoices(id).ambient.stop();
+        flags.playAmbientTrack &&
+          ambientTrack &&
+          WAW.getVoices(id).ambient.stop();
       };
     }
   }, [
@@ -81,6 +92,8 @@ export const MusicPlayer = () => {
     flags.playAmbientTrack,
     id,
     songLoadStatus,
+    ambientTrackQuantize,
+    bpm,
   ]);
 
   const handleReset = React.useCallback(() => {
@@ -118,16 +131,14 @@ export const MusicPlayer = () => {
     // init event
     if (
       state.backgroundMode &&
-      !WAW.scheduler.repeatingQueue.find(
-        (e) => e.id === backgroundModeEventRef.current
-      )
+      !WAW.scheduler.getEvent(backgroundModeEventRef.current)
     ) {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
         WAW.audioCtx.currentTime + 60 / bpm,
         (32 * 60) / bpm,
         triggerRandomVoice
       );
-      // update event
+      // triggerRandomVoice updates when different voices are on
     } else if (state.backgroundMode) {
       WAW.scheduler.updateCallback(
         backgroundModeEventRef.current,
@@ -182,7 +193,7 @@ export const MusicPlayer = () => {
     >
       {songLoadStatus && (
         <>
-          <FreqBands />
+          <FreqBands animate={false} />
           <MenuButtonParent
             name="Menu"
             direction="right"

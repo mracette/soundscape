@@ -18,44 +18,40 @@ export const removeWindowListeners = (callback) => {
     window.visualViewport.removeEventListener("resize", callback);
 };
 
-export const cinematicResize = (canvas) => {
-  const DPR = window.devicePixelRatio || 1;
+export const cinematicResize = (element) => {
+  return () => {
+    const resizeElement = element;
+    const ratioTargets = [
+      {
+        minRatio: 1,
+        ratio: { x: 1920, y: 1080 },
+      },
+      {
+        minRatio: 0,
+        ratio: { x: 1920, y: 1920 },
+      },
+    ];
 
-  const ratioTargets = [
-    {
-      minWidth: 1920,
-      ratio: { x: 1920, y: 1080 },
-    },
-    // {
-    //     minWidth: 1080,
-    //     ratio: { x: 1920, y: 720 }
-    // }
-  ];
-
-  const resizeCanvas = () => {
     const screen = {
       w: window.innerWidth,
       h: window.innerHeight,
+      r: window.innerWidth / window.innerHeight,
     };
 
-    let counter = 0;
-    let target = ratioTargets[counter];
+    let target;
 
-    while (target.minWidth <= screen.w && counter < ratioTargets.length - 1) {
-      counter++;
-      target = ratioTargets[counter];
+    if (screen.r > 1) {
+      target = ratioTargets[0];
+    } else {
+      target = ratioTargets[1];
     }
 
     const resizeRatio = Math.min(
       screen.w / target.ratio.x,
       screen.h / target.ratio.y
     );
-    canvas.style.width = target.ratio.x * resizeRatio + "px";
-    canvas.style.height = target.ratio.y * resizeRatio + "px";
-    canvas.width = target.ratio.x * resizeRatio * DPR;
-    canvas.height = target.ratio.y * resizeRatio * DPR;
-  };
 
-  addWindowListeners(resizeCanvas);
-  return () => removeWindowListeners(resizeCanvas);
+    resizeElement.style.width = target.ratio.x * resizeRatio + "px";
+    resizeElement.style.height = target.ratio.y * resizeRatio + "px";
+  };
 };

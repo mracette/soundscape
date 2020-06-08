@@ -3,11 +3,8 @@ export class Scheduler {
     // bind audio context
     this.audioCtx = audioCtx;
 
-    // for scheduleOnce
+    // for events
     this.queue = [];
-
-    // for scheduleRepeating
-    this.repeatingQueue = [];
 
     // event id
     this.eventId = 0;
@@ -59,26 +56,52 @@ export class Scheduler {
     }
   }
 
+  /* 
+  Increment a repeating event
+  */
+  incrementRepeating(event) {
+    event.count++;
+    // the web audio spec doesn't allow buffer source nodes to be reused
+    const dummySource = this.audioCtx.createBufferSource();
+    dummySource.buffer = event.source.buffer;
+    dummySource.connect(this.audioCtx.destination);
+    dummySource.onended = () => {
+      event.callback();
+      // add the next occurence
+      this.incrementRepeating(event);
+    };
+    dummySource.start(
+      event.time + event.count * event.frequency - dummySource.buffer.duration
+    );
+    event.source = dummySource;
+  }
+
+  /* 
+  Initialized a repeating event
+  */
   scheduleRepeating(time, frequency, callback) {
-    // increment for the next event
-    this.eventId++;
-
-    // grab the current value of the event id
-    const newEventId = this.eventId;
-
     // create a dummy buffer to trigger the event
     const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
     const dummySource = this.audioCtx.createBufferSource();
     dummySource.buffer = dummyBuffer;
     dummySource.connect(this.audioCtx.destination);
 
+    // grab the next event id value
+    const newEvent = {
+      id: ++this.eventId,
+      count: 0,
+      time,
+      frequency,
+      type: "repeating",
+      callback,
+      source: dummySource,
+    };
+
     // assign callback
     dummySource.onended = () => {
       callback();
       // add the next occurence
-      const { time, frequency } = this.getEvent(newEventId);
-      this.scheduleRepeating(time + frequency, frequency, callback);
-      this.cancel(newEventId); // ensures GC
+      this.incrementRepeating(newEvent);
     };
 
     dummySource.start(
@@ -87,93 +110,35 @@ export class Scheduler {
     );
 
     // initialize the event queue with the first event
-    this.repeatingQueue.push({
-      id: newEventId,
-      time,
-      type: "repeating",
-      frequency,
-      source: dummySource,
-    });
+    this.queue.push(newEvent);
 
-    return newEventId;
+    return newEvent.id;
   }
 
   updateCallback(id, callback) {
-    let event;
-
-    event = this.queue.find((e) => e.id === id);
-
-    if (!event) {
-      event = this.repeatingQueue.find((e) => e.id === id);
-    }
-
+    const event = this.getEvent(id);
     if (event) {
-      event.source.onended = callback;
-    }
-  }
-
-  updateQueue() {
-    for (let i = this.repeatingQueue.length - 1; i >= 0; i--) {
-      const event = this.repeatingQueue[i];
-
-      if (event.time < this.audioCtx.currentTime) {
-        this.repeatingQueue.splice(i, 1);
-
-        // create a dummy buffer to trigger the event
-        const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
-        const dummySource = this.audioCtx.createBufferSource();
-        dummySource.buffer = dummyBuffer;
-        dummySource.connect(this.audioCtx.destination);
-
-        // assign callback (same as previous event)
-        dummySource.onended = event.source.onended;
-
-        // start
-        dummySource.start(
-          // ensure the start time is positive
-          Math.max(0, event.time + event.frequency - dummyBuffer.duration)
-        );
-
-        // update the parameters and push a copy of the event to the queue
-        this.repeatingQueue.push({
-          id: event.id,
-          time: event.time + event.frequency,
-          type: "repeating",
-          frequency: event.frequency,
-          source: dummySource,
-        });
-      }
+      event.callback = callback;
+      event.source.onended = () => {
+        callback();
+        // add the next occurence
+        this.incrementRepeating(event);
+      };
     }
   }
 
   getEvent(id) {
     let event = this.queue.find((e) => e.id === id);
-
-    if (event) {
-      return event;
-    } else {
-      let event = this.repeatingQueue.find((e) => e.id === id);
-      if (event) {
-        return event;
-      } else {
-        return false;
-      }
-    }
+    return event || false;
   }
 
   clear() {
     this.queue.forEach((event) => {
       event.source.onended = null;
       event.source.stop();
+      event.source.disconnect();
     });
-
-    this.repeatingQueue.forEach((event) => {
-      event.source.onended = null;
-      event.source.stop();
-    });
-
-    this.queue = [];
-    this.repeatingQueue = [];
+    this.queue.length = 0;
   }
 
   cancel(id) {
@@ -185,14 +150,11 @@ export class Scheduler {
 
         try {
           event.source.stop();
+          /* eslint-disable-next-line no-empty */
         } catch (e) {}
 
         event.source.disconnect();
-
         this.queue = this.queue.filter((e) => e.id !== event.id);
-        this.repeatingQueue = this.repeatingQueue.filter(
-          (e) => e.id !== event.id
-        );
       }
     }
   }

@@ -5,51 +5,66 @@ import FirstPersonControls from "./controls/FirstPersonControls";
 
 export class SceneManager {
   constructor(canvas) {
-    this.canvas = canvas;
-
-    this.clock = new THREE.Clock(true);
-
-    this.screenDimensions = {
-      width: window.innerWidth,
-      height: window.innerHeight,
+    const opts = {
+      songId: null,
+      fov: 60,
+      bpm: null,
+      dprMax: 5,
+      canvas,
+      clock: new THREE.Clock(true),
+      resizeMethod: "fullscreen",
+      pauseVisuals: false,
+      sceneDimensions: {
+        width: null,
+        height: null,
+      },
+      spectrumFunction: (n) => "#FFFFFF",
+      showStats: false,
+      fpcControl: false,
     };
 
-    this.worldDimensions = {
-      width: 1000,
-      height: 1000,
-      depth: 1000,
-    };
-
-    this.pauseVisuals = false;
+    // bind properties to 'this'
+    Object.assign(this, opts);
     this.animate = this.animate.bind(this);
-    this.render = this.render.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
-    this.showStats = false;
+
+    // run initialization functions
+    this.setSceneDimensions();
   }
 
   init() {
-    return new Promise((resolve, reject) => {
-      try {
-        // lights, camera, action
-        this.scene = this.initScene();
-        this.renderer = this.initRender();
-        this.camera = this.initCamera("perspective");
-        this.controls = this.initControls();
-        this.subjects = this.initSubjects();
-        this.lights = this.initLights();
-        this.helpers = this.initHelpers();
-        resolve();
-      } catch (err) {
-        reject(err);
-      }
-    });
+    this.scene = this.initScene();
+    this.renderer = this.initRender();
+    this.camera = this.initCamera();
+    this.controls = this.initControls();
+    this.subjects = this.initSubjects();
+    this.lights = this.initLights();
+    this.helpers = this.initHelpers();
   }
 
   stop() {
     window.cancelAnimationFrame(this.currentFrame);
   }
 
-  applyAll(obj, callback, exceptions) {
+  setSceneDimensions() {
+    this.sceneDimensions = {
+      width:
+        this.resizeMethod === "cinematic"
+          ? this.canvas.clientWidth
+          : this.resizeMethod === "fullscreen"
+          ? window.innerWidth
+          : null,
+      height:
+        this.resizeMethod === "cinematic"
+          ? this.canvas.clientHeight
+          : this.resizeMethod === "fullscreen"
+          ? window.innerHeight
+          : null,
+    };
+  }
+
+  applyAll(obj, callback, exceptions = []) {
+    // recursively apply callback to all descendants of obj
     obj.children.forEach((child) => {
       if (child.children.length > 0) {
         this.applyAll(child, callback, exceptions);
@@ -61,15 +76,14 @@ export class SceneManager {
     });
   }
 
-  disposeAll(obj) {
+  disposeAll(obj, material = true, geometry = true) {
     while (obj.children.length > 0) {
-      this.disposeAll(obj.children[0]);
+      this.disposeAll(obj.children[0], material, geometry);
       obj.remove(obj.children[0]);
     }
-    if (obj.geometry) obj.geometry.dispose();
-
-    if (obj.material) {
-      //in case of map, bumpMap, normalMap, envMap ...
+    if (geometry && obj.geometry) obj.geometry.dispose();
+    if (material && obj.material) {
+      // in case of map, bumpMap, normalMap, envMap ...
       Object.keys(obj.material).forEach((prop) => {
         if (!obj.material[prop]) return;
         if (typeof obj.material[prop].dispose === "function")
@@ -97,55 +111,25 @@ export class SceneManager {
       autoClear: false,
       canvas: this.canvas,
       antialias: true,
-      //powerPreference: "high-performance",
       outputEncoding: THREE.sRGBEncoding,
     });
 
-    let DPR = Math.min(
-      this.DPRMax || 1.5,
-      window.devicePixelRatio ? window.devicePixelRatio : 1
-    );
-
-    renderer.setPixelRatio(DPR);
-    renderer.setSize(this.screenDimensions.width, this.screenDimensions.height);
+    renderer.setPixelRatio(this.getPixelRatio());
+    renderer.setSize(this.sceneDimensions.width, this.sceneDimensions.height);
 
     return renderer;
   }
 
-  initCamera(type, frustrum) {
-    const fieldOfView = 60;
+  initCamera() {
     const nearPlane = 1;
     const farPlane = 10000;
-    const aspect = this.screenDimensions.width / this.screenDimensions.height;
-    let camera;
-
-    switch (type || "perspective") {
-      case "perspective":
-        camera = new THREE.PerspectiveCamera(
-          fieldOfView,
-          1,
-          nearPlane,
-          farPlane
-        );
-        break;
-      case "orthographic":
-        {
-          let f = frustrum || 50;
-          camera = new THREE.OrthographicCamera(
-            -f,
-            f,
-            f / aspect,
-            -f / aspect,
-            nearPlane,
-            farPlane
-          );
-        }
-        break;
-      default:
-        break;
-    }
-
-    camera.aspect = aspect;
+    const camera = new THREE.PerspectiveCamera(
+      this.getFov(),
+      1,
+      nearPlane,
+      farPlane
+    );
+    camera.aspect = this.getAspectRatio();
     camera.position.set(0, 10, 115);
     camera.lookAt(new THREE.Vector3(0, 0, 0));
     camera.updateProjectionMatrix();
@@ -154,7 +138,7 @@ export class SceneManager {
 
   initControls() {
     const controls = {};
-    controls.fpc = new FirstPersonControls(this.camera);
+    this.fpcControl && (controls.fpc = new FirstPersonControls(this.camera));
     return controls;
   }
 
@@ -172,44 +156,51 @@ export class SceneManager {
   }
 
   initHelpers() {
-    let stats = null;
-
-    if (this.showStats) {
-      stats = new Stats();
-      stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-      stats.dom.style.left = null;
-      stats.dom.style.right = "0px";
-      document.body.appendChild(stats.dom);
-    }
-
     const helpers = {
-      stats: stats,
       gltfLoader: new GLTFLoader(),
     };
-
+    if (this.showStats) {
+      helpers.stats = new Stats();
+      helpers.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+      helpers.stats.dom.style.left = null;
+      helpers.stats.dom.style.right = "0px";
+      document.body.appendChild(helpers.stats.dom);
+    }
     return helpers;
   }
 
+  getFov() {
+    return this.fov;
+  }
+
+  getAspectRatio() {
+    return this.sceneDimensions.width / this.sceneDimensions.height;
+  }
+
+  getPixelRatio() {
+    return Math.min(window.devicePixelRatio || 1, this.dprMax || 4);
+  }
+
   onWindowResize() {
-    const newWidth = window.innerWidth;
-    const newHeight = window.innerHeight;
-    this.screenDimensions.width = newWidth;
-    this.screenDimensions.height = newHeight;
-    const aspectRatio = newWidth / newHeight;
-
-    if (this.fovAdjust) {
-      this.camera.fov = this.getNewFov(aspectRatio);
-    }
-
-    this.camera.aspect = aspectRatio;
+    // this function shouldn't contain any DOM resizing logic, just scene logic
+    this.setSceneDimensions();
+    this.camera.fov = this.getFov();
+    this.camera.aspect = this.getAspectRatio();
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(newWidth, newHeight);
+    if (this.resizeMethod === "fullscreen") {
+      this.renderer.setSize(
+        this.sceneDimensions.width,
+        this.sceneDimensions.height
+      );
+    }
     this.render(true);
   }
 
   loadModel(options = {}) {
     const { name } = options;
-    const format = process.env.REACT_APP_MODEL_FORMAT;
+    const format =
+      process.env[`REACT_APP_MODEL_FORMAT_${this.songId.toUpperCase()}`] ||
+      process.env.REACT_APP_MODEL_FORMAT;
 
     let ext;
 
@@ -235,5 +226,23 @@ export class SceneManager {
         (err) => reject(err)
       );
     });
+  }
+
+  convertMaterialToBasic(mat, params = {}) {
+    const newMat = new THREE.MeshBasicMaterial({
+      color: params.color || mat.color,
+      side: params.side || THREE.DoubleSide,
+    });
+    mat.dispose();
+    return newMat;
+  }
+
+  convertMaterialToLambert(mat, params = {}) {
+    const newMat = new THREE.MeshLambertMaterial({
+      color: params.color || mat.color,
+      map: mat.map,
+    });
+    mat.dispose();
+    return newMat;
   }
 }

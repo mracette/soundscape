@@ -8,6 +8,7 @@
             "keySignature": "G Minor",
             "ambientTrack": true,
             "ambientTrackLength": "8m",
+            "ambientTrackQuantize": false,
             "groups": [
                 {
                     "name": "rhythm",
@@ -37,7 +38,7 @@
                         {
                             "name": "belly-percs[2]",
                             "length": "2m",
-                            "quantizeLength": "2m"
+                            "quantizeLength": "4m"
                         }
                     ]
                 },
@@ -64,7 +65,7 @@
                         {
                             "name": "rhodes-sad[2]",
                             "length": "2m",
-                            "quantizeLength": "2m"
+                            "quantizeLength": "4m"
                         }
                     ]
                 },
@@ -86,7 +87,7 @@
                         {
                             "name": "sub-simple[8]",
                             "length": "8m",
-                            "quantizeLength": "8m"
+                            "quantizeLength": "4m"
                         },
                         {
                             "name": "sub-bouncey[8]",
@@ -158,6 +159,8 @@
             ]
         },
         "themes": {
+            "canvasFade": false,
+            "resizeType": "fullscreen",
             "buttonColor": "rgba(31, 38, 47, 1)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
             "contentPanelColor": "rgba(31, 38, 47, 0.65)",
@@ -189,6 +192,7 @@
             "keySignature": "Eb Major",
             "ambientTrack": true,
             "ambientTrackLength": "8m",
+            "ambientTrackQuantize": false,
             "groups": [
                 {
                     "name": "rhythm",
@@ -273,7 +277,7 @@
                         {
                             "name": "bass-two[4]",
                             "length": "4m",
-                            "quantizeLength": "8m"
+                            "quantizeLength": "4m"
                         },
                         {
                             "name": "bass-three[4]",
@@ -341,6 +345,8 @@
             ]
         },
         "themes": {
+            "canvasFade": false,
+            "resizeType": "fullscreen",
             "buttonColor": "rgba(55, 55, 55, 0.45)",
             "openButtonColor": "rgba(255, 255, 255, 0.15)",
             "contentPanelColor": "rgba(55, 55, 55, 0.45)",
@@ -364,6 +370,186 @@
                 {
                     "type": "Paintings:",
                     "content": "Kurt Vonnegut, Vincent Van Gogh"
+                },
+                {
+                    "type": "Technology:",
+                    "content": "React, Three.js, Anime.js, ColorCurves, Ableton Live, Yamaha P-125"
+                }
+            ]
+        }
+    },
+    {
+        "id": "swamp",
+        "audio": {
+            "name": "Swamp",
+            "bpm": 75,
+            "timeSignature": 4,
+            "keySignature": "Eb Minor",
+            "ambientTrack": true,
+            "ambientTrackLength": "4m",
+            "ambientTrackQuantize": true,
+            "groups": [
+                {
+                    "name": "rhythm",
+                    "polyphony": -1,
+                    "analyser": {
+                        "power": 5,
+                        "numBuckets": 5,
+                        "minDecibels": -90,
+                        "maxDecibels": 0,
+                        "smoothingTimeConstant": 0.5
+                    },
+                    "voices": [
+                        {
+                            "name": "rhythm-kick[1]",
+                            "length": "1m",
+                            "quantizeLength": "2m",
+                            "noFade": true
+                        },
+                        {
+                            "name": "rhythm-snaps[2]",
+                            "length": "2m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "rhythm-snare[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "rhythm-hats[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "rhythm-breath[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        }
+                    ]
+                },
+                {
+                    "name": "bass",
+                    "polyphony": 1,
+                    "analyser": {
+                    },
+                    "voices": [
+                        {
+                            "name": "bass-long[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "bass-sequence[2]",
+                            "length": "2m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "bass-octave[2]",
+                            "length": "2m",
+                            "quantizeLength": "2m"
+                        }
+                    ]
+                },
+                {
+                    "name": "harmony",
+                    "polyphony": 1,
+                    "analyser": {
+                    },
+                    "voices": [
+                        {
+                            "name": "harmony-build[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "harmony-tattletale[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "harmony-triplets[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        }
+                    ]
+                },
+                {
+                    "name": "melody",
+                    "polyphony": 1,
+                    "analyser": {
+                        "power": 9,
+                        "gainBoost": 12
+                    },
+                    "voices": [
+                        {
+                            "name": "piano-dark[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "piano-dreary[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "piano-theme[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "piano-drips[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        }
+                    ]
+                },
+                {
+                    "name": "extras",
+                    "polyphony": 2,
+                    "analyser": {
+                    },
+                    "voices": [
+                        {
+                            "name": "extras-texture[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "extras-critters[4]",
+                            "length": "4m",
+                            "quantizeLength": "2m"
+                        },
+                        {
+                            "name": "extras-riser[8]",
+                            "length": "8m",
+                            "quantizeLength": "2m"
+                        }
+                    ]
+                }
+            ]
+        },
+        "themes": {
+            "canvasFade": true,
+            "buttonColor": "rgba(0, 0, 0, 0.25)",
+            "openButtonColor": "rgba(255, 255, 255, 0.25)",
+            "contentPanelColor": "rgba(0, 0, 0, 0.25)",
+            "panelResetButton": "rgba(255, 255, 255, 0.3)",
+            "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
+            "panelMuteButton": "rgba(255, 255, 255, 0.3)",
+            "groupSoloButton": "rgba(90.5, 162.2, 240.8, 0.5)",
+            "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
+        },
+        "info": {
+            "credits": [
+                {
+                    "type": "Music & Development:",
+                    "content": "Mark Racette"
+                },
+                {
+                    "type": "Art & 3D Modeling:",
+                    "link": "https://www.alanaguidry.com/",
+                    "content": "Alana Guidry"
                 },
                 {
                     "type": "Technology:",

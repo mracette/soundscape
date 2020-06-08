@@ -1,5 +1,15 @@
 @import '../settings.scss';
 
+#canvas-viz-parent {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+    z-index: -1000;
+}
+
 #canvas-viz {
+    background-color: white;
     z-index: -999;
+    margin: auto;
 }

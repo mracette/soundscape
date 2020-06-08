@@ -159,6 +159,7 @@ export const ToggleButtonGroup = (props) => {
           groupCount={props.groupCount}
           gradient={true}
           name={name}
+          animate={false}
         />
 
         <button

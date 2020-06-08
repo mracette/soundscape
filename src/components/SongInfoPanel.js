@@ -1,5 +1,6 @@
 // libs
 import React from "react";
+import { Link } from "react-router-dom";
 
 // components
 import { SocialIcons } from "./iconography/SocialIcons";
@@ -22,13 +23,13 @@ export const SongInfoPanel = (props) => {
       {credits.map((c) => {
         return (
           <p key={c.type}>
-            <u>{c.type}</u>&nbsp;{c.content}
+            <span style={{ color: "rgb(0, 225, 158)" }}>{c.type}</span>
+            &nbsp;
+            {c.link ? <a href={c.link}>{c.content}</a> : c.content}
           </p>
         );
       })}
       <h2 className="padded-row">Share</h2>
-      {/* <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-text="Soundscape: a beautiful and relaxing music visualizer for the web." data-url="https://soundscape.world" data-via="markracette" data-show-count="false">Tweet</a>
-            <div class="fb-share-button" data-href="https://soundscape.world" data-layout="button" data-size="small"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fsoundscape.world%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">Share</a></div> */}
       <SharingIcons />
       <h2 className="padded-row">Connect</h2>
       {/* <p className="flex-row">
@@ -36,9 +37,10 @@ export const SongInfoPanel = (props) => {
         to collaborate with on new content. Please get in touch if you have any
         leads!
       </p> */}
-      <SocialIcons
-        svgClassList="icon icon-white info-panel-icon"
-      />
+      <SocialIcons svgClassList="icon icon-white info-panel-icon" />
+      <p>
+        <Link to="/info">{"Sign up for email updates on new content"}</Link>
+      </p>
     </div>
   );
 };

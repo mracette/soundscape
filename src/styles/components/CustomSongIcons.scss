@@ -1,5 +1,13 @@
 @import '../settings.scss';
 
+.new-label {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 1.6rem;
+    color: $hot-green;
+}
+
 .custom-song-icon {
     display: block;
     margin: 0;

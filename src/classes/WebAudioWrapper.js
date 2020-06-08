@@ -286,7 +286,7 @@ export class WebAudioWrapper {
                   60) /
                 this.config[id].bpm,
               fade: true,
-              fadeLength: this.values.FADE_LENGTH,
+              fadeLength: voice.noFade ? 0 : this.values.FADE_LENGTH,
               destination: this.nodes.effects[id].groupNodes[group.name],
               loop: true,
             });

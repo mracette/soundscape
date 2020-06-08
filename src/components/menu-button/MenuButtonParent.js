@@ -8,7 +8,6 @@ import { Icon } from "./../Icon";
 // contexts
 import { ThemeContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
-import { MusicPlayerContext } from "../../contexts/contexts";
 
 // styles
 import "../../styles/components/MenuButtonParent.scss";
@@ -40,6 +39,7 @@ export const MenuButtonParent = (props) => {
       style={{
         top,
         left,
+        // visibility: isLoading ? "hidden" : "visible",
       }}
     >
       <button

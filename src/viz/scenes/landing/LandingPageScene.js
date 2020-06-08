@@ -1,12 +1,18 @@
 import * as THREE from "three";
 import { Stars } from "../../subjects/Stars";
 import { SceneManager } from "../../SceneManager";
-import { ColorPalette } from "color-curves";
 
 export class LandingPageScene extends SceneManager {
-  constructor(canvas) {
+  constructor(canvas, extras) {
     super(canvas);
-    this.DPRMax = 2.5;
+    const opts = {
+      dprMax: 2.5,
+      resizeMethod: "fullscreen",
+      spectrumFunction: extras.spectrumFunction,
+    };
+    Object.assign(this, opts);
+    super.init();
+    this.animate();
   }
 
   initScene() {
@@ -19,7 +25,7 @@ export class LandingPageScene extends SceneManager {
     const fieldOfView = 60;
     const nearPlane = 1;
     const farPlane = 1000;
-    const aspect = this.screenDimensions.width / this.screenDimensions.height;
+    const aspect = this.sceneDimensions.width / this.sceneDimensions.height;
     let camera;
     camera = new THREE.PerspectiveCamera(fieldOfView, 1, nearPlane, farPlane);
     camera.aspect = aspect;
@@ -30,14 +36,9 @@ export class LandingPageScene extends SceneManager {
   }
 
   initSubjects() {
-    const palette = new ColorPalette(
-      '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.182,"y":-0.138},"scale":{"x":1,"y":1},"rotation":0,"angleStart":2.105,"angleEnd":6.283,"angleOffset":0,"radius":0.5}',
-      '{"type":"linear","overflow":"clamp","reverse":false,"translation":{"x":-0.003,"y":0.758},"scale":{"x":1.053,"y":-0.13},"rotation":0}',
-      '{"start":0,"end":1}'
-    );
     const subjects = {};
     subjects.stars = new Stars(this.scene, new THREE.Vector3(0, 0, 0), 1600, {
-      colorPalette: (n) => palette.rgbValueAt(n),
+      colorPalette: this.spectrumFunction,
       minOrbitRadius: 300,
       maxOrbitRadius: 600,
     });

@@ -2,7 +2,7 @@
 import React from "react";
 
 // components
-import { Canvas } from "../components/Canvas";
+import { Canvas } from "./canvas/Canvas";
 
 // hooks
 import { useAnimationFrame } from "../hooks/useAnimationFrame";
@@ -15,7 +15,7 @@ import { WebAudioContext } from "../contexts/contexts";
 // styles
 import "../styles/components/FreqBands.scss";
 
-export const FreqBands = () => {
+export const FreqBands = (props) => {
   const { spectrumFunction } = React.useContext(ThemeContext);
   const { bpm, timeSignature } = React.useContext(SongContext);
   const { WAW } = React.useContext(WebAudioContext);
@@ -62,8 +62,6 @@ export const FreqBands = () => {
 
         context.fillStyle = spectrumFunction(i / analyser.frequencyBinCount);
 
-        context.globalAlphs = vol;
-
         context.moveTo(cx, cy);
 
         context.arc(
@@ -81,7 +79,9 @@ export const FreqBands = () => {
   );
 
   useAnimationFrame((t) =>
-    render(canvasRef.current, contextRef.current, t.time)
+    props.animate
+      ? render(canvasRef.current, contextRef.current, t.time)
+      : () => null
   );
 
   return React.useMemo(

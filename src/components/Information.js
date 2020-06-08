@@ -3,13 +3,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 // components
-import { SocialIcons } from "../components/iconography/SocialIcons";
+import { SocialIcons } from "./iconography/SocialIcons";
 
 // styles
 import "../styles/components/LandingPage.scss";
 import "../styles/components/ComingSoon.scss";
 
-export const ComingSoon = () => {
+export const Information = () => {
   return (
     <div id="coming-soon" className="fullscreen off-black">
       <div className="landing-page-header">
@@ -18,7 +18,7 @@ export const ComingSoon = () => {
         </div>
         <div id="coming-soon-panel" className="flex-col">
           <div className="flex-row">
-            <span>Additional content is coming to Soundscape.</span>
+            <span>Soundscape is constantly changing.</span>
           </div>
           <div className="flex-row">
             <span>
@@ -40,7 +40,7 @@ export const ComingSoon = () => {
                 <input
                   type="email"
                   name="EMAIL"
-                  className="email"
+                  className="email custom-mc-input"
                   id="mce-EMAIL"
                   placeholder="email address"
                   required
@@ -63,24 +63,12 @@ export const ComingSoon = () => {
                     value="Subscribe"
                     name="subscribe"
                     id="mc-embedded-subscribe"
-                    className="button"
+                    className="button info-page-button button-yellow"
                   />
                 </div>
               </div>
             </form>
           </div>
-          <span className="flex-row">
-            We are also seeking
-            <span className="hot-pink">&nbsp;3D artists&nbsp;</span> to
-            collaborate with.
-          </span>
-          <span className="flex-row">
-            Please&nbsp;
-            <a className="hot-blue" href="mailto:mark@soundscape.world">
-              get in touch
-            </a>
-            &nbsp;if you have any leads!
-          </span>
           <SocialIcons
             divClassList="coming-soon-icon-row"
             svgClassList="icon icon-moon"
@@ -88,7 +76,9 @@ export const ComingSoon = () => {
         </div>
         <div>
           <Link to="/">
-            <button className="button-white">Return Home</button>
+            <button className="info-page-button button-yellow">
+              Return Home
+            </button>
           </Link>
         </div>
       </div>

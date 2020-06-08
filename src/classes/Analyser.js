@@ -8,6 +8,7 @@ export class Analyser {
     const defaults = {
       id: null,
       power: 13,
+      gainBoost: 0,
       minDecibels: -130,
       maxDecibels: 0,
       minFrequency: 20,
@@ -122,8 +123,25 @@ export class Analyser {
       this.analyser.maxDecibels = this.maxDecibels;
       this.analyser.smoothingTimeConstant = this.smoothingTimeConstant;
 
-      // feed in the input
-      this.input.connect(this.analyser);
+      // connect processing nodes if applicable
+      const chain = this.createProcessingNodes();
+      if (chain) {
+        this.input.connect(chain);
+        chain.connect(this.analyser);
+      } else {
+        // otherwise just feed in the input
+        this.input.connect(this.analyser);
+      }
+    }
+  }
+
+  createProcessingNodes() {
+    if (this.gainBoost !== 0) {
+      const gainBoost = this.context.createGain();
+      gainBoost.gain.value = this.gainBoost;
+      return gainBoost;
+    } else {
+      return null;
     }
   }
 

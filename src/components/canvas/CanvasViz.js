@@ -2,22 +2,33 @@
 import React from "react";
 
 // scenes
-import { Moonrise } from "../viz/scenes/moonrise/Moonrise";
-import { Mornings } from "../viz/scenes/mornings/Mornings";
+import { Moonrise } from "../../viz/scenes/moonrise/Moonrise";
+import { Mornings } from "../../viz/scenes/mornings/Mornings";
+import { Swamp } from "../../viz/scenes/swamp/Swamp";
 
 // context
-import { SongContext } from "../contexts/contexts";
-import { TestingContext } from "../contexts/contexts";
-import { MusicPlayerContext } from "../contexts/contexts";
-import { ThemeContext } from "../contexts/contexts";
-import { WebAudioContext } from "../contexts/contexts";
+import { SongContext } from "../../contexts/contexts";
+import { TestingContext } from "../../contexts/contexts";
+import { MusicPlayerContext } from "../../contexts/contexts";
+import { ThemeContext } from "../../contexts/contexts";
+import { WebAudioContext } from "../../contexts/contexts";
+
+// components
+import { CanvasFade } from "./CanvasFade";
+
+// utils
+import {
+  cinematicResize,
+  addWindowListeners,
+  removeWindowListeners,
+} from "../../utils/jsUtils";
 
 // styles
-import "../styles/components/CanvasViz.scss";
+import "../../styles/components/CanvasViz.scss";
 
 export const CanvasViz = (props) => {
   const { songLoadStatus, handleSetCanvasLoadStatus } = props;
-  const { spectrumFunction } = React.useContext(ThemeContext);
+  const { spectrumFunction, canvasFade } = React.useContext(ThemeContext);
   const { id, groups, bpm } = React.useContext(SongContext);
   const { WAW } = React.useContext(WebAudioContext);
   const { voices, analysers, dispatch, pauseVisuals } = React.useContext(
@@ -38,8 +49,11 @@ export const CanvasViz = (props) => {
       const playerState = {};
       groups.forEach((g) => {
         playerState[g.name] =
-          voices.filter((v) => v.group === g.name && v.voiceState === "active")
-            .length > 0;
+          voices.filter(
+            (v) =>
+              v.group === g.name &&
+              (v.voiceState === "active" || v.voiceState === "pending-stop")
+          ).length > 0;
       });
       sceneRef.current.playerState = playerState;
     }
@@ -76,55 +90,45 @@ export const CanvasViz = (props) => {
           handleSetCanvasLoadStatus(true);
         }
         break;
+      case "swamp":
+        if (flags.showVisuals) {
+          newScene = new Swamp(
+            canvasRef.current,
+            WAW.getAnalysers(id).groupAnalysers,
+            () => handleSetCanvasLoadStatus(true),
+            {
+              spectrumFunction,
+              bpm,
+            }
+          );
+          sceneRef.current = newScene;
+        } else {
+          handleSetCanvasLoadStatus(true);
+        }
+        break;
       default:
         throw new Error("Song not found");
     }
 
+    let resizeFunction;
+
     if (flags.showVisuals) {
-      window.addEventListener("resize", sceneRef.current.onWindowResize);
-      window.addEventListener(
-        "orientationchange",
-        sceneRef.current.onWindowResize
-      );
-      window.addEventListener(
-        "fullscreenchange",
-        sceneRef.current.onWindowResize
-      );
-      window.visualViewport &&
-        window.visualViewport.addEventListener(
-          "scroll",
-          sceneRef.current.onWindowResize
-        );
-      window.visualViewport &&
-        window.visualViewport.addEventListener(
-          "resize",
-          sceneRef.current.onWindowResize
-        );
+      if (newScene.resizeMethod === "cinematic") {
+        resizeFunction = cinematicResize(canvasRef.current);
+        resizeFunction();
+        addWindowListeners(resizeFunction);
+      }
+      addWindowListeners(sceneRef.current.onWindowResize);
     }
 
     return () => {
       if (flags.showVisuals) {
         newScene.stop();
         newScene.disposeAll(newScene.scene);
-        window.removeEventListener("resize", sceneRef.current.onWindowResize);
-        window.removeEventListener(
-          "orientationchange",
-          sceneRef.current.onWindowResize
-        );
-        window.removeEventListener(
-          "fullscreenchange",
-          sceneRef.current.onWindowResize
-        );
-        window.visualViewport &&
-          window.visualViewport.removeEventListener(
-            "scroll",
-            sceneRef.current.onWindowResize
-          );
-        window.visualViewport &&
-          window.visualViewport.removeEventListener(
-            "resize",
-            sceneRef.current.onWindowResize
-          );
+        if (newScene.resizeMethod === "cinematic") {
+          removeWindowListeners(resizeFunction);
+        }
+        removeWindowListeners(sceneRef.current.onWindowResize);
       }
     };
   }, [
@@ -141,6 +145,9 @@ export const CanvasViz = (props) => {
   ]);
 
   return (
-    <canvas id="canvas-viz" className="fullscreen" ref={canvasRef}></canvas>
+    <div id="canvas-viz-parent" className="fullscreen">
+      <canvas id="canvas-viz" ref={canvasRef}></canvas>
+      {canvasFade && <CanvasFade ref={canvasRef} />}
+    </div>
   );
 };
