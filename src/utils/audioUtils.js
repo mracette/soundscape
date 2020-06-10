@@ -7,8 +7,8 @@ export const getPathToAudio = (id, name, format, debug = false) => {
     const path = `${process.env.PUBLIC_URL}/audio/${format}/${id}/${name}.${ext}`;
     debug && console.log(path);
     return path;
-  } else if (process.env.REACT_APP_ASSET_LOCATION === "s3") {
-    const path = `https://soundscape-public.s3.us-east-2.amazonaws.com/app/audio/${format}/${id}/${name}.${ext}`;
+  } else if (process.env.REACT_APP_ASSET_LOCATION === "cloudfront") {
+    const path = `${process.env.REACT_APP_ASSET_DOMAIN}/app/audio/${format}/${id}/${name}.${ext}`;
     debug && console.log(path);
     return path;
   }

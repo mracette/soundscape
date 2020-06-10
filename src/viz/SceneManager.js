@@ -215,8 +215,8 @@ export class SceneManager {
 
       if (process.env.REACT_APP_ASSET_LOCATION === "local") {
         url = `${process.env.PUBLIC_URL}/models/${this.songId}/${name}${ext}`;
-      } else if (process.env.REACT_APP_ASSET_LOCATION === "s3") {
-        url = `https://soundscape-public.s3.us-east-2.amazonaws.com/app/models/${this.songId}/${format}/${name}${ext}`;
+      } else if (process.env.REACT_APP_ASSET_LOCATION === "cloudfront") {
+        url = `${process.env.REACT_APP_ASSET_DOMAIN}/app/models/${this.songId}/${format}/${name}${ext}`;
       }
 
       this.helpers.gltfLoader.load(
