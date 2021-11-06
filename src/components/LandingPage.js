@@ -237,6 +237,17 @@ export const LandingPage = (props) => {
           )}
         </div>
       </div>
+      <div className="announcement hot-green">
+        <span>New! Create your own music visualizers with&nbsp;</span>
+        <a
+          href="https://sinedesign.co"
+          target="_blank"
+          and
+          rel="noopener noreferrer"
+        >
+          Sine Design.
+        </a>
+      </div>
     </>
   );
 };

@@ -107,3 +107,15 @@ button:focus {
 .hot-blue {
     color: $hot-blue;
 }
+
+.announcement {
+    background-color: $off-black;
+    font-size: $m-size;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    bottom: 0px;
+    height: 50px;
+    width: 100vw;
+}

@@ -1,5 +1,15 @@
 @import '../settings.scss';
 
+.announcement {
+    background-color: $off-black;
+    font-size: $m-size;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+}
+
 #star-canvas {
     z-index: -1;
 }
