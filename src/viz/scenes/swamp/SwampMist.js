@@ -4,9 +4,6 @@ import { SceneManager } from "../../SceneManager";
 import chroma from "chroma-js";
 import FirstPersonControls from "../../controls/FirstPersonControls";
 import { Mist } from "./Mist";
-import { renderHut } from "./renderHut";
-import { renderFlowers } from "./renderFlowers";
-import { renderShrooms } from "./renderShrooms";
 
 // globals
 export const COLORS = {

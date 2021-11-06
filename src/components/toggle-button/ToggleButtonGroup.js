@@ -192,6 +192,7 @@ export const ToggleButtonGroup = (props) => {
       </div>
 
       <div className="toggle-buttons flex-row">
+        {/* eslint-disable-next-line react-hooks/exhaustive-deps */}
         {React.useCallback(
           props.voices.map((voice) => (
             <ToggleButton

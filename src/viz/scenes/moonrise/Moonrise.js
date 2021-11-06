@@ -568,9 +568,8 @@ export class Moonrise extends SceneManager {
           ) {
             const adj = 1 / (0.15 * (moonRingIndex + 1));
             const rot = bassFrequencies[moonRingIndex] / 255;
-            const moonRing = this.subjects.moonBeams.children[0].children[
-              moonRingIndex
-            ];
+            const moonRing =
+              this.subjects.moonBeams.children[0].children[moonRingIndex];
 
             // TAKE 2: Outward fanning
             moonRing.geometry.attributes.position.array[vertexCount * 3] =
@@ -587,18 +586,18 @@ export class Moonrise extends SceneManager {
                   Math.PI *
                   (vertexCount / this.bassAnalyser.fftSize + rot / 6)
               );
-            moonRing.geometry.attributes.position.array[
-              vertexCount * 3 + 2
-            ] = -81;
+            moonRing.geometry.attributes.position.array[vertexCount * 3 + 2] =
+              -81;
           }
         }
 
         // copy the single moon beam's geometry into the other position arrays and update
         this.subjects.moonBeams.children.forEach((moonBeam) => {
           moonBeam.children.forEach((moonRing, moonRingIndex) => {
-            moonRing.geometry.attributes.position.array = this.subjects.moonBeams.children[0].children[
-              moonRingIndex
-            ].geometry.attributes.position.array;
+            moonRing.geometry.attributes.position.array =
+              this.subjects.moonBeams.children[0].children[
+                moonRingIndex
+              ].geometry.attributes.position.array;
             moonRing.geometry.setDrawRange(
               0,
               moonRing.geometry.attributes.position.count
@@ -656,12 +655,13 @@ export class Moonrise extends SceneManager {
           }
 
           const petalGroup = lily.getObjectByName("petalGroup");
-          petalGroup.children[0].children[0].material.color = lily.userData.petalColor
-            .clone()
-            .lerp(
-              new THREE.Color(0xffffff),
-              Math.max(0, (avgMelodyVolume / 105) * data.measure)
-            );
+          petalGroup.children[0].children[0].material.color =
+            lily.userData.petalColor
+              .clone()
+              .lerp(
+                new THREE.Color(0xffffff),
+                Math.max(0, (avgMelodyVolume / 105) * data.measure)
+              );
         });
 
         this.prevMelodyVolume = avgMelodyVolume;

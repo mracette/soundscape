@@ -15,9 +15,8 @@ import "../../styles/components/ToggleButtonPanel.scss";
 export const ToggleButtonPanel = (props) => {
   const { panelMuteButton } = React.useContext(ThemeContext);
 
-  const { dispatch, mute, backgroundMode } = React.useContext(
-    MusicPlayerContext
-  );
+  const { dispatch, mute, backgroundMode } =
+    React.useContext(MusicPlayerContext);
 
   const { groups } = React.useContext(SongContext);
 

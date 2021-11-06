@@ -28,9 +28,8 @@ import "../styles/components/MusicPlayer.scss";
 
 export const MusicPlayer = () => {
   const { flags } = React.useContext(TestingContext);
-  const { id, bpm, ambientTrack, ambientTrackQuantize } = React.useContext(
-    SongContext
-  );
+  const { id, bpm, ambientTrack, ambientTrackQuantize } =
+    React.useContext(SongContext);
   const { WAW, wawLoadStatus } = React.useContext(WebAudioContext);
 
   const backgroundModeEventRef = React.useRef(null);

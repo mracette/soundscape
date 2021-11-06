@@ -15,9 +15,8 @@ import { useOutsideClick } from "../../hooks/useOutsideClick";
 import "../../styles/components/MenuButtonChild.scss";
 
 export const MenuButtonChild = (props) => {
-  const { buttonColor, openButtonColor, contentPanelColor } = React.useContext(
-    ThemeContext
-  );
+  const { buttonColor, openButtonColor, contentPanelColor } =
+    React.useContext(ThemeContext);
 
   const [isOpen, setIsOpen] = React.useState(props.autoOpen);
 

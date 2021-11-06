@@ -31,9 +31,8 @@ export const CanvasViz = (props) => {
   const { spectrumFunction, canvasFade } = React.useContext(ThemeContext);
   const { id, groups, bpm } = React.useContext(SongContext);
   const { WAW } = React.useContext(WebAudioContext);
-  const { voices, analysers, dispatch, pauseVisuals } = React.useContext(
-    MusicPlayerContext
-  );
+  const { voices, analysers, dispatch, pauseVisuals } =
+    React.useContext(MusicPlayerContext);
   const { flags } = React.useContext(TestingContext);
 
   const canvasRef = React.useRef(null);
