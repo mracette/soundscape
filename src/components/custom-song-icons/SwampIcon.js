@@ -97,7 +97,7 @@ const animate = (context, cycle, coords) => {
 export const SwampIcon = (props) => {
   return (
     <CustomSongIcon
-      isNew={true}
+      isNew={false}
       dispatch={props.dispatch}
       name={props.name}
       id="custom-swamp-icon"
