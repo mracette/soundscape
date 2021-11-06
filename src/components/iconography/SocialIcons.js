@@ -25,12 +25,12 @@ export const SocialIcons = (props) => {
         name="icon-twitter"
         link="https://twitter.com/markracette"
       />
-      <Icon
+      {/* <Icon
         divClassList={"icon-row-child"}
         svgClassList={props.svgClassList || "icon-white"}
         name="icon-instagram"
         link="https://instagram.com/rgb.ig"
-      />
+      /> */}
       <Icon
         divClassList={"icon-row-child"}
         svgClassList={props.svgClassList || "icon-white"}
