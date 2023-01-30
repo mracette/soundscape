@@ -17,7 +17,7 @@
     "react-scripts": "^4.0.3",
     "sass": "^1.57.1",
     "stats.js": "^0.17.0",
-    "three": "^0.108.0"
+    "three": "^0.125.0"
   },
   "scripts": {
     "start": "react-scripts start",
