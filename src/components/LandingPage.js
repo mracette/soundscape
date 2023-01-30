@@ -237,6 +237,19 @@ export const LandingPage = (props) => {
           )}
         </div>
       </div>
+      <div className="announcement hot-green">
+        <span>
+          New! &nbsp;
+          <a
+            href="https://discord.gg/7u7e4ZbeQk"
+            target="_blank"
+            and
+            rel="noopener noreferrer"
+          >
+            Join the Soundscape Discord
+          </a>
+        </span>
+      </div>
     </>
   );
 };
