@@ -2,9 +2,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-// components
-import { SocialIcons } from "./iconography/SocialIcons";
-
 // styles
 import "../styles/components/LandingPage.scss";
 import "../styles/components/ComingSoon.scss";
@@ -17,12 +14,24 @@ export const Information = () => {
           <h1 id="landing-page-soundscape-title">Soundscape</h1>
         </div>
         <div id="coming-soon-panel" className="flex-col">
-          <div className="flex-row">
-            <span>Soundscape is constantly changing.</span>
+          <div className="flex-row row-margin-bottom">
+            <span>New content is coming to Soundscape in 2023.</span>
           </div>
-          <div className="flex-row">
+          <div className="flex-row row-margin-bottom">
+            <a
+              href="https://discord.gg/7u7e4ZbeQk"
+              target="_blank"
+              and
+              rel="noopener noreferrer"
+            >
+              <button className="info-page-button button-yellow">
+                Join the Discord to stay in the loop
+              </button>
+            </a>
+          </div>
+          <div className="flex-row row-margin">
             <span>
-              To stay in the loop, sign up for
+              Or sign up for
               <span className="hot-pink">&nbsp;email updates&nbsp;</span>below.
             </span>
           </div>
@@ -69,10 +78,17 @@ export const Information = () => {
               </div>
             </form>
           </div>
-          <SocialIcons
-            divClassList="coming-soon-icon-row"
-            svgClassList="icon icon-moon"
-          />
+          <div className="flex-row row-margin-bottom">
+            <span>You can find the source code for Soundscape on&nbsp;</span>
+            <a
+              href="https://github.com/mracette/soundscape"
+              target="_blank"
+              and
+              rel="noopener noreferrer"
+            >
+              Github
+            </a>
+          </div>
         </div>
         <div>
           <Link to="/">
