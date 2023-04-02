@@ -6,7 +6,7 @@ import { AppWrap } from "./AppWrap";
 import { WebGLUnavailable } from "./WebGLUnavailable";
 
 // other
-import { WEBGL } from "three/examples/jsm/WebGL";
+import { WEBGL } from "three108/examples/jsm/WebGL";
 
 // styles
 import "../styles/app.scss";

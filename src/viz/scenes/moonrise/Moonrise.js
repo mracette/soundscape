@@ -1,5 +1,5 @@
 // libs
-import * as THREE from "three";
+import * as THREE from "three108";
 import * as d3Chromatic from "d3-scale-chromatic";
 import { linToLog } from "../../../utils/mathUtils";
 import { regularPolygon } from "crco-utils";

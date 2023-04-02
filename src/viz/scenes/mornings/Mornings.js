@@ -1,5 +1,5 @@
 // libs
-import * as THREE from "three";
+import * as THREE from "three108";
 import { SceneManager } from "../../SceneManager";
 import FirstPersonControls from "../../controls/FirstPersonControls";
 import { lerp, normalize } from "crco-utils";

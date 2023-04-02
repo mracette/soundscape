@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three108";
 import { Stars } from "../../subjects/Stars";
 import { SceneManager } from "../../SceneManager";
 

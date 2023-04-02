@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three108";
 import chroma from "chroma-js";
 import { COLORS } from "./Swamp";
 

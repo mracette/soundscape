@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three108";
 
 /**
  * Creates a set of 'stars' using an efficient buffer geometry implementation.

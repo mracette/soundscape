@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three108";
 
 export class StarQuandrants {
   constructor(scene, levels, skyColor, params) {

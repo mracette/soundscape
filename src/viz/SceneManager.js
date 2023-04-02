@@ -1,6 +1,6 @@
-import * as THREE from "three";
+import * as THREE from "three108";
 import Stats from "stats.js";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three108/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
 
 export class SceneManager {

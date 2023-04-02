@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three108";
 import { boundedSin } from "crco-utils";
 
 const w = 64 + 1;
