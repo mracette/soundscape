@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { clamp } from "crco-utils";
+import { clamp } from "crco-utils-0.0.17";
 
 // components
 import { Canvas } from "./Canvas";

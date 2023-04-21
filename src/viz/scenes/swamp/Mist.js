@@ -1,7 +1,7 @@
 import * as THREE from "three108";
 import * as d3 from "d3-ease";
 import chroma from "chroma-js";
-import { lerp, gaussianRand, boundedSin } from "crco-utils";
+import { lerp, gaussianRand, boundedSin } from "crco-utils-0.0.17";
 import { rgbaVertexLarge, rgbaFragment } from "../../shaders/rgba";
 
 const COUNT = 250;

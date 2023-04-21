@@ -2,7 +2,7 @@
 import * as THREE from "three108";
 import * as d3Chromatic from "d3-scale-chromatic";
 import { linToLog } from "../../../utils/mathUtils";
-import { regularPolygon } from "crco-utils";
+import { regularPolygon } from "crco-utils-0.0.17";
 
 import { SceneManager } from "../../SceneManager";
 import { StarQuandrants } from "../../subjects/StarQuandrants";

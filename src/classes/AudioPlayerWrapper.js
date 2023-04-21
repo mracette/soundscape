@@ -1,4 +1,4 @@
-import { createAudioPlayer } from "crco-utils";
+import { createAudioPlayer } from "crco-utils-0.0.17";
 
 export class AudioPlayerWrapper {
   constructor(context, path, options) {

@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { CanvasCoordinates } from "crco-utils";
+import { CanvasCoordinates } from "crco-utils-0.0.17";
 
 // components
 import { Canvas } from "../canvas/Canvas";

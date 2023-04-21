@@ -1,5 +1,5 @@
 import chroma from "chroma-js";
-import { boundedSin, clamp } from "crco-utils";
+import { boundedSin, clamp } from "crco-utils-0.0.17";
 import { COLORS } from "./Swamp";
 
 const bSin = boundedSin(8, 0, 1);

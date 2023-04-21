@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { clamp, lerp } from "crco-utils";
+import { clamp, lerp } from "crco-utils-0.0.17";
 
 // context
 import { MusicPlayerContext } from "../contexts/contexts";

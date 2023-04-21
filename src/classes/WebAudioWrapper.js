@@ -6,7 +6,7 @@ import {
   getPathToAudio,
 } from "../utils/audioUtils";
 
-import { loadArrayBuffer } from "crco-utils";
+import { loadArrayBuffer } from "crco-utils-0.0.17";
 import { Analyser } from "./Analyser";
 import { Scheduler } from "./Scheduler";
 import { AudioPlayerWrapper } from "./AudioPlayerWrapper";

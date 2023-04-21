@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
 import { COLORS } from "./Swamp";
-import { boundedSin } from "crco-utils";
+import { boundedSin } from "crco-utils-0.0.17";
 import * as d3 from "d3-ease";
 
 const intense = 5;

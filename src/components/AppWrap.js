@@ -4,7 +4,7 @@ import * as d3Chromatic from "d3-scale-chromatic";
 import * as d3Color from "d3-color";
 import { ColorPalette } from "color-curves";
 import chroma from "chroma-js";
-import { clamp } from "crco-utils";
+import { clamp } from "crco-utils-0.0.17";
 
 // components
 import { AppRouter } from "./AppRouter";

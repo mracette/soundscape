@@ -1,5 +1,5 @@
 import chroma from "chroma-js";
-import { boundedSin } from "crco-utils";
+import { boundedSin } from "crco-utils-0.0.17";
 
 const cycle = 2;
 const bSin = boundedSin(cycle, 0, 1);

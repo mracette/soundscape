@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { TAU, rotatePoint } from "crco-utils";
+import { TAU, rotatePoint } from "crco-utils-0.0.17";
 
 // components
 import { CustomSongIcon } from "./CustomSongIcon";

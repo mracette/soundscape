@@ -2,7 +2,7 @@
 import * as THREE from "three108";
 import { SceneManager } from "../../SceneManager";
 import FirstPersonControls from "../../controls/FirstPersonControls";
-import { lerp, normalize } from "crco-utils";
+import { lerp, normalize } from "crco-utils-0.0.17";
 
 // rendering
 import { renderBass } from "./renderBass";
