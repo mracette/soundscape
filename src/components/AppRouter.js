@@ -15,7 +15,7 @@ import { InfoContext } from "../contexts/contexts";
 // components
 import { MusicPlayer } from "./MusicPlayer";
 import { Information } from "./Information";
-import { LandingPage } from "src/components/landing/LandingPage";
+import { LandingPage } from "./landing/LandingPage";
 
 export const AppRouter = (props) => {
   return (

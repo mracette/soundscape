@@ -5,6 +5,7 @@ import * as d3Color from "d3-color";
 import { ColorPalette } from "color-curves";
 import chroma from "chroma-js";
 import { clamp } from "crco-utils-0.0.17";
+import appConfig from "../app-config.json";
 
 // components
 import { AppRouter } from "./AppRouter";
@@ -65,7 +66,6 @@ const spectrumFunctions = {
   swamp: swampPalette,
 };
 
-const appConfig = require("../app-config.json");
 const webAudioWrapper = new WebAudioWrapper(appConfig);
 
 // global behavior flags for testing
