@@ -1,4 +1,3 @@
-// libs
 import React from "react";
 import * as d3Chromatic from "d3-scale-chromatic";
 import * as d3Color from "d3-color";
@@ -6,20 +5,17 @@ import { ColorPalette } from "color-curves";
 import chroma from "chroma-js";
 import { clamp } from "crco-utils-0.0.17";
 import appConfig from "../app-config.json";
-
-// components
 import { AppRouter } from "./AppRouter";
 
-// context
 import { LayoutContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 
-// classes
 import { WebAudioWrapper } from "../classes/WebAudioWrapper";
 
-// utils
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
+
+import { SoundscapeThemeProvider } from "src/theme/ThemeProvider"
 
 const starsPalette = new ColorPalette(
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.182,"y":-0.138},"scale":{"x":1,"y":1},"rotation":0,"angleStart":2.105,"angleEnd":6.283,"angleOffset":0,"radius":0.5}',
@@ -144,10 +140,12 @@ export const AppWrap = () => {
     <WebAudioContext.Provider value={{ WAW: webAudioWrapper, wawLoadStatus }}>
       <TestingContext.Provider value={{ flags }}>
         <LayoutContext.Provider value={{ vw, vh, isMobile }}>
+          <SoundscapeThemeProvider>
           <AppRouter
             appConfig={appConfig}
             spectrumFunctions={spectrumFunctions}
           />
+          </SoundscapeThemeProvider>
         </LayoutContext.Provider>
       </TestingContext.Provider>
     </WebAudioContext.Provider>

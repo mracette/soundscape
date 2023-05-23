@@ -8,6 +8,7 @@ import Fragment from "./materials/LandingPage.frag";
 import Vertex from "./materials/LandingPage.vert";
 import { scale } from "src/components/landing/gradient";
 import { isOrthographicCamera } from "src/utils/predicates";
+import particle from 'src/assets/particle1.png';
 
 const COUNT = 1000;
 const SPEED = 0.01;
@@ -32,7 +33,7 @@ const LandingPageSceneInner = memo(() => {
   const pointsRef = useRef<Points>(null);
 
   const { camera, size } = useThree();
-  const particleTexture = useTexture("/particle1.png");
+  const particleTexture = useTexture(particle);
 
   if (!isOrthographicCamera(camera)) {
     throw new Error("Expected OrthographicCamera");
@@ -50,7 +51,7 @@ const LandingPageSceneInner = memo(() => {
       map: { value: particleTexture },
       diffuse: { value: new Color(0x00ff00).toArray() },
     };
-  }, [particleTexture]);
+  }, []);
 
   useLayoutEffect(() => {
     uniforms.size.value = size.height / 75;
@@ -110,6 +111,7 @@ const LandingPageSceneInner = memo(() => {
 
 export const LandingPageScene = memo(() => {
   const theme = useTheme();
+  console.log(theme.mixins);
   return (
     <Canvas orthographic style={{ ...theme.mixins.fillAbsolute, zIndex: -1 }}>
       <LandingPageSceneInner />

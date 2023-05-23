@@ -17,6 +17,7 @@ const rootStyles: SxProps<Theme> = {
   "&:hover": {
     backgroundColor: "rgba(255,255,255,0.02)",
     backdropFilter: "blur(3px)",
+    WebkitBackdropFilter: "blur(3px)",
   },
   borderRadius: "50%",
 };

@@ -199,8 +199,8 @@ export class SceneManager {
   loadModel(options = {}) {
     const { name } = options;
     const format =
-      process.env[`REACT_APP_MODEL_FORMAT_${this.songId.toUpperCase()}`] ||
-      process.env.REACT_APP_MODEL_FORMAT;
+      process.env[`VITE_MODEL_FORMAT_${this.songId.toUpperCase()}`] ||
+      import.meta.env.VITE_MODEL_FORMAT;
 
     let ext;
 
@@ -213,10 +213,10 @@ export class SceneManager {
     return new Promise((resolve, reject) => {
       let url;
 
-      if (process.env.REACT_APP_ASSET_LOCATION === "local") {
-        url = `${process.env.PUBLIC_URL}/models/${this.songId}/${name}${ext}`;
-      } else if (process.env.REACT_APP_ASSET_LOCATION === "cloudfront") {
-        url = `${process.env.REACT_APP_ASSET_DOMAIN}/app/models/${this.songId}/${format}/${name}${ext}`;
+      if (import.meta.env.VITE_ASSET_LOCATION === "local") {
+        url = `${import.meta.env.PUBLIC_URL}/models/${this.songId}/${name}${ext}`;
+      } else if (import.meta.env.VITE_ASSET_LOCATION === "cloudfront") {
+        url = `${import.meta.env.VITE_ASSET_DOMAIN}/app/models/${this.songId}/${format}/${name}${ext}`;
       }
 
       this.helpers.gltfLoader.load(

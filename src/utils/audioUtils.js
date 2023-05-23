@@ -3,12 +3,12 @@ import { solveExpEquation } from "./mathUtils";
 export const getPathToAudio = (id, name, format, debug = false) => {
   const ext = format === "wav" ? "wav" : "mp3";
 
-  if (process.env.REACT_APP_ASSET_LOCATION === "local") {
-    const path = `${process.env.PUBLIC_URL}/audio/${format}/${id}/${name}.${ext}`;
+  if (import.meta.env.VITE_ASSET_LOCATION === "local") {
+    const path = `${import.meta.env.PUBLIC_URL}/audio/${format}/${id}/${name}.${ext}`;
     debug && console.log(path);
     return path;
-  } else if (process.env.REACT_APP_ASSET_LOCATION === "cloudfront") {
-    const path = `${process.env.REACT_APP_ASSET_DOMAIN}/app/audio/${format}/${id}/${name}.${ext}`;
+  } else if (import.meta.env.VITE_ASSET_LOCATION === "cloudfront") {
+    const path = `${import.meta.env.VITE_ASSET_DOMAIN}/app/audio/${format}/${id}/${name}.${ext}`;
     debug && console.log(path);
     return path;
   }

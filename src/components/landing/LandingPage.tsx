@@ -10,15 +10,16 @@ export const LandingPage = () => {
   const selectedSong = useLandingPageStore(({ selectedSong }) => selectedSong);
 
   return (
-    <Container
-      sx={{
-        height: "100%",
-        display: "inline-block",
-      }}
-    >
+    // <Container
+    //   sx={{
+    //     height: "100%",
+    //     display: "inline-block",
+    //   }}
+    // >
       <Grid
         container
         sx={{
+          width: "100%",
           height: "100%",
           alignItems: "center",
           flexDirection: "column",
@@ -73,6 +74,6 @@ export const LandingPage = () => {
           <MoonriseIcon />
         </Grid>
       </Grid>
-    </Container>
+    // </Container>
   );
 };

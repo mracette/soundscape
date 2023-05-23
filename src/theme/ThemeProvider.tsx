@@ -15,10 +15,6 @@ export const SoundscapeThemeProvider = ({ children }: Props) => {
           "body, html": {
             ...theme.mixins.fillAbsolute,
           },
-          // TODO: Remove following https://github.com/vercel/next.js/issues/42345
-          "[data-nextjs-scroll-focus-boundary]": {
-            display: "contents",
-          },
         })}
       />
       {children}
