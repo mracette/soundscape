@@ -1,5 +1,5 @@
 // libs
-import React from "react";
+import React, { useContext } from "react";
 import { CanvasCoordinates } from "crco-utils";
 
 // components
@@ -7,6 +7,8 @@ import { Canvas } from "../canvas/Canvas";
 
 // styles
 import "../../styles/components/LandingPage.scss";
+
+import { LayoutContext } from "../../contexts/contexts";
 
 const speed = 0.001;
 
@@ -19,6 +21,8 @@ export function CustomSongIcon(props) {
   const coordsRef = React.useRef();
 
   const { animate, id, listen, setCustomStyles, dispatch, isNew } = props;
+
+  const { isMobile } = useContext(LayoutContext);
 
   React.useEffect(() => {
     const updateCanvas = (time, loop, reset) => {
@@ -47,8 +51,8 @@ export function CustomSongIcon(props) {
 
     const setStyles = () => {
       contextRef.current.lineWidth = coordsRef.current.getWidth() / 128;
-      contextRef.current.strokeStyle = "#f6f2d5";
-      contextRef.current.fillStyle = "#f6f2d5";
+      contextRef.current.strokeStyle = "#ffffff";
+      contextRef.current.fillStyle = "#ffffff";
       setCustomStyles && setCustomStyles(contextRef.current);
     };
 
@@ -120,11 +124,11 @@ export function CustomSongIcon(props) {
         {isNew && <span className="new-label">New!</span>}
         <Canvas
           id={id}
-          className="custom-song-icon"
+          className={isMobile ? "custom-song-icon-mobile" : "custom-song-icon"}
           onLoad={(canvas) => (canvasRef.current = canvas)}
           resize={false}
         />
       </div>
     );
-  }, [id, isNew]);
+  }, [id, isNew, isMobile]);
 }
