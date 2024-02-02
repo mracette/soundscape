@@ -97,7 +97,7 @@ export const AppWrap = () => {
   const [vh, setvh] = React.useState(viewportHeight / 100);
 
   // check for mobile
-  const [isMobile, setIsMobile] = React.useState(viewportWidth <= 760);
+  const [isMobile, setIsMobile] = React.useState(viewportWidth <= 670);
 
   React.useEffect(() => {
     const resumeAudio = () => {

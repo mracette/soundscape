@@ -19,6 +19,7 @@ import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 
 // other
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
+import { LandingPageMobile } from "./LandingPageMobile";
 
 export const landingPageReducer = (state, action) => {
   switch (action.type) {
@@ -84,8 +85,12 @@ export const LandingPage = (props) => {
 
   return (
     <>
-      <canvas id="star-canvas" className="fullscreen" ref={canvasRef} />
-      <div id="landing-page" className="fullscreen transparent">
+      <canvas id="landing-page-canvas" className="fullscreen" ref={canvasRef} />
+      <div
+        id="landing-page"
+        className="fullscreen transparent"
+        style={{ paddingTop: "10rem" }}
+      >
         <div className="landing-page-header">
           <div className="flex-row">
             <h1 id="landing-page-soundscape-title">Soundscape</h1>
@@ -94,162 +99,64 @@ export const LandingPage = (props) => {
             <span>This application uses audio.</span>
           </div>
           <div className="flex-row">
-            <span>Use speakers or headphones for the best experience.</span>
+            {isMobile ? (
+              <span id="choose-a-song">Choose a song to begin.</span>
+            ) : (
+              <>
+                <span
+                  id={
+                    selected.name ? "landing-page-song-title" : "choose-a-song"
+                  }
+                >
+                  {selected.name || "Choose a song to begin."}
+                </span>
+                {selected.bpm && (
+                  <>
+                    <span>&nbsp;|&nbsp;</span>{" "}
+                    <span id="landing-page-bpm">{` ${selected.bpm} bpm`}</span>
+                  </>
+                )}
+                {selected.key && (
+                  <>
+                    <span>&nbsp;|&nbsp;</span>{" "}
+                    <span id="landing-page-key">{selected.key}</span>
+                  </>
+                )}
+              </>
+            )}
           </div>
-          <div className="flex-row">
-            <p>
-              {isMobile ? (
-                <span id="choose-a-song">Choose a song to begin.</span>
-              ) : (
-                <>
-                  <span
-                    id={
-                      selected.name
-                        ? "landing-page-song-title"
-                        : "choose-a-song"
-                    }
-                  >
-                    {selected.name || "Choose a song to begin."}
-                  </span>
-                  {selected.bpm && (
-                    <>
-                      <span>&nbsp;|&nbsp;</span>{" "}
-                      <span id="landing-page-bpm">{` ${selected.bpm} bpm`}</span>
-                    </>
-                  )}
-                  {selected.key && (
-                    <>
-                      <span>&nbsp;|&nbsp;</span>{" "}
-                      <span id="landing-page-key">{selected.key}</span>
-                    </>
-                  )}
-                </>
-              )}
-            </p>
-          </div>
-        </div>
-        <div id="song-selection-panel">
-          <Link className="song-link" id="song-link-swamp" to="/play/swamp">
-            {!isMobile && <SwampIcon name="swamp" dispatch={dispatch} />}
-            {isMobile && (
-              <div style={{ position: "block" }}>
-                <div
-                  className="mobile-song-icon-wrapper"
-                  style={{ position: "relative" }}
-                >
-                  <SwampIcon name="swamp" dispatch={dispatch} />
-                  <div
-                    style={{ position: "absolute", bottom: "15px" }}
-                    className="landing-page-header"
-                  >
-                    <div className="flex-row">
-                      <span id="landing-page-song-title">Swamp</span>
-                      &nbsp;|&nbsp;
-                      <span id="landing-page-bpm">75 bpm</span>&nbsp;|&nbsp;
-                      <span id="landing-page-key">Eb Minor</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Link>
-          <Link
-            className="song-link"
-            id="song-link-mornings"
-            to="/play/mornings"
-          >
-            {!isMobile && <MorningsIcon name="mornings" dispatch={dispatch} />}
-            {isMobile && (
-              <div style={{ position: "block" }}>
-                <div
-                  className="mobile-song-icon-wrapper"
-                  style={{ position: "relative" }}
-                >
-                  <MorningsIcon name="mornings" dispatch={dispatch} />
-                  <div
-                    className="landing-page-header"
-                    style={{ position: "absolute", bottom: "15px" }}
-                  >
-                    <div className="flex-row">
-                      <span id="landing-page-song-title">Mornings</span>
-                      &nbsp;|&nbsp;
-                      <span id="landing-page-bpm">92 bpm</span>&nbsp;|&nbsp;
-                      <span id="landing-page-key">Eb Major</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Link>
-          <Link
-            className="song-link"
-            id="song-link-moonrise"
-            to="/play/moonrise"
-          >
-            {!isMobile && <MoonriseIcon name="moonrise" dispatch={dispatch} />}
-            {isMobile && (
-              <div style={{ position: "block" }}>
-                <div
-                  className="mobile-song-icon-wrapper"
-                  style={{ position: "relative" }}
-                >
-                  <MoonriseIcon name="moonrise" dispatch={dispatch} />
-                  <div
-                    className="landing-page-header"
-                    style={{ position: "absolute", bottom: "15px" }}
-                  >
-                    <div className="flex-row">
-                      <span id="landing-page-song-title">Moonrise</span>
-                      &nbsp;|&nbsp;
-                      <span id="landing-page-bpm">120 bpm</span>&nbsp;|&nbsp;
-                      <span id="landing-page-key">G Minor</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Link>
-          <Link className="song-link" id="song-link-coming-soon" to="/info">
-            {!isMobile && (
-              <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
-            )}
-            {isMobile && (
-              <div style={{ position: "block" }}>
-                <div
-                  className="mobile-song-icon-wrapper"
-                  style={{ position: "relative", borderBottomWidth: "1px" }}
-                >
-                  <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
-                  <div
-                    className="landing-page-header"
-                    style={{ position: "absolute", bottom: "15px" }}
-                  >
-                    <div className="flex-row">
-                      <span>{"Information & Updates"}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Link>
-          {isMobile && (
-            <div id="filler" style={{ width: "100vw", height: "50vh" }}></div>
+          {isMobile ? (
+            <LandingPageMobile dispatch={dispatch} />
+          ) : (
+            <div id="song-selection-panel">
+              <Link className="song-link" to="/play/swamp">
+                <SwampIcon name="swamp" dispatch={dispatch} />
+              </Link>
+              <Link className="song-link" to="/play/mornings">
+                <MorningsIcon name="mornings" dispatch={dispatch} />
+              </Link>
+              <Link className="song-link" to="/play/moonrise">
+                <MoonriseIcon name="moonrise" dispatch={dispatch} />
+              </Link>
+              <Link className="song-link" to="/info">
+                <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
+              </Link>
+            </div>
           )}
         </div>
       </div>
-      <div className="announcement hot-green">
+      {/* <div className="announcement hot-green">
         <span>
           New! &nbsp;
           <a
             href="https://discord.gg/7u7e4ZbeQk"
             target="_blank"
-            and
             rel="noopener noreferrer"
           >
             Join the Soundscape Discord
           </a>
         </span>
-      </div>
+      </div> */}
     </>
   );
 };

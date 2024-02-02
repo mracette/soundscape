@@ -15,8 +15,14 @@
     height: 25rem;
 }
 
+.custom-song-icon-mobile {
+    display: block;
+    margin: 0;
+    width: 15rem;
+    height: 15rem;
+}
+
 #loading-button-wrapper {
-    // display: inline-block;
     width: 25rem;
     height: 25rem;
 }
@@ -31,7 +37,7 @@
     vertical-align: middle;
     border: none;
     border-radius: 50%;
-    background-color: rgba(0,0,0,0);
+    background-color: rgba(255, 0, 0, 0);
 }
 
 #loading-button * {
