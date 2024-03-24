@@ -17,7 +17,6 @@ export const COLOR_SCALE = chroma
   .mode("lrgb");
 
 export const COLOR_SCALE_STEPS = COLOR_SCALE.colors(10, "hex");
-console.log(COLOR_SCALE_STEPS.join(", "));
 
 const COUNT = 3000;
 const SPEED = 0.01;
@@ -80,10 +79,11 @@ export class LandingPageParticles {
     this.loadTexture()
       .then((texture) => {
         const material = new ShaderMaterial({
+          depthTest: false,
           transparent: true,
           uniforms: {
             uMap: { value: texture },
-            uSize: { value: viewport.w / 75 }, // Add resize handlers to update this
+            uSize: { value: 10 * this.renderer.getPixelRatio() },
           },
           defines: {
             USE_COLOR: "",
@@ -124,11 +124,9 @@ export class LandingPageParticles {
           }
           `,
         });
-        console.log(this);
         this.object = new Points(geometry, material);
         this.object.scale.copy(planeDimensions);
         this.object.position.copy(planeDimensions.clone().multiplyScalar(-0.5));
-        console.log(this.object);
         this.scene.add(this.object);
       })
       .catch(console.error);
@@ -156,7 +154,7 @@ export class LandingPageParticles {
         (texture) => resolve(texture),
         undefined,
         (error) => reject(error)
-      ); // TODO: Add texture to public folder
+      );
     });
   };
 }
