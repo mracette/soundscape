@@ -1,11 +1,6 @@
 // libs
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 // context
 import { ThemeContext } from "../contexts/contexts";
@@ -15,20 +10,11 @@ import { InfoContext } from "../contexts/contexts";
 // components
 import { MusicPlayer } from "./MusicPlayer";
 import { LandingPage } from "./LandingPage";
-import { Information } from "./Information";
 
 export const AppRouter = (props) => {
   return (
     <Router>
       <Switch>
-        <Route
-          exact
-          path="/"
-          render={() => (
-            <LandingPage spectrumFunction={props.spectrumFunctions.stars} />
-          )}
-        />
-        <Route exact path="/info" component={Information} />
         <Route
           exact
           path={"/play/:songId"}
@@ -70,7 +56,12 @@ export const AppRouter = (props) => {
             );
           }}
         />
-        <Redirect to="/" />
+        <Route
+          path="/"
+          render={() => (
+            <LandingPage spectrumFunction={props.spectrumFunctions.stars} />
+          )}
+        />
       </Switch>
     </Router>
   );

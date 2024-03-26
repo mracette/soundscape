@@ -21,6 +21,8 @@ import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
 import { LandingPageMobile } from "./LandingPageMobile";
 
+import { Route, Switch, Redirect } from "react-router-dom";
+
 export const landingPageReducer = (state, action) => {
   switch (action.type) {
     case "moonrise":
@@ -58,15 +60,8 @@ export const landingPageReducer = (state, action) => {
 
 export const LandingPage = (props) => {
   const { spectrumFunction } = props;
-  const [selected, dispatch] = React.useReducer(landingPageReducer, {
-    name: null,
-    bpm: null,
-    key: null,
-  });
 
   const canvasRef = React.useRef(null);
-
-  const { isMobile } = React.useContext(LayoutContext);
 
   React.useEffect(() => {
     let scene;
@@ -95,68 +90,122 @@ export const LandingPage = (props) => {
           <div className="flex-row">
             <h1 id="landing-page-soundscape-title">Soundscape</h1>
           </div>
-          <div className="flex-row">
-            <span>This application uses audio.</span>
-          </div>
-          <div className="flex-row">
-            {isMobile ? (
-              <span id="choose-a-song">Choose a song to begin.</span>
-            ) : (
-              <>
-                <span
-                  id={
-                    selected.name ? "landing-page-song-title" : "choose-a-song"
-                  }
-                >
-                  {selected.name || "Choose a song to begin."}
-                </span>
-                {selected.bpm && (
-                  <>
-                    <span>&nbsp;|&nbsp;</span>{" "}
-                    <span id="landing-page-bpm">{` ${selected.bpm} bpm`}</span>
-                  </>
-                )}
-                {selected.key && (
-                  <>
-                    <span>&nbsp;|&nbsp;</span>{" "}
-                    <span id="landing-page-key">{selected.key}</span>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-          {isMobile ? (
-            <LandingPageMobile dispatch={dispatch} />
-          ) : (
-            <div id="song-selection-panel">
-              <Link className="song-link" to="/play/swamp">
-                <SwampIcon name="swamp" dispatch={dispatch} />
-              </Link>
-              <Link className="song-link" to="/play/mornings">
-                <MorningsIcon name="mornings" dispatch={dispatch} />
-              </Link>
-              <Link className="song-link" to="/play/moonrise">
-                <MoonriseIcon name="moonrise" dispatch={dispatch} />
-              </Link>
-              <Link className="song-link" to="/info">
-                <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
-              </Link>
-            </div>
-          )}
+          <Switch>
+            <Route exact path="/">
+              <LandingPageInner />
+            </Route>
+            <Route exact path="/info">
+              <InfoPageInner />
+            </Route>
+            <Redirect to="/" />
+          </Switch>
         </div>
       </div>
-      {/* <div className="announcement hot-green">
-        <span>
-          New! &nbsp;
-          <a
-            href="https://discord.gg/7u7e4ZbeQk"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Join the Soundscape Discord
-          </a>
-        </span>
-      </div> */}
     </>
   );
 };
+
+function InfoPageInner() {
+  return (
+    <div className="flex-col" style={{ alignItems: "center" }}>
+      <h3 className="info-subheader">
+        The immersive music visualizer that lets you build your own beats
+      </h3>
+      <div className="info-row">
+        <p>Join Discord to hear about new content</p>
+        <a
+          href="https://discord.gg/7u7e4ZbeQk"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <button role="link" className="info-page-button button-white">
+            Join the Discord
+          </button>
+        </a>
+      </div>
+      <div className="info-row">
+        <p>You can find the source code for Soundscape on Github</p>
+        <a
+          href="https://github.com/mracette/soundscape"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <button role="link" className="info-page-button button-white">
+            View the source
+          </button>
+        </a>
+      </div>
+      <div className="info-row">
+        <p>For questions or comments, send an email</p>
+        <a
+          href="mailto:markracette+soundscape@gmail.com"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <button role="link" className="info-page-button button-white">
+            Send an email
+          </button>
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function LandingPageInner() {
+  const { isMobile } = React.useContext(LayoutContext);
+  const [selected, dispatch] = React.useReducer(landingPageReducer, {
+    name: null,
+    bpm: null,
+    key: null,
+  });
+  return (
+    <>
+      <div className="flex-row">
+        <span>This application uses audio.</span>
+      </div>
+      <div className="flex-row">
+        {isMobile ? (
+          <span id="choose-a-song">Choose a song to begin.</span>
+        ) : (
+          <>
+            <span
+              id={selected.name ? "landing-page-song-title" : "choose-a-song"}
+            >
+              {selected.name || "Choose a song to begin."}
+            </span>
+            {selected.bpm && (
+              <>
+                <span>&nbsp;|&nbsp;</span>{" "}
+                <span id="landing-page-bpm">{` ${selected.bpm} bpm`}</span>
+              </>
+            )}
+            {selected.key && (
+              <>
+                <span>&nbsp;|&nbsp;</span>{" "}
+                <span id="landing-page-key">{selected.key}</span>
+              </>
+            )}
+          </>
+        )}
+      </div>
+      {isMobile ? (
+        <LandingPageMobile dispatch={dispatch} />
+      ) : (
+        <div id="song-selection-panel">
+          <Link className="song-link" to="/play/swamp">
+            <SwampIcon name="swamp" dispatch={dispatch} />
+          </Link>
+          <Link className="song-link" to="/play/mornings">
+            <MorningsIcon name="mornings" dispatch={dispatch} />
+          </Link>
+          <Link className="song-link" to="/play/moonrise">
+            <MoonriseIcon name="moonrise" dispatch={dispatch} />
+          </Link>
+          <Link className="song-link" to="/info">
+            <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
+          </Link>
+        </div>
+      )}
+    </>
+  );
+}
