@@ -14,7 +14,11 @@ export const LoadingScreen = () => {
   const { isLoading } = React.useContext(MusicPlayerContext);
 
   return (
-    <div id="loading-screen" className="front-most off-black fullscreen">
+    <div
+      id="loading-screen"
+      className="front-most off-black fullscreen"
+      style={{ paddingTop: "10rem" }}
+    >
       <div className="landing-page-header">
         <div className="flex-row">
           <h1 id="landing-page-soundscape-title">Soundscape</h1>
