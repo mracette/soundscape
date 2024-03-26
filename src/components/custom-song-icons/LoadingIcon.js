@@ -39,7 +39,7 @@ const animateLoading = (context, cycle, coords) => {
 
   context.globalCompositeOperation = "destination-atop";
   context.beginPath();
-  context.fillStyle = "#1f262f";
+  context.fillStyle = "#141b24";
   context.arc(coords.nx(0), coords.ny(0), coords.getHeight() / 2.5, 0, TAU);
   context.fill();
 
@@ -48,7 +48,7 @@ const animateLoading = (context, cycle, coords) => {
 };
 
 const animateReady = (context, cycle, coords) => {
-  context.fillStyle = "#1f262f";
+  context.fillStyle = "#141b24";
   context.globalCompositeOperation = "source-over";
   context.beginPath();
   context.arc(coords.nx(0), coords.ny(0), coords.getHeight() / 2.5, 0, TAU);
