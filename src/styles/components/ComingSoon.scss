@@ -19,6 +19,12 @@
 
 .info-page-button {
   font-size: $m-size;
+  border-radius: 4px;
+}
+
+.info-page-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transition-duration: 250ms;
 }
 
 #mc_embed_signup {
