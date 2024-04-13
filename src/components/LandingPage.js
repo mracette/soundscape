@@ -81,13 +81,9 @@ export const LandingPage = (props) => {
   return (
     <>
       <canvas id="landing-page-canvas" className="fullscreen" ref={canvasRef} />
-      <div
-        id="landing-page"
-        className="fullscreen transparent"
-        style={{ paddingTop: "10rem" }}
-      >
+      <div id="landing-page" className="fullscreen transparent">
         <div className="landing-page-header">
-          <div className="flex-row">
+          <div className="flex-row" style={{ paddingTop: "10rem" }}>
             <h1 id="landing-page-soundscape-title">Soundscape</h1>
           </div>
           <Switch>
@@ -112,7 +108,7 @@ function InfoPageInner() {
         The immersive music visualizer that lets you build your own beats
       </h3>
       <div className="info-row">
-        <p>Join Discord to hear about new content</p>
+        <p>Join Discord for updates on new content</p>
         <a
           href="https://discord.gg/7u7e4ZbeQk"
           target="_blank"
@@ -124,7 +120,7 @@ function InfoPageInner() {
         </a>
       </div>
       <div className="info-row">
-        <p>You can find the source code for Soundscape on Github</p>
+        <p>View the source code for Soundscape on Github</p>
         <a
           href="https://github.com/mracette/soundscape"
           target="_blank"
@@ -136,7 +132,7 @@ function InfoPageInner() {
         </a>
       </div>
       <div className="info-row">
-        <p>For questions or comments, send an email</p>
+        <p>Questions or comments? Send an email</p>
         <a
           href="mailto:markracette+soundscape@gmail.com"
           target="_blank"
@@ -206,6 +202,25 @@ function LandingPageInner() {
           </Link>
         </div>
       )}
+      <div
+        className="flex-row"
+        style={{
+          marginTop: "auto",
+          marginBottom: "2rem",
+        }}
+      >
+        <span>Join the</span>
+        &nbsp;
+        <span>
+          <a
+            href="https://discord.gg/7u7e4ZbeQk"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Soundscape Discord
+          </a>
+        </span>
+      </div>
     </>
   );
 }

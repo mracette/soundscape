@@ -58,7 +58,7 @@ const animateReady = (context, cycle, coords) => {
 
 export function LoadingIcon(props) {
   return (
-    <div id="loading-button-wrapper">
+    <div>
       {!props.isLoading && (
         <button
           id="loading-button"

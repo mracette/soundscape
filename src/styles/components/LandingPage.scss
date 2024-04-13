@@ -42,6 +42,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    height: 100%;
     justify-content: flex-start;
     align-items: center;
     gap: 0.5rem;
@@ -82,7 +83,6 @@
 
 #song-selection-panel {
     width: vw(75);
-    margin: auto;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -125,12 +125,27 @@
     align-items: center;
 }
 
+.info-row>p {
+    text-align: center;
+}
+
 .info-subheader {
     margin-bottom: 4rem;
-    text-transform: "none";
-    max-width: "375px";
-    text-wrap: "wrap";
-    text-align: "center";
+    text-transform: none;
+    max-width: 375px;
+    text-wrap: wrap;
+    text-align: center;
+}
+
+.info-page-button {
+    font-size: $m-size;
+    border-radius: 4px;
+    width: 140px;
+  }
+  
+.info-page-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transition-duration: 250ms;
 }
 
 span,p {
