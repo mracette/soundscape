@@ -15,6 +15,16 @@
     z-index: -1;
 }
 
+#landing-page-soundscape-title-wrapper {
+    padding-top: 10rem;
+}
+
+@media screen and (max-width: 670px) {
+    #landing-page-soundscape-title-wrapper {
+        padding-top: 3rem;
+    } 
+}
+
 #landing-page-soundscape-title {
     font-family: 'Satisfy';
     font-size: $xxl-size;
@@ -32,8 +42,7 @@
 @media screen and (max-width: 670px) {
     #landing-page-soundscape-title {
         font-size: 7.5rem;
-    }
-    
+    } 
 }
 
 .landing-page-header {
@@ -130,6 +139,7 @@
 }
 
 .info-subheader {
+    font-size: 3rem;
     margin-bottom: 4rem;
     text-transform: none;
     max-width: 375px;

@@ -83,7 +83,7 @@ export const LandingPage = (props) => {
       <canvas id="landing-page-canvas" className="fullscreen" ref={canvasRef} />
       <div id="landing-page" className="fullscreen transparent">
         <div className="landing-page-header">
-          <div className="flex-row" style={{ paddingTop: "10rem" }}>
+          <div className="flex-row" id="landing-page-soundscape-title-wrapper">
             <h1 id="landing-page-soundscape-title">Soundscape</h1>
           </div>
           <Switch>
@@ -108,7 +108,7 @@ function InfoPageInner() {
         The immersive music visualizer that lets you build your own beats
       </h3>
       <div className="info-row">
-        <p>Join Discord for updates on new content</p>
+        <p>Join the Discord for updates on new content</p>
         <a
           href="https://discord.gg/7u7e4ZbeQk"
           target="_blank"
@@ -120,7 +120,7 @@ function InfoPageInner() {
         </a>
       </div>
       <div className="info-row">
-        <p>View the source code for Soundscape on Github</p>
+        <p>View the source code for Soundscape</p>
         <a
           href="https://github.com/mracette/soundscape"
           target="_blank"
@@ -132,7 +132,7 @@ function InfoPageInner() {
         </a>
       </div>
       <div className="info-row">
-        <p>Questions or comments? Send an email</p>
+        <p>Questions or comments?</p>
         <a
           href="mailto:markracette+soundscape@gmail.com"
           target="_blank"
@@ -157,17 +157,17 @@ function LandingPageInner() {
   return (
     <>
       <div className="flex-row">
-        <span>This application uses audio.</span>
+        <span>This application uses audio</span>
       </div>
       <div className="flex-row">
         {isMobile ? (
-          <span id="choose-a-song">Choose a song to begin.</span>
+          <span id="choose-a-song">Choose a song to begin</span>
         ) : (
           <>
             <span
               id={selected.name ? "landing-page-song-title" : "choose-a-song"}
             >
-              {selected.name || "Choose a song to begin."}
+              {selected.name || "Choose a song to begin"}
             </span>
             {selected.bpm && (
               <>
@@ -202,25 +202,27 @@ function LandingPageInner() {
           </Link>
         </div>
       )}
-      <div
-        className="flex-row"
-        style={{
-          marginTop: "auto",
-          marginBottom: "2rem",
-        }}
-      >
-        <span>Join the</span>
-        &nbsp;
-        <span>
-          <a
-            href="https://discord.gg/7u7e4ZbeQk"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Soundscape Discord
-          </a>
-        </span>
-      </div>
+      {!isMobile && (
+        <div
+          className="flex-row"
+          style={{
+            marginTop: "auto",
+            marginBottom: "2rem",
+          }}
+        >
+          <span>Join the</span>
+          &nbsp;
+          <span>
+            <a
+              href="https://discord.gg/7u7e4ZbeQk"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Soundscape Discord
+            </a>
+          </span>
+        </div>
+      )}
     </>
   );
 }
