@@ -29,13 +29,13 @@
   }
 
 html {
-    font-size: 62.5%;
+    font-size: 52.5%;
 }
 
 body {
     font-family: 'Lato', Helvetica, sans-serif;
     font-weight: normal;
-    background-color: $off-black;
+    background-color: $off-black-2;
 }
 
 canvas {
@@ -89,7 +89,7 @@ button:focus {
 }
 
 .off-black {
-    background-color: $off-black;
+    background-color: $off-black-2;
 }
 
 .front-most {
@@ -109,7 +109,7 @@ button:focus {
 }
 
 .announcement {
-    background-color: $off-black;
+    background-color: $off-black-2;
     font-size: $m-size;
     display: flex;
     justify-content: center;
