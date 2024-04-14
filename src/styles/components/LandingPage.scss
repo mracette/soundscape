@@ -1,7 +1,7 @@
 @import '../settings.scss';
 
 .announcement {
-    background-color: $off-black;
+    background-color: $off-black-2;
     font-size: $m-size;
     display: flex;
     justify-content: center;
@@ -11,24 +11,50 @@
     width: 100%;
 }
 
-#star-canvas {
+#landing-page-canvas {
     z-index: -1;
+}
+
+#landing-page-soundscape-title-wrapper {
+    padding-top: 10rem;
+}
+
+@media screen and (max-width: 670px) {
+    #landing-page-soundscape-title-wrapper {
+        padding-top: 3rem;
+    } 
 }
 
 #landing-page-soundscape-title {
     font-family: 'Satisfy';
     font-size: $xxl-size;
-    margin: 2.5rem;
+    font-weight: 400;
+    margin: 0;
+    padding: 2rem;
+    color: $font-color; // Fallback for non-webkit - test this
+    // `background` must come before `background-clip` in this stylesheet
+    background: linear-gradient(30deg, #feac5e, #f3a280, #e7979b, #db8cb2, #ce80c7, #be8ad4, #aaa6dc, #94bfe4, #7ad4eb, #59e8f2);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+@media screen and (max-width: 670px) {
+    #landing-page-soundscape-title {
+        font-size: 7.5rem;
+    } 
 }
 
 .landing-page-header {
     font-size: $m-size;
-    color: $moon-yellow;
+    color: $font-color;
     display: flex;
     flex-direction: column;
     width: 100%;
+    height: 100%;
     justify-content: flex-start;
     align-items: center;
+    gap: 0.5rem;
 }
 
 .landing-page-header .flex-row {
@@ -66,7 +92,6 @@
 
 #song-selection-panel {
     width: vw(75);
-    margin: auto;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -75,6 +100,64 @@
     align-content: flex-start;
 }
 
+.song-link {
+    border-radius: 50%;
+}
+
 .song-link:hover {
-    background-color: rgba(255,255,255,.2);
+    background-color: rgba(255,255,255,.05);
+    backdrop-filter: blur(3px);
+}
+
+.song-link-mobile {
+    text-decoration: none;
+    max-width: 320px;
+    display: block;
+    border-radius: 1rem;
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.song-link-mobile>div {
+    flex-basis: 50%;
+}
+
+.song-link-mobile:hover {
+    background-color: rgba(255,255,255,.05);
+    backdrop-filter: blur(3px);
+}
+
+.info-row {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.info-row>p {
+    text-align: center;
+}
+
+.info-subheader {
+    font-size: 3rem;
+    margin-bottom: 4rem;
+    text-transform: none;
+    max-width: 375px;
+    text-wrap: wrap;
+    text-align: center;
+}
+
+.info-page-button {
+    font-size: $m-size;
+    border-radius: 4px;
+    width: 140px;
+  }
+  
+.info-page-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transition-duration: 250ms;
+}
+
+span,p {
+    font-size: 1.75rem;
 }
