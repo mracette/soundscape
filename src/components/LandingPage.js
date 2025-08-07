@@ -202,27 +202,6 @@ function LandingPageInner() {
           </Link>
         </div>
       )}
-      {!isMobile && (
-        <div
-          className="flex-row"
-          style={{
-            marginTop: "auto",
-            marginBottom: "2rem",
-          }}
-        >
-          <span>Join the</span>
-          &nbsp;
-          <span>
-            <a
-              href="https://discord.gg/7u7e4ZbeQk"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Soundscape Discord
-            </a>
-          </span>
-        </div>
-      )}
     </>
   );
 }
