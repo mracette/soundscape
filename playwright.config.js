@@ -10,9 +10,12 @@ module.exports = defineConfig({
   use: {
     baseURL: "http://localhost:3000",
     ...devices["Desktop Chrome"],
+    launchOptions: {
+      args: ["--autoplay-policy=no-user-gesture-required"],
+    },
   },
   webServer: {
-    command: "BROWSER=none npm start",
+    command: "BROWSER=none pnpm start",
     url: "http://localhost:3000",
     reuseExistingServer: true,
     timeout: 120_000,

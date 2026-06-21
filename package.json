@@ -43,8 +43,10 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "prettier": "^2.0.2"
-  }
+  },
+  "packageManager": "pnpm@11.8.0"
 }
