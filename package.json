@@ -24,7 +24,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint src/ --fix"
+    "lint": "eslint src/ --fix",
+    "test:e2e": "playwright test"
   },
   "eslintConfig": {
     "extends": "react-app"
