@@ -4,6 +4,11 @@ Run this after every modernization phase, before merging. The automated smoke
 test (`npm run test:e2e`) covers boot/render/no-crash; this covers what it cannot:
 audio, ambient motion, audio-reactive visuals, and responsive layout.
 
+> The smoke test runs with `REACT_APP_ASSET_LOCATION` unset, so it deliberately
+> does NOT exercise audio/model asset loading — green CI means "boots without
+> crashing", not "audio verified". The audio checks below are the only coverage
+> of the asset/playback path.
+
 > If `/play/*` scenes need CloudFront assets locally, run the app / tests with
 > `REACT_APP_ASSET_LOCATION=cloudfront`.
 
