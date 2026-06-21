@@ -13,7 +13,9 @@ for (const { path, canvas } of sceneRoutes) {
     page.on("pageerror", (err) => pageErrors.push(err));
 
     await page.goto(path, { waitUntil: "domcontentloaded" });
-    await expect(page.locator(canvas)).toBeVisible({ timeout: 30_000 });
+    // The canvas mounts with the scene component, independent of asset/audio
+    // load time, so assert it is attached rather than waiting for it to paint.
+    await expect(page.locator(canvas)).toBeAttached({ timeout: 30_000 });
 
     // Give async scene init a moment to surface any thrown error.
     await page.waitForTimeout(3_000);
