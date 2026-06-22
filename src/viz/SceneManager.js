@@ -1,5 +1,4 @@
 import * as THREE from "three";
-import Stats from "stats.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
 
@@ -94,9 +93,9 @@ export class SceneManager {
   }
 
   animate() {
-    this.showStats && this.helpers.stats.begin();
+    this.showStats && this.helpers.stats?.begin();
     this.render();
-    this.showStats && this.helpers.stats.end();
+    this.showStats && this.helpers.stats?.end();
     this.currentFrame = requestAnimationFrame(this.animate);
   }
 
@@ -160,11 +159,13 @@ export class SceneManager {
       gltfLoader: new GLTFLoader(),
     };
     if (this.showStats) {
-      helpers.stats = new Stats();
-      helpers.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-      helpers.stats.dom.style.left = null;
-      helpers.stats.dom.style.right = "0px";
-      document.body.appendChild(helpers.stats.dom);
+      import("stats.js").then(({ default: Stats }) => {
+        helpers.stats = new Stats();
+        helpers.stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+        helpers.stats.dom.style.left = null;
+        helpers.stats.dom.style.right = "0px";
+        document.body.appendChild(helpers.stats.dom);
+      });
     }
     return helpers;
   }
