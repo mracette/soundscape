@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { boundedSin } from "crco-utils";
+import { boundedSin } from "../../utils/mathUtils";
 
 // components
 import { CustomSongIcon } from "./CustomSongIcon";

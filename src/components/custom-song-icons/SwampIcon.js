@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { boundedSin, TAU, rotatePoint } from "crco-utils";
+import { boundedSin, TAU, rotatePoint } from "../../utils/mathUtils";
 
 // components
 import { CustomSongIcon } from "./CustomSongIcon";

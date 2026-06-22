@@ -8,21 +8,12 @@ importers:
 
   .:
     dependencies:
-      animejs:
-        specifier: 3.2.1
-        version: 3.2.1
       chroma-js:
         specifier: 2.1.2
         version: 2.1.2
-      classnames:
-        specifier: 2.3.1
-        version: 2.3.1
       color-curves:
         specifier: 0.0.7
         version: 0.0.7
-      crco-utils:
-        specifier: 0.0.17
-        version: 0.0.17
       d3-color:
         specifier: 3.0.1
         version: 3.0.1
@@ -32,6 +23,9 @@ importers:
       d3-scale-chromatic:
         specifier: 3.0.0
         version: 3.0.0
+      gsap:
+        specifier: 3.15.0
+        version: 3.15.0
       react:
         specifier: 17.0.2
         version: 17.0.2
@@ -587,9 +581,6 @@ packages:
   ajv@6.15.0:
     resolution: {integrity: sha512-fgFx7Hfoq60ytK2c7DhnF8jIvzYgOMxfugjLOSMHjLIPgenqa7S7oaagATUq99mV6IYvN2tRmC0wnTYX6iPbMw==}
 
-  animejs@3.2.1:
-    resolution: {integrity: sha512-sWno3ugFryK5nhiDm/2BKeFCpZv7vzerWUcUPyAZLDhMek3+S/p418ldZJbJXo5ZUOpfm2kP2XRO4NJcULMy9A==}
-
   ansi-styles@4.3.0:
     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==}
     engines: {node: '>=8'}
@@ -646,9 +637,6 @@ packages:
   chroma-js@2.1.2:
     resolution: {integrity: sha512-ri/ouYDWuxfus3UcaMxC1Tfp3IE9K5iQzxc2hSxbBRVNQFut1UuGAsZmiAf2mOUubzGJwgMSv9lHg+XqLaz1QQ==}
 
-  classnames@2.3.1:
-    resolution: {integrity: sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==}
-
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
     engines: {node: '>=7.0.0'}
@@ -667,9 +655,6 @@ packages:
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
-
-  crco-utils@0.0.17:
-    resolution: {integrity: sha512-Q4lAAwmJJHoy5NKI0ez3UDGsLixGE7RC70zu6wl5oOLpLpxLtEEI/Im7AYmlsYgj6ETADC9inGpSbcjk8Bh9+A==}
 
   cross-env@6.0.3:
     resolution: {integrity: sha512-+KqxF6LCvfhWvADcDPqo64yVIB31gv/jQulX2NGzKS/g3GEVz6/pt4wjHFtFWsHMddebWD/sDthJemzM4MaAag==}
@@ -850,6 +835,9 @@ packages:
   globals@15.15.0:
     resolution: {integrity: sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==}
     engines: {node: '>=18'}
+
+  gsap@3.15.0:
+    resolution: {integrity: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==}
 
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
@@ -1644,8 +1632,6 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
-  animejs@3.2.1: {}
-
   ansi-styles@4.3.0:
     dependencies:
       color-convert: 2.0.1
@@ -1708,8 +1694,6 @@ snapshots:
     dependencies:
       cross-env: 6.0.3
 
-  classnames@2.3.1: {}
-
   color-convert@2.0.1:
     dependencies:
       color-name: 1.1.4
@@ -1726,8 +1710,6 @@ snapshots:
   concat-map@0.0.1: {}
 
   convert-source-map@2.0.0: {}
-
-  crco-utils@0.0.17: {}
 
   cross-env@6.0.3:
     dependencies:
@@ -1920,6 +1902,8 @@ snapshots:
   globals@14.0.0: {}
 
   globals@15.15.0: {}
+
+  gsap@3.15.0: {}
 
   has-flag@4.0.0: {}
 

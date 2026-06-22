@@ -1,4 +1,4 @@
-import { boundedSin } from "crco-utils";
+import { boundedSin } from "../../../utils/mathUtils";
 
 const period = 4;
 const bSin = boundedSin(period, 0, 2, 0, 0, true);

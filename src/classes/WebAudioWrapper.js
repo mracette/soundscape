@@ -6,7 +6,7 @@ import {
   getPathToAudio,
 } from "../utils/audioUtils";
 
-import { loadArrayBuffer } from "crco-utils";
+import { loadArrayBuffer } from "../utils/audioUtils";
 import { Analyser } from "./Analyser";
 import { Scheduler } from "./Scheduler";
 import { AudioPlayerWrapper } from "./AudioPlayerWrapper";
@@ -24,7 +24,7 @@ export class WebAudioWrapper {
       status: {},
     };
 
-    props.audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+    props.audioCtx = new AudioContext({
       latencyHint: "balanced",
     });
 

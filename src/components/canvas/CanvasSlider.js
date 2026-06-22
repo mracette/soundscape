@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { clamp } from "crco-utils";
+import { clamp } from "../../utils/mathUtils";
 
 // components
 import { Canvas } from "./Canvas";
