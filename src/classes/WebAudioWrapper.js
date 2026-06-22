@@ -24,7 +24,7 @@ export class WebAudioWrapper {
       status: {},
     };
 
-    props.audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+    props.audioCtx = new AudioContext({
       latencyHint: "balanced",
     });
 
