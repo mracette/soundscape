@@ -17,9 +17,6 @@ importers:
       color-curves:
         specifier: 0.0.7
         version: 0.0.7
-      crco-utils:
-        specifier: 0.0.17
-        version: 0.0.17
       d3-color:
         specifier: 3.0.1
         version: 3.0.1
@@ -661,9 +658,6 @@ packages:
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
-
-  crco-utils@0.0.17:
-    resolution: {integrity: sha512-Q4lAAwmJJHoy5NKI0ez3UDGsLixGE7RC70zu6wl5oOLpLpxLtEEI/Im7AYmlsYgj6ETADC9inGpSbcjk8Bh9+A==}
 
   cross-env@6.0.3:
     resolution: {integrity: sha512-+KqxF6LCvfhWvADcDPqo64yVIB31gv/jQulX2NGzKS/g3GEVz6/pt4wjHFtFWsHMddebWD/sDthJemzM4MaAag==}
@@ -1718,8 +1712,6 @@ snapshots:
   concat-map@0.0.1: {}
 
   convert-source-map@2.0.0: {}
-
-  crco-utils@0.0.17: {}
 
   cross-env@6.0.3:
     dependencies:

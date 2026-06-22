@@ -1,4 +1,4 @@
-import { lerp } from "crco-utils";
+import { lerp } from "../../utils/mathUtils";
 
 import {
   Vector3,

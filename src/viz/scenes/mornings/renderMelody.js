@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { boundedSin } from "crco-utils";
+import { boundedSin } from "../../../utils/mathUtils";
 
 const w = 64 + 1;
 const grey = new THREE.Color(0x333333);

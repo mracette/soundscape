@@ -1,6 +1,6 @@
 // libs
 import React, { useContext } from "react";
-import { CanvasCoordinates } from "crco-utils";
+import { CanvasCoordinates } from "../../utils/mathUtils";
 
 // components
 import { Canvas } from "../canvas/Canvas";
