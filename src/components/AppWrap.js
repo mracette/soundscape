@@ -20,6 +20,9 @@ import { WebAudioWrapper } from "../classes/WebAudioWrapper";
 // utils
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 
+// config
+import appConfig from "../app-config.json";
+
 const starsPalette = new ColorPalette(
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.182,"y":-0.138},"scale":{"x":1,"y":1},"rotation":0,"angleStart":2.105,"angleEnd":6.283,"angleOffset":0,"radius":0.5}',
   '{"type":"linear","overflow":"clamp","reverse":false,"translation":{"x":-0.003,"y":0.758},"scale":{"x":1.053,"y":-0.13},"rotation":0}',
@@ -65,7 +68,6 @@ const spectrumFunctions = {
   swamp: swampPalette,
 };
 
-const appConfig = require("../app-config.json");
 const webAudioWrapper = new WebAudioWrapper(appConfig);
 
 // global behavior flags for testing

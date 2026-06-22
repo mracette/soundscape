@@ -150,7 +150,7 @@ export class LandingPageParticles {
   loadTexture = () => {
     return new Promise((resolve, reject) => {
       this.loader.load(
-        `${process.env.PUBLIC_URL}/img/particle1.png`,
+        `${import.meta.env.BASE_URL}img/particle1.png`,
         (texture) => resolve(texture),
         undefined,
         (error) => reject(error)
