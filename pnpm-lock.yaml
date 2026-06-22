@@ -14,9 +14,6 @@ importers:
       chroma-js:
         specifier: 2.1.2
         version: 2.1.2
-      classnames:
-        specifier: 2.3.1
-        version: 2.3.1
       color-curves:
         specifier: 0.0.7
         version: 0.0.7
@@ -645,9 +642,6 @@ packages:
 
   chroma-js@2.1.2:
     resolution: {integrity: sha512-ri/ouYDWuxfus3UcaMxC1Tfp3IE9K5iQzxc2hSxbBRVNQFut1UuGAsZmiAf2mOUubzGJwgMSv9lHg+XqLaz1QQ==}
-
-  classnames@2.3.1:
-    resolution: {integrity: sha512-OlQdbZ7gLfGarSqxesMesDa5uz7KFbID8Kpq/SxIoNGDqY8lSYs0D+hhtBXhcdB3rcbXArFr7vlHheLk1voeNA==}
 
   color-convert@2.0.1:
     resolution: {integrity: sha512-RRECPsj7iu/xb5oKYcsFHSppFNnsj/52OVTRKb4zP5onXwVF3zVmmToNcOfGC+CRDpfK/U584fMg38ZHCaElKQ==}
@@ -1707,8 +1701,6 @@ snapshots:
   chroma-js@2.1.2:
     dependencies:
       cross-env: 6.0.3
-
-  classnames@2.3.1: {}
 
   color-convert@2.0.1:
     dependencies:
