@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import anime from "animejs/lib/anime.es.js";
+import { gsap } from "gsap";
 
 // context
 import { SongContext } from "../../contexts/contexts";
@@ -56,74 +56,70 @@ export const ToggleButton = (props) => {
   const changePlayerState = React.useCallback(
     (newState) => {
       const runAnimation = (type, duration) => {
-        // clear queue
-        anime.remove(animationTargetsRef.current.circleSvg);
-        anime.remove(animationTargetsRef.current.iconPoly);
-        anime.remove(animationTargetsRef.current.iconDiv);
-        anime.remove(animationTargetsRef.current.iconDiv.children);
-        anime.remove(animationTargetsRef.current.button);
+        const seconds = duration / 1000;
 
-        let strokeDashoffset, points, backgroundColor, rotateZ;
+        // clear queue
+        gsap.killTweensOf(animationTargetsRef.current.circleSvg);
+        gsap.killTweensOf(animationTargetsRef.current.iconPoly);
+        gsap.killTweensOf(animationTargetsRef.current.iconDiv);
+        gsap.killTweensOf([...animationTargetsRef.current.iconDiv.children]);
+        gsap.killTweensOf(animationTargetsRef.current.button);
+
+        let points, backgroundColor, rotateZ;
 
         if (type === "start") {
-          rotateZ = START_PARAMS.rotateZ;
+          rotateZ = -180;
           backgroundColor = START_PARAMS.backgroundColor;
-          strokeDashoffset = [
-            0,
-            2 * Math.PI * (buttonRadius - buttonBorder / 2),
-          ];
-          points = [
+          points = START_PARAMS.points;
+
+          // sweep always begins from a 0 offset regardless of current value
+          gsap.fromTo(
+            animationTargetsRef.current.circleSvg,
+            { strokeDashoffset: 0 },
             {
-              value: START_PARAMS.points,
-            },
-          ];
+              strokeDashoffset: 2 * Math.PI * (buttonRadius - buttonBorder / 2),
+              duration: seconds,
+              ease: "none",
+            }
+          );
         } else if (type === "stop") {
-          rotateZ = STOP_PARAMS.rotateZ;
+          rotateZ = 0;
           backgroundColor = STOP_PARAMS.backgroundColor;
-          strokeDashoffset = [
-            animationTargetsRef.current.circleSvg.style.strokeDashoffset,
-            0,
-          ];
-          points = [
-            {
-              value: STOP_PARAMS.points,
-            },
-          ];
+          points = STOP_PARAMS.points;
+
+          // run circle animation
+          gsap.to(animationTargetsRef.current.circleSvg, {
+            strokeDashoffset: 0,
+            duration: seconds,
+            ease: "none",
+          });
         }
 
-        // run cirle animation
-        anime({
-          targets: animationTargetsRef.current.circleSvg,
-          strokeDashoffset,
-          duration,
-          easing: "linear",
-        });
-
-        // run icon animation
-        anime({
-          targets: animationTargetsRef.current.iconPoly,
-          points,
-          duration,
-          easing: "linear",
+        // run icon animation (morph polygon points)
+        gsap.to(animationTargetsRef.current.iconPoly, {
+          attr: { points },
+          duration: seconds,
+          ease: "none",
         });
 
         // run rotate animation
-        anime({
-          targets: [
+        gsap.to(
+          [
             animationTargetsRef.current.iconDiv,
-            animationTargetsRef.current.iconDiv.children,
+            ...animationTargetsRef.current.iconDiv.children,
           ],
-          rotateZ,
-          duration,
-          easing: "linear",
-        });
+          {
+            rotation: rotateZ,
+            duration: seconds,
+            ease: "none",
+          }
+        );
 
         // run button animation
-        anime({
-          targets: animationTargetsRef.current.button,
+        gsap.to(animationTargetsRef.current.button, {
           backgroundColor,
-          duration,
-          easing: "easeInCubic",
+          duration: seconds,
+          ease: "power2.in",
         });
       };
 
