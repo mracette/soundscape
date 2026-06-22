@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 
 // styles
 import "../styles/components/MenuButtonContentWrapper.scss";
@@ -11,7 +11,7 @@ export const HomePanel = (props) => {
       <h2>Return Home?</h2>
       <p>This will stop your current session.</p>
       <div className="flex-row">
-        <Link to="/">
+        <Link href="/">
           <button
             style={{ width: "20rem" }}
             className="grouped-buttons button-white"

@@ -1,6 +1,6 @@
 // libs
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link } from "wouter";
 
 // components
 import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
@@ -21,7 +21,7 @@ import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
 import { LandingPageMobile } from "./LandingPageMobile";
 
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch, Redirect } from "wouter";
 
 export const landingPageReducer = (state, action) => {
   switch (action.type) {
@@ -87,13 +87,15 @@ export const LandingPage = (props) => {
             <h1 id="landing-page-soundscape-title">Soundscape</h1>
           </div>
           <Switch>
-            <Route exact path="/">
+            <Route path="/">
               <LandingPageInner />
             </Route>
-            <Route exact path="/info">
+            <Route path="/info">
               <InfoPageInner />
             </Route>
-            <Redirect to="/" />
+            <Route>
+              <Redirect to="/" />
+            </Route>
           </Switch>
         </div>
       </div>
@@ -188,16 +190,16 @@ function LandingPageInner() {
         <LandingPageMobile dispatch={dispatch} />
       ) : (
         <div id="song-selection-panel">
-          <Link className="song-link" to="/play/swamp">
+          <Link className="song-link" href="/play/swamp">
             <SwampIcon name="swamp" dispatch={dispatch} />
           </Link>
-          <Link className="song-link" to="/play/mornings">
+          <Link className="song-link" href="/play/mornings">
             <MorningsIcon name="mornings" dispatch={dispatch} />
           </Link>
-          <Link className="song-link" to="/play/moonrise">
+          <Link className="song-link" href="/play/moonrise">
             <MoonriseIcon name="moonrise" dispatch={dispatch} />
           </Link>
-          <Link className="song-link" to="/info">
+          <Link className="song-link" href="/info">
             <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
           </Link>
         </div>
