@@ -26,6 +26,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/ --fix",
+    "format": "prettier --write src",
     "test:e2e": "playwright test"
   },
   "browserslist": {
