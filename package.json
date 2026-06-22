@@ -2,6 +2,9 @@
   "name": "soundscape",
   "version": "3.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "animejs": "3.2.1",
     "chroma-js": "2.1.2",
