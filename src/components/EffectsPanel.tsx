@@ -8,7 +8,7 @@ import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 
 import { CanvasSlider } from "./canvas/CanvasSlider";
 
-import "../styles/components/EffectsPanel.scss";
+import "../styles/components/EffectsPanel.css";
 
 const EFFECT_INTERVAL = 4; // in beats
 

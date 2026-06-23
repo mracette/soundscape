@@ -4,7 +4,7 @@ import { boundedSin, TAU, CanvasCoordinates } from "../../utils/mathUtils";
 import { CustomSongIcon } from "./CustomSongIcon";
 
 // styles
-import "../../styles/components/CustomSongIcons.scss";
+import "../../styles/components/CustomSongIcons.css";
 
 const period = 2;
 const bsin = boundedSin(period, 0, 1, 0);

@@ -23,7 +23,7 @@ import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 import { nextSubdivision } from "../utils/audioUtils";
 
 // styles
-import "../styles/components/MusicPlayer.scss";
+import "../styles/components/MusicPlayer.css";
 
 export const MusicPlayer = () => {
   const { flags } = useContext(TestingContext)!;
