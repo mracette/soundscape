@@ -5,7 +5,7 @@ import { LayoutContext } from "../../contexts/contexts";
 import { ThemeContext } from "../../contexts/contexts";
 
 // styles
-import "../../styles/components/MenuButtonContentWrapper.scss";
+import "../../styles/components/MenuButtonContentWrapper.css";
 
 interface Props {
   content?: ReactNode;

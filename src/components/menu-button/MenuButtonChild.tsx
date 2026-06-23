@@ -11,7 +11,7 @@ import { ThemeContext } from "../../contexts/contexts";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 
 // styles
-import "../../styles/components/MenuButtonChild.scss";
+import "../../styles/components/MenuButtonChild.css";
 
 interface Props {
   id?: string;

@@ -9,7 +9,7 @@ import { ThemeContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
 
 // styles
-import "../../styles/components/MenuButtonParent.scss";
+import "../../styles/components/MenuButtonParent.css";
 
 interface ChildButtonProp {
   id: string;

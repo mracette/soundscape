@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 
-import "../styles/components/MenuButtonContentWrapper.scss";
+import "../styles/components/MenuButtonContentWrapper.css";
 
 export const HomePanel = () => {
   return (
