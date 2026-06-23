@@ -2,8 +2,12 @@ import * as THREE from "three";
 import { SceneManager } from "../../SceneManager";
 import { LandingPageParticles } from "../../subjects/LandingPageParticles";
 
+interface LandingPageExtras {
+  spectrumFunction: (n: number) => string;
+}
+
 export class LandingPageScene extends SceneManager {
-  constructor(canvas, extras) {
+  constructor(canvas: HTMLCanvasElement, extras: LandingPageExtras) {
     super(canvas);
     const opts = {
       dprMax: 2.5,
@@ -37,11 +41,11 @@ export class LandingPageScene extends SceneManager {
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
 
-    return camera;
+    return camera as unknown as THREE.PerspectiveCamera;
   }
 
   initSubjects() {
-    const subjects = {};
+    const subjects: Record<string, unknown> = {};
     subjects.particles = new LandingPageParticles(
       this.scene,
       this.camera,
@@ -50,8 +54,10 @@ export class LandingPageScene extends SceneManager {
     return subjects;
   }
 
-  render() {
-    this.subjects.particles.update(this.clock.getDelta());
+  protected render() {
+    (this.subjects.particles as LandingPageParticles).update(
+      this.clock.getDelta()
+    );
     this.renderer.render(this.scene, this.camera);
   }
 }

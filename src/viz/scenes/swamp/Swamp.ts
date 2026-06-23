@@ -8,27 +8,50 @@ import { renderHut } from "./renderHut";
 import { renderFlowers } from "./renderFlowers";
 import { renderShrooms } from "./renderShrooms";
 import { renderEyes } from "./renderEyes";
+import { Analyser } from "../../../classes/Analyser";
 
 // globals
 export const COLORS = {
-  black: chroma("#000000").hex(),
-  vine: chroma("#010503").darken(0.8).hex(),
-  tree: chroma("#0A0805").darken(0.085).hex(),
-  fog: chroma("#cccccc").hex(),
-  flower: chroma("#DA4167").hex(),
-  darkGreen: chroma("darkgreen").darken(1.95).hex(),
-  darkFlower: chroma("#DA4167").darken(4.5).hex(),
-  mushroom: chroma("#3F250B").darken(2.5).hex(),
-  chimney: chroma("#040404").darken(1).hex(),
-  roof: chroma("#0E0F0C").hex(),
-  darkBlue: chroma("#5669AE").hex(),
-  purple: chroma("#9A4A91").hex(),
-  green: chroma("#53DD6C").hex(),
-  moonYellow: chroma("#f6f2d5").hex(),
+  black: (chroma as any)("#000000").hex() as string,
+  vine: (chroma as any)("#010503").darken(0.8).hex() as string,
+  tree: (chroma as any)("#0A0805").darken(0.085).hex() as string,
+  fog: (chroma as any)("#cccccc").hex() as string,
+  flower: (chroma as any)("#DA4167").hex() as string,
+  darkGreen: (chroma as any)("darkgreen").darken(1.95).hex() as string,
+  darkFlower: (chroma as any)("#DA4167").darken(4.5).hex() as string,
+  mushroom: (chroma as any)("#3F250B").darken(2.5).hex() as string,
+  chimney: (chroma as any)("#040404").darken(1).hex() as string,
+  roof: (chroma as any)("#0E0F0C").hex() as string,
+  darkBlue: (chroma as any)("#5669AE").hex() as string,
+  purple: (chroma as any)("#9A4A91").hex() as string,
+  green: (chroma as any)("#53DD6C").hex() as string,
+  moonYellow: (chroma as any)("#f6f2d5").hex() as string,
 };
 
+interface SwampExtras {
+  spectrumFunction: (n: number) => string;
+  bpm: number;
+}
+
+interface Shroom {
+  mesh: THREE.Mesh;
+  baseColor: string;
+}
+
 export class Swamp extends SceneManager {
-  constructor(canvas, analysers, callback, extras) {
+  rhythmAnalyser!: Analyser;
+  atmosphereAnalyser!: Analyser;
+  harmonyAnalyser!: Analyser;
+  melodyAnalyser!: Analyser;
+  bassAnalyser!: Analyser;
+  elapsedBeats!: number;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    analysers: Record<string, Analyser>,
+    callback: () => void,
+    extras: SwampExtras
+  ) {
     super(canvas);
 
     const opts = {
@@ -52,7 +75,7 @@ export class Swamp extends SceneManager {
     this.setup(callback);
   }
 
-  setup(callback) {
+  setup(callback: () => void) {
     super.init();
     this.loadModels()
       .then(() => {
@@ -66,20 +89,21 @@ export class Swamp extends SceneManager {
   }
 
   applySceneSettings() {
-    this.renderer.outputEncoding = THREE.sRGBEncoding;
+    // outputEncoding exists in r108 but is absent from @types/three@0.103.2
+    (this.renderer as any).outputEncoding = THREE.sRGBEncoding;
     this.renderer.physicallyCorrectLights = true;
     this.renderer.setClearColor(0x000000, 0);
   }
 
-  preProcessSceneObjects(sceneObjects) {
-    return new Promise((resolve, reject) => {
+  preProcessSceneObjects(sceneObjects: THREE.Object3D) {
+    return new Promise<void>((resolve) => {
       const vineMat = new THREE.MeshBasicMaterial({ color: COLORS.vine });
       const treeMat = new THREE.MeshBasicMaterial({ color: COLORS.tree });
       const flowerMat = new THREE.MeshBasicMaterial({
         color: COLORS.darkFlower,
         emissive: COLORS.flower,
         emissiveIntensity: 0,
-      });
+      } as THREE.MeshBasicMaterialParameters);
       const lilyMat = new THREE.MeshBasicMaterial({
         color: COLORS.darkGreen,
       });
@@ -89,28 +113,37 @@ export class Swamp extends SceneManager {
       });
 
       this.applyAll(sceneObjects, (obj) => {
+        const mesh = obj as THREE.Mesh & {
+          material: THREE.MeshBasicMaterial & {
+            name: string;
+            map: THREE.Texture | null;
+          };
+          fov?: number;
+        };
         const type = obj.type.toLowerCase();
         const name = obj.name.toLowerCase();
         if (type.includes("light")) {
+          const light = obj as THREE.Light;
           if (name.includes("house_light")) {
-            this.lights.houseLight = obj;
-            obj.color = new THREE.Color(COLORS.moonYellow);
-            obj.intensity = 0;
+            this.lights.houseLight = light;
+            light.color = new THREE.Color(COLORS.moonYellow);
+            light.intensity = 0;
           } else {
             // remove light
-            obj.intensity = 0;
+            light.intensity = 0;
           }
         } else if (type.includes("camera")) {
-          obj.fov = this.fov || 45;
-          obj.updateProjectionMatrix();
+          const cam = obj as THREE.PerspectiveCamera;
+          cam.fov = this.fov || 45;
+          cam.updateProjectionMatrix();
         } else if (type.includes("mesh")) {
           // no meshes move !
-          obj.matrixAutoUpdates = false;
-          if (obj.material) {
-            obj.material.roughness = 1;
+          (obj as any).matrixAutoUpdates = false;
+          if (mesh.material) {
+            (mesh.material as any).roughness = 1;
           }
           if (name.includes("reference")) {
-            const mist = this.subjects.mist.mist;
+            const mist = (this.subjects.mist as Mist).mist;
             mist.rotateY(-Math.PI / 4);
             mist.scale.set(0.25, 0.2, 0.2);
             mist.position.set(obj.position.x, obj.position.y, obj.position.z);
@@ -119,64 +152,58 @@ export class Swamp extends SceneManager {
             this.subjects.water = obj;
           } else if (
             (name.includes("sphere") || name.includes("cylinder")) &&
-            obj.material.name.includes("eyes")
+            mesh.material.name.includes("eyes")
           ) {
-            const halfWay = chroma(this.spectrumFunction(0.35)).hex();
-            obj.material = new THREE.MeshBasicMaterial({
+            const halfWay = (chroma as any)(this.spectrumFunction(0.35)).hex() as string;
+            mesh.material = new THREE.MeshBasicMaterial({
               color: new THREE.Color(halfWay),
               side: THREE.DoubleSide,
             });
-            obj.material.userData.baseColor = halfWay;
-            this.subjects.eyes.push(obj);
+            mesh.material.userData.baseColor = halfWay;
+            (this.subjects.eyes as THREE.Mesh[]).push(mesh);
           } else if (name.includes("house_base")) {
-            this.subjects.houseBase = obj;
-            obj.material = new THREE.MeshBasicMaterial({
+            this.subjects.houseBase = mesh;
+            mesh.material = new THREE.MeshBasicMaterial({
               color: COLORS.moonYellow,
             });
-            obj.material.side = THREE.DoubleSide;
+            mesh.material.side = THREE.DoubleSide;
           } else if (name.includes("background")) {
-            this.subjects.background = obj;
-            obj.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-            obj.material.side = THREE.DoubleSide;
+            this.subjects.background = mesh;
+            mesh.material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+            mesh.material.side = THREE.DoubleSide;
           } else if (name.includes("vine")) {
-            this.subjects.vines.push(obj);
-            obj.material = vineMat.clone();
-            // obj.userData.active = false;
-            // obj.userData.activeAmount = 0;
-            // obj.userData.activeBeat = null;
-            // obj.material.userData.color = chroma(
-            //   this.spectrumFunction(Math.random())
-            // ).hex();
-          } else if (name.includes("tree") && obj.material.map === null) {
-            obj.material = treeMat;
+            (this.subjects.vines as THREE.Mesh[]).push(mesh);
+            mesh.material = vineMat.clone();
+          } else if (name.includes("tree") && mesh.material.map === null) {
+            mesh.material = treeMat;
           } else if (name.includes("lilypad")) {
-            obj.material = lilyMat;
+            mesh.material = lilyMat;
           } else if (name.includes("flower")) {
-            obj.material = flowerMat.clone();
-            this.subjects.flowers.push(obj);
+            mesh.material = flowerMat.clone();
+            (this.subjects.flowers as THREE.Mesh[]).push(mesh);
           } else if (name.includes("lily")) {
-            obj.material = flowerMat.clone();
+            mesh.material = flowerMat.clone();
           } else if (name.includes("roof")) {
-            obj.material = roofMat;
+            mesh.material = roofMat;
           } else if (name.includes("chimney")) {
-            obj.material = chimneyMat;
+            mesh.material = chimneyMat;
           } else if (name.includes("cube")) {
-            if (obj.material.name.includes("lantern_baked")) {
-              obj.material = treeMat.clone();
-            } else if (obj.material.name.includes("lantern_em")) {
-              obj.material = new THREE.MeshBasicMaterial({
+            if (mesh.material.name.includes("lantern_baked")) {
+              mesh.material = treeMat.clone();
+            } else if (mesh.material.name.includes("lantern_em")) {
+              mesh.material = new THREE.MeshBasicMaterial({
                 color: new THREE.Color(COLORS.moonYellow),
               });
             }
-          } else if (obj.material.name.includes("mushroom")) {
-            if (obj.material.name.includes("mushroom_stem")) {
-              obj.material = new THREE.MeshBasicMaterial({
+          } else if (mesh.material.name.includes("mushroom")) {
+            if (mesh.material.name.includes("mushroom_stem")) {
+              mesh.material = new THREE.MeshBasicMaterial({
                 color: COLORS.mushroom,
                 side: THREE.DoubleSide,
               });
             } else {
               const rand = Math.random();
-              let color;
+              let color: string;
               if (rand < 0.33) {
                 color = COLORS.green;
               } else if (rand < 0.66) {
@@ -185,12 +212,12 @@ export class Swamp extends SceneManager {
                 color = COLORS.flower;
               }
               const mat = new THREE.MeshBasicMaterial({
-                color: chroma.mix(color, COLORS.black, 0.5, "rgb").hex(),
+                color: (chroma as any).mix(color, COLORS.black, 0.5, "rgb").hex(),
                 side: THREE.DoubleSide,
               });
-              obj.material = mat;
-              this.subjects.shrooms.push({
-                mesh: obj,
+              mesh.material = mat;
+              (this.subjects.shrooms as Shroom[]).push({
+                mesh,
                 baseColor: color,
               });
             }
@@ -201,7 +228,7 @@ export class Swamp extends SceneManager {
     });
   }
 
-  getNewFov(aspectRatio) {
+  getNewFov(aspectRatio: number) {
     const fovMin = 25;
     const fovMax = 50;
     const aspectMin = 0.5;
@@ -214,7 +241,7 @@ export class Swamp extends SceneManager {
   }
 
   initControls() {
-    const controls = {};
+    const controls: Record<string, unknown> = {};
 
     if (this.fpcControl) {
       controls.fpc = new FirstPersonControls(this.camera);
@@ -225,12 +252,13 @@ export class Swamp extends SceneManager {
 
   initScene() {
     const scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(COLORS.fog, 1, 240);
+    // THREE.Fog types only accept number but r108 accepts strings too
+    scene.fog = new THREE.Fog(COLORS.fog as unknown as number, 1, 240);
     return scene;
   }
 
   initLights() {
-    const lights = {
+    const lights: Record<string, unknown> = {
       hemisphere: new THREE.HemisphereLight(
         new THREE.Color(COLORS.moonYellow),
         new THREE.Color(COLORS.moonYellow),
@@ -238,7 +266,7 @@ export class Swamp extends SceneManager {
       ),
     };
 
-    this.scene.add(lights.hemisphere);
+    this.scene.add(lights.hemisphere as THREE.HemisphereLight);
 
     return lights;
   }
@@ -248,23 +276,23 @@ export class Swamp extends SceneManager {
       mist: new Mist(this.scene, this.melodyAnalyser, {
         spectrumFunction: this.spectrumFunction,
       }),
-      shrooms: [],
-      flowers: [],
-      vines: [],
-      eyes: [],
+      shrooms: [] as Shroom[],
+      flowers: [] as THREE.Mesh[],
+      vines: [] as THREE.Mesh[],
+      eyes: [] as THREE.Mesh[],
     };
   }
 
-  loadModels(modelList) {
-    return new Promise((resolve, reject) => {
-      const loadPromiseArray = [];
+  loadModels(_modelList?: string[]) {
+    return new Promise<void>((resolve, reject) => {
+      const loadPromiseArray: Promise<void>[] = [];
 
       loadPromiseArray.push(
-        new Promise((resolve, reject) => {
+        new Promise<void>((resolve) => {
           this.loadModel({ name: "swamp" }).then((model) => {
             this.preProcessSceneObjects(model.scene).then(() => {
               this.scene.add(model.scene);
-              this.camera = model.cameras[0];
+              this.camera = model.cameras[0] as THREE.PerspectiveCamera;
               this.camera.layers.enable(1);
               this.applySceneSettings();
               resolve();
@@ -283,15 +311,15 @@ export class Swamp extends SceneManager {
     });
   }
 
-  render(overridePause) {
+  protected render(overridePause?: boolean) {
     if (!this.pauseVisuals || overridePause) {
-      this.elapsedBeats = (this.bpm * this.clock.getElapsedTime()) / 60;
-      this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
+      this.elapsedBeats = (this.bpm! * this.clock.getElapsedTime()) / 60;
+      this.fpcControl && (this.controls.fpc as FirstPersonControls).update(this.clock.getDelta());
       renderHut(
         {
-          light: this.lights.houseLight,
-          hut: this.subjects.houseBase,
-          background: this.subjects.background,
+          light: this.lights.houseLight as THREE.Light,
+          hut: this.subjects.houseBase as THREE.Mesh,
+          background: this.subjects.background as THREE.Mesh,
         },
         this.bassAnalyser,
         {
@@ -301,7 +329,7 @@ export class Swamp extends SceneManager {
       );
       renderFlowers(
         {
-          flowers: this.subjects.flowers,
+          flowers: this.subjects.flowers as THREE.Mesh[],
         },
         this.harmonyAnalyser,
         {
@@ -312,13 +340,21 @@ export class Swamp extends SceneManager {
           },
         }
       );
-      renderShrooms({ shrooms: this.subjects.shrooms }, this.rhythmAnalyser, {
-        beats: this.elapsedBeats,
-      });
-      renderEyes({ eyes: this.subjects.eyes }, this.atmosphereAnalyser, {
-        beats: this.elapsedBeats,
-      });
-      this.subjects.mist.render();
+      renderShrooms(
+        { shrooms: this.subjects.shrooms as Shroom[] },
+        this.rhythmAnalyser,
+        {
+          beats: this.elapsedBeats,
+        }
+      );
+      renderEyes(
+        { eyes: this.subjects.eyes as THREE.Mesh[] },
+        this.atmosphereAnalyser,
+        {
+          beats: this.elapsedBeats,
+        }
+      );
+      (this.subjects.mist as Mist).render();
       this.renderer.render(this.scene, this.camera);
     }
   }
