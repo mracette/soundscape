@@ -1,12 +1,18 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
-import React from "react";
+import { useRef, useEffect } from "react";
 
-export const useTraceUpdate = (enabled, componentName, props) => {
+export const useTraceUpdate = (
+  enabled: boolean,
+  componentName: string,
+  props: Record<string, unknown>
+) => {
   if (enabled) {
-    const prev = React.useRef(props);
-    React.useEffect(() => {
-      const changedProps = Object.entries(props).reduce((ps, [k, v]) => {
+    const prev = useRef(props);
+    useEffect(() => {
+      const changedProps = Object.entries(props).reduce<
+        Record<string, [unknown, unknown]>
+      >((ps, [k, v]) => {
         if (prev.current[k] !== v) {
           ps[k] = [prev.current[k], v];
         }

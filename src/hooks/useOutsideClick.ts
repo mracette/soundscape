@@ -1,9 +1,13 @@
-import React from "react";
+import { useCallback, useEffect, RefObject } from "react";
 
-export const useOutsideClick = (nodeRef, insideCallback, outsideCallback) => {
-  const handleOutsideClick = React.useCallback(
-    (e) => {
-      if (nodeRef.current.contains(e.target)) {
+export const useOutsideClick = (
+  nodeRef: RefObject<HTMLElement | null>,
+  insideCallback?: () => void,
+  outsideCallback?: () => void
+) => {
+  const handleOutsideClick = useCallback(
+    (e: MouseEvent) => {
+      if (nodeRef.current!.contains(e.target as Node)) {
         // the click was inside of the nodeRef hierarchy
         insideCallback && insideCallback();
       } else {
@@ -14,7 +18,7 @@ export const useOutsideClick = (nodeRef, insideCallback, outsideCallback) => {
     [insideCallback, outsideCallback, nodeRef]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.addEventListener("mousedown", handleOutsideClick);
 
     return () => {
