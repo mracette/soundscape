@@ -8,7 +8,7 @@ import { SongContext } from "../contexts/contexts";
 
 import { Analyser } from "../classes/Analyser";
 
-import "../styles/components/Oscilloscope.scss";
+import "../styles/components/Oscilloscope.css";
 
 interface Props {
   name: string;

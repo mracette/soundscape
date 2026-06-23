@@ -28,7 +28,7 @@ import {
 } from "../../utils/jsUtils";
 
 // styles
-import "../../styles/components/CanvasViz.scss";
+import "../../styles/components/CanvasViz.css";
 
 interface Props {
   songLoadStatus: boolean;

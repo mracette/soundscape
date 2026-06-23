@@ -25,7 +25,7 @@ import { ToggleButtonGroupReducer } from "../../reducers/ToggleButtonGroupReduce
 
 // styles
 import "../../styles/components/ToggleButtonGroup.scss";
-import "../../styles/components/Oscilloscope.scss";
+import "../../styles/components/Oscilloscope.css";
 
 interface Props {
   name: string;
