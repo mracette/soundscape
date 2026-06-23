@@ -17,7 +17,8 @@
     "sass": "1.57.1",
     "stats.js": "0.17.0",
     "three": "0.108.0",
-    "wouter": "3.10.0"
+    "wouter": "3.10.0",
+    "zustand": "5.0.14"
   },
   "scripts": {
     "start": "vite",

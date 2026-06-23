@@ -9,9 +9,11 @@ import { Swamp } from "../../viz/scenes/swamp/Swamp";
 // context
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
-import { MusicPlayerContext } from "../../contexts/contexts";
 import { ThemeContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
+
+// store
+import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 
 // components
 import { CanvasFade } from "./CanvasFade";
@@ -31,8 +33,8 @@ export const CanvasViz = (props) => {
   const { spectrumFunction, canvasFade } = React.useContext(ThemeContext);
   const { id, groups, bpm } = React.useContext(SongContext);
   const { WAW } = React.useContext(WebAudioContext);
-  const { voices, analysers, dispatch, pauseVisuals } =
-    React.useContext(MusicPlayerContext);
+  const voices = useMusicPlayerStore((s) => s.voices);
+  const pauseVisuals = useMusicPlayerStore((s) => s.pauseVisuals);
   const { flags } = React.useContext(TestingContext);
 
   const canvasRef = React.useRef(null);
@@ -136,8 +138,6 @@ export const CanvasViz = (props) => {
     spectrumFunction,
     flags.showVisuals,
     id,
-    analysers,
-    dispatch,
     WAW,
     songLoadStatus,
     handleSetCanvasLoadStatus,

@@ -7,7 +7,9 @@ import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
-import { MusicPlayerContext } from "../../contexts/contexts";
+
+// store
+import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 
 // other
 import { nextSubdivision } from "../../utils/audioUtils";
@@ -39,7 +41,8 @@ export const ToggleButton = (props) => {
   const { vh } = React.useContext(LayoutContext);
   const { id, timeSignature, bpm } = React.useContext(SongContext);
   const { flags } = React.useContext(TestingContext);
-  const musicPlayerDispatch = React.useContext(MusicPlayerContext).dispatch;
+  const addVoice = useMusicPlayerStore((s) => s.addVoice);
+  const updateVoiceState = useMusicPlayerStore((s) => s.updateVoiceState);
   const { dispatch, name, override, quantizeLength } = props;
 
   const { scheduler, audioCtx } = WAW;
@@ -137,12 +140,9 @@ export const ToggleButton = (props) => {
         },
       });
 
-      musicPlayerDispatch({
-        type: "updateVoiceState",
-        payload: {
-          id: props.name,
-          newState: initialState,
-        },
+      updateVoiceState({
+        id: props.name,
+        newState: initialState,
       });
 
       setPlayerState(initialState);
@@ -187,12 +187,9 @@ export const ToggleButton = (props) => {
               newState: newState,
             },
           });
-          musicPlayerDispatch({
-            type: "updateVoiceState",
-            payload: {
-              id: props.name,
-              newState,
-            },
+          updateVoiceState({
+            id: props.name,
+            newState,
           });
         }
       );
@@ -213,7 +210,7 @@ export const ToggleButton = (props) => {
       buttonRadius,
       buttonBorder,
       player,
-      musicPlayerDispatch,
+      updateVoiceState,
       props.name,
     ]
   );
@@ -240,16 +237,13 @@ export const ToggleButton = (props) => {
       },
     });
 
-    musicPlayerDispatch({
-      type: "addVoice",
-      payload: {
-        id: props.name,
-        group: props.groupName,
-        voiceState: "stopped",
-        ref: buttonRef.current,
-      },
+    addVoice({
+      id: props.name,
+      group: props.groupName,
+      voiceState: "stopped",
+      ref: buttonRef.current,
     });
-  }, [dispatch, id, musicPlayerDispatch, props.groupName, props.name]);
+  }, [dispatch, id, addVoice, props.groupName, props.name]);
 
   /* Override Hook */
   React.useEffect(() => {

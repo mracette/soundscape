@@ -12,13 +12,12 @@ import { HomePanel } from "./HomePanel";
 import { LoadingScreen } from "../components/LoadingScreen";
 
 // context
-import { MusicPlayerContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 
-// reducers
-import { MusicPlayerReducer } from "../reducers/MusicPlayerReducer";
+// store
+import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 
 // other
 import { nextSubdivision } from "../utils/audioUtils";
@@ -43,19 +42,12 @@ export const MusicPlayer = () => {
     [setCanvasLoadStatus]
   );
 
-  const [state, dispatch] = React.useReducer(MusicPlayerReducer, {
-    players: [],
-    voices: [],
-    groupSolos: [],
-    resetCallbacks: [],
-    randomizeCallbacks: [],
-    isLoading: true,
-    backgroundMode: false,
-    randomizeEffects: false,
-    pauseVisuals: false,
-    mute: false,
-    soloOverride: false,
-  });
+  React.useState(() => useMusicPlayerStore.getState().reset());
+  const resetCallbacks = useMusicPlayerStore((s) => s.resetCallbacks);
+  const randomizeCallbacks = useMusicPlayerStore((s) => s.randomizeCallbacks);
+  const voices = useMusicPlayerStore((s) => s.voices);
+  const backgroundMode = useMusicPlayerStore((s) => s.backgroundMode);
+  const mute = useMusicPlayerStore((s) => s.mute);
 
   React.useEffect(() => {
     if (wawLoadStatus && !songLoadStatus) {
@@ -96,40 +88,40 @@ export const MusicPlayer = () => {
   ]);
 
   const handleReset = React.useCallback(() => {
-    state.resetCallbacks.forEach((obj) => {
+    resetCallbacks.forEach((obj) => {
       obj.resetCallback();
     });
-  }, [state.resetCallbacks]);
+  }, [resetCallbacks]);
 
   const handleRandomize = React.useCallback(() => {
-    state.randomizeCallbacks.forEach((obj) => {
+    randomizeCallbacks.forEach((obj) => {
       obj.randomizeCallback();
     });
-  }, [state.randomizeCallbacks]);
+  }, [randomizeCallbacks]);
 
   /* Background Mode Callback */
   const triggerRandomVoice = React.useCallback(() => {
-    const viableOne = state.voices.filter(
+    const viableOne = voices.filter(
       (v) => !v.voiceState.includes("pending")
     );
     const randomOne = Math.floor(Math.random() * viableOne.length);
-    state.voices[randomOne].ref.click();
+    voices[randomOne].ref.click();
 
     // trigger an additional voice when less than 1/2 are active
-    if (viableOne.length >= state.voices.length) {
+    if (viableOne.length >= voices.length) {
       const viableTwo = viableOne.filter(
         (p, i) => i !== randomOne && p.groupName !== randomOne.groupName
       );
       const randomTwo = Math.floor(Math.random() * viableTwo.length);
-      state.voices[randomTwo].ref.click();
+      voices[randomTwo].ref.click();
     }
-  }, [state.voices]);
+  }, [voices]);
 
   /* Background Mode Hook */
   React.useEffect(() => {
     // init event
     if (
-      state.backgroundMode &&
+      backgroundMode &&
       !WAW.scheduler.getEvent(backgroundModeEventRef.current)
     ) {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
@@ -138,17 +130,17 @@ export const MusicPlayer = () => {
         triggerRandomVoice
       );
       // triggerRandomVoice updates when different voices are on
-    } else if (state.backgroundMode) {
+    } else if (backgroundMode) {
       WAW.scheduler.updateCallback(
         backgroundModeEventRef.current,
         triggerRandomVoice
       );
       // stop event
-    } else if (!state.backgroundMode) {
+    } else if (!backgroundMode) {
       WAW.scheduler.cancel(backgroundModeEventRef.current);
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [bpm, state.backgroundMode, triggerRandomVoice]);
+  }, [bpm, backgroundMode, triggerRandomVoice]);
 
   /* Mute Hook */
   React.useEffect(() => {
@@ -160,19 +152,16 @@ export const MusicPlayer = () => {
       WAW.getEffects().premaster.gain.value = 1;
     };
 
-    if (state.mute) {
+    if (mute) {
       startMute();
     } else {
       stopMute();
     }
-  }, [WAW, state.mute, state.premaster]);
+  }, [WAW, mute]);
 
   const HomePanelMemo = React.useMemo(() => <HomePanel />, []);
   const SongInfoPanelMemo = React.useMemo(() => <SongInfoPanel />, []);
-  const EffectsPanelMemo = React.useMemo(
-    () => <EffectsPanel dispatch={dispatch} />,
-    [dispatch]
-  );
+  const EffectsPanelMemo = React.useMemo(() => <EffectsPanel />, []);
   const ToggleButtonPanelMemo = React.useMemo(
     () => (
       <ToggleButtonPanel
@@ -184,12 +173,7 @@ export const MusicPlayer = () => {
   );
 
   return (
-    <MusicPlayerContext.Provider
-      value={{
-        ...state,
-        dispatch,
-      }}
-    >
+    <>
       {songLoadStatus && (
         <>
           <FreqBands animate={false} />
@@ -228,6 +212,6 @@ export const MusicPlayer = () => {
       {(!canvasLoadStatus || !wawLoadStatus || !songLoadStatus) && (
         <LoadingScreen />
       )}
-    </MusicPlayerContext.Provider>
+    </>
   );
 };

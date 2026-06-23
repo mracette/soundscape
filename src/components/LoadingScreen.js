@@ -4,14 +4,14 @@ import React from "react";
 // components
 import { LoadingIcon } from "../components/custom-song-icons/LoadingIcon";
 
-// contexts
-import { MusicPlayerContext } from "../contexts/contexts";
+// store
+import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 
 // styles
 import "../styles/components/LandingPage.scss";
 
 export const LoadingScreen = () => {
-  const { isLoading } = React.useContext(MusicPlayerContext);
+  const isLoading = useMusicPlayerStore((s) => s.isLoading);
 
   return (
     <div

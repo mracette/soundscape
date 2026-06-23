@@ -3,9 +3,11 @@ import React from "react";
 import { clamp, lerp } from "../utils/mathUtils";
 
 // context
-import { MusicPlayerContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
+
+// store
+import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 
 // components
 import { CanvasSlider } from "./canvas/CanvasSlider";
@@ -31,7 +33,10 @@ const chooseNewValue = (prev) => {
 };
 
 export const EffectsPanel = (props) => {
-  const { dispatch } = React.useContext(MusicPlayerContext);
+  const setVoicesBackgroundMode = useMusicPlayerStore(
+    (s) => s.setBackgroundMode
+  );
+  const setPauseVisuals = useMusicPlayerStore((s) => s.setPauseVisuals);
   const { bpm } = React.useContext(SongContext);
   const { WAW } = React.useContext(WebAudioContext);
 
@@ -125,7 +130,7 @@ export const EffectsPanel = (props) => {
               type="checkbox"
               onInput={(e) => {
                 const checked = e.target.checked;
-                dispatch({ type: "setBackgroundMode", payload: checked });
+                setVoicesBackgroundMode(checked);
               }}
             />
             <span className="slider round"></span>
@@ -166,7 +171,7 @@ export const EffectsPanel = (props) => {
               type="checkbox"
               onInput={(e) => {
                 const checked = e.target.checked;
-                dispatch({ type: "setPauseVisuals", payload: checked });
+                setPauseVisuals(checked);
               }}
             />
             <span className="slider round"></span>

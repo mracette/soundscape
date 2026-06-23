@@ -9,7 +9,9 @@ import { Oscilloscope } from "../Oscilloscope";
 import { ThemeContext } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
-import { MusicPlayerContext } from "../../contexts/contexts";
+
+// store
+import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 
 // reducers
 import { ToggleButtonGroupReducer } from "../../reducers/ToggleButtonGroupReducer";
@@ -23,8 +25,13 @@ export const ToggleButtonGroup = (props) => {
   const { WAW } = React.useContext(WebAudioContext);
   const { id } = React.useContext(SongContext);
   const { groupMuteButton, groupSoloButton } = React.useContext(ThemeContext);
-  const { groupSolos } = React.useContext(MusicPlayerContext);
-  const musicPlayerDispatch = React.useContext(MusicPlayerContext).dispatch;
+  const groupSolos = useMusicPlayerStore((s) => s.groupSolos);
+  const addResetCallback = useMusicPlayerStore((s) => s.addResetCallback);
+  const addRandomizeCallback = useMusicPlayerStore(
+    (s) => s.addRandomizeCallback
+  );
+  const addGroupSolo = useMusicPlayerStore((s) => s.addGroupSolo);
+  const removeGroupSolo = useMusicPlayerStore((s) => s.removeGroupSolo);
   const [state, dispatch] = React.useReducer(ToggleButtonGroupReducer, {
     maxPolyphony: props.polyphony,
     polyphony: 0,
@@ -109,23 +116,18 @@ export const ToggleButtonGroup = (props) => {
       });
     };
 
-    musicPlayerDispatch({
-      type: "addResetCallback",
-      payload: {
-        name: name,
-        resetCallback: handleReset,
-      },
+    addResetCallback({
+      name: name,
+      resetCallback: handleReset,
     });
 
-    musicPlayerDispatch({
-      type: "addRandomizeCallback",
-      payload: {
-        name: name,
-        randomizeCallback: handleRandomize,
-      },
+    addRandomizeCallback({
+      name: name,
+      randomizeCallback: handleRandomize,
     });
   }, [
-    musicPlayerDispatch,
+    addResetCallback,
+    addRandomizeCallback,
     name,
     state.maxPolyphony,
     state.players,
@@ -134,16 +136,11 @@ export const ToggleButtonGroup = (props) => {
 
   const handleToggleSolo = React.useCallback(() => {
     if (solo) {
-      musicPlayerDispatch({
-        type: "removeGroupSolo",
-      });
+      removeGroupSolo();
     } else {
-      musicPlayerDispatch({
-        type: "addGroupSolo",
-        payload: name,
-      });
+      addGroupSolo(name);
     }
-  }, [solo, musicPlayerDispatch, name]);
+  }, [solo, removeGroupSolo, addGroupSolo, name]);
 
   return (
     <div className="toggle-button-group flex-col">
