@@ -1,4 +1,28 @@
-export const ToggleButtonGroupReducer = (state, action) => {
+type PlayerState = "stopped" | "pending-start" | "active" | "pending-stop";
+
+export interface Player {
+  id: string;
+  playerState: PlayerState;
+  ref: HTMLElement;
+}
+
+export interface State {
+  maxPolyphony: number;
+  polyphony: number;
+  players: Player[];
+  playerOrder: string[];
+  playerOverrides: string[];
+}
+
+export type Action =
+  | { type: "incrementPolyphony" }
+  | { type: "decrementPolyphony" }
+  | { type: "addPlayer"; payload: { player: Player } }
+  | { type: "updatePlayerState"; payload: { id: string; newState: PlayerState } }
+  | { type: "updatePlayerOrder"; payload: { playerId: string; newState: PlayerState } }
+  | { type: "updatePlayerOverrides"; payload: { playerId: string } };
+
+export const ToggleButtonGroupReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "incrementPolyphony": {
       return {
@@ -33,7 +57,7 @@ export const ToggleButtonGroupReducer = (state, action) => {
         players: [
           ...state.players.filter((p) => p.id !== action.payload.id),
           {
-            ...state.players.find((p) => p.id === action.payload.id),
+            ...state.players.find((p) => p.id === action.payload.id)!,
             playerState: action.payload.newState,
           },
         ],
