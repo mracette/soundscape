@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { SceneManager } from "../../SceneManager";
 import FirstPersonControls from "../../controls/FirstPersonControls";
 import { lerp, normalize } from "../../../utils/mathUtils";
+import { Analyser } from "../../../classes/Analyser";
 
 // rendering
 import { renderBass } from "./renderBass";
@@ -16,10 +17,10 @@ import { rgbaVertex, rgbaFragment } from "../../shaders/rgba";
 
 // globals
 const CANVAS_STYLE = `
-background-color: none; background: 
+background-color: none; background:
 linear-gradient(
-    to top, 
-    #F0A9B3 45%, 
+    to top,
+    #F0A9B3 45%,
     #D8B7B6 55%,
     #BEBDC3 70%,
     #A1BCD4 85%,
@@ -47,8 +48,25 @@ const FREEZE_EXCEPTIONS = [
   "god_rays_bottom",
 ];
 
+interface MorningsExtras {
+  spectrumFunction: (n: number) => string;
+  bpm: number;
+}
+
 export class Mornings extends SceneManager {
-  constructor(canvas, analysers, callback, extras) {
+  rhythmAnalyser!: Analyser;
+  atmosphereAnalyser!: Analyser;
+  harmonyAnalyser!: Analyser;
+  melodyAnalyser!: Analyser;
+  bassAnalyser!: Analyser;
+  elapsedBeats!: number;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    analysers: Record<string, Analyser>,
+    callback: () => void,
+    extras: MorningsExtras
+  ) {
     super(canvas);
 
     const opts = {
@@ -59,7 +77,7 @@ export class Mornings extends SceneManager {
     };
 
     Object.assign(this, opts);
-    this.canvas.style = CANVAS_STYLE;
+    this.canvas.style.cssText = CANVAS_STYLE;
     this.rhythmAnalyser = analysers["rhythm"];
     this.atmosphereAnalyser = analysers["extras"];
     this.harmonyAnalyser = analysers["harmony"];
@@ -72,7 +90,7 @@ export class Mornings extends SceneManager {
       .then(() => {
         this.applySceneSettings();
         this.preProcessSceneObjects();
-        this.render(RENDER_LIST);
+        this.render(RENDER_LIST as unknown as boolean);
         super.animate();
         callback();
       })
@@ -83,7 +101,7 @@ export class Mornings extends SceneManager {
 
   applySceneSettings() {
     this.renderer.shadowMap.enabled = false;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.setClearColor(0x000000, 0.0);
 
     this.camera.position.set(
@@ -102,18 +120,23 @@ export class Mornings extends SceneManager {
     this.applyAll(
       this.scene,
       (child) => {
+        const mesh = child as THREE.Mesh & {
+          matrixAutoUpdates: boolean;
+          material: THREE.MeshStandardMaterial & THREE.MeshLambertMaterial;
+        };
         // freeze objects that don't move
-        child.matrixAutoUpdates = false;
+        mesh.matrixAutoUpdates = false;
         // lambert material is the most efficient
-        if (child.material && child.material.type === "MeshStandardMaterial") {
+        if (mesh.material && mesh.material.type === "MeshStandardMaterial") {
           const mat = new THREE.MeshLambertMaterial({
-            color: child.material.color,
+            color: mesh.material.color,
             side: THREE.DoubleSide,
-            emissive: child.material.emissive,
-            emissiveIntensity: child.material.emissiveIntensity,
+            emissive: mesh.material.emissive,
+            emissiveIntensity: mesh.material.emissiveIntensity,
           });
-          child.material.dispose();
-          child.material = mat;
+          mesh.material.dispose();
+          mesh.material = mat as unknown as THREE.MeshStandardMaterial &
+            THREE.MeshLambertMaterial;
         }
       },
       FREEZE_EXCEPTIONS
@@ -128,7 +151,7 @@ export class Mornings extends SceneManager {
   }
 
   initControls() {
-    const controls = {};
+    const controls: Record<string, unknown> = {};
 
     if (this.fpcControl) {
       controls.fpc = new FirstPersonControls(this.camera);
@@ -143,7 +166,7 @@ export class Mornings extends SceneManager {
   }
 
   initLights() {
-    const lights = {
+    const lights: Record<string, unknown> = {
       ambient: new THREE.AmbientLight(
         COLORS.morningLight.clone().lerp(COLORS.white, 0.65),
         0.35
@@ -152,58 +175,66 @@ export class Mornings extends SceneManager {
       pointOne: new THREE.PointLight(0xffffff, 0.1),
     };
 
-    lights.pointOne.position.set(
+    (lights.pointOne as THREE.PointLight).position.set(
       -36.792147432025736,
       12.295984744079584,
       19.50565058881036
     );
 
-    this.scene.add(lights.ambient);
-    this.scene.add(lights.sunlight);
-    this.scene.add(lights.sunlight.target);
-    this.scene.add(lights.pointOne);
+    this.scene.add(lights.ambient as THREE.AmbientLight);
+    this.scene.add(lights.sunlight as THREE.DirectionalLight);
+    this.scene.add((lights.sunlight as THREE.DirectionalLight).target);
+    this.scene.add(lights.pointOne as THREE.PointLight);
 
     return lights;
   }
 
-  loadModels(modelList) {
-    return new Promise((resolve, reject) => {
-      const loadPromiseArray = [];
+  loadModels(modelList: string[]) {
+    return new Promise<void>((resolve, reject) => {
+      const loadPromiseArray: Promise<void>[] = [];
 
       // house and god rays
       modelList.indexOf("house") !== -1 &&
         loadPromiseArray.push(
-          new Promise((resolve, reject) => {
+          new Promise<void>((resolve) => {
             this.subjects.stringLights = [];
             this.subjects.godRays = [];
 
             this.loadModel({ name: "house" }).then((model) => {
               model.scene.children.forEach((mesh) => {
+                const m = mesh as THREE.Mesh & {
+                  material: THREE.MeshStandardMaterial;
+                };
                 if (
                   mesh.type === "Group" &&
                   mesh.name.includes("string_light")
                 ) {
-                  mesh.children[1].material.emissive =
-                    mesh.children[1].material.color;
-                  this.subjects.stringLights.push(mesh.children[1]);
+                  const group = mesh as THREE.Group;
+                  const child1 = group.children[1] as THREE.Mesh & {
+                    material: THREE.MeshStandardMaterial;
+                  };
+                  child1.material.emissive = child1.material.color;
+                  (this.subjects.stringLights as THREE.Mesh[]).push(child1);
                 }
 
                 if (mesh.name === "bushes") {
-                  mesh.material.emissive = mesh.material.color;
-                  mesh.material.emissiveIntensity = 0.5;
+                  m.material.emissive = m.material.color;
+                  m.material.emissiveIntensity = 0.5;
                 }
 
                 if (
                   mesh.name === "god_rays_top" ||
                   mesh.name === "god_rays_bottom"
                 ) {
-                  mesh.material = new THREE.MeshBasicMaterial({
+                  (mesh as THREE.Mesh).material = new THREE.MeshBasicMaterial({
                     color: COLORS.white,
                     transparent: true,
                     side: THREE.DoubleSide,
                     opacity: 0.025,
                   });
-                  this.subjects.godRays.push(mesh);
+                  (this.subjects.godRays as THREE.Mesh[]).push(
+                    mesh as THREE.Mesh
+                  );
                 }
               });
 
@@ -216,16 +247,21 @@ export class Mornings extends SceneManager {
       // paintings
       modelList.indexOf("house") !== -1 &&
         loadPromiseArray.push(
-          new Promise((resolve, reject) => {
+          new Promise<void>((resolve) => {
             this.loadModel({ name: "paintings" }).then((model) => {
               model.scene.children.forEach((mesh) => {
+                const m = mesh as THREE.Mesh & {
+                  material: THREE.MeshStandardMaterial & {
+                    map: THREE.Texture;
+                  };
+                };
                 if (mesh.name === "vonnegut_self_portrait") {
-                  mesh.material.side = THREE.FrontSide;
-                  mesh.material.map.minFilter = THREE.LinearFilter;
+                  m.material.side = THREE.FrontSide;
+                  m.material.map.minFilter = THREE.LinearFilter;
                 }
                 if (mesh.name === "van_gogh") {
-                  mesh.material.side = THREE.BackSide;
-                  mesh.material.map.minFilter = THREE.LinearFilter;
+                  m.material.side = THREE.BackSide;
+                  m.material.map.minFilter = THREE.LinearFilter;
                 }
               });
 
@@ -238,20 +274,23 @@ export class Mornings extends SceneManager {
       // table
       modelList.indexOf("table") !== -1 &&
         loadPromiseArray.push(
-          new Promise((resolve, reject) => {
+          new Promise<void>((resolve) => {
             this.loadModel({ name: "table" }).then((model) => {
               const pageGeo = new THREE.PlaneBufferGeometry(1.9, 1.8, 64, 64);
               pageGeo.rotateX(-Math.PI / 2);
 
               model.scene.children.forEach((mesh) => {
+                const m = mesh as THREE.Mesh & {
+                  material: THREE.MeshStandardMaterial;
+                };
                 if (mesh.name.includes("mug_coffee")) {
-                  mesh.material = new THREE.MeshBasicMaterial({
+                  m.material = new THREE.MeshBasicMaterial({
                     color: COLORS.coffee,
-                  });
+                  }) as unknown as THREE.MeshStandardMaterial;
                 }
 
                 if (mesh.name.includes("mug_top")) {
-                  mesh.material.color = new THREE.Color(0x666666);
+                  m.material.color = new THREE.Color(0x666666);
                 }
 
                 if (
@@ -262,9 +301,10 @@ export class Mornings extends SceneManager {
                     pageGeo.attributes.position.count * 4
                   );
 
-                  const newMesh = mesh.clone();
+                  const newMesh = mesh.clone() as THREE.Mesh;
                   newMesh.geometry = pageGeo.clone();
-                  newMesh.geometry.addAttribute(
+                  // addAttribute exists in r108 runtime; absent from @types/three@0.103.2
+                  (newMesh.geometry as any).addAttribute(
                     "customColor",
                     new THREE.Float32BufferAttribute(colors, 4)
                   );
@@ -285,12 +325,12 @@ export class Mornings extends SceneManager {
                 }
 
                 if (mesh.name === "steam") {
-                  mesh.material = new THREE.MeshBasicMaterial({
+                  m.material = new THREE.MeshBasicMaterial({
                     color: COLORS.white,
                     transparent: true,
                     side: THREE.DoubleSide,
                     opacity: 0.025,
-                  });
+                  }) as unknown as THREE.MeshStandardMaterial;
                   this.subjects.steam = mesh;
                 }
               });
@@ -308,40 +348,43 @@ export class Mornings extends SceneManager {
       // flowers
       modelList.indexOf("flower") !== -1 &&
         loadPromiseArray.push(
-          new Promise((resolve, reject) => {
-            const stickLeaves = [];
-            const stickLeavesOne = [];
+          new Promise<void>((resolve) => {
+            const stickLeaves: THREE.Mesh[] = [];
+            const stickLeavesOne: THREE.Mesh[] = [];
             this.subjects.innerPetals = [];
             this.subjects.outerPetals = [];
 
             this.loadModel({ name: "flowers" }).then((model) => {
               model.scene.children.forEach((mesh) => {
+                const m = mesh as THREE.Mesh & {
+                  material: THREE.MeshStandardMaterial;
+                };
                 if (mesh.name.includes("Inner_Petals")) {
-                  mesh.material.emissive = mesh.material.color;
-                  mesh.material.emissiveIntensity = 0;
-                  this.subjects.innerPetals.push(mesh);
+                  m.material.emissive = m.material.color;
+                  m.material.emissiveIntensity = 0;
+                  (this.subjects.innerPetals as THREE.Mesh[]).push(m);
                 }
 
                 if (mesh.name.includes("Outer_Petals")) {
-                  mesh.material.emissive = mesh.material.color;
-                  mesh.material.emissiveIntensity = 0;
-                  this.subjects.outerPetals.push(mesh);
+                  m.material.emissive = m.material.color;
+                  m.material.emissiveIntensity = 0;
+                  (this.subjects.outerPetals as THREE.Mesh[]).push(m);
                 }
 
                 if (mesh.name.includes("stick_leaves_one")) {
-                  mesh.material = new THREE.MeshLambertMaterial({
+                  m.material = new THREE.MeshLambertMaterial({
                     color: COLORS.plant,
                     emissive: COLORS.plant,
                     emissiveIntensity: 0,
-                  });
-                  stickLeavesOne.push(mesh);
+                  }) as unknown as THREE.MeshStandardMaterial;
+                  stickLeavesOne.push(m);
                 } else if (mesh.name.includes("stick_leaves")) {
-                  mesh.material = new THREE.MeshLambertMaterial({
+                  m.material = new THREE.MeshLambertMaterial({
                     color: COLORS.plant,
                     emissive: COLORS.plant,
                     emissiveIntensity: 0,
-                  });
-                  stickLeaves.push(mesh);
+                  }) as unknown as THREE.MeshStandardMaterial;
+                  stickLeaves.push(m);
                 }
               });
 
@@ -358,19 +401,22 @@ export class Mornings extends SceneManager {
       // spiral plant
       modelList.indexOf("plant") !== -1 &&
         loadPromiseArray.push(
-          new Promise((resolve, reject) => {
+          new Promise<void>((resolve) => {
             this.loadModel({ name: "spiral_plant" }).then((model) => {
-              const leaves = [];
+              const leaves: THREE.Mesh[] = [];
 
               model.scene.children
                 .filter((mesh) => mesh.name.includes("spiral_plant_leaf"))
                 .forEach((mesh) => {
-                  mesh.material = new THREE.MeshLambertMaterial({
+                  const m = mesh as THREE.Mesh & {
+                    material: THREE.MeshStandardMaterial;
+                  };
+                  m.material = new THREE.MeshLambertMaterial({
                     color: COLORS.plant,
                     emissive: COLORS.plant,
                     emissiveIntensity: 0,
-                  });
-                  leaves.push(mesh);
+                  }) as unknown as THREE.MeshStandardMaterial;
+                  leaves.push(m);
                 });
 
               this.subjects.spiralPlantLeaves = leaves;
@@ -385,11 +431,13 @@ export class Mornings extends SceneManager {
       // bookshelf
       modelList.indexOf("bookcase") !== -1 &&
         loadPromiseArray.push(
-          new Promise((resolve, reject) => {
+          new Promise<void>((resolve) => {
             // 3d array: columns, rows, books in cell
             this.subjects.books = new Array(4)
               .fill(null)
-              .map((d) => new Array(5).fill(null).map((d) => []));
+              .map(() =>
+                new Array(5).fill(null).map(() => [] as THREE.Mesh[])
+              );
 
             this.loadModel({ name: "bookcase" }).then((model) => {
               const pageMat = new THREE.MeshLambertMaterial({
@@ -403,6 +451,7 @@ export class Mornings extends SceneManager {
                   !mesh.name.includes("bookcase") &&
                   mesh.type === "Group"
                 ) {
+                  const group = mesh as THREE.Group;
                   const name = mesh.name;
                   const z = parseInt(name.slice(name.length - 1, name.length));
                   const y = parseInt(
@@ -416,12 +465,20 @@ export class Mornings extends SceneManager {
                     this.spectrumFunction(1 - (r + y + 0.5) / 5)
                   );
 
-                  const bookMesh = mesh.children.find((mesh) =>
-                    mesh.material.name.includes("book")
-                  );
-                  const pageMesh = mesh.children.find((mesh) =>
-                    mesh.material.name.includes("page")
-                  );
+                  const bookMesh = group.children.find((child) =>
+                    (
+                      child as THREE.Mesh & {
+                        material: { name: string };
+                      }
+                    ).material.name.includes("book")
+                  ) as THREE.Mesh & { material: THREE.MeshLambertMaterial };
+                  const pageMesh = group.children.find((child) =>
+                    (
+                      child as THREE.Mesh & {
+                        material: { name: string };
+                      }
+                    ).material.name.includes("page")
+                  ) as THREE.Mesh & { material: THREE.MeshLambertMaterial };
 
                   pageMesh.material = pageMat;
                   bookMesh.material = new THREE.MeshLambertMaterial({
@@ -431,7 +488,8 @@ export class Mornings extends SceneManager {
                     emissiveIntensity: 0.1,
                   });
 
-                  this.subjects.books[x][y][z] = bookMesh;
+                  (this.subjects.books as THREE.Mesh[][][])[x][y][z] =
+                    bookMesh;
                 }
               });
 
@@ -452,21 +510,24 @@ export class Mornings extends SceneManager {
     });
   }
 
-  render(overridePause) {
+  protected render(overridePause?: boolean | string[] | unknown) {
     if (!this.pauseVisuals || overridePause) {
-      this.elapsedBeats = (this.bpm * this.clock.getElapsedTime()) / 60;
-      this.fpcControl && this.controls.fpc.update(this.clock.getDelta());
+      this.elapsedBeats = (this.bpm! * this.clock.getElapsedTime()) / 60;
+      this.fpcControl &&
+        (this.controls.fpc as FirstPersonControls).update(
+          this.clock.getDelta()
+        );
 
-      this.subjects.steam.rotateY(-0.05);
+      (this.subjects.steam as THREE.Mesh).rotateY(-0.05);
 
       this.playerState &&
         (this.playerState.melody || overridePause) &&
         renderMelody(
           {
-            innerPetals: this.subjects.innerPetals,
-            outerPetals: this.subjects.outerPetals,
-            leftPage: this.subjects.leftPage,
-            rightPage: this.subjects.rightPage,
+            innerPetals: this.subjects.innerPetals as THREE.Mesh[],
+            outerPetals: this.subjects.outerPetals as THREE.Mesh[],
+            leftPage: this.subjects.leftPage as THREE.Mesh,
+            rightPage: this.subjects.rightPage as THREE.Mesh,
           },
           this.melodyAnalyser,
           {
@@ -477,24 +538,28 @@ export class Mornings extends SceneManager {
 
       this.playerState &&
         (this.playerState.bass || overridePause) &&
-        renderBass(this.subjects.godRays, this.bassAnalyser, {
-          sunlight: this.lights.sunlight,
+        renderBass(this.subjects.godRays as THREE.Mesh[], this.bassAnalyser, {
+          sunlight: this.lights.sunlight as THREE.DirectionalLight,
         });
 
       this.playerState &&
         (this.playerState.rhythm || overridePause) &&
-        renderRhythm(this.subjects.books, this.rhythmAnalyser, {
-          spectrumFunction: this.spectrumFunction,
-          beats: this.elapsedBeats,
-        });
+        renderRhythm(
+          this.subjects.books as THREE.Mesh[][][],
+          this.rhythmAnalyser,
+          {
+            spectrumFunction: this.spectrumFunction,
+            beats: this.elapsedBeats,
+          }
+        );
 
       this.playerState &&
         (this.playerState.harmony || overridePause) &&
         renderHarmony(
           {
-            leaves: this.subjects.spiralPlantLeaves,
-            stickLeaves: this.subjects.stickLeaves,
-            stickLeavesOne: this.subjects.stickLeavesOne,
+            leaves: this.subjects.spiralPlantLeaves as THREE.Mesh[],
+            stickLeaves: this.subjects.stickLeaves as THREE.Mesh[],
+            stickLeavesOne: this.subjects.stickLeavesOne as THREE.Mesh[],
             group: this.subjects.spiralPlantGroup,
             box: this.subjects.spiralPlantBox,
           },
@@ -506,10 +571,14 @@ export class Mornings extends SceneManager {
 
       this.playerState &&
         (this.playerState.extras || overridePause) &&
-        renderAtmosphere(this.subjects.stringLights, this.atmosphereAnalyser, {
-          beats: this.elapsedBeats,
-          enabled: this.playerState.extras,
-        });
+        renderAtmosphere(
+          this.subjects.stringLights as THREE.Mesh[],
+          this.atmosphereAnalyser,
+          {
+            beats: this.elapsedBeats,
+            enabled: this.playerState.extras,
+          }
+        );
 
       this.renderer.render(this.scene, this.camera);
     }
