@@ -12,7 +12,6 @@ import { SongContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 
 // styles
-import "../../styles/components/ToggleButtonPanel.scss";
 
 interface Props {
   handleReset: () => void;

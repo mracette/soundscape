@@ -24,7 +24,7 @@ import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 import { ToggleButtonGroupReducer } from "../../reducers/ToggleButtonGroupReducer";
 
 // styles
-import "../../styles/components/ToggleButtonGroup.scss";
+import "../../styles/components/ToggleButtonGroup.css";
 import "../../styles/components/Oscilloscope.css";
 
 interface Props {

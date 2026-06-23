@@ -19,7 +19,7 @@ import { Action } from "../../reducers/ToggleButtonGroupReducer";
 
 // styles
 import "../../styles/components/Icon.css";
-import "../../styles/components/ToggleButton.scss";
+import "../../styles/components/ToggleButton.css";
 
 const START_PARAMS = {
   rotateZ: "-180",
