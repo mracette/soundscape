@@ -1,4 +1,4 @@
-export const addWindowListeners = (callback) => {
+export const addWindowListeners = (callback: EventListenerOrEventListenerObject): void => {
   window.addEventListener("resize", callback);
   window.addEventListener("orientationchange", callback);
   window.addEventListener("fullscreenchange", callback);
@@ -8,7 +8,7 @@ export const addWindowListeners = (callback) => {
     window.visualViewport.addEventListener("resize", callback);
 };
 
-export const removeWindowListeners = (callback) => {
+export const removeWindowListeners = (callback: EventListenerOrEventListenerObject): void => {
   window.removeEventListener("resize", callback);
   window.removeEventListener("orientationchange", callback);
   window.removeEventListener("fullscreenchange", callback);
@@ -18,7 +18,7 @@ export const removeWindowListeners = (callback) => {
     window.visualViewport.removeEventListener("resize", callback);
 };
 
-export const cinematicResize = (element) => {
+export const cinematicResize = (element: HTMLElement): () => void => {
   return () => {
     const resizeElement = element;
     const ratioTargets = [

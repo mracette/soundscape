@@ -1,12 +1,12 @@
 const regularPolygon = (
-  nSides,
+  nSides: number,
   size = 1,
   cx = 0,
   cy = 0,
   closedLoop = true,
   rotate = false,
   twoDim = false
-) => {
+): Float32Array => {
   const nPoints = closedLoop ? nSides + 1 : nSides;
   const nCoords = twoDim ? 2 : 3;
   const points = new Float32Array(nPoints * nCoords);
@@ -28,7 +28,12 @@ const regularPolygon = (
   return points;
 };
 
-const solveExpEquation = (x0, y0, x1, y1) => {
+const solveExpEquation = (
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number
+): { a: number; b: number } => {
   // solve the system of equations ...
   // a*b^(x0) = y0
   // a*b^(x1) = y1
@@ -38,7 +43,7 @@ const solveExpEquation = (x0, y0, x1, y1) => {
   return { a, b }; // to be used y = ab^x
 };
 
-const linToLog = (w) => {
+const linToLog = (w: number): { a: number; b: number } => {
   /*
    *
    * linear scale: [1, w]
@@ -69,8 +74,8 @@ const boundedSin = (
   translateX = 0,
   translateY = 0,
   invert = false
-) => {
-  return (x) =>
+): ((x: number) => number) => {
+  return (x: number) =>
     yMin +
     (yMax - yMin) *
       (0.5 +
@@ -78,19 +83,20 @@ const boundedSin = (
     translateY;
 };
 
-const clamp = (n, min, max) => {
+const clamp = (n: number, min: number, max: number): number => {
   return Math.max(Math.min(max, n), min);
 };
 
-const normalize = (n, min, max, clamp = false) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const normalize = (n: number, min: number, max: number, clamp: any = false): number => {
   return clamp ? (n - min) / (max - min) : (clamp(n, min, max) - min) / (max - min);
 };
 
-const lerp = (n0, n1, t) => {
+const lerp = (n0: number, n1: number, t: number): number => {
   return n0 * (1 - t) + n1 * t;
 };
 
-const gaussianRand = (factor = 6) => {
+const gaussianRand = (factor = 6): number => {
   let rand = 0;
   for (let i = 0; i < factor; i += 1) {
     rand += Math.random();
@@ -98,15 +104,60 @@ const gaussianRand = (factor = 6) => {
   return rand / factor;
 };
 
-const rotatePoint = (px, py, cx, cy, angle) => {
+const rotatePoint = (
+  px: number,
+  py: number,
+  cx: number,
+  cy: number,
+  angle: number
+): { x: number; y: number } => {
   return {
     x: Math.cos(angle) * (px - cx) - Math.sin(angle) * (py - cy) + cx,
     y: Math.sin(angle) * (px - cx) + Math.cos(angle) * (py - cy) + cy,
   };
 };
 
+interface CanvasCoordinatesOptions {
+  nxRange?: [number, number];
+  nyRange?: [number, number];
+  padding?: number;
+  paddingX?: number;
+  paddingY?: number;
+  xOffset?: number;
+  yOffset?: number;
+  canvas?: HTMLCanvasElement | null;
+  clamp?: boolean;
+  baseHeight?: number | null;
+  baseWidth?: number | null;
+  orientationY?: "up" | "down";
+}
+
+interface NxOptions {
+  padding?: number;
+}
+
+interface NyOptions {
+  padding?: number;
+  paddingY?: number;
+}
+
 class CanvasCoordinates {
-  constructor(options = {}) {
+  nxRange!: [number, number];
+  nyRange!: [number, number];
+  padding!: number;
+  paddingX!: number;
+  paddingY!: number;
+  xOffset!: number;
+  yOffset!: number;
+  canvas!: HTMLCanvasElement | null;
+  clamp!: boolean;
+  baseHeight!: number | null;
+  baseWidth!: number | null;
+  orientationY!: "up" | "down";
+  width!: number;
+  height!: number;
+
+  constructor(options: CanvasCoordinatesOptions = {}) {
     if (
       (typeof options.baseHeight === "undefined" &&
         typeof options.canvas === "undefined") ||
@@ -118,7 +169,7 @@ class CanvasCoordinates {
       );
     }
 
-    const defaults = {
+    const defaults: Required<CanvasCoordinatesOptions> = {
       nxRange: [-1, 1],
       nyRange: [-1, 1],
       padding: 0,
@@ -133,12 +184,12 @@ class CanvasCoordinates {
       orientationY: "down",
     };
     Object.assign(this, { ...defaults, ...options });
-    this.width = this.baseWidth || this.canvas.width;
-    this.height = this.baseHeight || this.canvas.height;
+    this.width = this.baseWidth || this.canvas!.width;
+    this.height = this.baseHeight || this.canvas!.height;
   }
 
-  nx(n, options = {}) {
-    let padding;
+  nx(n: number, options: NxOptions = {}): number {
+    let padding: number;
     this.clamp && (n = clamp(n, this.nxRange[0], this.nxRange[1]));
     if (typeof options.padding === "number") {
       padding = options.padding * this.width;
@@ -153,8 +204,8 @@ class CanvasCoordinates {
     );
   }
 
-  xn(x, options = {}) {
-    let padding;
+  xn(x: number, options: NxOptions = {}): number {
+    let padding: number;
     if (typeof options.padding === "number") {
       padding = options.padding * this.width;
     } else {
@@ -163,8 +214,8 @@ class CanvasCoordinates {
     return (x - padding - this.xOffset) / (this.width - padding * 2);
   }
 
-  ny(n, options = {}) {
-    let padding;
+  ny(n: number, options: NyOptions = {}): number | undefined {
+    let padding: number;
     this.clamp && (n = clamp(n, this.nyRange[0], this.nyRange[1]));
     if (typeof options.paddingY === "number") {
       padding = options.paddingY * this.height;
@@ -194,8 +245,8 @@ class CanvasCoordinates {
     }
   }
 
-  yn(y, options = {}) {
-    let padding;
+  yn(y: number, options: NyOptions = {}): number | undefined {
+    let padding: number;
     if (typeof options.paddingY === "number") {
       padding = options.paddingY * this.height;
     } else if (typeof options.padding === "number") {
@@ -213,15 +264,15 @@ class CanvasCoordinates {
     }
   }
 
-  getWidth() {
+  getWidth(): number {
     return this.nx(this.nxRange[1]) - this.nx(this.nxRange[0]);
   }
 
-  getHeight() {
+  getHeight(): number | undefined {
     if (this.orientationY === "down") {
-      return this.ny(this.nyRange[1]) - this.ny(this.nyRange[0]);
+      return this.ny(this.nyRange[1])! - this.ny(this.nyRange[0])!;
     } else if (this.orientationY === "up") {
-      return this.ny(this.nyRange[0]) - this.ny(this.nyRange[1]);
+      return this.ny(this.nyRange[0])! - this.ny(this.nyRange[1])!;
     } else {
       return undefined;
     }

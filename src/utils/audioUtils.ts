@@ -1,6 +1,11 @@
 import { solveExpEquation } from "./mathUtils";
 
-export const getPathToAudio = (id, name, format, debug = false) => {
+export const getPathToAudio = (
+  id: string,
+  name: string,
+  format: string,
+  debug = false
+): string | undefined => {
   const ext = format === "wav" ? "wav" : "mp3";
 
   if (import.meta.env.REACT_APP_ASSET_LOCATION === "local") {
@@ -14,7 +19,11 @@ export const getPathToAudio = (id, name, format, debug = false) => {
   }
 };
 
-export const nextSubdivision = (audioCtx, bpm, beats) => {
+export const nextSubdivision = (
+  audioCtx: AudioContext,
+  bpm: number,
+  beats: number
+): number => {
   const timeElapsed = audioCtx.currentTime;
   const beatsElapsed = timeElapsed / (60 / bpm);
   const subdivisionsElapsed = Math.floor(beatsElapsed / beats);
@@ -47,13 +56,13 @@ export const effectParams = {
   },
 };
 
-export const initGain = (audioCtx, gain) => {
+export const initGain = (audioCtx: AudioContext, gain: number): GainNode => {
   const a = audioCtx.createGain();
   a.gain.value = gain;
   return a;
 };
 
-export const initLowpass = (audioCtx) => {
+export const initLowpass = (audioCtx: AudioContext): BiquadFilterNode => {
   const a = audioCtx.createBiquadFilter();
   a.type = "lowpass";
   a.frequency.value = 20000;
@@ -61,7 +70,7 @@ export const initLowpass = (audioCtx) => {
   return a;
 };
 
-export const initHighpass = (audioCtx) => {
+export const initHighpass = (audioCtx: AudioContext): BiquadFilterNode => {
   const a = audioCtx.createBiquadFilter();
   a.type = "highpass";
   a.frequency.value = 20000;
@@ -69,13 +78,13 @@ export const initHighpass = (audioCtx) => {
   return a;
 };
 
-export const loadArrayBuffer = (audioFilePath) => {
+export const loadArrayBuffer = (audioFilePath: string): Promise<ArrayBuffer> => {
   return new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.responseType = "arraybuffer";
     request.addEventListener("load", () => {
       if (request.status === 200) {
-        resolve(request.response);
+        resolve(request.response as ArrayBuffer);
       }
     });
     request.addEventListener("error", (err) => {
@@ -86,7 +95,20 @@ export const loadArrayBuffer = (audioFilePath) => {
   });
 };
 
-export const createAudioPlayer = (audioCtx, audioFilePath, options = {}) => {
+interface AudioPlayerOptions {
+  fade?: boolean;
+  fadeLength?: number | null;
+  fadeType?: string;
+  offlineRendering?: boolean;
+  logLevel?: string;
+  renderLength?: number;
+}
+
+export const createAudioPlayer = (
+  audioCtx: AudioContext,
+  audioFilePath: string,
+  options: AudioPlayerOptions = {}
+): Promise<AudioBufferSourceNode> => {
   const fade = options.fade || false;
   const fadeLength = options.fadeLength || null;
   const fadeType = options.fadeType || "exponential";
@@ -101,10 +123,10 @@ export const createAudioPlayer = (audioCtx, audioFilePath, options = {}) => {
             if (offlineRendering) {
               const bufferLength = options.renderLength || buffer.length;
               const bufferDuration = bufferLength / buffer.sampleRate;
-              const offline = new (window.OfflineAudioContext ||
-                window.webkitOfflineAudioContext)(2, bufferLength, buffer.sampleRate);
+              const offline = new ((window as any).OfflineAudioContext ||
+                (window as any).webkitOfflineAudioContext)(2, bufferLength, buffer.sampleRate) as OfflineAudioContext;
 
-              offline.oncomplete = (event) => {
+              offline.oncomplete = (event: OfflineAudioCompletionEvent) => {
                 const { renderedBuffer } = event;
                 logLevel === "debug" && console.log(renderedBuffer);
                 const audioPlayer = audioCtx.createBufferSource();
@@ -122,13 +144,13 @@ export const createAudioPlayer = (audioCtx, audioFilePath, options = {}) => {
                 gainNode.gain.setValueAtTime(0.001, offline.currentTime);
                 gainNode.gain.setValueAtTime(
                   1,
-                  offline.currentTime + bufferDuration - fadeLength
+                  offline.currentTime + bufferDuration - (fadeLength as number)
                 );
 
                 if (fadeType === "exponential") {
                   gainNode.gain.exponentialRampToValueAtTime(
                     1,
-                    offline.currentTime + fadeLength
+                    offline.currentTime + (fadeLength as number)
                   );
                   gainNode.gain.exponentialRampToValueAtTime(
                     0.001,
@@ -137,7 +159,7 @@ export const createAudioPlayer = (audioCtx, audioFilePath, options = {}) => {
                 } else if (fadeType === "linear") {
                   gainNode.gain.linearRampToValueAtTime(
                     1,
-                    offline.currentTime + fadeLength
+                    offline.currentTime + (fadeLength as number)
                   );
                   gainNode.gain.linearRampToValueAtTime(
                     0.001,
