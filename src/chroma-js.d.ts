@@ -10,6 +10,9 @@ declare module "chroma-js" {
   }
   interface ChromaStatic {
     scale(colors: string[]): Scale;
+    mix(color1: Color, color2: Color, ratio: number, mode?: string): Color;
+    new (color: string): Color;
+    (color: string): Color;
   }
   const chroma: ChromaStatic;
   export = chroma;

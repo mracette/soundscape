@@ -1,5 +1,5 @@
 // libs
-import React from "react";
+import { useState, useEffect } from "react";
 import * as d3Chromatic from "d3-scale-chromatic";
 import * as d3Color from "d3-color";
 import { ColorPalette } from "color-curves";
@@ -35,7 +35,7 @@ const morningsPalette = new ColorPalette(
   '{"start":0,"end":1}'
 );
 
-const swampPalette = (n) => {
+const swampPalette = (n: number) => {
   const darkBlue = new chroma("#5669AE");
   const purple = new chroma("#9A4A91");
   const green = new chroma("#53DD6C");
@@ -47,9 +47,9 @@ const swampPalette = (n) => {
   }
 };
 
-const morningsPaletteDiscrete = [];
-const moonrisePaletteDiscrete = [];
-const starsPaletteDiscrete = [];
+const morningsPaletteDiscrete: unknown[] = [];
+const moonrisePaletteDiscrete: unknown[] = [];
+const starsPaletteDiscrete: unknown[] = [];
 
 // instead of querying the full palettes, use a discrete, in-memory versions to save compute
 for (let i = 0; i <= 255; i++) {
@@ -61,10 +61,10 @@ for (let i = 0; i <= 255; i++) {
 }
 
 // define spectrum functions here since they don't do well in json
-const spectrumFunctions = {
-  moonrise: (n) => moonrisePaletteDiscrete[Math.round(n * 255)],
-  mornings: (n) => morningsPaletteDiscrete[Math.round(n * 255)],
-  stars: (n) => starsPaletteDiscrete[Math.round(n * 255)],
+const spectrumFunctions: Record<string, (n: number) => unknown> = {
+  moonrise: (n: number) => moonrisePaletteDiscrete[Math.round(n * 255)],
+  mornings: (n: number) => morningsPaletteDiscrete[Math.round(n * 255)],
+  stars: (n: number) => starsPaletteDiscrete[Math.round(n * 255)],
   swamp: swampPalette,
 };
 
@@ -79,7 +79,7 @@ const flags = {
 
 // inits globals vars, adds listeners, and manages some other settings
 export const AppWrap = () => {
-  const [wawLoadStatus, setWawLoadStatus] = React.useState(false);
+  const [wawLoadStatus, setWawLoadStatus] = useState(false);
   webAudioWrapper.initAppState().then(() => setWawLoadStatus(true));
 
   // run once before the dom is drawn
@@ -95,13 +95,13 @@ export const AppWrap = () => {
   );
 
   // custom vw and vh vars
-  const [vw, setvw] = React.useState(viewportWidth / 100);
-  const [vh, setvh] = React.useState(viewportHeight / 100);
+  const [vw, setvw] = useState(viewportWidth / 100);
+  const [vh, setvh] = useState(viewportHeight / 100);
 
   // check for mobile
-  const [isMobile, setIsMobile] = React.useState(viewportWidth <= 670);
+  const [isMobile, setIsMobile] = useState(viewportWidth <= 670);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const resumeAudio = () => {
       webAudioWrapper.audioCtx.state === "suspended" &&
         webAudioWrapper.audioCtx.resume();

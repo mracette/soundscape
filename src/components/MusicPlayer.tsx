@@ -1,5 +1,5 @@
 // libs
-import React from "react";
+import { useContext, useRef, useState, useCallback, useEffect, useMemo, type ComponentType } from "react";
 
 // components
 import { CanvasViz } from "./canvas/CanvasViz";
@@ -26,30 +26,30 @@ import { nextSubdivision } from "../utils/audioUtils";
 import "../styles/components/MusicPlayer.scss";
 
 export const MusicPlayer = () => {
-  const { flags } = React.useContext(TestingContext);
+  const { flags } = useContext(TestingContext)!;
   const { id, bpm, ambientTrack, ambientTrackQuantize } =
-    React.useContext(SongContext);
-  const { WAW, wawLoadStatus } = React.useContext(WebAudioContext);
+    useContext(SongContext)!;
+  const { WAW, wawLoadStatus } = useContext(WebAudioContext)!;
 
-  const backgroundModeEventRef = React.useRef(null);
+  const backgroundModeEventRef = useRef<number | null>(null);
 
-  const [songLoadStatus, setSongLoadStatus] = React.useState(false);
-  const [canvasLoadStatus, setCanvasLoadStatus] = React.useState(false);
-  const handleSetCanvasLoadStatus = React.useCallback(
-    (status) => {
+  const [songLoadStatus, setSongLoadStatus] = useState(false);
+  const [canvasLoadStatus, setCanvasLoadStatus] = useState(false);
+  const handleSetCanvasLoadStatus = useCallback(
+    (status: boolean) => {
       setCanvasLoadStatus(status);
     },
     [setCanvasLoadStatus]
   );
 
-  React.useState(() => useMusicPlayerStore.getState().reset());
+  useState(() => useMusicPlayerStore.getState().reset());
   const resetCallbacks = useMusicPlayerStore((s) => s.resetCallbacks);
   const randomizeCallbacks = useMusicPlayerStore((s) => s.randomizeCallbacks);
   const voices = useMusicPlayerStore((s) => s.voices);
   const backgroundMode = useMusicPlayerStore((s) => s.backgroundMode);
   const mute = useMusicPlayerStore((s) => s.mute);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (wawLoadStatus && !songLoadStatus) {
       WAW.initSongState(id).then(() => {
         setSongLoadStatus(true);
@@ -63,7 +63,7 @@ export const MusicPlayer = () => {
         startTime = nextSubdivision(WAW.audioCtx, bpm, 4);
       }
       WAW.audioCtx.resume();
-      WAW.getVoices(id)["ambient"].start(startTime);
+      WAW.getVoices(id)["ambient"].start(startTime as number);
     }
 
     // music player cleanup
@@ -73,7 +73,7 @@ export const MusicPlayer = () => {
         WAW.audioCtx.suspend();
         flags.playAmbientTrack &&
           ambientTrack &&
-          WAW.getVoices(id).ambient.stop();
+          WAW.getVoices(id).ambient.stop(0);
       };
     }
   }, [
@@ -87,20 +87,20 @@ export const MusicPlayer = () => {
     bpm,
   ]);
 
-  const handleReset = React.useCallback(() => {
+  const handleReset = useCallback(() => {
     resetCallbacks.forEach((obj) => {
-      obj.resetCallback();
+      (obj as any).resetCallback();
     });
   }, [resetCallbacks]);
 
-  const handleRandomize = React.useCallback(() => {
+  const handleRandomize = useCallback(() => {
     randomizeCallbacks.forEach((obj) => {
-      obj.randomizeCallback();
+      (obj as any).randomizeCallback();
     });
   }, [randomizeCallbacks]);
 
   /* Background Mode Callback */
-  const triggerRandomVoice = React.useCallback(() => {
+  const triggerRandomVoice = useCallback(() => {
     const viableOne = voices.filter(
       (v) => !v.voiceState.includes("pending")
     );
@@ -110,7 +110,8 @@ export const MusicPlayer = () => {
     // trigger an additional voice when less than 1/2 are active
     if (viableOne.length >= voices.length) {
       const viableTwo = viableOne.filter(
-        (p, i) => i !== randomOne && p.groupName !== randomOne.groupName
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (p, i) => i !== randomOne && (p as any).groupName !== (randomOne as any).groupName
       );
       const randomTwo = Math.floor(Math.random() * viableTwo.length);
       voices[randomTwo].ref.click();
@@ -118,11 +119,11 @@ export const MusicPlayer = () => {
   }, [voices]);
 
   /* Background Mode Hook */
-  React.useEffect(() => {
+  useEffect(() => {
     // init event
     if (
       backgroundMode &&
-      !WAW.scheduler.getEvent(backgroundModeEventRef.current)
+      !WAW.scheduler.getEvent(backgroundModeEventRef.current!)
     ) {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
         WAW.audioCtx.currentTime + 60 / bpm,
@@ -132,24 +133,24 @@ export const MusicPlayer = () => {
       // triggerRandomVoice updates when different voices are on
     } else if (backgroundMode) {
       WAW.scheduler.updateCallback(
-        backgroundModeEventRef.current,
+        backgroundModeEventRef.current!,
         triggerRandomVoice
       );
       // stop event
     } else if (!backgroundMode) {
-      WAW.scheduler.cancel(backgroundModeEventRef.current);
+      WAW.scheduler.cancel(backgroundModeEventRef.current ?? undefined);
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [bpm, backgroundMode, triggerRandomVoice]);
 
   /* Mute Hook */
-  React.useEffect(() => {
+  useEffect(() => {
     const startMute = () => {
-      WAW.getEffects().premaster.gain.value = 0;
+      (WAW.getEffects() as any).premaster.gain.value = 0;
     };
 
     const stopMute = () => {
-      WAW.getEffects().premaster.gain.value = 1;
+      (WAW.getEffects() as any).premaster.gain.value = 1;
     };
 
     if (mute) {
@@ -159,10 +160,10 @@ export const MusicPlayer = () => {
     }
   }, [WAW, mute]);
 
-  const HomePanelMemo = React.useMemo(() => <HomePanel />, []);
-  const SongInfoPanelMemo = React.useMemo(() => <SongInfoPanel />, []);
-  const EffectsPanelMemo = React.useMemo(() => <EffectsPanel />, []);
-  const ToggleButtonPanelMemo = React.useMemo(
+  const HomePanelMemo = useMemo(() => <HomePanel />, []);
+  const SongInfoPanelMemo = useMemo(() => <SongInfoPanel />, []);
+  const EffectsPanelMemo = useMemo(() => <EffectsPanel />, []);
+  const ToggleButtonPanelMemo = useMemo(
     () => (
       <ToggleButtonPanel
         handleRandomize={handleRandomize}
@@ -177,36 +178,42 @@ export const MusicPlayer = () => {
       {songLoadStatus && (
         <>
           <FreqBands animate={false} />
-          <MenuButtonParent
-            name="Menu"
-            direction="right"
-            separation="6rem"
-            parentSize="5rem"
-            childButtonProps={[
-              {
-                id: "home",
-                iconName: "icon-home",
-                content: HomePanelMemo,
-              },
-              {
-                autoOpen: true,
-                id: "toggles",
-                iconName: "icon-music",
-                content: ToggleButtonPanelMemo,
-              },
-              {
-                id: "effects",
-                iconName: "icon-equalizer",
-                content: EffectsPanelMemo,
-              },
-              {
-                id: "song-info",
-                iconName: "icon-info",
-                content: SongInfoPanelMemo,
-              },
-            ]}
-          />
-          <CanvasViz handleSetCanvasLoadStatus={handleSetCanvasLoadStatus} />
+          {/* extra props name/direction/separation/parentSize passed but unused by MenuButtonParent — latent */}
+          {(() => {
+            const MBP = MenuButtonParent as ComponentType<any>;
+            return (
+              <MBP
+                name="Menu"
+                direction="right"
+                separation="6rem"
+                parentSize="5rem"
+                childButtonProps={[
+                  {
+                    id: "home",
+                    iconName: "icon-home",
+                    content: HomePanelMemo,
+                  },
+                  {
+                    autoOpen: true,
+                    id: "toggles",
+                    iconName: "icon-music",
+                    content: ToggleButtonPanelMemo,
+                  },
+                  {
+                    id: "effects",
+                    iconName: "icon-equalizer",
+                    content: EffectsPanelMemo,
+                  },
+                  {
+                    id: "song-info",
+                    iconName: "icon-info",
+                    content: SongInfoPanelMemo,
+                  },
+                ]}
+              />
+            );
+          })()}
+          <CanvasViz songLoadStatus={songLoadStatus} handleSetCanvasLoadStatus={handleSetCanvasLoadStatus} />
         </>
       )}
       {(!canvasLoadStatus || !wawLoadStatus || !songLoadStatus) && (

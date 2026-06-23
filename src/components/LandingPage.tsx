@@ -1,5 +1,5 @@
 // libs
-import React from "react";
+import { useRef, useEffect, useContext, useReducer } from "react";
 import { Link } from "wouter";
 
 // components
@@ -23,7 +23,10 @@ import { LandingPageMobile } from "./LandingPageMobile";
 
 import { Route, Switch, Redirect } from "wouter";
 
-export const landingPageReducer = (state, action) => {
+type State = { name: string | null; bpm: string | null; key: string | null };
+type Action = { type: string | null };
+
+export const landingPageReducer = (state: State, action: Action): State => {
   switch (action.type) {
     case "moonrise":
       return {
@@ -58,23 +61,29 @@ export const landingPageReducer = (state, action) => {
   }
 };
 
-export const LandingPage = (props) => {
+interface LandingPageProps {
+  spectrumFunction: (n: number) => unknown;
+}
+
+export const LandingPage = (props: LandingPageProps) => {
   const { spectrumFunction } = props;
 
-  const canvasRef = React.useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  React.useEffect(() => {
-    let scene;
+  useEffect(() => {
+    let scene: LandingPageScene | undefined;
 
     if (canvasRef.current) {
-      scene = new LandingPageScene(canvasRef.current, { spectrumFunction });
+      scene = new LandingPageScene(canvasRef.current, {
+        spectrumFunction: spectrumFunction as (n: number) => string,
+      });
       addWindowListeners(scene.onWindowResize);
     }
 
     return () => {
-      scene.stop();
-      scene.disposeAll(scene.scene);
-      removeWindowListeners(scene.onWindowResize);
+      scene!.stop();
+      scene!.disposeAll(scene!.scene);
+      removeWindowListeners(scene!.onWindowResize);
     };
   }, [spectrumFunction]);
 
@@ -150,8 +159,8 @@ function InfoPageInner() {
 }
 
 function LandingPageInner() {
-  const { isMobile } = React.useContext(LayoutContext);
-  const [selected, dispatch] = React.useReducer(landingPageReducer, {
+  const { isMobile } = useContext(LayoutContext)!;
+  const [selected, dispatch] = useReducer(landingPageReducer, {
     name: null,
     bpm: null,
     key: null,

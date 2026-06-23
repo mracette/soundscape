@@ -17,5 +17,5 @@
     "types": ["vite/client"]
   },
   "include": ["src"],
-  "exclude": ["node_modules", "src/components/**/*.js", "src/index.js"]
+  "exclude": ["node_modules"]
 }

@@ -1,6 +1,3 @@
-// libs
-import React from "react";
-
 // components
 import { AppWrap } from "./AppWrap";
 import { WebGLUnavailable } from "./WebGLUnavailable";
