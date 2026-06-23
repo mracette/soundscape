@@ -1,5 +1,26 @@
+interface SchedulerEvent {
+  id: number;
+  time: number;
+  type: "single" | "repeating";
+  source: AudioBufferSourceNode;
+  count?: number;
+  frequency?: number;
+  callback?: () => void;
+}
+
+interface RepeatingEvent extends SchedulerEvent {
+  type: "repeating";
+  count: number;
+  frequency: number;
+  callback: () => void;
+}
+
 export class Scheduler {
-  constructor(audioCtx) {
+  audioCtx: AudioContext;
+  queue: SchedulerEvent[];
+  eventId: number;
+
+  constructor(audioCtx: AudioContext) {
     // bind audio context
     this.audioCtx = audioCtx;
 
@@ -10,7 +31,7 @@ export class Scheduler {
     this.eventId = 0;
   }
 
-  scheduleOnce(time, callback) {
+  scheduleOnce(time: number, callback?: () => void): number | Promise<number> {
     // increment for the next event
     this.eventId++;
 
@@ -42,7 +63,7 @@ export class Scheduler {
 
       return newEventId;
     } else {
-      const promise = new Promise(
+      const promise = new Promise<number>(
         (resolve) =>
           (dummySource.onended = () => {
             resolve(newEventId);
@@ -56,10 +77,10 @@ export class Scheduler {
     }
   }
 
-  /* 
+  /*
   Increment a repeating event
   */
-  incrementRepeating(event) {
+  incrementRepeating(event: RepeatingEvent): void {
     event.count++;
     // the web audio spec doesn't allow buffer source nodes to be reused
     const dummySource = this.audioCtx.createBufferSource();
@@ -71,15 +92,15 @@ export class Scheduler {
       this.incrementRepeating(event);
     };
     dummySource.start(
-      event.time + event.count * event.frequency - dummySource.buffer.duration
+      event.time + event.count * event.frequency - dummySource.buffer!.duration
     );
     event.source = dummySource;
   }
 
-  /* 
+  /*
   Initialized a repeating event
   */
-  scheduleRepeating(time, frequency, callback) {
+  scheduleRepeating(time: number, frequency: number, callback: () => void): number {
     // create a dummy buffer to trigger the event
     const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
     const dummySource = this.audioCtx.createBufferSource();
@@ -87,7 +108,7 @@ export class Scheduler {
     dummySource.connect(this.audioCtx.destination);
 
     // grab the next event id value
-    const newEvent = {
+    const newEvent: RepeatingEvent = {
       id: ++this.eventId,
       count: 0,
       time,
@@ -115,24 +136,25 @@ export class Scheduler {
     return newEvent.id;
   }
 
-  updateCallback(id, callback) {
+  updateCallback(id: number, callback: () => void): void {
     const event = this.getEvent(id);
     if (event) {
-      event.callback = callback;
-      event.source.onended = () => {
+      const re = event as RepeatingEvent;
+      re.callback = callback;
+      re.source.onended = () => {
         callback();
         // add the next occurence
-        this.incrementRepeating(event);
+        this.incrementRepeating(re);
       };
     }
   }
 
-  getEvent(id) {
+  getEvent(id: number): SchedulerEvent | false {
     let event = this.queue.find((e) => e.id === id);
     return event || false;
   }
 
-  clear() {
+  clear(): void {
     this.queue.forEach((event) => {
       event.source.onended = null;
       event.source.stop();
@@ -141,7 +163,7 @@ export class Scheduler {
     this.queue.length = 0;
   }
 
-  cancel(id) {
+  cancel(id?: number): void {
     if (typeof id !== "undefined") {
       const event = this.getEvent(id);
 

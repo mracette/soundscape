@@ -11,24 +11,113 @@ import { Analyser } from "./Analyser";
 import { Scheduler } from "./Scheduler";
 import { AudioPlayerWrapper } from "./AudioPlayerWrapper";
 
+// appConfig is a heterogeneous JSON structure; each entry's shape varies per song.
+// We type the subset that WebAudioWrapper reads directly and use `any` for the rest.
+interface VoiceConfig {
+  name: string;
+  length: string;
+  noFade?: boolean;
+  [key: string]: unknown;
+}
+
+interface GroupConfig {
+  name: string;
+  voices: VoiceConfig[];
+  analyser?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+interface SongAudioConfig {
+  bpm: number;
+  timeSignature: number;
+  ambientTrack?: boolean;
+  ambientTrackLength?: string;
+  groups: GroupConfig[];
+  [key: string]: unknown;
+}
+
+interface AppConfigEntry {
+  id: string;
+  audio: SongAudioConfig;
+  [key: string]: unknown;
+}
+
+// Effects nodes for the app-level audio chain
+interface AppEffects {
+  premaster: GainNode;
+  effectsChainEntry: GainNode;
+  effectsChainExit: GainNode;
+  hpFilter: BiquadFilterNode;
+  lpFilter: BiquadFilterNode;
+  reverbDry: GainNode;
+  reverbWet: GainNode;
+  reverb: ConvolverNode;
+  // per-song group nodes keyed by song id
+  [id: string]: unknown;
+}
+
+interface SongEffects {
+  groupNodes: Record<string, GainNode>;
+}
+
+// Shape is dynamic: top-level has 'premaster', then song-id keys
+// Typed as any-indexed to allow both known keys and song-id dynamic keys
+type NodesEffects = AppEffects;
+
+interface NodesAnalysers {
+  premaster?: Analyser;
+  [id: string]: Analyser | { groupAnalysers: Record<string, Analyser> } | undefined;
+}
+
+interface NodesVoices {
+  [id: string]: Record<string, AudioPlayerWrapper>;
+}
+
+interface WrapperNodes {
+  effects: NodesEffects;
+  analysers: NodesAnalysers;
+  voices: NodesVoices;
+}
+
+interface FilterValue {
+  f: number;
+  q: number;
+}
+
+interface WrapperValues {
+  FADE_LENGTH: number;
+  FADE_LENGTH_AMBIENT: number;
+  NUM_EFFECT_VALUES: number;
+  lp: FilterValue[];
+  hp: FilterValue[];
+  am: number[];
+}
+
 export class WebAudioWrapper {
-  constructor(appConfig) {
+  config: Record<string, SongAudioConfig>;
+  nodes: Partial<WrapperNodes>;
+  values: WrapperValues;
+  status: Record<string, boolean>;
+  audioCtx: AudioContext;
+  scheduler: Scheduler;
+
+  constructor(appConfig: AppConfigEntry[]) {
     const props = {
-      config: {},
-      nodes: {},
+      config: {} as Record<string, SongAudioConfig>,
+      nodes: {} as Partial<WrapperNodes>,
       values: {
         FADE_LENGTH: 0.025,
         FADE_LENGTH_AMBIENT: 0.01,
         NUM_EFFECT_VALUES: 100,
-      },
-      status: {},
+      } as WrapperValues,
+      status: {} as Record<string, boolean>,
     };
 
-    props.audioCtx = new AudioContext({
+    const audioCtx = new AudioContext({
       latencyHint: "balanced",
     });
 
-    props.scheduler = new Scheduler(props.audioCtx);
+    const scheduler = new Scheduler(audioCtx);
 
     appConfig.forEach((songConfig) => {
       // move relevant portion of the app config to the classe's "config" property
@@ -39,10 +128,18 @@ export class WebAudioWrapper {
       props.status[songConfig.id] = false;
     });
 
-    Object.assign(this, props);
+    Object.assign(this, props, { audioCtx, scheduler });
+
+    // Object.assign doesn't initialize these declared fields; set them explicitly
+    this.config = props.config;
+    this.nodes = props.nodes;
+    this.values = props.values as WrapperValues;
+    this.status = props.status;
+    this.audioCtx = audioCtx;
+    this.scheduler = scheduler;
   }
 
-  async initAppState() {
+  async initAppState(): Promise<boolean> {
     /*
      * These are WebAudio nodes that will be used across songs, and should persist
      * for the duration of the session.
@@ -56,7 +153,7 @@ export class WebAudioWrapper {
     return true;
   }
 
-  async initSongState(id) {
+  async initSongState(id: string): Promise<boolean> {
     /*
      * These are WebAudio nodes that are specific to the chosen song. They can
      * persist across the session to avoid re-initialization if a user re-visits
@@ -71,9 +168,9 @@ export class WebAudioWrapper {
     return true;
   }
 
-  _initAppEffects() {
+  _initAppEffects(): Promise<void> {
     return new Promise((resolve, reject) => {
-      const effects = {};
+      const effects = {} as AppEffects;
 
       // initialize
       effects.premaster = initGain(this.audioCtx, 1);
@@ -110,7 +207,7 @@ export class WebAudioWrapper {
         "wav"
       );
 
-      loadArrayBuffer(pathToAudio)
+      loadArrayBuffer(pathToAudio!)
         .then((arrayBuffer) => {
           this.audioCtx.decodeAudioData(arrayBuffer, (audioBuffer) => {
             effects.reverb.buffer = audioBuffer;
@@ -123,15 +220,15 @@ export class WebAudioWrapper {
     });
   }
 
-  _initAppEffectValues() {
+  _initAppEffectValues(): void {
     /*
      * Exponential calculations are involved in finding effects values based off of
      * a linear scale. Here, we pre-calculate a set of discrete effects values to save
      * compute time later.
      */
-    const hpValues = [];
-    const lpValues = [];
-    const amValues = [];
+    const hpValues: FilterValue[] = [];
+    const lpValues: FilterValue[] = [];
+    const amValues: number[] = [];
 
     for (
       let i = 0,
@@ -174,13 +271,13 @@ export class WebAudioWrapper {
     this.values.am = amValues;
   }
 
-  _initAppAnalysers() {
+  _initAppAnalysers(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        const analysers = {};
+        const analysers: NodesAnalysers = {};
         analysers.premaster = new Analyser(
           this.audioCtx,
-          this.nodes.effects.premaster,
+          this.nodes.effects!.premaster,
           {
             id: `premaster-analyser`,
             power: 6,
@@ -197,15 +294,16 @@ export class WebAudioWrapper {
     });
   }
 
-  _initSongEffects(id) {
+  _initSongEffects(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        const groupNodes = {};
+        const groupNodes: Record<string, GainNode> = {};
         this.config[id].groups.forEach((group) => {
           groupNodes[group.name] = initGain(this.audioCtx, 1);
-          groupNodes[group.name].connect(this.nodes.effects.effectsChainEntry);
+          groupNodes[group.name].connect(this.nodes.effects!.effectsChainEntry);
         });
-        this.nodes.effects[id] = { groupNodes };
+        // Song effects stored as dynamic key on the effects object
+        (this.nodes.effects as any)[id] = { groupNodes } as SongEffects;
         resolve();
       } catch (err) {
         reject(err);
@@ -213,15 +311,16 @@ export class WebAudioWrapper {
     });
   }
 
-  _initSongAnalysers(id) {
+  _initSongAnalysers(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        const groupAnalysers = {};
+        const groupAnalysers: Record<string, Analyser> = {};
         this.config[id].groups.forEach((group) => {
+          const songEffects = (this.nodes.effects as any)[id] as SongEffects;
           // one analyser for 3D vizualizations
           groupAnalysers[group.name] = new Analyser(
             this.audioCtx,
-            this.nodes.effects[id].groupNodes[group.name],
+            songEffects.groupNodes[group.name],
             {
               id: `${id}-${group.name}-analyser`,
               ...group.analyser,
@@ -230,7 +329,7 @@ export class WebAudioWrapper {
           // one analyser for oscilloscopes
           groupAnalysers[group.name + "-osc"] = new Analyser(
             this.audioCtx,
-            this.nodes.effects[id].groupNodes[group.name],
+            songEffects.groupNodes[group.name],
             {
               id: `${id}-${group.name}-analyser-osc`,
               power: 5,
@@ -249,25 +348,26 @@ export class WebAudioWrapper {
     });
   }
 
-  _initSongVoices(id) {
+  _initSongVoices(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        const voices = {};
-        const promises = [];
+        const voices: Record<string, AudioPlayerWrapper> = {};
+        const promises: Promise<void>[] = [];
+        const songEffects = (this.nodes.effects as any)[id] as SongEffects;
         // ambient track
         if (this.config[id].ambientTrack) {
           const pathToAudio = getPathToAudio(id, "ambient-track", "vbr");
-          const player = new AudioPlayerWrapper(this.audioCtx, pathToAudio, {
+          const player = new AudioPlayerWrapper(this.audioCtx, pathToAudio!, {
             offlineRendering: true,
             renderLength:
               (this.audioCtx.sampleRate *
-                parseInt(this.config[id].ambientTrackLength) *
+                parseInt(this.config[id].ambientTrackLength!) *
                 this.config[id].timeSignature *
                 60) /
               this.config[id].bpm,
             fade: true,
             fadeLength: this.values.FADE_LENGTH_AMBIENT,
-            destination: this.nodes.effects.premaster,
+            destination: this.nodes.effects!.premaster,
             loop: true,
           });
           voices["ambient"] = player;
@@ -277,7 +377,7 @@ export class WebAudioWrapper {
         this.config[id].groups.forEach((group) => {
           group.voices.forEach((voice) => {
             const pathToAudio = getPathToAudio(id, voice.name, "vbr");
-            const player = new AudioPlayerWrapper(this.audioCtx, pathToAudio, {
+            const player = new AudioPlayerWrapper(this.audioCtx, pathToAudio!, {
               offlineRendering: true,
               renderLength:
                 (this.audioCtx.sampleRate *
@@ -287,15 +387,15 @@ export class WebAudioWrapper {
                 this.config[id].bpm,
               fade: true,
               fadeLength: voice.noFade ? 0 : this.values.FADE_LENGTH,
-              destination: this.nodes.effects[id].groupNodes[group.name],
+              destination: songEffects.groupNodes[group.name],
               loop: true,
             });
             voices[voice.name] = player;
             promises.push(player.init());
           });
         });
-        this.nodes.voices || (this.nodes.voices = {});
-        this.nodes.voices[id] = voices;
+        this.nodes.voices || (this.nodes.voices = {} as NodesVoices);
+        this.nodes.voices![id] = voices;
         Promise.all(promises)
           .then(() => resolve())
           .catch((err) => reject(err));
@@ -305,44 +405,44 @@ export class WebAudioWrapper {
     });
   }
 
-  getAnalysers(songId = null) {
-    return songId ? this.nodes.analysers[songId] : this.nodes.analysers;
+  getAnalysers(songId: string | null = null): NodesAnalysers | unknown {
+    return songId ? this.nodes.analysers![songId] : this.nodes.analysers;
   }
 
-  getEffects(songId = null) {
-    return songId ? this.nodes.effects[songId] : this.nodes.effects;
+  getEffects(songId: string | null = null): unknown {
+    return songId ? (this.nodes.effects as any)[songId] : this.nodes.effects;
   }
 
-  getValues() {
+  getValues(): WrapperValues {
     return this.values;
   }
 
-  getVoices(songId) {
-    return this.nodes.voices[songId];
+  getVoices(songId: string): Record<string, AudioPlayerWrapper> {
+    return this.nodes.voices![songId];
   }
 
-  getConfig(songId) {
+  getConfig(songId: string): SongAudioConfig {
     return this.config[songId];
   }
 
-  setEffects(name, value) {
+  setEffects(name: string, value: number): void {
     switch (name) {
       case "lp": {
         const v = this.values.lp[Math.round(value) - 1];
-        this.nodes.effects.lpFilter.frequency.value = v.f;
-        this.nodes.effects.lpFilter.Q.value = v.q;
+        this.nodes.effects!.lpFilter.frequency.value = v.f;
+        this.nodes.effects!.lpFilter.Q.value = v.q;
         break;
       }
       case "hp": {
         const v = this.values.hp[Math.round(value) - 1];
-        this.nodes.effects.hpFilter.frequency.value = v.f;
-        this.nodes.effects.hpFilter.Q.value = v.q;
+        this.nodes.effects!.hpFilter.frequency.value = v.f;
+        this.nodes.effects!.hpFilter.Q.value = v.q;
         break;
       }
       case "am": {
         const wet = this.values.am[Math.round(value) - 1];
-        this.nodes.effects.reverbWet.gain.value = wet;
-        this.nodes.effects.reverbDry.gain.value = 1 - wet;
+        this.nodes.effects!.reverbWet.gain.value = wet;
+        this.nodes.effects!.reverbDry.gain.value = 1 - wet;
         break;
       }
       default:
