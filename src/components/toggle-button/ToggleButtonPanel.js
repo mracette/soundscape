@@ -6,8 +6,10 @@ import { ToggleButtonGroup } from "./ToggleButtonGroup";
 
 // contexts
 import { ThemeContext } from "../../contexts/contexts";
-import { MusicPlayerContext } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
+
+// store
+import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 
 // styles
 import "../../styles/components/ToggleButtonPanel.scss";
@@ -15,8 +17,10 @@ import "../../styles/components/ToggleButtonPanel.scss";
 export const ToggleButtonPanel = (props) => {
   const { panelMuteButton } = React.useContext(ThemeContext);
 
-  const { dispatch, mute, backgroundMode } =
-    React.useContext(MusicPlayerContext);
+  const mute = useMusicPlayerStore((s) => s.mute);
+  const backgroundMode = useMusicPlayerStore((s) => s.backgroundMode);
+  const startMute = useMusicPlayerStore((s) => s.startMute);
+  const stopMute = useMusicPlayerStore((s) => s.stopMute);
 
   const { groups } = React.useContext(SongContext);
 
@@ -69,11 +73,7 @@ export const ToggleButtonPanel = (props) => {
                 }
               : undefined
           }
-          onClick={() =>
-            mute
-              ? dispatch({ type: "stopMute" })
-              : dispatch({ type: "startMute" })
-          }
+          onClick={() => (mute ? stopMute() : startMute())}
         >
           Mute
         </button>
