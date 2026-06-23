@@ -6,7 +6,7 @@ import { WebGLUnavailable } from "./WebGLUnavailable";
 import { WEBGL } from "three/examples/jsm/WebGL";
 
 // styles
-import "../styles/app.scss";
+import "../styles/app.css";
 
 export const App = () => {
   // check if webgl is available, if not, show the error page
