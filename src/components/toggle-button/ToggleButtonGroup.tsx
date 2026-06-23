@@ -1,12 +1,19 @@
 // libs
-import React from "react";
+import {
+  useContext,
+  useReducer,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 
 // components
 import { ToggleButton } from "./ToggleButton";
 import { Oscilloscope } from "../Oscilloscope";
 
 // contexts
-import { ThemeContext } from "../../contexts/contexts";
+import { ThemeContext, VoiceConfig } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
 
@@ -20,11 +27,19 @@ import { ToggleButtonGroupReducer } from "../../reducers/ToggleButtonGroupReduce
 import "../../styles/components/ToggleButtonGroup.scss";
 import "../../styles/components/Oscilloscope.scss";
 
-export const ToggleButtonGroup = (props) => {
+interface Props {
+  name: string;
+  index: number;
+  groupCount: number;
+  polyphony: number;
+  voices: VoiceConfig[];
+}
+
+export const ToggleButtonGroup = (props: Props) => {
   const { name } = props;
-  const { WAW } = React.useContext(WebAudioContext);
-  const { id } = React.useContext(SongContext);
-  const { groupMuteButton, groupSoloButton } = React.useContext(ThemeContext);
+  const { WAW } = useContext(WebAudioContext)!;
+  const { id } = useContext(SongContext)!;
+  const { groupMuteButton, groupSoloButton } = useContext(ThemeContext)!;
   const groupSolos = useMusicPlayerStore((s) => s.groupSolos);
   const addResetCallback = useMusicPlayerStore((s) => s.addResetCallback);
   const addRandomizeCallback = useMusicPlayerStore(
@@ -32,7 +47,7 @@ export const ToggleButtonGroup = (props) => {
   );
   const addGroupSolo = useMusicPlayerStore((s) => s.addGroupSolo);
   const removeGroupSolo = useMusicPlayerStore((s) => s.removeGroupSolo);
-  const [state, dispatch] = React.useReducer(ToggleButtonGroupReducer, {
+  const [state, dispatch] = useReducer(ToggleButtonGroupReducer, {
     maxPolyphony: props.polyphony,
     polyphony: 0,
     players: [],
@@ -40,13 +55,13 @@ export const ToggleButtonGroup = (props) => {
     playerOverrides: [],
   });
 
-  const [solo, setSolo] = React.useState(false);
-  const [mute, setMute] = React.useState(false);
+  const [solo, setSolo] = useState(false);
+  const [mute, setMute] = useState(false);
 
-  const groupNode = WAW.getEffects(id).groupNodes[name];
+  const groupNode = (WAW.getEffects(id) as { groupNodes: Record<string, GainNode> }).groupNodes[name];
 
   /* Solo and Mute Effects */
-  React.useEffect(() => {
+  useEffect(() => {
     if (solo && !mute) {
       groupNode.gain.value = 1;
     } else if (solo && mute) {
@@ -60,7 +75,7 @@ export const ToggleButtonGroup = (props) => {
   }, [solo, mute, groupSolos]);
 
   /* Solo Effects */
-  React.useEffect(() => {
+  useEffect(() => {
     if (groupSolos.length > 0) {
       if (groupSolos.indexOf(name) === -1) {
         setSolo(false);
@@ -76,7 +91,7 @@ export const ToggleButtonGroup = (props) => {
   }, [groupSolos]);
 
   /* Reset & Randomize Callbacks and Effects */
-  React.useEffect(() => {
+  useEffect(() => {
     const handleReset = () => {
       // take the simple route - click the players!
       const activePlayers = state.players.filter(
@@ -92,13 +107,13 @@ export const ToggleButtonGroup = (props) => {
       // ensures at least 1 voice from each group is enabled
       const count = Math.ceil(Math.random() * ePoly);
       // keep track of how many are enabled in each group
-      const playersToEnable = [];
+      const playersToEnable: string[] = [];
       // choose a random player from the set
       while (playersToEnable.length < count) {
         const rand = Math.floor(Math.random() * state.players.length);
-        const id = state.players[rand].id;
-        if (playersToEnable.indexOf(id) === -1) {
-          playersToEnable.push(id);
+        const pid = state.players[rand].id;
+        if (playersToEnable.indexOf(pid) === -1) {
+          playersToEnable.push(pid);
         }
       }
       state.players.forEach((p) => {
@@ -116,15 +131,11 @@ export const ToggleButtonGroup = (props) => {
       });
     };
 
-    addResetCallback({
-      name: name,
-      resetCallback: handleReset,
-    });
-
-    addRandomizeCallback({
-      name: name,
-      randomizeCallback: handleRandomize,
-    });
+    // LATENT BUG: store's ResetCallback/RandomizeCallback are callable interfaces ({ name; (): void }),
+    // but these objects are plain { name, resetCallback/randomizeCallback } — not callable.
+    // Preserving the existing runtime behavior with casts.
+    addResetCallback({ name, resetCallback: handleReset } as any);
+    addRandomizeCallback({ name, randomizeCallback: handleRandomize } as any);
   }, [
     addResetCallback,
     addRandomizeCallback,
@@ -134,7 +145,7 @@ export const ToggleButtonGroup = (props) => {
     state.polyphony,
   ]);
 
-  const handleToggleSolo = React.useCallback(() => {
+  const handleToggleSolo = useCallback(() => {
     if (solo) {
       removeGroupSolo();
     } else {
@@ -190,18 +201,19 @@ export const ToggleButtonGroup = (props) => {
 
       <div className="toggle-buttons flex-row">
         {/* eslint-disable-next-line react-hooks/exhaustive-deps */}
-        {React.useCallback(
-          props.voices.map((voice) => (
-            <ToggleButton
-              dispatch={dispatch}
-              key={voice.name}
-              name={voice.name}
-              groupName={name}
-              length={voice.length}
-              quantizeLength={voice.quantizeLength}
-              override={state.playerOverrides.indexOf(voice.name) !== -1}
-            />
-          )),
+        {useMemo(
+          () =>
+            props.voices.map((voice) => (
+              <ToggleButton
+                dispatch={dispatch}
+                key={voice.name}
+                name={voice.name}
+                groupName={name}
+                length={voice.length}
+                quantizeLength={voice.quantizeLength}
+                override={state.playerOverrides.indexOf(voice.name) !== -1}
+              />
+            )),
           [props.voices, name, state.playerOverrides, dispatch]
         )}
       </div>

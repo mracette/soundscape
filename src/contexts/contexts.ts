@@ -43,11 +43,14 @@ export interface CreditEntry {
 
 export interface VoiceConfig {
   name: string;
+  length?: string;
+  quantizeLength?: string;
   [key: string]: unknown;
 }
 
 export interface GroupConfig {
   name: string;
+  polyphony: number;
   voices: VoiceConfig[];
   analyser?: Record<string, unknown>;
 }

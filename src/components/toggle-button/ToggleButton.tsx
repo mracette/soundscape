@@ -1,5 +1,5 @@
 // libs
-import React from "react";
+import { useRef, useState, useCallback, useEffect, useContext } from "react";
 import { gsap } from "gsap";
 
 // context
@@ -13,6 +13,9 @@ import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 
 // other
 import { nextSubdivision } from "../../utils/audioUtils";
+
+// reducers
+import { Action } from "../../reducers/ToggleButtonGroupReducer";
 
 // styles
 import "../../styles/components/Icon.scss";
@@ -32,15 +35,34 @@ const STOP_PARAMS = {
     "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100",
 };
 
-export const ToggleButton = (props) => {
-  const buttonRef = React.useRef();
-  const animationTargetsRef = React.useRef();
-  const animationEventRef = React.useRef();
+type PlayerState = "stopped" | "pending-start" | "active" | "pending-stop";
 
-  const { WAW } = React.useContext(WebAudioContext);
-  const { vh } = React.useContext(LayoutContext);
-  const { id, timeSignature, bpm } = React.useContext(SongContext);
-  const { flags } = React.useContext(TestingContext);
+interface AnimationTargets {
+  button: HTMLButtonElement;
+  circleSvg: Element;
+  iconDiv: Element;
+  iconSvg: Element;
+  iconPoly: Element;
+}
+
+interface Props {
+  dispatch: (action: Action) => void;
+  name: string;
+  groupName: string;
+  length?: string;
+  quantizeLength?: string;
+  override: boolean;
+}
+
+export const ToggleButton = (props: Props) => {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const animationTargetsRef = useRef<AnimationTargets | null>(null);
+  const animationEventRef = useRef<number | undefined>(undefined);
+
+  const { WAW } = useContext(WebAudioContext)!;
+  const { vh } = useContext(LayoutContext)!;
+  const { id, timeSignature, bpm } = useContext(SongContext)!;
+  const { flags } = useContext(TestingContext)!;
   const addVoice = useMusicPlayerStore((s) => s.addVoice);
   const updateVoiceState = useMusicPlayerStore((s) => s.updateVoiceState);
   const { dispatch, name, override, quantizeLength } = props;
@@ -48,27 +70,30 @@ export const ToggleButton = (props) => {
   const { scheduler, audioCtx } = WAW;
   const player = WAW.getVoices(id)[name];
 
-  const [playerState, setPlayerState] = React.useState("stopped");
+  const [playerState, setPlayerState] = useState<PlayerState>("stopped");
 
   const quantizedStartBeats = flags.quantizeSamples
-    ? timeSignature * parseInt(quantizeLength)
+    ? timeSignature * parseInt(quantizeLength!)
     : 1;
   const buttonRadius = vh ? vh * 3.5 : 0;
   const buttonBorder = vh ? (vh * 3.5) / 15 : 0;
 
-  const changePlayerState = React.useCallback(
-    (newState) => {
-      const runAnimation = (type, duration) => {
+  const changePlayerState = useCallback(
+    (newState: PlayerState) => {
+      const runAnimation = (type: "start" | "stop", duration: number) => {
         const seconds = duration / 1000;
+        const targets = animationTargetsRef.current!;
 
         // clear queue
-        gsap.killTweensOf(animationTargetsRef.current.circleSvg);
-        gsap.killTweensOf(animationTargetsRef.current.iconPoly);
-        gsap.killTweensOf(animationTargetsRef.current.iconDiv);
-        gsap.killTweensOf([...animationTargetsRef.current.iconDiv.children]);
-        gsap.killTweensOf(animationTargetsRef.current.button);
+        gsap.killTweensOf(targets.circleSvg);
+        gsap.killTweensOf(targets.iconPoly);
+        gsap.killTweensOf(targets.iconDiv);
+        gsap.killTweensOf([...targets.iconDiv.children]);
+        gsap.killTweensOf(targets.button);
 
-        let points, backgroundColor, rotateZ;
+        let points: string | undefined;
+        let backgroundColor: string | undefined;
+        let rotateZ: number;
 
         if (type === "start") {
           rotateZ = -180;
@@ -77,7 +102,7 @@ export const ToggleButton = (props) => {
 
           // sweep always begins from a 0 offset regardless of current value
           gsap.fromTo(
-            animationTargetsRef.current.circleSvg,
+            targets.circleSvg,
             { strokeDashoffset: 0 },
             {
               strokeDashoffset: 2 * Math.PI * (buttonRadius - buttonBorder / 2),
@@ -85,13 +110,13 @@ export const ToggleButton = (props) => {
               ease: "none",
             }
           );
-        } else if (type === "stop") {
+        } else {
           rotateZ = 0;
           backgroundColor = STOP_PARAMS.backgroundColor;
           points = STOP_PARAMS.points;
 
           // run circle animation
-          gsap.to(animationTargetsRef.current.circleSvg, {
+          gsap.to(targets.circleSvg, {
             strokeDashoffset: 0,
             duration: seconds,
             ease: "none",
@@ -99,7 +124,7 @@ export const ToggleButton = (props) => {
         }
 
         // run icon animation (morph polygon points)
-        gsap.to(animationTargetsRef.current.iconPoly, {
+        gsap.to(targets.iconPoly, {
           attr: { points },
           duration: seconds,
           ease: "none",
@@ -107,10 +132,7 @@ export const ToggleButton = (props) => {
 
         // run rotate animation
         gsap.to(
-          [
-            animationTargetsRef.current.iconDiv,
-            ...animationTargetsRef.current.iconDiv.children,
-          ],
+          [targets.iconDiv, ...targets.iconDiv.children],
           {
             rotation: rotateZ,
             duration: seconds,
@@ -119,7 +141,7 @@ export const ToggleButton = (props) => {
         );
 
         // run button animation
-        gsap.to(animationTargetsRef.current.button, {
+        gsap.to(targets.button, {
           backgroundColor,
           duration: seconds,
           ease: "power2.in",
@@ -129,7 +151,7 @@ export const ToggleButton = (props) => {
       // cancel current event for this toggle (necessary to stop a pending start)
       scheduler.cancel(animationEventRef.current);
 
-      const initialState =
+      const initialState: PlayerState =
         newState === "active" ? "pending-start" : "pending-stop";
 
       dispatch({
@@ -192,7 +214,7 @@ export const ToggleButton = (props) => {
             newState,
           });
         }
-      );
+      ) as number;
 
       // convert to millis for animations
       const quantizedStartMillis =
@@ -216,14 +238,15 @@ export const ToggleButton = (props) => {
   );
 
   /* Initialize Hook */
-  React.useEffect(() => {
+  useEffect(() => {
+    const btn = buttonRef.current!;
     // store the animation targets based on their relative positions in the DOM
     animationTargetsRef.current = {
-      button: buttonRef.current,
-      circleSvg: buttonRef.current.children[0],
-      iconDiv: buttonRef.current.children[1],
-      iconSvg: buttonRef.current.children[1].children[0],
-      iconPoly: buttonRef.current.children[1].children[0].children[0],
+      button: btn,
+      circleSvg: btn.children[0],
+      iconDiv: btn.children[1],
+      iconSvg: btn.children[1].children[0],
+      iconPoly: btn.children[1].children[0].children[0],
     };
 
     dispatch({
@@ -232,7 +255,7 @@ export const ToggleButton = (props) => {
         player: {
           id: props.name,
           playerState: "stopped",
-          ref: buttonRef.current,
+          ref: btn,
         },
       },
     });
@@ -241,12 +264,12 @@ export const ToggleButton = (props) => {
       id: props.name,
       group: props.groupName,
       voiceState: "stopped",
-      ref: buttonRef.current,
+      ref: btn,
     });
   }, [dispatch, id, addVoice, props.groupName, props.name]);
 
   /* Override Hook */
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       override &&
       (playerState === "active" || playerState === "pending-start")
@@ -258,10 +281,11 @@ export const ToggleButton = (props) => {
   }, [playerState, changePlayerState, name, override, dispatch]);
 
   /* Cleanup Hook */
-  React.useEffect(() => {
+  useEffect(() => {
     if (player) {
       return () => {
-        player.stop();
+        // LATENT BUG: AudioPlayerWrapper.stop() requires a number arg; called here without one
+        (player.stop as (t?: number) => void)();
         player.disconnect();
       };
     }
@@ -271,8 +295,7 @@ export const ToggleButton = (props) => {
     <button
       className="toggle-button"
       ref={buttonRef}
-      onClick={(e) => {
-        // e.preventDefault();
+      onClick={() => {
         switch (playerState) {
           case "stopped": // start if stopped
             changePlayerState("active");

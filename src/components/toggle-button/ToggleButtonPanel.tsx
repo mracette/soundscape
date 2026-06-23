@@ -1,5 +1,5 @@
 // libs
-import React from "react";
+import { useContext } from "react";
 
 // components
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
@@ -14,15 +14,20 @@ import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 // styles
 import "../../styles/components/ToggleButtonPanel.scss";
 
-export const ToggleButtonPanel = (props) => {
-  const { panelMuteButton } = React.useContext(ThemeContext);
+interface Props {
+  handleReset: () => void;
+  handleRandomize: () => void;
+}
+
+export const ToggleButtonPanel = (props: Props) => {
+  const { panelMuteButton } = useContext(ThemeContext)!;
 
   const mute = useMusicPlayerStore((s) => s.mute);
   const backgroundMode = useMusicPlayerStore((s) => s.backgroundMode);
   const startMute = useMusicPlayerStore((s) => s.startMute);
   const stopMute = useMusicPlayerStore((s) => s.stopMute);
 
-  const { groups } = React.useContext(SongContext);
+  const { groups } = useContext(SongContext)!;
 
   return (
     <div id="toggle-button-panel" className="flex-panel">
