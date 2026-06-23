@@ -1,8 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), vanillaExtractPlugin()],
   server: { port: 3000 },
   // Expose CRA-style env vars (REACT_APP_*) via import.meta.env.
   envPrefix: "REACT_APP_",
