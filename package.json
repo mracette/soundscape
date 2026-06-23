@@ -25,6 +25,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/ --fix",
+    "typecheck": "tsc --noEmit",
     "format": "prettier --write src",
     "test:e2e": "playwright test"
   },
@@ -43,12 +44,17 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.61.0",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@types/three": "0.103.2",
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^15.15.0",
     "prettier": "^3.8.4",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.62.0",
     "vite": "^6.4.3"
   },
   "packageManager": "pnpm@11.8.0"
