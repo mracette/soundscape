@@ -18,7 +18,7 @@ import { nextSubdivision } from "../../utils/audioUtils";
 import { Action } from "../../reducers/ToggleButtonGroupReducer";
 
 // styles
-import "../../styles/components/Icon.scss";
+import "../../styles/components/Icon.css";
 import "../../styles/components/ToggleButton.scss";
 
 const START_PARAMS = {

@@ -2,7 +2,7 @@ import { useRef, CSSProperties, RefObject } from "react";
 
 import icons from "../assets/svg/iconList.svg";
 
-import "../styles/components/Icon.scss";
+import "../styles/components/Icon.css";
 
 interface Props {
   name?: string;

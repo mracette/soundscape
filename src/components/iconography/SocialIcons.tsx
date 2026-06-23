@@ -2,7 +2,7 @@
 import { Icon } from "../../components/Icon";
 
 // styles
-import "../../styles/components/Icon.scss";
+import "../../styles/components/Icon.css";
 
 interface Props {
   divClassList?: string;

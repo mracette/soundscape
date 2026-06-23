@@ -10,7 +10,7 @@ import { WebAudioContext } from "../contexts/contexts";
 
 import { Analyser } from "../classes/Analyser";
 
-import "../styles/components/FreqBands.scss";
+import "../styles/components/FreqBands.css";
 
 interface Props {
   animate?: boolean;
