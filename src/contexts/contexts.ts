@@ -39,6 +39,7 @@ export interface ThemeContextValue {
 export interface CreditEntry {
   type: string;
   content: string;
+  link?: string;
 }
 
 export interface VoiceConfig {

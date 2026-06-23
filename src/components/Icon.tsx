@@ -1,11 +1,20 @@
-import React from "react";
+import { useRef, CSSProperties, RefObject } from "react";
 
 import icons from "../assets/svg/iconList.svg";
 
 import "../styles/components/Icon.scss";
 
-export const Icon = (props) => {
-  const iconRef = React.useRef(null);
+interface Props {
+  name?: string;
+  divClassList?: string;
+  svgClassList?: string;
+  style?: CSSProperties;
+  link?: string;
+  handleAddIconRef?: (ref: RefObject<SVGUseElement | null>) => void;
+}
+
+export const Icon = (props: Props) => {
+  const iconRef = useRef<SVGUseElement>(null);
 
   if (props.handleAddIconRef) {
     props.handleAddIconRef(iconRef);

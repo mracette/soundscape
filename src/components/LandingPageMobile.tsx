@@ -1,4 +1,3 @@
-import React from "react";
 import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
 import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
 import { SwampIcon } from "./custom-song-icons/SwampIcon";
@@ -7,7 +6,11 @@ import { Link } from "wouter";
 
 import "../styles/components/LandingPage.scss";
 
-export const LandingPageMobile = ({ dispatch }) => {
+interface Props {
+  dispatch: (action: { type: string | null }) => void;
+}
+
+export const LandingPageMobile = ({ dispatch }: Props) => {
   return (
     <div
       style={{

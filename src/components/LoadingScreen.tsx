@@ -1,6 +1,3 @@
-// libs
-import React from "react";
-
 // components
 import { LoadingIcon } from "../components/custom-song-icons/LoadingIcon";
 

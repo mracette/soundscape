@@ -1,27 +1,22 @@
-// libs
-import React from "react";
+import { useContext, useRef, useState, useEffect } from "react";
 import { clamp, lerp } from "../utils/mathUtils";
 
-// context
 import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 
-// store
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 
-// components
 import { CanvasSlider } from "./canvas/CanvasSlider";
 
-// styles
 import "../styles/components/EffectsPanel.scss";
 
 const EFFECT_INTERVAL = 4; // in beats
 
-const chooseNewValue = (prev) => {
+const chooseNewValue = (prev: number): number => {
   const max = 100;
   const bounds = 35;
   const effectSize = 40;
-  let newValue;
+  let newValue: number;
   if (prev < bounds) {
     newValue = prev + Math.random() * effectSize;
   } else if (prev > max - bounds) {
@@ -32,22 +27,27 @@ const chooseNewValue = (prev) => {
   return clamp(newValue, 1, 100);
 };
 
-export const EffectsPanel = (props) => {
+export const EffectsPanel = () => {
   const setVoicesBackgroundMode = useMusicPlayerStore(
     (s) => s.setBackgroundMode
   );
   const setPauseVisuals = useMusicPlayerStore((s) => s.setPauseVisuals);
-  const { bpm } = React.useContext(SongContext);
-  const { WAW } = React.useContext(WebAudioContext);
+  const { bpm } = useContext(SongContext)!;
+  const { WAW } = useContext(WebAudioContext)!;
 
-  const [backgroundMode, setBackgroundMode] = React.useState(false);
-  const backgroundModeEventRef = React.useRef(null);
+  const [backgroundMode, setBackgroundMode] = useState(false);
+  const backgroundModeEventRef = useRef<number | null>(null);
 
-  const [hpValue, setHpValue] = React.useState(1);
-  const [lpValue, setLpValue] = React.useState(100);
-  const [amValue, setAmValue] = React.useState(1);
+  const [hpValue, setHpValue] = useState(1);
+  const [lpValue, setLpValue] = useState(100);
+  const [amValue, setAmValue] = useState(1);
 
-  const effectsTargets = React.useRef({
+  const effectsTargets = useRef<{
+    time: number | null;
+    hp: number | null;
+    lp: number | null;
+    am: number | null;
+  }>({
     time: null,
     hp: null,
     lp: null,
@@ -67,11 +67,11 @@ export const EffectsPanel = (props) => {
       effectsTargets.current.am = chooseNewValue(amValue);
     }
     const progress =
-      (WAW.audioCtx.currentTime - effectsTargets.current.time) /
+      (WAW.audioCtx.currentTime - effectsTargets.current.time!) /
       intervalSeconds;
-    const newHp = lerp(hpValue, effectsTargets.current.hp, progress);
-    const newLp = lerp(lpValue, effectsTargets.current.lp, progress);
-    const newAm = lerp(amValue, effectsTargets.current.am, progress);
+    const newHp = lerp(hpValue, effectsTargets.current.hp!, progress);
+    const newLp = lerp(lpValue, effectsTargets.current.lp!, progress);
+    const newAm = lerp(amValue, effectsTargets.current.am!, progress);
     setHpValue(newHp);
     WAW.setEffects("hp", newHp);
     setLpValue(newLp);
@@ -81,11 +81,11 @@ export const EffectsPanel = (props) => {
   };
 
   /* Background Mode Hook */
-  React.useEffect(() => {
+  useEffect(() => {
     // init event
     if (
       backgroundMode &&
-      !WAW.scheduler.getEvent(backgroundModeEventRef.current)
+      !WAW.scheduler.getEvent(backgroundModeEventRef.current!)
     ) {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
         WAW.audioCtx.currentTime + 60 / bpm,
@@ -95,24 +95,24 @@ export const EffectsPanel = (props) => {
       // update event
     } else if (backgroundMode) {
       WAW.scheduler.updateCallback(
-        backgroundModeEventRef.current,
+        backgroundModeEventRef.current!,
         triggerRandomEffects
       );
       // stop event
     } else if (!backgroundMode) {
-      WAW.scheduler.cancel(backgroundModeEventRef.current);
+      WAW.scheduler.cancel(backgroundModeEventRef.current!);
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [bpm, backgroundMode, triggerRandomEffects]);
 
   /* Effect Value Hooks */
-  React.useEffect(() => {
+  useEffect(() => {
     WAW.setEffects("hp", hpValue);
   }, [WAW, hpValue]);
-  React.useEffect(() => {
+  useEffect(() => {
     WAW.setEffects("lp", lpValue);
   }, [WAW, lpValue]);
-  React.useEffect(() => {
+  useEffect(() => {
     WAW.setEffects("am", amValue);
   }, [WAW, amValue]);
 
@@ -129,7 +129,7 @@ export const EffectsPanel = (props) => {
             <input
               type="checkbox"
               onInput={(e) => {
-                const checked = e.target.checked;
+                const checked = (e.target as HTMLInputElement).checked;
                 setVoicesBackgroundMode(checked);
               }}
             />
@@ -148,7 +148,7 @@ export const EffectsPanel = (props) => {
             <input
               type="checkbox"
               onInput={(e) => {
-                const checked = e.target.checked;
+                const checked = (e.target as HTMLInputElement).checked;
                 setBackgroundMode(checked);
               }}
             />
@@ -170,7 +170,7 @@ export const EffectsPanel = (props) => {
             <input
               type="checkbox"
               onInput={(e) => {
-                const checked = e.target.checked;
+                const checked = (e.target as HTMLInputElement).checked;
                 setPauseVisuals(checked);
               }}
             />

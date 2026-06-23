@@ -1,13 +1,13 @@
-import React from "react";
+import { useContext } from "react";
 
 import { SongContext } from "../contexts/contexts";
 import { InfoContext } from "../contexts/contexts";
 
 import "../styles/components/SongInfoPanel.scss";
 
-export const SongInfoPanel = (props) => {
-  const { name } = React.useContext(SongContext);
-  const { credits } = React.useContext(InfoContext);
+export const SongInfoPanel = () => {
+  const { name } = useContext(SongContext)!;
+  const { credits } = useContext(InfoContext)!;
 
   return (
     <div id="song-info-panel">

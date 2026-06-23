@@ -1,33 +1,35 @@
-// libs
-import React from "react";
+import { useContext, useRef, useCallback, useMemo } from "react";
 
-// components
 import { Canvas } from "./canvas/Canvas";
 
-// hooks
 import { useAnimationFrame } from "../hooks/useAnimationFrame";
 
-// contexts
 import { ThemeContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 
-// styles
+import { Analyser } from "../classes/Analyser";
+
 import "../styles/components/FreqBands.scss";
 
-export const FreqBands = (props) => {
-  const { spectrumFunction } = React.useContext(ThemeContext);
-  const { bpm, timeSignature } = React.useContext(SongContext);
-  const { WAW } = React.useContext(WebAudioContext);
-  const analyser = WAW.getAnalysers().premaster;
+interface Props {
+  animate?: boolean;
+}
+
+export const FreqBands = (props: Props) => {
+  const { spectrumFunction } = useContext(ThemeContext)!;
+  const { bpm, timeSignature } = useContext(SongContext)!;
+  const { WAW } = useContext(WebAudioContext)!;
+  const analyser = (WAW.getAnalysers() as { premaster: Analyser }).premaster;
 
   const secondsPerBar = (60 / bpm) * timeSignature;
 
-  const canvasRef = React.useRef(null);
-  const contextRef = React.useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 
-  const render = React.useCallback(
-    (canvas, context, time) => {
+  const render = useCallback(
+    (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, time: number) => {
+      const fftData = analyser.fftData as Uint8Array;
       const radius =
         canvas.height / 2 - canvas.height / analyser.frequencyBinCount;
 
@@ -41,7 +43,7 @@ export const FreqBands = (props) => {
       analyser.getFrequencyData();
 
       // map time domain data to canvas draw actions
-      analyser.fftData.forEach((d, i) => {
+      fftData.forEach((d, i) => {
         const vol = d / 255;
         const cx =
           canvas.width / 2 +
@@ -60,7 +62,7 @@ export const FreqBands = (props) => {
 
         context.beginPath();
 
-        context.fillStyle = spectrumFunction(i / analyser.frequencyBinCount);
+        context.fillStyle = spectrumFunction(i / analyser.frequencyBinCount) as string;
 
         context.moveTo(cx, cy);
 
@@ -80,11 +82,11 @@ export const FreqBands = (props) => {
 
   useAnimationFrame((t) =>
     props.animate
-      ? render(canvasRef.current, contextRef.current, t.time)
+      ? render(canvasRef.current!, contextRef.current!, t.time)
       : () => null
   );
 
-  return React.useMemo(
+  return useMemo(
     () => (
       <div id="freq-bands">
         <Canvas

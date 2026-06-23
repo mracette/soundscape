@@ -1,11 +1,8 @@
-// libs
-import React from "react";
 import { Link } from "wouter";
 
-// styles
 import "../styles/components/MenuButtonContentWrapper.scss";
 
-export const HomePanel = (props) => {
+export const HomePanel = () => {
   return (
     <div id="home-panel" className="flex-panel">
       <h2>Return Home?</h2>

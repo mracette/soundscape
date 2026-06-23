@@ -1,43 +1,47 @@
-// libs
-import React from "react";
+import { useContext, useRef, useCallback, useEffect, useMemo } from "react";
 
-// components
 import { Canvas } from "./canvas/Canvas";
 
-// context
 import { ThemeContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 
-// hooks
-// import { useAnimationFrame } from "../hooks/useAnimationFrame";
+import { Analyser } from "../classes/Analyser";
 
-// styles
 import "../styles/components/Oscilloscope.scss";
 
-export const Oscilloscope = (props) => {
-  const { WAW } = React.useContext(WebAudioContext);
-  const { spectrumFunction } = React.useContext(ThemeContext);
-  const { id } = React.useContext(SongContext);
-  const analyser = WAW.getAnalysers(id).groupAnalysers[props.name + "-osc"];
-  const canvasRef = React.useRef(null);
-  const contextRef = React.useRef(null);
+interface Props {
+  name: string;
+  gradient?: boolean;
+  index?: number;
+  groupCount?: number;
+  animate?: boolean;
+}
 
-  const render = React.useCallback(
-    (canvas, context) => {
+export const Oscilloscope = (props: Props) => {
+  const { WAW } = useContext(WebAudioContext)!;
+  const { spectrumFunction } = useContext(ThemeContext)!;
+  const { id } = useContext(SongContext)!;
+  const analyser = (WAW.getAnalysers(id) as { groupAnalysers: Record<string, Analyser> }).groupAnalysers[props.name + "-osc"];
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
+
+  const render = useCallback(
+    (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => {
       context.lineWidth = canvas.height / 20;
       context.clearRect(0, 0, canvas.width, canvas.height);
       analyser.getTimeData();
-      const sliceWidth = canvas.width / (analyser.timeData.length - 1);
-      let prevX, prevY;
+      const timeData = analyser.timeData as Uint8Array;
+      const sliceWidth = canvas.width / (timeData.length - 1);
+      let prevX: number, prevY: number;
       let x = 0;
-      analyser.timeData.forEach((d, i) => {
+      timeData.forEach((d, i) => {
         context.beginPath();
         if (props.gradient) {
           context.strokeStyle = spectrumFunction(
-            props.index / props.groupCount +
-              i / (analyser.timeData.length * props.groupCount)
-          );
+            props.index! / props.groupCount! +
+              i / (timeData.length * props.groupCount!)
+          ) as string;
         }
 
         const v = d / 128.0;
@@ -59,15 +63,15 @@ export const Oscilloscope = (props) => {
     [analyser, props.gradient, props.groupCount, props.index, spectrumFunction]
   );
 
-  React.useEffect(() => {
-    render(canvasRef.current, contextRef.current);
+  useEffect(() => {
+    render(canvasRef.current!, contextRef.current!);
   }, [render]);
 
   // useAnimationFrame(() =>
   //   props.animate ? render(canvasRef.current, contextRef.current) : () => null
   // );
 
-  return React.useMemo(
+  return useMemo(
     () => (
       <div id="oscilloscope">
         <Canvas
@@ -76,7 +80,7 @@ export const Oscilloscope = (props) => {
             canvasRef.current = canvas;
             contextRef.current = canvas.getContext("2d");
           }}
-          onResize={(canvas) => render(canvas, canvas.getContext("2d"))}
+          onResize={(canvas) => render(canvas, canvas.getContext("2d")!)}
         />
       </div>
     ),
