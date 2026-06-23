@@ -8,8 +8,4 @@ export default defineConfig({
   envPrefix: "REACT_APP_",
   // Keep CRA's output directory so deploy is unchanged.
   build: { outDir: "build" },
-  // This codebase stores JSX in .js files; esbuild must parse them as JSX.
-  // tsx loader is a superset of jsx and also strips TypeScript annotations.
-  esbuild: { loader: "tsx", include: /src\/.*\.[jt]sx?$/, exclude: [] },
-  optimizeDeps: { esbuildOptions: { loader: { ".js": "jsx", ".ts": "tsx" } } },
 });
