@@ -8,8 +8,13 @@ import {
   Points,
   Vector4,
   BufferAttribute,
+  Camera,
+  WebGLRenderer,
+  Scene,
+  Texture,
 } from "three";
 
+// chroma-js has no bundled types; all chroma calls are typed as any
 import chroma from "chroma-js";
 
 export const COLOR_SCALE = chroma
@@ -22,28 +27,30 @@ const COUNT = 3000;
 const SPEED = 0.01;
 const V3 = new Vector3();
 
-const getY = (lifecycle) => Math.pow(lifecycle, 2.75);
+const getY = (lifecycle: number): number => Math.pow(lifecycle, 2.75);
 
-const positions = [];
-const lifecycles = [];
-const colors = [];
+const positions: number[] = [];
+const lifecycles: number[] = [];
+const colors: number[] = [];
 
 for (let i = 0; i < COUNT; i++) {
   V3.set(Math.random(), Math.random(), Math.random());
   const lifeCycle = Math.random();
   lifecycles.push(lifeCycle);
   positions.push(V3.x, getY(lifeCycle), V3.z);
+  // chroma(...).gl() returns [r, g, b, a] as number[]; typed any due to missing chroma types
   const chroma = COLOR_SCALE(Math.random()).gl();
   colors.push(chroma[0], chroma[1], chroma[2]);
 }
 
 export class LandingPageParticles {
-  /**
-   * @param {Scene} scene
-   * @param {Camera} camera
-   * @param {WebGLRenderer} renderer
-   */
-  constructor(scene, camera, renderer) {
+  scene: Scene;
+  camera: Camera;
+  renderer: WebGLRenderer;
+  loader: TextureLoader;
+  object: Points | undefined;
+
+  constructor(scene: Scene, camera: Camera, renderer: WebGLRenderer) {
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
@@ -98,7 +105,7 @@ export class LandingPageParticles {
           void main()	{
 
               float opacity = .6 * (1. - vPosition.y);
-              
+
               vec4 texColor = texture2D( uMap, gl_PointCoord );
 
               gl_FragColor = vec4 ( vColor.xyz, texColor.w * opacity );
@@ -132,22 +139,23 @@ export class LandingPageParticles {
       .catch(console.error);
   }
 
-  update = (delta) => {
+  update = (delta: number): void => {
     if (!this.object) return; // Wait for texture load
 
-    this.object.geometry.setDrawRange(0, Math.min(window.innerWidth, COUNT));
+    const geom = this.object.geometry as BufferGeometry;
+    geom.setDrawRange(0, Math.min(window.innerWidth, COUNT));
 
-    const position = this.object.geometry.attributes.position;
+    const position = geom.attributes.position;
     for (let i = 0; i < COUNT; i++) {
       const zFactor = lerp(position.getZ(i), 0.5, 1);
       const lifecycleNext = lifecycles[i] + delta * SPEED * (1 / zFactor);
       lifecycles[i] = lifecycleNext % 1;
       position.setY(i, getY(lifecycles[i]));
     }
-    this.object.geometry.attributes.position.needsUpdate = true;
+    (geom.attributes.position as BufferAttribute).needsUpdate = true;
   };
 
-  loadTexture = () => {
+  loadTexture = (): Promise<Texture> => {
     return new Promise((resolve, reject) => {
       this.loader.load(
         `${import.meta.env.BASE_URL}img/particle1.png`,

@@ -1,7 +1,31 @@
 import * as THREE from "three";
 
+interface StarQuandrantsParams {
+  colorPalette: (t: number) => string | number;
+  width: number;
+  height: number;
+  depth: number;
+  center: THREE.Vector3;
+  count: number;
+}
+
 export class StarQuandrants {
-  constructor(scene, levels, skyColor, params) {
+  levels: number;
+  colorPalette: (t: number) => string | number;
+  width: number;
+  height: number;
+  depth: number;
+  center: THREE.Vector3;
+  leftGroup: THREE.Group;
+  rightGroup: THREE.Group;
+  group: THREE.Group;
+
+  constructor(
+    scene: THREE.Scene,
+    levels: number,
+    skyColor: THREE.Color,
+    params: StarQuandrantsParams
+  ) {
     this.levels = levels;
 
     this.colorPalette = params.colorPalette;
@@ -25,11 +49,11 @@ export class StarQuandrants {
     scene.add(this.group);
   }
 
-  createStars(n, channel, level, skyColor) {
+  createStars(n: number, channel: string, level: number, skyColor: THREE.Color): void {
     let geometry = new THREE.BufferGeometry();
-    let positions = [];
-    let color;
-    let colors = [];
+    let positions: number[] = [];
+    let color: THREE.Color;
+    let colors: number[] = [];
 
     for (let i = 0; i < n; i++) {
       const xBound =

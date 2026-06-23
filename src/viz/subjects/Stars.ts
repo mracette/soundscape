@@ -1,19 +1,37 @@
 import * as THREE from "three";
 
-/**
- * Creates a set of 'stars' using an efficient buffer geometry implementation.
- * The stars move together in orbit around a center point.
- * @module Stars
- */
+interface StarsParams {
+  color?: number | string;
+  colorPalette?: ((t: number) => string | number) | null;
+  intensityMap?: number[][];
+  radiusSpread?: number;
+  minOrbitRadius?: number;
+  maxOrbitRadius?: number;
+  orbitSpeed?: number;
+  rotateVector?: THREE.Vector3;
+}
 
 export class Stars {
-  /**
-   * @param {object} scene - the THREE.js scene
-   * @param {object} center - Vector3: the center of the star field (which is a sphere)
-   * @param {number} number - the number of stars to display
-   * @param {object} params - optional parameters (see documentation)
-   */
-  constructor(scene, center, number, params) {
+  scene: THREE.Scene;
+  center: THREE.Vector3;
+  number: number;
+  color!: number | string;
+  colorPalette!: ((t: number) => string | number) | null;
+  intensityMap!: number[][];
+  radiusSpread!: number;
+  minOrbitRadius!: number;
+  maxOrbitRadius!: number;
+  orbitSpeed!: number;
+  rotateVector!: THREE.Vector3;
+  group: THREE.Group;
+  starField: THREE.Points;
+
+  constructor(
+    scene: THREE.Scene,
+    center: THREE.Vector3,
+    number: number,
+    params: StarsParams
+  ) {
     // required parameters
     this.scene = scene;
     this.center = center;
@@ -42,7 +60,7 @@ export class Stars {
     this.scene.add(this.group);
   }
 
-  guassianRand() {
+  guassianRand(): number {
     var rand = 0;
     for (var i = 0; i < 6; i += 1) {
       rand += Math.random();
@@ -50,7 +68,7 @@ export class Stars {
     return rand / 6;
   }
 
-  normalize(x, y, z, r) {
+  normalize(x: number, y: number, z: number, r: number): { x: number; y: number; z: number } {
     const nX = (r * x) / Math.sqrt(x * x + y * y + z * z);
     const nY = (r * y) / Math.sqrt(x * x + y * y + z * z);
     const nZ = (r * z) / Math.sqrt(x * x + y * y + z * z);
@@ -61,12 +79,12 @@ export class Stars {
     };
   }
 
-  createSpheres(n) {
+  createSpheres(n: number): THREE.Points {
     let geometry = new THREE.BufferGeometry();
-    let positions = [];
-    let intensities = [];
-    let color;
-    let colors = [];
+    let positions: number[] = [];
+    let intensities: number[] = [];
+    let color: THREE.Color;
+    let colors: number[] = [];
 
     for (let i = 0; i < n; i++) {
       let randomCoords = this.normalize(
@@ -107,21 +125,21 @@ export class Stars {
 
     let starField = new THREE.Points(geometry, material);
 
-    starField.geometry.attributes.position.needsUpdate = true;
+    ((starField.geometry as THREE.BufferGeometry).attributes.position as THREE.BufferAttribute).needsUpdate = true;
 
     this.group.add(starField);
 
     return starField;
   }
 
-  update(delta) {
+  update(delta: number): void {
     this.group.rotateOnAxis(
       this.rotateVector.normalize(),
       (delta * this.orbitSpeed * 2 * Math.PI) / 60
     );
   }
 
-  lerp(v0, v1, t) {
+  lerp(v0: number, v1: number, t: number): number {
     return v0 * (1 - t) + v1 * t;
   }
 }
