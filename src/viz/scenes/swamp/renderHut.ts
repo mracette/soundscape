@@ -38,7 +38,7 @@ export const renderHut = (
       extras.colors.length - 1,
       Math.floor(cycle * extras.colors.length)
     );
-    let posTwo =
+    const posTwo =
       pos === 0
         ? pos + 1
         : pos === extras.colors.length - 1

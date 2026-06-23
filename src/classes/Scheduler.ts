@@ -150,7 +150,7 @@ export class Scheduler {
   }
 
   getEvent(id: number): SchedulerEvent | false {
-    let event = this.queue.find((e) => e.id === id);
+    const event = this.queue.find((e) => e.id === id);
     return event || false;
   }
 

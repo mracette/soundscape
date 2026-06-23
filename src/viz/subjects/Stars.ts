@@ -61,8 +61,8 @@ export class Stars {
   }
 
   guassianRand(): number {
-    var rand = 0;
-    for (var i = 0; i < 6; i += 1) {
+    let rand = 0;
+    for (let i = 0; i < 6; i += 1) {
       rand += Math.random();
     }
     return rand / 6;
@@ -80,14 +80,14 @@ export class Stars {
   }
 
   createSpheres(n: number): THREE.Points {
-    let geometry = new THREE.BufferGeometry();
-    let positions: number[] = [];
-    let intensities: number[] = [];
+    const geometry = new THREE.BufferGeometry();
+    const positions: number[] = [];
+    const intensities: number[] = [];
     let color: THREE.Color;
-    let colors: number[] = [];
+    const colors: number[] = [];
 
     for (let i = 0; i < n; i++) {
-      let randomCoords = this.normalize(
+      const randomCoords = this.normalize(
         -1 + 2 * this.guassianRand(),
         -1 + 2 * this.guassianRand(),
         -1 + 2 * this.guassianRand(),
@@ -117,13 +117,13 @@ export class Stars {
     );
     geometry.setDrawRange(0, n);
 
-    let material = new THREE.PointsMaterial({
+    const material = new THREE.PointsMaterial({
       vertexColors: THREE.VertexColors,
       transparent: true,
       opacity: 1,
     });
 
-    let starField = new THREE.Points(geometry, material);
+    const starField = new THREE.Points(geometry, material);
 
     ((starField.geometry as THREE.BufferGeometry).attributes.position as THREE.BufferAttribute).needsUpdate = true;
 

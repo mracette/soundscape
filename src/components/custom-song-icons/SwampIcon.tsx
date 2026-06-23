@@ -19,8 +19,8 @@ const animate = (context: CanvasRenderingContext2D, cycle: number, coords: Canva
   for (let i = 0; i < count; i++) {
     const rot = TAU * (i / count);
     const rotAgain = TAU * bsinRot(cycle);
-    let eyeStartX = coords.nx(-1 + 2 / 6);
-    let eyeStartY = coords.ny(0)!;
+    const eyeStartX = coords.nx(-1 + 2 / 6);
+    const eyeStartY = coords.ny(0)!;
 
     for (let j = 0; j < 2; j++) {
       const mod = j % 2 === 0 ? -1 : 1;

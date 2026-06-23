@@ -139,7 +139,7 @@ export default class FirstPersonControls {
   update(delta: number, yClamp?: number) {
     if (this.enabled === false) return;
 
-    var actualMoveSpeed = delta * this.movementSpeed;
+    const actualMoveSpeed = delta * this.movementSpeed;
 
     // translate by key press
     if (this.moveForward || (this.autoForward && !this.moveBackward))
@@ -151,7 +151,7 @@ export default class FirstPersonControls {
     // enforce height lock
     if (this.heightLock) this.object.position.y = yClamp || 1;
 
-    var actualLookSpeed = delta * this.lookSpeed;
+    const actualLookSpeed = delta * this.lookSpeed;
 
     if (this.lookUp) this.lat += actualLookSpeed;
     if (this.lookDown) this.lat -= actualLookSpeed;
@@ -172,8 +172,8 @@ export default class FirstPersonControls {
       );
     }
 
-    let targetPosition = this.target;
-    let position = this.object.position;
+    const targetPosition = this.target;
+    const position = this.object.position;
 
     targetPosition.x =
       position.x + 100 * Math.sin(this.phi) * Math.cos(this.theta);

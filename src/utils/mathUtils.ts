@@ -59,8 +59,8 @@ const linToLog = (w: number): { a: number; b: number } => {
    * a = w/exp(b*w)
    *
    */
-  let b = Math.log(1 / w) / (1 - w);
-  let a = w / Math.exp(b * w);
+  const b = Math.log(1 / w) / (1 - w);
+  const a = w / Math.exp(b * w);
 
   return { a, b };
 };

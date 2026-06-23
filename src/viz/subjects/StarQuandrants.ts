@@ -50,10 +50,10 @@ export class StarQuandrants {
   }
 
   createStars(n: number, channel: string, level: number, skyColor: THREE.Color): void {
-    let geometry = new THREE.BufferGeometry();
-    let positions: number[] = [];
+    const geometry = new THREE.BufferGeometry();
+    const positions: number[] = [];
     let color: THREE.Color;
-    let colors: number[] = [];
+    const colors: number[] = [];
 
     for (let i = 0; i < n; i++) {
       const xBound =
@@ -83,7 +83,7 @@ export class StarQuandrants {
     geometry.addAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
     geometry.setDrawRange(0, n);
 
-    let material = new THREE.PointsMaterial({
+    const material = new THREE.PointsMaterial({
       vertexColors: THREE.VertexColors,
       transparent: true,
       opacity: 0,

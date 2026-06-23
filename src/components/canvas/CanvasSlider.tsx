@@ -31,7 +31,7 @@ export const CanvasSlider = (props: Props) => {
       const x = (e as MouseEvent).clientX || ((e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientX : 0);
       const delta = parseFloat(String(x - startPosition));
       const multiplier = (maxValue - minValue) / canvasRef.current!.clientWidth;
-      let newValue = clamp(startValue + delta * multiplier, minValue, maxValue);
+      const newValue = clamp(startValue + delta * multiplier, minValue, maxValue);
       props.handleValue(newValue);
     };
     document.onmousemove = (e) => onMouseOrTouchMove(e);
