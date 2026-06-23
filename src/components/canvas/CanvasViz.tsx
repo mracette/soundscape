@@ -1,10 +1,12 @@
-// libs
-import React from "react";
+import { useRef, useEffect, useContext } from "react";
 
 // scenes
 import { Moonrise } from "../../viz/scenes/moonrise/Moonrise";
 import { Mornings } from "../../viz/scenes/mornings/Mornings";
 import { Swamp } from "../../viz/scenes/swamp/Swamp";
+
+// scene base
+import { SceneManager } from "../../viz/SceneManager";
 
 // context
 import { SongContext } from "../../contexts/contexts";
@@ -28,26 +30,31 @@ import {
 // styles
 import "../../styles/components/CanvasViz.scss";
 
-export const CanvasViz = (props) => {
+interface Props {
+  songLoadStatus: boolean;
+  handleSetCanvasLoadStatus: (status: boolean) => void;
+}
+
+export const CanvasViz = (props: Props) => {
   const { songLoadStatus, handleSetCanvasLoadStatus } = props;
-  const { spectrumFunction, canvasFade } = React.useContext(ThemeContext);
-  const { id, groups, bpm } = React.useContext(SongContext);
-  const { WAW } = React.useContext(WebAudioContext);
+  const { spectrumFunction, canvasFade } = useContext(ThemeContext)!;
+  const { id, groups, bpm } = useContext(SongContext)!;
+  const { WAW } = useContext(WebAudioContext)!;
   const voices = useMusicPlayerStore((s) => s.voices);
   const pauseVisuals = useMusicPlayerStore((s) => s.pauseVisuals);
-  const { flags } = React.useContext(TestingContext);
+  const { flags } = useContext(TestingContext)!;
 
-  const canvasRef = React.useRef(null);
-  const sceneRef = React.useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const sceneRef = useRef<SceneManager | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     sceneRef.current && (sceneRef.current.pauseVisuals = pauseVisuals);
   }, [pauseVisuals]);
 
   // tell the scene which voices are active so it can render elements selectively
-  React.useEffect(() => {
+  useEffect(() => {
     if (sceneRef.current) {
-      const playerState = {};
+      const playerState: Record<string, boolean> = {};
       groups.forEach((g) => {
         playerState[g.name] =
           voices.filter(
@@ -60,15 +67,18 @@ export const CanvasViz = (props) => {
     }
   }, [groups, voices]);
 
-  React.useEffect(() => {
-    let newScene;
+  useEffect(() => {
+    let newScene: SceneManager | undefined;
+    // spectrumFunction is typed (n: number) => unknown in ThemeContext but scenes require (n: number) => string
+    const specFn = spectrumFunction as (n: number) => string;
     switch (id) {
       case "moonrise":
         if (flags.showVisuals) {
           newScene = new Moonrise(
-            canvasRef.current,
-            WAW.getAnalysers(id).groupAnalysers,
-            () => handleSetCanvasLoadStatus(true)
+            canvasRef.current!,
+            (WAW.getAnalysers(id) as any).groupAnalysers,
+            () => handleSetCanvasLoadStatus(true),
+            {}
           );
           sceneRef.current = newScene;
         } else {
@@ -78,11 +88,11 @@ export const CanvasViz = (props) => {
       case "mornings":
         if (flags.showVisuals) {
           newScene = new Mornings(
-            canvasRef.current,
-            WAW.getAnalysers(id).groupAnalysers,
+            canvasRef.current!,
+            (WAW.getAnalysers(id) as any).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {
-              spectrumFunction,
+              spectrumFunction: specFn,
               bpm,
             }
           );
@@ -94,11 +104,11 @@ export const CanvasViz = (props) => {
       case "swamp":
         if (flags.showVisuals) {
           newScene = new Swamp(
-            canvasRef.current,
-            WAW.getAnalysers(id).groupAnalysers,
+            canvasRef.current!,
+            (WAW.getAnalysers(id) as any).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {
-              spectrumFunction,
+              spectrumFunction: specFn,
               bpm,
             }
           );
@@ -111,25 +121,25 @@ export const CanvasViz = (props) => {
         throw new Error("Song not found");
     }
 
-    let resizeFunction;
+    let resizeFunction: (() => void) | undefined;
 
     if (flags.showVisuals) {
-      if (newScene.resizeMethod === "cinematic") {
-        resizeFunction = cinematicResize(canvasRef.current);
+      if (newScene!.resizeMethod === "cinematic") {
+        resizeFunction = cinematicResize(canvasRef.current!);
         resizeFunction();
         addWindowListeners(resizeFunction);
       }
-      addWindowListeners(sceneRef.current.onWindowResize);
+      addWindowListeners(sceneRef.current!.onWindowResize);
     }
 
     return () => {
       if (flags.showVisuals) {
-        newScene.stop();
-        newScene.disposeAll(newScene.scene);
-        if (newScene.resizeMethod === "cinematic") {
-          removeWindowListeners(resizeFunction);
+        newScene!.stop();
+        newScene!.disposeAll(newScene!.scene);
+        if (newScene!.resizeMethod === "cinematic") {
+          removeWindowListeners(resizeFunction!);
         }
-        removeWindowListeners(sceneRef.current.onWindowResize);
+        removeWindowListeners(sceneRef.current!.onWindowResize);
       }
     };
   }, [

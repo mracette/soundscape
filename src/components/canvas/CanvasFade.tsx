@@ -1,10 +1,9 @@
-// libs
-import React from "react";
+import { useRef, useEffect, RefObject } from "react";
 
 // utils
 import { addWindowListeners, removeWindowListeners } from "../../utils/jsUtils";
 
-const trackParentSize = (child, parent) => {
+const trackParentSize = (child: HTMLCanvasElement, parent: HTMLCanvasElement) => {
   const rect = parent.getBoundingClientRect();
   child.style.top = `${rect.top}px`;
   child.style.left = `${rect.left}px`;
@@ -14,14 +13,14 @@ const trackParentSize = (child, parent) => {
   child.height = parent.height;
 };
 
-const drawFade = (canvas, context) => {
+const drawFade = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => {
   const gradientSize = Math.round(canvas.width / 30);
   const startColor = "rgba(0, 0, 0, 0)";
   const endColor = "rgba(0, 0, 0, 1)";
 
   // corners first
   for (let i = 0; i < 4; i++) {
-    let x, y, gx, gy;
+    let x: number | undefined, y: number | undefined, gx: number | undefined, gy: number | undefined;
     switch (i.toString()) {
       case "0": {
         x = 0;
@@ -55,22 +54,23 @@ const drawFade = (canvas, context) => {
         break;
     }
     const gradient = context.createRadialGradient(
-      gx,
-      gy,
+      gx!,
+      gy!,
       0,
-      gx,
-      gy,
+      gx!,
+      gy!,
       gradientSize
     );
     gradient.addColorStop(0, startColor);
     gradient.addColorStop(1, endColor);
     context.fillStyle = gradient;
-    context.fillRect(x, y, gradientSize, gradientSize);
+    context.fillRect(x!, y!, gradientSize, gradientSize);
   }
 
   // sides
   for (let i = 0; i < 4; i++) {
-    let x, y, w, h, gx, gy, gxx, gyy;
+    let x: number | undefined, y: number | undefined, w: number | undefined, h: number | undefined;
+    let gx: number | undefined, gy: number | undefined, gxx: number | undefined, gyy: number | undefined;
     switch (i.toString()) {
       case "0": {
         x = gradientSize;
@@ -119,25 +119,29 @@ const drawFade = (canvas, context) => {
       default:
         break;
     }
-    const gradient = context.createLinearGradient(gx, gy, gxx, gyy);
+    const gradient = context.createLinearGradient(gx!, gy!, gxx!, gyy!);
     gradient.addColorStop(0, startColor);
     gradient.addColorStop(1, endColor);
     context.fillStyle = gradient;
-    context.fillRect(x, y, w, h);
+    context.fillRect(x!, y!, w!, h!);
   }
 };
 
-export const CanvasFade = React.forwardRef((props, ref) => {
-  const canvasRef = React.useRef(null);
-  const refWidth = ref.current ? ref.current.width : null;
-  const refHeight = ref.current ? ref.current.height : null;
-  React.useEffect(() => {
+interface Props {
+  ref?: RefObject<HTMLCanvasElement | null>;
+}
+
+export const CanvasFade = ({ ref }: Props) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const refWidth = ref?.current ? ref.current.width : null;
+  const refHeight = ref?.current ? ref.current.height : null;
+  useEffect(() => {
     if (ref && canvasRef) {
-      const parent = ref.current;
-      const fade = canvasRef.current;
-      const context = fade.getContext("2d");
+      const parent = ref.current!;
+      const fade = canvasRef.current!;
+      const context = fade.getContext("2d")!;
       fade.style.position = "absolute";
-      fade.style.zIndex = 1;
+      fade.style.zIndex = "1";
       const listener = () => {
         trackParentSize(fade, parent);
         drawFade(fade, context);
@@ -150,4 +154,4 @@ export const CanvasFade = React.forwardRef((props, ref) => {
     }
   }, [ref, canvasRef, refWidth, refHeight]);
   return <canvas ref={canvasRef} className="canvas-fade"></canvas>;
-});
+};

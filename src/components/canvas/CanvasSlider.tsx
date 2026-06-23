@@ -1,5 +1,4 @@
-// libs
-import React from "react";
+import { useRef } from "react";
 import { clamp } from "../../utils/mathUtils";
 
 // components
@@ -9,20 +8,29 @@ const thumbRadius = 1 / 4;
 const trackHeight = 1 / 12;
 const hotGreen = "rgb(0, 225, 158)";
 
-export const CanvasSlider = (props) => {
+interface Props {
+  id?: string;
+  reverse?: boolean;
+  minValue?: number;
+  maxValue?: number;
+  value: number;
+  handleValue: (value: number) => void;
+}
+
+export const CanvasSlider = (props: Props) => {
   const reverse = props.reverse || false;
   const minValue = props.minValue || 1;
   const maxValue = props.maxValue || 100;
-  const canvasRef = React.useRef(null);
-  const contextRef = React.useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 
-  const handleMouseOrTouchDown = (startPosition, startValue) => {
+  const handleMouseOrTouchDown = (startPosition: number, startValue: number) => {
     // disable selections while the mouse is down
     document.onselectstart = () => false;
-    const onMouseOrTouchMove = (e) => {
-      const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-      const delta = parseFloat(x - startPosition);
-      const multiplier = (maxValue - minValue) / canvasRef.current.clientWidth;
+    const onMouseOrTouchMove = (e: MouseEvent | TouchEvent) => {
+      const x = (e as MouseEvent).clientX || ((e as TouchEvent).touches ? (e as TouchEvent).touches[0].clientX : 0);
+      const delta = parseFloat(String(x - startPosition));
+      const multiplier = (maxValue - minValue) / canvasRef.current!.clientWidth;
       let newValue = clamp(startValue + delta * multiplier, minValue, maxValue);
       props.handleValue(newValue);
     };
@@ -41,7 +49,7 @@ export const CanvasSlider = (props) => {
     };
   };
 
-  const render = (canvas, context) => {
+  const render = (canvas: HTMLCanvasElement, context: CanvasRenderingContext2D) => {
     const radius = canvas.height * thumbRadius;
     const track = canvas.height * trackHeight;
     const activeValue =
@@ -70,14 +78,14 @@ export const CanvasSlider = (props) => {
       className="canvas-slider-wrapper"
       onMouseDown={(e) => {
         e.preventDefault();
-        const startPosition = parseFloat(e.clientX);
-        const startValue = parseFloat(props.value);
+        const startPosition = parseFloat(String(e.clientX));
+        const startValue = parseFloat(String(props.value));
         handleMouseOrTouchDown(startPosition, startValue);
       }}
       onTouchStart={(e) => {
         e.preventDefault();
-        const startPosition = parseFloat(e.touches[0].clientX);
-        const startValue = parseFloat(props.value);
+        const startPosition = parseFloat(String(e.touches[0].clientX));
+        const startValue = parseFloat(String(props.value));
         handleMouseOrTouchDown(startPosition, startValue);
       }}
     >
@@ -87,12 +95,12 @@ export const CanvasSlider = (props) => {
         onLoad={(canvas) => {
           canvasRef.current = canvas;
           contextRef.current = canvas.getContext("2d");
-          render(canvasRef.current, contextRef.current);
+          render(canvasRef.current, contextRef.current!);
         }}
         onResize={(canvas) => {
           canvasRef.current = canvas;
           contextRef.current = canvas.getContext("2d");
-          render(canvasRef.current, contextRef.current);
+          render(canvasRef.current, contextRef.current!);
         }}
       />
     </div>
