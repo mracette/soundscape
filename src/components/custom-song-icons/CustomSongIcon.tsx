@@ -5,7 +5,7 @@ import { CanvasCoordinates } from "../../utils/mathUtils";
 import { Canvas } from "../canvas/Canvas";
 
 // styles
-import "../../styles/components/LandingPage.scss";
+import "../../styles/components/LandingPage.css";
 
 import { LayoutContext } from "../../contexts/contexts";
 

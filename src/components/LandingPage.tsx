@@ -12,7 +12,7 @@ import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
 import { LayoutContext } from "../contexts/contexts";
 
 // styles
-import "../styles/components/LandingPage.scss";
+import "../styles/components/LandingPage.css";
 
 // utils
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";

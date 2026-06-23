@@ -4,7 +4,7 @@ import { SwampIcon } from "./custom-song-icons/SwampIcon";
 import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
 import { Link } from "wouter";
 
-import "../styles/components/LandingPage.scss";
+import "../styles/components/LandingPage.css";
 
 interface Props {
   dispatch: (action: { type: string | null }) => void;

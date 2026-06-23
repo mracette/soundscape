@@ -5,7 +5,7 @@ import { LoadingIcon } from "../components/custom-song-icons/LoadingIcon";
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 
 // styles
-import "../styles/components/LandingPage.scss";
+import "../styles/components/LandingPage.css";
 
 export const LoadingScreen = () => {
   const isLoading = useMusicPlayerStore((s) => s.isLoading);
