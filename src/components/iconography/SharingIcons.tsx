@@ -1,10 +1,11 @@
-// libs
-import React from "react";
-
 // styles
 import "../../styles/components/Icon.scss";
 
-export const SharingIcons = (props) => {
+interface Props {
+  divClassList?: string;
+}
+
+export const SharingIcons = (props: Props) => {
   const url = "https://soundscape.world";
   const tagline =
     "Soundscape: the immersive music visualizer that lets you build your own beats.";

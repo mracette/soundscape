@@ -1,13 +1,15 @@
-// libs
-import React from "react";
-
 // components
 import { Icon } from "../../components/Icon";
 
 // styles
 import "../../styles/components/Icon.scss";
 
-export const SocialIcons = (props) => {
+interface Props {
+  divClassList?: string;
+  svgClassList?: string;
+}
+
+export const SocialIcons = (props: Props) => {
   return (
     <div
       id="social-icons"

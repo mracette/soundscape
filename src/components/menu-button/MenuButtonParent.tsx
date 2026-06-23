@@ -1,5 +1,4 @@
-// libs
-import React, { useState, useContext } from "react";
+import { useState, useContext, type ReactNode } from "react";
 
 // components
 import { MenuButtonChild } from "./MenuButtonChild";
@@ -12,9 +11,22 @@ import { LayoutContext } from "../../contexts/contexts";
 // styles
 import "../../styles/components/MenuButtonParent.scss";
 
-export const MenuButtonParent = (props) => {
-  const { vh } = useContext(LayoutContext);
-  const { buttonColor } = useContext(ThemeContext);
+interface ChildButtonProp {
+  id: string;
+  autoOpen?: boolean;
+  iconName?: string;
+  icon?: ReactNode;
+  content?: ReactNode;
+  [key: string]: unknown;
+}
+
+interface Props {
+  childButtonProps: ChildButtonProp[];
+}
+
+export const MenuButtonParent = (props: Props) => {
+  const { vh } = useContext(LayoutContext)!;
+  const { buttonColor } = useContext(ThemeContext)!;
 
   // parent button dimensions
   const height = 7 * vh;

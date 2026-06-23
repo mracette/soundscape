@@ -1,5 +1,4 @@
-// libs
-import React, { useContext } from "react";
+import { useContext, type ReactNode } from "react";
 
 // contexts
 import { LayoutContext } from "../../contexts/contexts";
@@ -8,15 +7,23 @@ import { ThemeContext } from "../../contexts/contexts";
 // styles
 import "../../styles/components/MenuButtonContentWrapper.scss";
 
-export const MenuButtonContentWrapper = (props) => {
-  const { vw, vh } = useContext(LayoutContext);
-  const { contentPanelColor } = useContext(ThemeContext);
+interface Props {
+  content?: ReactNode;
+  config?: unknown;
+  minWidth?: number;
+  marginTop?: number;
+  parentIsOpen?: boolean;
+}
+
+export const MenuButtonContentWrapper = (props: Props) => {
+  const { vw, vh } = useContext(LayoutContext)!;
+  const { contentPanelColor } = useContext(ThemeContext)!;
 
   return (
     <div
       className="menu-button-content"
       style={{
-        visibility: !props.parentIsOpen && "hidden",
+        visibility: (!props.parentIsOpen && "hidden") as "hidden" | undefined,
         background: contentPanelColor,
         top: props.marginTop,
         minWidth: props.minWidth,

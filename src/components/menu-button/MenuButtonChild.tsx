@@ -1,5 +1,4 @@
-// libs
-import React from "react";
+import { useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
 // components
 import { MenuButtonContentWrapper } from "./MenuButtonContentWrapper";
@@ -14,13 +13,31 @@ import { useOutsideClick } from "../../hooks/useOutsideClick";
 // styles
 import "../../styles/components/MenuButtonChild.scss";
 
-export const MenuButtonChild = (props) => {
+interface Props {
+  id?: string;
+  autoOpen?: boolean;
+  parentIsOpen?: boolean;
+  parentWidth: number;
+  parentHeight: number;
+  width: number;
+  height: number;
+  separation: number;
+  index: number;
+  zIndex?: number;
+  iconName?: string;
+  icon?: ReactNode;
+  menuWidth: number;
+  content?: ReactNode;
+  config?: unknown;
+}
+
+export const MenuButtonChild = (props: Props) => {
   const { buttonColor, openButtonColor, contentPanelColor } =
-    React.useContext(ThemeContext);
+    useContext(ThemeContext)!;
 
-  const [isOpen, setIsOpen] = React.useState(props.autoOpen);
+  const [isOpen, setIsOpen] = useState(props.autoOpen);
 
-  const nodeRef = React.useRef();
+  const nodeRef = useRef<HTMLDivElement>(null);
 
   // calculate the margin needed to expand this child to its outward position
   const marginStyle = props.parentIsOpen
@@ -29,12 +46,13 @@ export const MenuButtonChild = (props) => {
       2 * props.separation * (props.index - 1)
     : 0;
 
-  useOutsideClick(
+  // 4th arg is passed but useOutsideClick only accepts 3; the extra arg is ignored at runtime
+  (useOutsideClick as (...args: unknown[]) => void)(
     nodeRef,
-    React.useCallback(() => {
+    useCallback(() => {
       if (!isOpen) setIsOpen(true);
     }, [isOpen]),
-    React.useCallback(() => {
+    useCallback(() => {
       if (isOpen) setIsOpen(false);
     }, [isOpen]),
     ["menu-button-child"]
@@ -73,7 +91,7 @@ export const MenuButtonChild = (props) => {
           className="arrow"
           style={{
             borderBottomColor: contentPanelColor,
-            display: !isOpen && "none",
+            display: (!isOpen && "none") as "none" | undefined,
             top: props.height + (props.parentHeight - props.height) / 2,
             left: marginStyle + (props.parentWidth - props.width) / 2,
             borderLeftWidth: props.width / 2,

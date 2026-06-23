@@ -1,6 +1,4 @@
-// libs
-import React from "react";
-import { boundedSin, TAU } from "../../utils/mathUtils";
+import { boundedSin, TAU, CanvasCoordinates } from "../../utils/mathUtils";
 
 // components
 import { CustomSongIcon } from "./CustomSongIcon";
@@ -12,8 +10,8 @@ const period = 2;
 const bsin = boundedSin(period, 0, 1, 0);
 const gridSize = 16;
 
-const animateLoading = (context, cycle, coords) => {
-  const r = coords.getHeight() / 64;
+const animateLoading = (context: CanvasRenderingContext2D, cycle: number, coords: CanvasCoordinates) => {
+  const r = coords.getHeight()! / 64;
 
   context.fillStyle = "#f6f2d5";
   context.globalCompositeOperation = "source-over";
@@ -28,7 +26,7 @@ const animateLoading = (context, cycle, coords) => {
       context.beginPath();
       context.arc(
         coords.nx(p[0]),
-        coords.ny(p[1]),
+        coords.ny(p[1])!,
         bsin(cycle - 1.75 * (i / gridSize) * (j / gridSize) * period) * r,
         0,
         TAU
@@ -40,23 +38,28 @@ const animateLoading = (context, cycle, coords) => {
   context.globalCompositeOperation = "destination-atop";
   context.beginPath();
   context.fillStyle = "#141b24";
-  context.arc(coords.nx(0), coords.ny(0), coords.getHeight() / 2.5, 0, TAU);
+  context.arc(coords.nx(0), coords.ny(0)!, coords.getHeight()! / 2.5, 0, TAU);
   context.fill();
 
   context.globalCompositeOperation = "source-over";
   context.stroke();
 };
 
-const animateReady = (context, cycle, coords) => {
+const animateReady = (context: CanvasRenderingContext2D, _cycle: number, coords: CanvasCoordinates) => {
   context.fillStyle = "#141b24";
   context.globalCompositeOperation = "source-over";
   context.beginPath();
-  context.arc(coords.nx(0), coords.ny(0), coords.getHeight() / 2.5, 0, TAU);
+  context.arc(coords.nx(0), coords.ny(0)!, coords.getHeight()! / 2.5, 0, TAU);
   context.fill();
   context.stroke();
 };
 
-export function LoadingIcon(props) {
+interface Props {
+  name?: string;
+  isLoading?: boolean;
+}
+
+export function LoadingIcon(props: Props) {
   return (
     <div>
       {!props.isLoading && (

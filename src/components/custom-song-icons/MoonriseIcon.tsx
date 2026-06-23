@@ -1,6 +1,4 @@
-// libs
-import React from "react";
-import { TAU, rotatePoint } from "../../utils/mathUtils";
+import { TAU, rotatePoint, CanvasCoordinates } from "../../utils/mathUtils";
 
 // components
 import { CustomSongIcon } from "./CustomSongIcon";
@@ -8,12 +6,12 @@ import { CustomSongIcon } from "./CustomSongIcon";
 // styles
 import "../../styles/components/LandingPage.scss";
 
-const animate = (context, cycle, coords) => {
+const animate = (context: CanvasRenderingContext2D, cycle: number, coords: CanvasCoordinates) => {
   for (let i = 0; i < 5; i++) {
     context.beginPath();
     context.arc(
       coords.nx(rotatePoint(0.2, 0, 0, 0, cycle + (TAU * i) / 5).x),
-      coords.ny(rotatePoint(0.2, 0, 0, 0, cycle + (TAU * i) / 5).y),
+      coords.ny(rotatePoint(0.2, 0, 0, 0, cycle + (TAU * i) / 5).y)!,
       coords.getWidth() / 4,
       0,
       TAU
@@ -22,7 +20,12 @@ const animate = (context, cycle, coords) => {
   }
 };
 
-export function MoonriseIcon(props) {
+interface Props {
+  name?: string;
+  dispatch: (action: { type: string | null }) => void;
+}
+
+export function MoonriseIcon(props: Props) {
   return (
     <CustomSongIcon
       dispatch={props.dispatch}

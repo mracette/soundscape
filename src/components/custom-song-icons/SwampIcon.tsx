@@ -1,6 +1,4 @@
-// libs
-import React from "react";
-import { boundedSin, TAU, rotatePoint } from "../../utils/mathUtils";
+import { boundedSin, TAU, rotatePoint, CanvasCoordinates } from "../../utils/mathUtils";
 
 // components
 import { CustomSongIcon } from "./CustomSongIcon";
@@ -11,9 +9,9 @@ import "../../styles/components/LandingPage.scss";
 const bsin = boundedSin(2.5, 0, 1, -1.5);
 const bsinRot = boundedSin(5, 0, 1, -1.5);
 
-const animate = (context, cycle, coords) => {
+const animate = (context: CanvasRenderingContext2D, cycle: number, coords: CanvasCoordinates) => {
   const w = coords.getWidth();
-  const h = coords.getHeight();
+  const h = coords.getHeight()!;
   const eyeWidth = w / 4;
   const eyeHeight = h / 15;
   const count = 8;
@@ -22,7 +20,7 @@ const animate = (context, cycle, coords) => {
     const rot = TAU * (i / count);
     const rotAgain = TAU * bsinRot(cycle);
     let eyeStartX = coords.nx(-1 + 2 / 6);
-    let eyeStartY = coords.ny(0);
+    let eyeStartY = coords.ny(0)!;
 
     for (let j = 0; j < 2; j++) {
       const mod = j % 2 === 0 ? -1 : 1;
@@ -30,7 +28,7 @@ const animate = (context, cycle, coords) => {
         eyeStartX + eyeWidth / 2,
         eyeStartY + bsin(cycle) * mod * eyeHeight * 2,
         coords.nx(0),
-        coords.ny(0),
+        coords.ny(0)!,
         rot
       );
 
@@ -38,7 +36,7 @@ const animate = (context, cycle, coords) => {
         eyeStartX,
         eyeStartY,
         coords.nx(0),
-        coords.ny(0),
+        coords.ny(0)!,
         rot
       );
 
@@ -46,7 +44,7 @@ const animate = (context, cycle, coords) => {
         eyeStartX + eyeWidth / 2,
         eyeStartY,
         coords.nx(0),
-        coords.ny(0),
+        coords.ny(0)!,
         rot
       );
 
@@ -54,7 +52,7 @@ const animate = (context, cycle, coords) => {
         eyeStartX + eyeWidth,
         eyeStartY,
         coords.nx(0),
-        coords.ny(0),
+        coords.ny(0)!,
         rot
       );
 
@@ -94,7 +92,12 @@ const animate = (context, cycle, coords) => {
   }
 };
 
-export const SwampIcon = (props) => {
+interface Props {
+  name?: string;
+  dispatch: (action: { type: string | null }) => void;
+}
+
+export const SwampIcon = (props: Props) => {
   return (
     <CustomSongIcon
       isNew={false}

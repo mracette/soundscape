@@ -1,6 +1,4 @@
-// libs
-import React from "react";
-import { rotatePoint, TAU } from "../../utils/mathUtils";
+import { rotatePoint, TAU, CanvasCoordinates } from "../../utils/mathUtils";
 
 // components
 import { CustomSongIcon } from "./CustomSongIcon";
@@ -10,7 +8,7 @@ import "../../styles/components/LandingPage.scss";
 
 const addPad = 0.8;
 
-const animate = (context, cycle, coords) => {
+const animate = (context: CanvasRenderingContext2D, cycle: number, coords: CanvasCoordinates) => {
   const count = 3;
   const rows = 3;
   const rect = coords.getWidth() / 2.5;
@@ -23,7 +21,7 @@ const animate = (context, cycle, coords) => {
       context.beginPath();
       context.rect(
         coords.nx(rot.x) - rect / 2,
-        coords.ny(rot.y) - rect / 2,
+        coords.ny(rot.y)! - rect / 2,
         rect,
         rect
       );
@@ -32,7 +30,12 @@ const animate = (context, cycle, coords) => {
   }
 };
 
-export function ComingSoonIcon(props) {
+interface Props {
+  name?: string;
+  dispatch: (action: { type: string | null }) => void;
+}
+
+export function ComingSoonIcon(props: Props) {
   return (
     <CustomSongIcon
       dispatch={props.dispatch}
