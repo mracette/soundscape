@@ -1,0 +1,71 @@
+import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
+import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
+import { SwampIcon } from "./custom-song-icons/SwampIcon";
+import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
+import { Link } from "wouter";
+
+import "../styles/components/LandingPage.css";
+
+interface Props {
+  dispatch: (action: { type: string | null }) => void;
+}
+
+export const LandingPageMobile = ({ dispatch }: Props) => {
+  return (
+    <div
+      style={{
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
+      <Link href="/play/swamp" className="song-link-mobile">
+        <div className="flex-row" style={{ justifyContent: "flex-start" }}>
+          <SwampIcon name="swamp" dispatch={dispatch} />
+          <div>
+            <span>Swamp</span>
+            <div>
+              <span>75 bpm</span>&nbsp;|&nbsp;
+              <span>Eb Minor</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+      <Link href="/play/mornings" className="song-link-mobile">
+        <div className="flex-row" style={{ justifyContent: "flex-start" }}>
+          <MorningsIcon name="mornings" dispatch={dispatch} />
+          <div>
+            <span>Mornings</span>
+            <div>
+              <span>92 bpm</span>&nbsp;|&nbsp;
+              <span>Eb Major</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+      <Link href="/play/moonrise" className="song-link-mobile">
+        <div className="flex-row" style={{ justifyContent: "flex-start" }}>
+          <MoonriseIcon name="moonrise" dispatch={dispatch} />
+          <div>
+            <span>Moonrise</span>
+            <div>
+              <span>120 bpm</span>&nbsp;|&nbsp;
+              <span>G Minor</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+      <Link href="/info" className="song-link-mobile">
+        <div className="flex-row" style={{ justifyContent: "flex-start" }}>
+          <div>
+            <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
+          </div>
+          <div>
+            <span>Information & Updates</span>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+};

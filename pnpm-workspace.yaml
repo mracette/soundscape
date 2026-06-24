@@ -1,0 +1,19 @@
+allowBuilds:
+  '@parcel/watcher': true
+  core-js: true
+  ejs: true
+  es5-ext: true
+  esbuild: true
+  fsevents: true
+minimumReleaseAgeExclude:
+  - '@typescript-eslint/eslint-plugin@8.62.0'
+  - '@typescript-eslint/parser@8.62.0'
+  - '@typescript-eslint/project-service@8.62.0'
+  - '@typescript-eslint/scope-manager@8.62.0'
+  - '@typescript-eslint/tsconfig-utils@8.62.0'
+  - '@typescript-eslint/type-utils@8.62.0'
+  - '@typescript-eslint/types@8.62.0'
+  - '@typescript-eslint/typescript-estree@8.62.0'
+  - '@typescript-eslint/utils@8.62.0'
+  - '@typescript-eslint/visitor-keys@8.62.0'
+  - typescript-eslint@8.62.0

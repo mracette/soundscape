@@ -1,0 +1,15 @@
+import { globalStyle } from "@vanilla-extract/css";
+import { vh } from "../settings";
+
+globalStyle("#freq-bands", {
+  top: vh(1.5),
+  left: vh(1.5),
+  position: "absolute",
+});
+
+globalStyle("#freq-bands-canvas", {
+  padding: 0,
+  margin: 0,
+  height: vh(9),
+  width: vh(9),
+});
