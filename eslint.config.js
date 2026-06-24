@@ -40,6 +40,14 @@ module.exports = [
       // Pre-existing `arguments`-forwarding bind helper (FirstPersonControls);
       // advisory only, not rewritten in this behavior-identical migration.
       "prefer-rest-params": "warn",
+      // React Compiler diagnostics (P9, via eslint-plugin-react-hooks 7 `recommended`).
+      // These fire on deliberate imperative escape hatches we do NOT rewrite: viz ref
+      // access during render (Icon, CanvasFade), WebAudio gain mutation + effect-driven
+      // setState (ToggleButton, ToggleButtonGroup). Advisory only, consistent with this
+      // project's lint posture; the compiler bails or is opted out at runtime.
+      "react-hooks/refs": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/immutability": "warn",
     },
   },
 ];
