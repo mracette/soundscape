@@ -3,7 +3,14 @@ import react from "@vitejs/plugin-react";
 import { vanillaExtractPlugin } from "@vanilla-extract/vite-plugin";
 
 export default defineConfig({
-  plugins: [react(), vanillaExtractPlugin()],
+  plugins: [
+    react({
+      babel: {
+        plugins: [["babel-plugin-react-compiler", { target: "19" }]],
+      },
+    }),
+    vanillaExtractPlugin(),
+  ],
   server: { port: 3000 },
   // Expose CRA-style env vars (REACT_APP_*) via import.meta.env.
   envPrefix: "REACT_APP_",
