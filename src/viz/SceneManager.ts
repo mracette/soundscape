@@ -41,6 +41,17 @@ interface LoadModelOptions {
   [key: string]: unknown;
 }
 
+/**
+ * Base class for every visualizer scene. Owns the three.js renderer, camera,
+ * and RAF loop, and defines the initialization lifecycle that subclasses fill in:
+ * `initScene` → `initRender` → `initCamera` → `initControls` → `initSubjects`
+ * → `initLights` → `initHelpers`. Call `init()` once after constructing, then
+ * `animate()` / `stop()` to start and halt the render loop.
+ *
+ * Subclasses must override `render()` — the base implementation is a no-op.
+ * All other `init*` methods have default implementations that subclasses can
+ * override or extend.
+ */
 export class SceneManager {
   // Core options (set via Object.assign in constructor)
   protected songId!: string | null;
@@ -99,6 +110,7 @@ export class SceneManager {
     this.setSceneDimensions();
   }
 
+  /** Run all init* lifecycle methods in order and assign results to instance fields. */
   init() {
     this.scene = this.initScene();
     this.renderer = this.initRender();
@@ -109,10 +121,16 @@ export class SceneManager {
     this.helpers = this.initHelpers();
   }
 
+  /** Cancel the RAF loop. Call `animate()` to restart it. */
   stop() {
     window.cancelAnimationFrame(this.currentFrame);
   }
 
+  /**
+   * Recompute `sceneDimensions` from the current `resizeMethod`.
+   * "fullscreen" uses `window.innerWidth/Height`; "cinematic" uses the canvas
+   * element's CSS dimensions. Called in the constructor and in `onWindowResize`.
+   */
   setSceneDimensions() {
     this.sceneDimensions = {
       width:
@@ -130,6 +148,12 @@ export class SceneManager {
     };
   }
 
+  /**
+   * Recursively walk `obj`'s descendants and invoke `callback` on every leaf
+   * (a node with no children). Intermediate branch nodes are skipped.
+   * Names in `exceptions` are matched with `includes()` against `child.name`
+   * and excluded from the callback.
+   */
   applyAll(
     obj: THREE.Object3D,
     callback: (child: THREE.Object3D) => void,
@@ -147,6 +171,13 @@ export class SceneManager {
     });
   }
 
+  /**
+   * Recursively free GPU resources for `obj` and every descendant: geometries,
+   * materials, and any texture maps stored as properties on the material
+   * (e.g. `map`, `bumpMap`, `normalMap`, `envMap`). Children are removed from
+   * the parent after disposal so three.js doesn't hold stale references.
+   * Call this before discarding a scene to prevent GPU memory leaks.
+   */
   disposeAll(obj: any, material = true, geometry = true) {
     while (obj.children.length > 0) {
       this.disposeAll(obj.children[0], material, geometry);
@@ -164,6 +195,13 @@ export class SceneManager {
     }
   }
 
+  /**
+   * Single RAF tick: bracket stats, call `render()`, then re-queue itself.
+   * Subclasses that need to drive the loop at a different cadence (e.g. Swamp,
+   * Moonrise) call `super.animate()` from their own overridden `animate()`.
+   * Bound to `this` in the constructor so it can be passed directly to
+   * `requestAnimationFrame`.
+   */
   animate() {
     this.showStats && this.helpers.stats?.begin();
     this.render();
@@ -279,6 +317,13 @@ export class SceneManager {
     this.render(true);
   }
 
+  /**
+   * Load a GLTF/GLB model for this scene via the shared `gltfLoader`.
+   * The asset URL is built from env vars: `REACT_APP_ASSET_LOCATION` selects
+   * "local" (BASE_URL/models/…) or "cloudfront" (REACT_APP_ASSET_DOMAIN/…).
+   * Format (.glb vs .gltf) is read from `REACT_APP_MODEL_FORMAT_<SONGID>`,
+   * falling back to `REACT_APP_MODEL_FORMAT`.
+   */
   loadModel(options: LoadModelOptions = { name: "" }): Promise<GLTF> {
     const { name } = options;
     const format =
