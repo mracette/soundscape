@@ -1,12 +1,12 @@
 import { Switch, Route } from "wouter";
-import { ThemeContext, ThemeContextValue, SongContextValue, InfoContextValue } from "../contexts/contexts";
+import { ThemeContext, ThemeContextValue, SongContextValue, InfoContextValue, AppConfigEntry } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { InfoContext } from "../contexts/contexts";
 import { MusicPlayer } from "./MusicPlayer";
 import { LandingPage } from "./LandingPage";
 
 interface Props {
-  appConfig: any[];
+  appConfig: AppConfigEntry[];
   spectrumFunctions: Record<string, (n: number) => unknown>;
 }
 
@@ -23,7 +23,7 @@ export const AppRouter = (props: Props) => {
                 spectrumFunction: props.spectrumFunctions[songId],
                 ...props.appConfig.find((song) => {
                   return song.id === songId;
-                })["themes"],
+                })!["themes"],
               } as ThemeContextValue}
             >
               <SongContext.Provider
@@ -31,7 +31,7 @@ export const AppRouter = (props: Props) => {
                   id: songId,
                   ...props.appConfig.find((song) => {
                     return song.id === songId;
-                  })["audio"],
+                  })!["audio"],
                 } as SongContextValue}
               >
                 <InfoContext.Provider
@@ -39,7 +39,7 @@ export const AppRouter = (props: Props) => {
                     id: songId,
                     ...props.appConfig.find((song) => {
                       return song.id === songId;
-                    })["info"],
+                    })!["info"],
                   } as InfoContextValue}
                 >
                   <MusicPlayer />
