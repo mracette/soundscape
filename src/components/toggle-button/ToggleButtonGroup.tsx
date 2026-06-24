@@ -120,11 +120,8 @@ export const ToggleButtonGroup = (props: Props) => {
       });
     };
 
-    // LATENT BUG: store's ResetCallback/RandomizeCallback are callable interfaces ({ name; (): void }),
-    // but these objects are plain { name, resetCallback/randomizeCallback } — not callable.
-    // Preserving the existing runtime behavior with casts.
-    addResetCallback({ name, resetCallback: handleReset } as any);
-    addRandomizeCallback({ name, randomizeCallback: handleRandomize } as any);
+    addResetCallback({ name, resetCallback: handleReset });
+    addRandomizeCallback({ name, randomizeCallback: handleRandomize });
   }, [
     addResetCallback,
     addRandomizeCallback,

@@ -78,13 +78,13 @@ export const MusicPlayer = () => {
 
   const handleReset = useCallback(() => {
     resetCallbacks.forEach((obj) => {
-      (obj as any).resetCallback();
+      obj.resetCallback();
     });
   }, [resetCallbacks]);
 
   const handleRandomize = useCallback(() => {
     randomizeCallbacks.forEach((obj) => {
-      (obj as any).randomizeCallback();
+      obj.randomizeCallback();
     });
   }, [randomizeCallbacks]);
 
