@@ -1,4 +1,4 @@
-import { useContext, useRef, useState, useCallback, useEffect, useMemo, type ComponentType } from "react";
+import { useContext, useRef, useState, useCallback, useEffect } from "react";
 import { CanvasViz } from "./canvas/CanvasViz";
 import { EffectsPanel } from "./EffectsPanel";
 import { FreqBands } from "./FreqBands";
@@ -24,13 +24,13 @@ export const MusicPlayer = () => {
 
   const [songLoadStatus, setSongLoadStatus] = useState(false);
   const [canvasLoadStatus, setCanvasLoadStatus] = useState(false);
-  const handleSetCanvasLoadStatus = useCallback(
-    (status: boolean) => {
-      setCanvasLoadStatus(status);
-    },
-    [setCanvasLoadStatus]
-  );
+  const handleSetCanvasLoadStatus = (status: boolean) => {
+    setCanvasLoadStatus(status);
+  };
 
+  // Reset the store before child ToggleButtons mount and register their voices.
+  // A lazy useState initializer runs once, synchronously, before children render;
+  // a useEffect would run after children register and wipe them.
   useState(() => useMusicPlayerStore.getState().reset());
   const resetCallbacks = useMusicPlayerStore((s) => s.resetCallbacks);
   const randomizeCallbacks = useMusicPlayerStore((s) => s.randomizeCallbacks);
@@ -76,17 +76,17 @@ export const MusicPlayer = () => {
     bpm,
   ]);
 
-  const handleReset = useCallback(() => {
+  const handleReset = () => {
     resetCallbacks.forEach((obj) => {
       obj.resetCallback();
     });
-  }, [resetCallbacks]);
+  };
 
-  const handleRandomize = useCallback(() => {
+  const handleRandomize = () => {
     randomizeCallbacks.forEach((obj) => {
       obj.randomizeCallback();
     });
-  }, [randomizeCallbacks]);
+  };
 
   /* Background Mode Callback */
   const triggerRandomVoice = useCallback(() => {
@@ -134,6 +134,9 @@ export const MusicPlayer = () => {
 
   /* Mute Hook */
   useEffect(() => {
+    // The app effects chain (premaster) only exists once initAppState resolves.
+    if (!wawLoadStatus) return;
+
     const startMute = () => {
       WAW.getEffects().premaster.gain.value = 0;
     };
@@ -147,61 +150,43 @@ export const MusicPlayer = () => {
     } else {
       stopMute();
     }
-  }, [WAW, mute]);
-
-  const HomePanelMemo = useMemo(() => <HomePanel />, []);
-  const SongInfoPanelMemo = useMemo(() => <SongInfoPanel />, []);
-  const EffectsPanelMemo = useMemo(() => <EffectsPanel />, []);
-  const ToggleButtonPanelMemo = useMemo(
-    () => (
-      <ToggleButtonPanel
-        handleRandomize={handleRandomize}
-        handleReset={handleReset}
-      />
-    ),
-    [handleRandomize, handleReset]
-  );
+  }, [WAW, mute, wawLoadStatus]);
 
   return (
     <>
       {songLoadStatus && (
         <>
           <FreqBands animate={false} />
-          {/* extra props name/direction/separation/parentSize passed but unused by MenuButtonParent — latent */}
-          {(() => {
-            const MBP = MenuButtonParent as ComponentType<any>;
-            return (
-              <MBP
-                name="Menu"
-                direction="right"
-                separation="6rem"
-                parentSize="5rem"
-                childButtonProps={[
-                  {
-                    id: "home",
-                    iconName: "icon-home",
-                    content: HomePanelMemo,
-                  },
-                  {
-                    autoOpen: true,
-                    id: "toggles",
-                    iconName: "icon-music",
-                    content: ToggleButtonPanelMemo,
-                  },
-                  {
-                    id: "effects",
-                    iconName: "icon-equalizer",
-                    content: EffectsPanelMemo,
-                  },
-                  {
-                    id: "song-info",
-                    iconName: "icon-info",
-                    content: SongInfoPanelMemo,
-                  },
-                ]}
-              />
-            );
-          })()}
+          <MenuButtonParent
+            childButtonProps={[
+              {
+                id: "home",
+                iconName: "icon-home",
+                content: <HomePanel />,
+              },
+              {
+                autoOpen: true,
+                id: "toggles",
+                iconName: "icon-music",
+                content: (
+                  <ToggleButtonPanel
+                    handleRandomize={handleRandomize}
+                    handleReset={handleReset}
+                  />
+                ),
+              },
+              {
+                id: "effects",
+                iconName: "icon-equalizer",
+                content: <EffectsPanel />,
+              },
+              {
+                id: "song-info",
+                iconName: "icon-info",
+                content: <SongInfoPanel />,
+              },
+            ]}
+          />
           <CanvasViz songLoadStatus={songLoadStatus} handleSetCanvasLoadStatus={handleSetCanvasLoadStatus} />
         </>
       )}
