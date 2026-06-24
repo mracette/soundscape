@@ -1,4 +1,4 @@
-import { useContext, useRef, useState, useCallback, useEffect } from "react";
+import { useContext, useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { CanvasViz } from "./canvas/CanvasViz";
 import { EffectsPanel } from "./EffectsPanel";
 import { FreqBands } from "./FreqBands";
@@ -24,9 +24,12 @@ export const MusicPlayer = () => {
 
   const [songLoadStatus, setSongLoadStatus] = useState(false);
   const [canvasLoadStatus, setCanvasLoadStatus] = useState(false);
-  const handleSetCanvasLoadStatus = (status: boolean) => {
+  // Must be referentially stable: it is a dependency of CanvasViz's scene-init
+  // effect, and this component is not compiler-memoized (its render calls
+  // store.reset()). Without useCallback the scene re-initializes on every render.
+  const handleSetCanvasLoadStatus = useCallback((status: boolean) => {
     setCanvasLoadStatus(status);
-  };
+  }, []);
 
   // Reset the store before child ToggleButtons mount and register their voices.
   // A lazy useState initializer runs once, synchronously, before children render;
@@ -76,17 +79,17 @@ export const MusicPlayer = () => {
     bpm,
   ]);
 
-  const handleReset = () => {
+  const handleReset = useCallback(() => {
     resetCallbacks.forEach((obj) => {
       obj.resetCallback();
     });
-  };
+  }, [resetCallbacks]);
 
-  const handleRandomize = () => {
+  const handleRandomize = useCallback(() => {
     randomizeCallbacks.forEach((obj) => {
       obj.randomizeCallback();
     });
-  };
+  }, [randomizeCallbacks]);
 
   /* Background Mode Callback */
   const triggerRandomVoice = useCallback(() => {
@@ -155,6 +158,21 @@ export const MusicPlayer = () => {
     }
   }, [WAW, mute, wawLoadStatus]);
 
+  // Memoized because this component is not compiler-memoized (impure render);
+  // without these the panels remount on every store change (e.g. each toggle).
+  const homePanel = useMemo(() => <HomePanel />, []);
+  const songInfoPanel = useMemo(() => <SongInfoPanel />, []);
+  const effectsPanel = useMemo(() => <EffectsPanel />, []);
+  const toggleButtonPanel = useMemo(
+    () => (
+      <ToggleButtonPanel
+        handleRandomize={handleRandomize}
+        handleReset={handleReset}
+      />
+    ),
+    [handleRandomize, handleReset]
+  );
+
   return (
     <>
       {songLoadStatus && (
@@ -165,28 +183,23 @@ export const MusicPlayer = () => {
               {
                 id: "home",
                 iconName: "icon-home",
-                content: <HomePanel />,
+                content: homePanel,
               },
               {
                 autoOpen: true,
                 id: "toggles",
                 iconName: "icon-music",
-                content: (
-                  <ToggleButtonPanel
-                    handleRandomize={handleRandomize}
-                    handleReset={handleReset}
-                  />
-                ),
+                content: toggleButtonPanel,
               },
               {
                 id: "effects",
                 iconName: "icon-equalizer",
-                content: <EffectsPanel />,
+                content: effectsPanel,
               },
               {
                 id: "song-info",
                 iconName: "icon-info",
-                content: <SongInfoPanel />,
+                content: songInfoPanel,
               },
             ]}
           />
