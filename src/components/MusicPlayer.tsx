@@ -1,7 +1,4 @@
-// libs
 import { useContext, useRef, useState, useCallback, useEffect, useMemo, type ComponentType } from "react";
-
-// components
 import { CanvasViz } from "./canvas/CanvasViz";
 import { EffectsPanel } from "./EffectsPanel";
 import { FreqBands } from "./FreqBands";
@@ -10,19 +7,11 @@ import { SongInfoPanel } from "./SongInfoPanel";
 import { ToggleButtonPanel } from "./toggle-button/ToggleButtonPanel";
 import { HomePanel } from "./HomePanel";
 import { LoadingScreen } from "../components/LoadingScreen";
-
-// context
 import { SongContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
-
-// store
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
-
-// other
 import { nextSubdivision } from "../utils/audioUtils";
-
-// styles
 import "../styles/components/MusicPlayer.css";
 
 export const MusicPlayer = () => {

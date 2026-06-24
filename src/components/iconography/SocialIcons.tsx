@@ -1,7 +1,4 @@
-// components
 import { Icon } from "../../components/Icon";
-
-// styles
 import "../../styles/components/Icon.css";
 
 interface Props {

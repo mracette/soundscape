@@ -1,9 +1,6 @@
 import { boundedSin, TAU, CanvasCoordinates } from "../../utils/mathUtils";
 
-// components
 import { CustomSongIcon } from "./CustomSongIcon";
-
-// styles
 import "../../styles/components/CustomSongIcons.css";
 
 const period = 2;

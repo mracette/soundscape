@@ -1,6 +1,5 @@
 import { useRef, useEffect, useContext } from "react";
 
-// scenes
 import { Moonrise } from "../../viz/scenes/moonrise/Moonrise";
 import { Mornings } from "../../viz/scenes/mornings/Mornings";
 import { Swamp } from "../../viz/scenes/swamp/Swamp";
@@ -8,26 +7,17 @@ import { Swamp } from "../../viz/scenes/swamp/Swamp";
 // scene base
 import { SceneManager } from "../../viz/SceneManager";
 
-// context
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { ThemeContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
-
-// store
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
-
-// components
 import { CanvasFade } from "./CanvasFade";
-
-// utils
 import {
   cinematicResize,
   addWindowListeners,
   removeWindowListeners,
 } from "../../utils/jsUtils";
-
-// styles
 import "../../styles/components/CanvasViz.css";
 
 interface Props {

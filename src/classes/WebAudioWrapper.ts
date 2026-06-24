@@ -182,7 +182,6 @@ export class WebAudioWrapper {
       effects.reverbWet = initGain(this.audioCtx, 0);
       effects.reverb = this.audioCtx.createConvolver();
 
-      // routing
       effects.effectsChainEntry.connect(effects.lpFilter);
       effects.lpFilter.connect(effects.hpFilter);
       effects.hpFilter.connect(effects.reverbDry);

@@ -1,26 +1,15 @@
-// libs
 import { useState, useEffect } from "react";
 import * as d3Chromatic from "d3-scale-chromatic";
 import * as d3Color from "d3-color";
 import { ColorPalette } from "color-curves";
 import chroma from "chroma-js";
 import { clamp } from "../utils/mathUtils";
-
-// components
 import { AppRouter } from "./AppRouter";
-
-// context
 import { LayoutContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
-
-// classes
 import { WebAudioWrapper } from "../classes/WebAudioWrapper";
-
-// utils
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
-
-// config
 import appConfig from "../app-config.json";
 
 const starsPalette = new ColorPalette(

@@ -1,4 +1,3 @@
-// libs
 import {
   useContext,
   useReducer,
@@ -7,23 +6,13 @@ import {
   useCallback,
   useMemo,
 } from "react";
-
-// components
 import { ToggleButton } from "./ToggleButton";
 import { Oscilloscope } from "../Oscilloscope";
-
-// contexts
 import { ThemeContext, VoiceConfig } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
-
-// store
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
-
-// reducers
 import { ToggleButtonGroupReducer } from "../../reducers/ToggleButtonGroupReducer";
-
-// styles
 import "../../styles/components/ToggleButtonGroup.css";
 import "../../styles/components/Oscilloscope.css";
 

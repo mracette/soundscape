@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { clamp } from "../../utils/mathUtils";
 
-// components
 import { Canvas } from "./Canvas";
 
 const thumbRadius = 1 / 4;

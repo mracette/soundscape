@@ -1,4 +1,3 @@
-// libs
 import * as THREE from "three";
 import { SceneManager } from "../../SceneManager";
 import chroma from "chroma-js";
@@ -6,7 +5,6 @@ import FirstPersonControls from "../../controls/FirstPersonControls";
 import { Mist } from "./Mist";
 import { Analyser } from "../../../classes/Analyser";
 
-// globals
 export const COLORS = {
   black: (chroma as any)("#000000").hex() as string,
   vine: (chroma as any)("#010503").darken(0.8).hex() as string,

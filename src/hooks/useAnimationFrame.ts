@@ -1,4 +1,3 @@
-// libs
 import { useRef, useEffect } from "react";
 
 type FrameInfo = { delta: number; time: number };

@@ -1,23 +1,12 @@
-// libs
 import { useRef, useState, useCallback, useEffect, useContext } from "react";
 import { gsap } from "gsap";
-
-// context
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
-
-// store
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
-
-// other
 import { nextSubdivision } from "../../utils/audioUtils";
-
-// reducers
 import { Action } from "../../reducers/ToggleButtonGroupReducer";
-
-// styles
 import "../../styles/components/Icon.css";
 import "../../styles/components/ToggleButton.css";
 

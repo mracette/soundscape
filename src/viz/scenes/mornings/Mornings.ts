@@ -1,4 +1,3 @@
-// libs
 import * as THREE from "three";
 import { SceneManager } from "../../SceneManager";
 import FirstPersonControls from "../../controls/FirstPersonControls";
@@ -12,10 +11,8 @@ import { renderHarmony } from "./renderHarmony";
 import { renderMelody } from "./renderMelody";
 import { renderAtmosphere } from "./renderAtmosphere";
 
-// shaders
 import { rgbaVertex, rgbaFragment } from "../../shaders/rgba";
 
-// globals
 const CANVAS_STYLE = `
 background-color: none; background:
 linear-gradient(

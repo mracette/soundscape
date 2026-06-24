@@ -1,4 +1,3 @@
-// libs
 import * as THREE from "three";
 import * as d3Chromatic from "d3-scale-chromatic";
 import { linToLog } from "../../../utils/mathUtils";
@@ -8,7 +7,6 @@ import { StarQuadrants } from "../../subjects/StarQuadrants";
 
 import { SceneManager } from "../../SceneManager";
 
-// globals
 const COLORS = {
   white: 0xffffff,
   rockGrey: 0x9d978e,
