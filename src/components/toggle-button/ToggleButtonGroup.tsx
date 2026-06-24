@@ -47,7 +47,7 @@ export const ToggleButtonGroup = (props: Props) => {
   const [solo, setSolo] = useState(false);
   const [mute, setMute] = useState(false);
 
-  const groupNode = (WAW.getEffects(id) as { groupNodes: Record<string, GainNode> }).groupNodes[name];
+  const groupNode = WAW.getEffects(id).groupNodes[name];
 
   /* Solo and Mute Effects */
   useEffect(() => {

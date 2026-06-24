@@ -66,7 +66,7 @@ export const CanvasViz = (props: Props) => {
         if (flags.showVisuals) {
           newScene = new Moonrise(
             canvasRef.current!,
-            (WAW.getAnalysers(id) as any).groupAnalysers,
+            WAW.getAnalysers(id).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {}
           );
@@ -79,7 +79,7 @@ export const CanvasViz = (props: Props) => {
         if (flags.showVisuals) {
           newScene = new Mornings(
             canvasRef.current!,
-            (WAW.getAnalysers(id) as any).groupAnalysers,
+            WAW.getAnalysers(id).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {
               spectrumFunction: specFn,
@@ -95,7 +95,7 @@ export const CanvasViz = (props: Props) => {
         if (flags.showVisuals) {
           newScene = new Swamp(
             canvasRef.current!,
-            (WAW.getAnalysers(id) as any).groupAnalysers,
+            WAW.getAnalysers(id).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {
               spectrumFunction: specFn,

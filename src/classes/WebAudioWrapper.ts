@@ -60,6 +60,10 @@ interface SongEffects {
   groupNodes: Record<string, GainNode>;
 }
 
+interface SongAnalysers {
+  groupAnalysers: Record<string, Analyser>;
+}
+
 // Shape is dynamic: top-level has 'premaster', then song-id keys
 // Typed as any-indexed to allow both known keys and song-id dynamic keys
 type NodesEffects = AppEffects;
@@ -303,7 +307,7 @@ export class WebAudioWrapper {
           groupNodes[group.name].connect(this.nodes.effects!.effectsChainEntry);
         });
         // Song effects stored as dynamic key on the effects object
-        (this.nodes.effects as any)[id] = { groupNodes } as SongEffects;
+        this.nodes.effects![id] = { groupNodes } as SongEffects;
         resolve();
       } catch (err) {
         reject(err);
@@ -316,7 +320,7 @@ export class WebAudioWrapper {
       try {
         const groupAnalysers: Record<string, Analyser> = {};
         this.config[id].groups.forEach((group) => {
-          const songEffects = (this.nodes.effects as any)[id] as SongEffects;
+          const songEffects = this.nodes.effects![id] as SongEffects;
           // one analyser for 3D vizualizations
           groupAnalysers[group.name] = new Analyser(
             this.audioCtx,
@@ -353,7 +357,7 @@ export class WebAudioWrapper {
       try {
         const voices: Record<string, AudioPlayerWrapper> = {};
         const promises: Promise<void>[] = [];
-        const songEffects = (this.nodes.effects as any)[id] as SongEffects;
+        const songEffects = this.nodes.effects![id] as SongEffects;
         // ambient track
         if (this.config[id].ambientTrack) {
           const pathToAudio = getPathToAudio(id, "ambient-track", "vbr");
@@ -405,12 +409,20 @@ export class WebAudioWrapper {
     });
   }
 
-  getAnalysers(songId: string | null = null): NodesAnalysers | unknown {
-    return songId ? this.nodes.analysers![songId] : this.nodes.analysers;
+  getAnalysers(): NodesAnalysers;
+  getAnalysers(songId: string): SongAnalysers;
+  getAnalysers(songId: string | null = null): NodesAnalysers | SongAnalysers {
+    return songId
+      ? (this.nodes.analysers![songId] as SongAnalysers)
+      : this.nodes.analysers!;
   }
 
-  getEffects(songId: string | null = null): unknown {
-    return songId ? (this.nodes.effects as any)[songId] : this.nodes.effects;
+  getEffects(): AppEffects;
+  getEffects(songId: string): SongEffects;
+  getEffects(songId: string | null = null): AppEffects | SongEffects {
+    return songId
+      ? (this.nodes.effects![songId] as SongEffects)
+      : this.nodes.effects!;
   }
 
   getValues(): WrapperValues {
