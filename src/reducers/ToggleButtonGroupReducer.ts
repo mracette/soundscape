@@ -54,13 +54,11 @@ export const ToggleButtonGroupReducer = (state: State, action: Action): State =>
       return {
         ...state,
         polyphony: state.polyphony + increment,
-        players: [
-          ...state.players.filter((p) => p.id !== action.payload.id),
-          {
-            ...state.players.find((p) => p.id === action.payload.id)!,
-            playerState: action.payload.newState,
-          },
-        ],
+        players: state.players.map((p) =>
+          p.id === action.payload.id
+            ? { ...p, playerState: action.payload.newState }
+            : p
+        ),
       };
     }
     case "updatePlayerOrder": {

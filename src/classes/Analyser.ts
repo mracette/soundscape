@@ -245,8 +245,8 @@ export class Analyser {
 
   getFrequencyBins(channel?: string): { data: number; freq: number }[] {
     const fBins: { data: number; freq: number }[] = [];
-    // LATENT BUG: getFrequencyData returns void; .slice() on undefined will throw at runtime
-    const data = (this.getFrequencyData(channel) as any).slice(
+    this.getFrequencyData(channel);
+    const data = (this.fftData as Uint8Array<ArrayBuffer>).slice(
       this.binMin,
       this.binMax + 1
     );
