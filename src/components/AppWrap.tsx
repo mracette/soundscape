@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import * as d3Chromatic from "d3-scale-chromatic";
 import * as d3Color from "d3-color";
 import { ColorPalette } from "color-curves";
@@ -69,26 +69,31 @@ const flags = {
 // inits globals vars, adds listeners, and manages some other settings
 export const AppWrap = () => {
   const [wawLoadStatus, setWawLoadStatus] = useState(false);
-  webAudioWrapper.initAppState().then(() => setWawLoadStatus(true));
 
-  // run once before the dom is drawn
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  document.documentElement.style.setProperty(
-    "--vw",
-    `${viewportWidth / 100}px`
-  );
-  document.documentElement.style.setProperty(
-    "--vh",
-    `${viewportHeight / 100}px`
-  );
-
-  // custom vw and vh vars
   const [vw, setvw] = useState(viewportWidth / 100);
   const [vh, setvh] = useState(viewportHeight / 100);
-
-  // check for mobile
   const [isMobile, setIsMobile] = useState(viewportWidth <= 670);
+
+  // Initialize persistent app-level WebAudio nodes once on mount.
+  // initAppState() is internally idempotent (guarded by status.app).
+  useEffect(() => {
+    webAudioWrapper.initAppState().then(() => setWawLoadStatus(true));
+  }, []);
+
+  // Set the --vw/--vh custom properties before first paint (layout effect runs
+  // pre-paint). Styles read them via calc(var(--vh, 1vh) * n).
+  useLayoutEffect(() => {
+    document.documentElement.style.setProperty(
+      "--vw",
+      `${window.innerWidth / 100}px`
+    );
+    document.documentElement.style.setProperty(
+      "--vh",
+      `${window.innerHeight / 100}px`
+    );
+  }, []);
 
   useEffect(() => {
     const resumeAudio = () => {
