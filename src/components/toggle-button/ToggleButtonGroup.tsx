@@ -1,6 +1,5 @@
 import {
   useContext,
-  useReducer,
   useState,
   useEffect,
   useCallback,
@@ -12,7 +11,6 @@ import { ThemeContext, VoiceConfig } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
-import { ToggleButtonGroupReducer } from "../../reducers/ToggleButtonGroupReducer";
 import "../../styles/components/ToggleButtonGroup.css";
 import "../../styles/components/Oscilloscope.css";
 
@@ -36,18 +34,22 @@ export const ToggleButtonGroup = (props: Props) => {
   );
   const addGroupSolo = useMusicPlayerStore((s) => s.addGroupSolo);
   const removeGroupSolo = useMusicPlayerStore((s) => s.removeGroupSolo);
-  const [state, dispatch] = useReducer(ToggleButtonGroupReducer, {
-    maxPolyphony: props.polyphony,
-    polyphony: 0,
-    players: [],
-    playerOrder: [],
-    playerOverrides: [],
-  });
+  const voices = useMusicPlayerStore((s) => s.voices);
+  const registerGroup = useMusicPlayerStore((s) => s.registerGroup);
 
   const [solo, setSolo] = useState(false);
   const [mute, setMute] = useState(false);
 
   const groupNode = WAW.getEffects(id).groupNodes[name];
+
+  const groupVoices = voices.filter((v) => v.group === name);
+  const polyphony = groupVoices.filter(
+    (v) => v.voiceState === "pending-start" || v.voiceState === "active"
+  ).length;
+
+  useEffect(() => {
+    registerGroup(name, props.polyphony);
+  }, [registerGroup, name, props.polyphony]);
 
   /* Solo and Mute Effects */
   useEffect(() => {
@@ -82,39 +84,39 @@ export const ToggleButtonGroup = (props: Props) => {
   /* Reset & Randomize Callbacks and Effects */
   useEffect(() => {
     const handleReset = () => {
-      // take the simple route - click the players!
-      const activePlayers = state.players.filter(
-        (p) => p.playerState === "active" || p.playerState === "pending-start"
-      );
-      activePlayers.forEach((p) => p.ref.click());
+      const current = useMusicPlayerStore
+        .getState()
+        .voices.filter((v) => v.group === name);
+      current
+        .filter(
+          (v) =>
+            v.voiceState === "active" || v.voiceState === "pending-start"
+        )
+        .forEach((v) => v.ref.click());
     };
 
     const handleRandomize = () => {
-      // get the effective poly; the max number of voices to enable
-      const ePoly =
-        state.maxPolyphony === -1 ? state.players.length : state.maxPolyphony;
-      // ensures at least 1 voice from each group is enabled
+      const current = useMusicPlayerStore
+        .getState()
+        .voices.filter((v) => v.group === name);
+      const ePoly = props.polyphony === -1 ? current.length : props.polyphony;
       const count = Math.ceil(Math.random() * ePoly);
-      // keep track of how many are enabled in each group
-      const playersToEnable: string[] = [];
-      // choose a random player from the set
-      while (playersToEnable.length < count) {
-        const rand = Math.floor(Math.random() * state.players.length);
-        const pid = state.players[rand].id;
-        if (playersToEnable.indexOf(pid) === -1) {
-          playersToEnable.push(pid);
+      const idsToEnable: string[] = [];
+      while (idsToEnable.length < count) {
+        const rand = Math.floor(Math.random() * current.length);
+        const vid = current[rand].id;
+        if (idsToEnable.indexOf(vid) === -1) {
+          idsToEnable.push(vid);
         }
       }
-      state.players.forEach((p) => {
-        // start stopped players in the enable list
-        if (playersToEnable.indexOf(p.id) !== -1) {
-          if (p.playerState === "stopped") {
-            p.ref.click();
+      current.forEach((v) => {
+        if (idsToEnable.indexOf(v.id) !== -1) {
+          if (v.voiceState === "stopped") {
+            v.ref.click();
           }
         } else {
-          // stop active players not in the enable list
-          if (p.playerState !== "stopped") {
-            p.ref.click();
+          if (v.voiceState !== "stopped") {
+            v.ref.click();
           }
         }
       });
@@ -122,14 +124,7 @@ export const ToggleButtonGroup = (props: Props) => {
 
     addResetCallback({ name, resetCallback: handleReset });
     addRandomizeCallback({ name, randomizeCallback: handleRandomize });
-  }, [
-    addResetCallback,
-    addRandomizeCallback,
-    name,
-    state.maxPolyphony,
-    state.players,
-    state.polyphony,
-  ]);
+  }, [addResetCallback, addRandomizeCallback, name, props.polyphony]);
 
   const handleToggleSolo = useCallback(() => {
     if (solo) {
@@ -143,8 +138,8 @@ export const ToggleButtonGroup = (props: Props) => {
     <div className="toggle-button-group flex-col">
       <div className="flex-row">
         <h3>
-          {name} ({state.polyphony} /{" "}
-          {state.maxPolyphony === -1 ? props.voices.length : state.maxPolyphony}
+          {name} ({polyphony} /{" "}
+          {props.polyphony === -1 ? props.voices.length : props.polyphony}
           )
         </h3>
 
@@ -190,16 +185,14 @@ export const ToggleButtonGroup = (props: Props) => {
           () =>
             props.voices.map((voice) => (
               <ToggleButton
-                dispatch={dispatch}
                 key={voice.name}
                 name={voice.name}
                 groupName={name}
                 length={voice.length}
                 quantizeLength={voice.quantizeLength}
-                override={state.playerOverrides.indexOf(voice.name) !== -1}
               />
             )),
-          [props.voices, name, state.playerOverrides, dispatch]
+          [props.voices, name]
         )}
       </div>
     </div>

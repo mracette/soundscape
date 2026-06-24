@@ -21,6 +21,12 @@ interface Voice {
   ref: HTMLElement;
 }
 
+interface GroupState {
+  maxPolyphony: number;
+  playerOrder: string[];
+  playerOverrides: string[];
+}
+
 interface ResetCallback {
   name: string;
   resetCallback: () => void;
@@ -33,6 +39,7 @@ interface RandomizeCallback {
 
 interface MusicPlayerState {
   voices: Voice[];
+  groups: Record<string, GroupState>;
   groupSolos: string[];
   resetCallbacks: ResetCallback[];
   randomizeCallbacks: RandomizeCallback[];
@@ -44,6 +51,9 @@ interface MusicPlayerState {
   setPauseVisuals: (v: boolean) => void;
   startMute: () => void;
   stopMute: () => void;
+  registerGroup: (name: string, maxPolyphony: number) => void;
+  queueVoice: (group: string, voiceId: string, newState: VoiceState) => void;
+  clearVoiceOverride: (group: string, voiceId: string) => void;
   addVoice: (voice: Voice) => void;
   updateVoiceState: (args: { id: string; newState: VoiceState }) => void;
   addGroupSolo: (name: string) => void;
@@ -55,6 +65,7 @@ interface MusicPlayerState {
 
 const initialState = {
   voices: [],
+  groups: {},
   groupSolos: [],
   resetCallbacks: [],
   randomizeCallbacks: [],
@@ -70,6 +81,53 @@ export const useMusicPlayerStore = create<MusicPlayerState>()((set) => ({
   setPauseVisuals: (v) => set({ pauseVisuals: v }),
   startMute: () => set({ mute: true }),
   stopMute: () => set({ mute: false }),
+  registerGroup: (name, maxPolyphony) =>
+    set((s) => ({
+      groups: {
+        ...s.groups,
+        [name]: { maxPolyphony, playerOrder: [], playerOverrides: [] },
+      },
+    })),
+  queueVoice: (group, voiceId, newState) =>
+    set((s) => {
+      const g = s.groups[group];
+      if (!g) return {};
+      // polyphony = group voices already turning on or on (voices was updated first)
+      const polyphony = s.voices.filter(
+        (v) =>
+          v.group === group &&
+          (v.voiceState === "pending-start" || v.voiceState === "active")
+      ).length;
+      let { playerOrder, playerOverrides } = g;
+      if (newState === "pending-start") {
+        if (g.maxPolyphony === -1 || polyphony <= g.maxPolyphony) {
+          playerOrder = [...playerOrder, voiceId];
+        } else {
+          // over the cap: override the oldest, append the new one
+          playerOverrides = [playerOrder[0]];
+          playerOrder = [...playerOrder.slice(1), voiceId];
+        }
+      } else if (newState === "pending-stop") {
+        playerOrder = playerOrder.filter((p) => p !== voiceId);
+      }
+      return {
+        groups: { ...s.groups, [group]: { ...g, playerOrder, playerOverrides } },
+      };
+    }),
+  clearVoiceOverride: (group, voiceId) =>
+    set((s) => {
+      const g = s.groups[group];
+      if (!g) return {};
+      return {
+        groups: {
+          ...s.groups,
+          [group]: {
+            ...g,
+            playerOverrides: g.playerOverrides.filter((p) => p !== voiceId),
+          },
+        },
+      };
+    }),
   addVoice: (voice) => set((s) => ({ voices: [...s.voices, voice] })),
   updateVoiceState: ({ id, newState }) =>
     set((s) => ({

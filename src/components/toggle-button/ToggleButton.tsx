@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect, useContext } from "react";
+import { useRef, useCallback, useEffect, useContext } from "react";
 import { gsap } from "gsap";
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
@@ -6,7 +6,6 @@ import { LayoutContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 import { nextSubdivision } from "../../utils/audioUtils";
-import { Action } from "../../reducers/ToggleButtonGroupReducer";
 import "../../styles/components/Icon.css";
 import "../../styles/components/ToggleButton.css";
 
@@ -35,12 +34,10 @@ interface AnimationTargets {
 }
 
 interface Props {
-  dispatch: (action: Action) => void;
   name: string;
   groupName: string;
   length?: string;
   quantizeLength?: string;
-  override: boolean;
 }
 
 export const ToggleButton = (props: Props) => {
@@ -52,14 +49,22 @@ export const ToggleButton = (props: Props) => {
   const { vh } = useContext(LayoutContext)!;
   const { id, timeSignature, bpm } = useContext(SongContext)!;
   const { flags } = useContext(TestingContext)!;
+  const { name, groupName, quantizeLength } = props;
   const addVoice = useMusicPlayerStore((s) => s.addVoice);
   const updateVoiceState = useMusicPlayerStore((s) => s.updateVoiceState);
-  const { dispatch, name, override, quantizeLength } = props;
+  const queueVoice = useMusicPlayerStore((s) => s.queueVoice);
+  const clearVoiceOverride = useMusicPlayerStore((s) => s.clearVoiceOverride);
+  const override =
+    useMusicPlayerStore((s) =>
+      s.groups[groupName]?.playerOverrides.includes(name)
+    ) ?? false;
+  const playerState =
+    useMusicPlayerStore(
+      (s) => s.voices.find((v) => v.id === name)?.voiceState
+    ) ?? "stopped";
 
   const { scheduler, audioCtx } = WAW;
   const player = WAW.getVoices(id)[name];
-
-  const [playerState, setPlayerState] = useState<PlayerState>("stopped");
 
   const quantizedStartBeats = flags.quantizeSamples
     ? timeSignature * parseInt(quantizeLength!)
@@ -143,28 +148,8 @@ export const ToggleButton = (props: Props) => {
       const initialState: PlayerState =
         newState === "active" ? "pending-start" : "pending-stop";
 
-      dispatch({
-        type: "updatePlayerState",
-        payload: {
-          id: name,
-          newState: initialState,
-        },
-      });
-
-      updateVoiceState({
-        id: props.name,
-        newState: initialState,
-      });
-
-      setPlayerState(initialState);
-
-      dispatch({
-        type: "updatePlayerOrder",
-        payload: {
-          playerId: name,
-          newState: initialState,
-        },
-      });
+      updateVoiceState({ id: name, newState: initialState });
+      queueVoice(groupName, name, initialState);
 
       // calculate time till next loop start
       const quantizedStartSeconds = nextSubdivision(
@@ -188,20 +173,7 @@ export const ToggleButton = (props: Props) => {
       animationEventRef.current = scheduler.scheduleOnce(
         quantizedStartSeconds,
         () => {
-          // update local state
-          setPlayerState(newState);
-          // dispatch final update to music player
-          dispatch({
-            type: "updatePlayerState",
-            payload: {
-              id: name,
-              newState: newState,
-            },
-          });
-          updateVoiceState({
-            id: props.name,
-            newState,
-          });
+          updateVoiceState({ id: name, newState });
         }
       ) as number;
 
@@ -213,7 +185,6 @@ export const ToggleButton = (props: Props) => {
     },
     [
       scheduler,
-      dispatch,
       name,
       audioCtx,
       bpm,
@@ -222,7 +193,8 @@ export const ToggleButton = (props: Props) => {
       buttonBorder,
       player,
       updateVoiceState,
-      props.name,
+      queueVoice,
+      groupName,
     ]
   );
 
@@ -238,24 +210,13 @@ export const ToggleButton = (props: Props) => {
       iconPoly: btn.children[1].children[0].children[0],
     };
 
-    dispatch({
-      type: "addPlayer",
-      payload: {
-        player: {
-          id: props.name,
-          playerState: "stopped",
-          ref: btn,
-        },
-      },
-    });
-
     addVoice({
       id: props.name,
       group: props.groupName,
       voiceState: "stopped",
       ref: btn,
     });
-  }, [dispatch, id, addVoice, props.groupName, props.name]);
+  }, [id, addVoice, props.groupName, props.name]);
 
   /* Override Hook */
   useEffect(() => {
@@ -265,9 +226,9 @@ export const ToggleButton = (props: Props) => {
     ) {
       // stop player and remove from the override list
       changePlayerState("stopped");
-      dispatch({ type: "updatePlayerOverrides", payload: { playerId: name } });
+      clearVoiceOverride(groupName, name);
     }
-  }, [playerState, changePlayerState, name, override, dispatch]);
+  }, [playerState, changePlayerState, name, override, clearVoiceOverride, groupName]);
 
   /* Cleanup Hook */
   useEffect(() => {
