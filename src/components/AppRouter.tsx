@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { ThemeContext, ThemeContextValue, SongContextValue, InfoContextValue, AppConfigEntry } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { InfoContext } from "../contexts/contexts";
@@ -16,30 +16,28 @@ export const AppRouter = (props: Props) => {
       <Route path="/play/:songId">
         {(params) => {
           const songId = params.songId as string;
+          const song = props.appConfig.find((s) => s.id === songId);
+          if (!song) {
+            return <Redirect to="/" />;
+          }
           return (
             <ThemeContext.Provider
               value={{
                 id: songId,
                 spectrumFunction: props.spectrumFunctions[songId],
-                ...props.appConfig.find((song) => {
-                  return song.id === songId;
-                })!["themes"],
+                ...song.themes,
               } as ThemeContextValue}
             >
               <SongContext.Provider
                 value={{
                   id: songId,
-                  ...props.appConfig.find((song) => {
-                    return song.id === songId;
-                  })!["audio"],
+                  ...song.audio,
                 } as SongContextValue}
               >
                 <InfoContext.Provider
                   value={{
                     id: songId,
-                    ...props.appConfig.find((song) => {
-                      return song.id === songId;
-                    })!["info"],
+                    ...song.info,
                   } as InfoContextValue}
                 >
                   <MusicPlayer />

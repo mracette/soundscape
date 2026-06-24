@@ -5,7 +5,7 @@ module.exports = defineConfig({
   timeout: 60_000,
   expect: { timeout: 15_000 },
   fullyParallel: false,
-  retries: 0,
+  retries: process.env.CI ? 2 : 0,
   reporter: "list",
   use: {
     baseURL: "http://localhost:3000",

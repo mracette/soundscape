@@ -11,6 +11,7 @@ import { WebAudioContext } from "../contexts/contexts";
 import { WebAudioWrapper } from "../classes/WebAudioWrapper";
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 import appConfig from "../app-config.json";
+import { installTestHooks } from "../testHooks";
 
 const starsPalette = new ColorPalette(
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.182,"y":-0.138},"scale":{"x":1,"y":1},"rotation":0,"angleStart":2.105,"angleEnd":6.283,"angleOffset":0,"radius":0.5}',
@@ -58,6 +59,10 @@ const spectrumFunctions: Record<string, (n: number) => unknown> = {
 };
 
 const webAudioWrapper = new WebAudioWrapper(appConfig);
+
+if (import.meta.env.DEV) {
+  installTestHooks(webAudioWrapper);
+}
 
 // global behavior flags for testing
 const flags = {
