@@ -90,20 +90,23 @@ export const MusicPlayer = () => {
 
   /* Background Mode Callback */
   const triggerRandomVoice = useCallback(() => {
-    const viableOne = voices.filter(
-      (v) => !v.voiceState.includes("pending")
-    );
-    const randomOne = Math.floor(Math.random() * viableOne.length);
-    voices[randomOne].ref.click();
+    const viable = voices.filter((v) => !v.voiceState.includes("pending"));
+    if (viable.length === 0) return;
 
-    // trigger an additional voice when less than 1/2 are active
-    if (viableOne.length >= voices.length) {
-      const viableTwo = viableOne.filter(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (p, i) => i !== randomOne && (p as any).groupName !== (randomOne as any).groupName
+    const first = viable[Math.floor(Math.random() * viable.length)];
+    first.ref.click();
+
+    // When fewer than half the voices are active, also trigger a second voice
+    // from a different group to build the mix up.
+    const activeCount = voices.filter((v) => v.voiceState === "active").length;
+    if (activeCount < voices.length / 2) {
+      const viableTwo = viable.filter(
+        (v) => v.id !== first.id && v.group !== first.group
       );
-      const randomTwo = Math.floor(Math.random() * viableTwo.length);
-      voices[randomTwo].ref.click();
+      if (viableTwo.length > 0) {
+        const second = viableTwo[Math.floor(Math.random() * viableTwo.length)];
+        second.ref.click();
+      }
     }
   }, [voices]);
 
