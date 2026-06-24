@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect, useContext } from "react";
+import { useRef, useCallback, useEffect, useContext } from "react";
 import { gsap } from "gsap";
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
@@ -52,14 +52,16 @@ export const ToggleButton = (props: Props) => {
   const { vh } = useContext(LayoutContext)!;
   const { id, timeSignature, bpm } = useContext(SongContext)!;
   const { flags } = useContext(TestingContext)!;
+  const { dispatch, name, override, quantizeLength } = props;
   const addVoice = useMusicPlayerStore((s) => s.addVoice);
   const updateVoiceState = useMusicPlayerStore((s) => s.updateVoiceState);
-  const { dispatch, name, override, quantizeLength } = props;
+  const playerState =
+    useMusicPlayerStore(
+      (s) => s.voices.find((v) => v.id === name)?.voiceState
+    ) ?? "stopped";
 
   const { scheduler, audioCtx } = WAW;
   const player = WAW.getVoices(id)[name];
-
-  const [playerState, setPlayerState] = useState<PlayerState>("stopped");
 
   const quantizedStartBeats = flags.quantizeSamples
     ? timeSignature * parseInt(quantizeLength!)
@@ -156,8 +158,6 @@ export const ToggleButton = (props: Props) => {
         newState: initialState,
       });
 
-      setPlayerState(initialState);
-
       dispatch({
         type: "updatePlayerOrder",
         payload: {
@@ -188,8 +188,6 @@ export const ToggleButton = (props: Props) => {
       animationEventRef.current = scheduler.scheduleOnce(
         quantizedStartSeconds,
         () => {
-          // update local state
-          setPlayerState(newState);
           // dispatch final update to music player
           dispatch({
             type: "updatePlayerState",
