@@ -20,17 +20,14 @@ interface RandomizeCallback {
 }
 
 interface MusicPlayerState {
-  players: unknown[];
   voices: Voice[];
   groupSolos: string[];
   resetCallbacks: ResetCallback[];
   randomizeCallbacks: RandomizeCallback[];
   isLoading: boolean;
   backgroundMode: boolean;
-  randomizeEffects: boolean;
   pauseVisuals: boolean;
   mute: boolean;
-  soloOverride: boolean;
   setBackgroundMode: (v: boolean) => void;
   setPauseVisuals: (v: boolean) => void;
   startMute: () => void;
@@ -45,17 +42,14 @@ interface MusicPlayerState {
 }
 
 const initialState = {
-  players: [],
   voices: [],
   groupSolos: [],
   resetCallbacks: [],
   randomizeCallbacks: [],
   isLoading: true,
   backgroundMode: false,
-  randomizeEffects: false,
   pauseVisuals: false,
   mute: false,
-  soloOverride: false,
 };
 
 export const useMusicPlayerStore = create<MusicPlayerState>()((set) => ({
