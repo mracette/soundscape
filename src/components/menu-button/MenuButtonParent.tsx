@@ -12,7 +12,6 @@ interface ChildButtonProp {
   iconName?: string;
   icon?: ReactNode;
   content?: ReactNode;
-  [key: string]: unknown;
 }
 
 interface Props {
