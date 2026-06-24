@@ -1,10 +1,7 @@
 import { useContext, type ReactNode } from "react";
 
-// contexts
 import { LayoutContext } from "../../contexts/contexts";
 import { ThemeContext } from "../../contexts/contexts";
-
-// styles
 import "../../styles/components/MenuButtonContentWrapper.css";
 
 interface Props {

@@ -1,4 +1,3 @@
-// styles
 import "../../styles/components/Icon.css";
 
 interface Props {

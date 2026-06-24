@@ -1,16 +1,9 @@
 import { useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
-// components
 import { MenuButtonContentWrapper } from "./MenuButtonContentWrapper";
 import { Icon } from "../../components/Icon";
-
-// contexts
 import { ThemeContext } from "../../contexts/contexts";
-
-// hooks
 import { useOutsideClick } from "../../hooks/useOutsideClick";
-
-// styles
 import "../../styles/components/MenuButtonChild.css";
 
 interface Props {

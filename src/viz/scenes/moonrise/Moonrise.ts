@@ -1,14 +1,12 @@
-// libs
 import * as THREE from "three";
 import * as d3Chromatic from "d3-scale-chromatic";
 import { linToLog } from "../../../utils/mathUtils";
 import { regularPolygon } from "../../../utils/mathUtils";
 import { Analyser } from "../../../classes/Analyser";
-import { StarQuandrants } from "../../subjects/StarQuandrants";
+import { StarQuadrants } from "../../subjects/StarQuadrants";
 
 import { SceneManager } from "../../SceneManager";
 
-// globals
 const COLORS = {
   white: 0xffffff,
   rockGrey: 0x9d978e,
@@ -388,7 +386,7 @@ export class Moonrise extends SceneManager {
   initLakeStars() {
     return new Promise<void>((resolve, reject) => {
       try {
-        this.subjects.stars = new StarQuandrants(
+        this.subjects.stars = new StarQuadrants(
           this.scene,
           8,
           this.scene.background as THREE.Color,
@@ -545,7 +543,7 @@ export class Moonrise extends SceneManager {
           .slice(1, 9)
           .forEach((d, i) => {
             (
-              (this.subjects.stars as StarQuandrants).leftGroup.children[
+              (this.subjects.stars as StarQuadrants).leftGroup.children[
                 i
               ] as THREE.Points & { material: THREE.PointsMaterial }
             ).material.opacity = d / 125;
@@ -560,7 +558,7 @@ export class Moonrise extends SceneManager {
           .slice(1, 9)
           .forEach((d, i) => {
             (
-              (this.subjects.stars as StarQuandrants).rightGroup.children[
+              (this.subjects.stars as StarQuadrants).rightGroup.children[
                 i
               ] as THREE.Points & { material: THREE.PointsMaterial }
             ).material.opacity = d / 125;

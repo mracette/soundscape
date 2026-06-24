@@ -1,14 +1,9 @@
 import { useState, useContext, type ReactNode } from "react";
 
-// components
 import { MenuButtonChild } from "./MenuButtonChild";
 import { Icon } from "./../Icon";
-
-// contexts
 import { ThemeContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
-
-// styles
 import "../../styles/components/MenuButtonParent.css";
 
 interface ChildButtonProp {

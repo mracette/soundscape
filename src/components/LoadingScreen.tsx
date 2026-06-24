@@ -1,10 +1,5 @@
-// components
 import { LoadingIcon } from "../components/custom-song-icons/LoadingIcon";
-
-// store
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
-
-// styles
 import "../styles/components/LandingPage.css";
 
 export const LoadingScreen = () => {

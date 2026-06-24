@@ -1,10 +1,7 @@
 import { useRef, useContext, useEffect, useMemo } from "react";
 import { CanvasCoordinates } from "../../utils/mathUtils";
 
-// components
 import { Canvas } from "../canvas/Canvas";
-
-// styles
 import "../../styles/components/LandingPage.css";
 
 import { LayoutContext } from "../../contexts/contexts";

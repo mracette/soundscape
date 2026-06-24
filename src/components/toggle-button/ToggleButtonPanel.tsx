@@ -1,17 +1,8 @@
-// libs
 import { useContext } from "react";
-
-// components
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
-
-// contexts
 import { ThemeContext } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
-
-// store
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
-
-// styles
 
 interface Props {
   handleReset: () => void;

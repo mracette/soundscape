@@ -1,23 +1,12 @@
-// libs
 import { useRef, useEffect, useContext, useReducer } from "react";
 import { Link } from "wouter";
-
-// components
 import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
 import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
 import { SwampIcon } from "./custom-song-icons/SwampIcon";
 import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
-
-// context
 import { LayoutContext } from "../contexts/contexts";
-
-// styles
 import "../styles/components/LandingPage.css";
-
-// utils
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
-
-// other
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
 import { LandingPageMobile } from "./LandingPageMobile";
 
