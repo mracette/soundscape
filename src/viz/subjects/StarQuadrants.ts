@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-interface StarQuandrantsParams {
+interface StarQuadrantsParams {
   colorPalette: (t: number) => string | number;
   width: number;
   height: number;
@@ -9,7 +9,7 @@ interface StarQuandrantsParams {
   count: number;
 }
 
-export class StarQuandrants {
+export class StarQuadrants {
   levels: number;
   colorPalette: (t: number) => string | number;
   width: number;
@@ -24,7 +24,7 @@ export class StarQuandrants {
     scene: THREE.Scene,
     levels: number,
     skyColor: THREE.Color,
-    params: StarQuandrantsParams
+    params: StarQuadrantsParams
   ) {
     this.levels = levels;
 
