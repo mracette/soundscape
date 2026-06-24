@@ -15,6 +15,18 @@ interface RepeatingEvent extends SchedulerEvent {
   callback: () => void;
 }
 
+/**
+ * Precision event scheduler built on the WebAudio clock.
+ *
+ * `setTimeout`/`setInterval` drift by tens of milliseconds, which is audible.
+ * This class sidesteps that by firing callbacks via `BufferSourceNode.onended`:
+ * a silent 1-sample dummy buffer is scheduled at a precise `AudioContext` time,
+ * and the callback fires when that buffer ends. All timing is in AudioContext
+ * seconds (same origin as `audioCtx.currentTime`).
+ *
+ * Repeating events chain themselves: each fired node immediately schedules the
+ * next one `frequency` seconds later, so drift never accumulates.
+ */
 export class Scheduler {
   audioCtx: AudioContext;
   queue: SchedulerEvent[];
@@ -31,6 +43,15 @@ export class Scheduler {
     this.eventId = 0;
   }
 
+  /**
+   * Schedule a one-shot event at `time` (AudioContext seconds, absolute).
+   *
+   * With `callback`: fires it and returns the event id synchronously.
+   * Without `callback`: returns a `Promise<number>` that resolves to the event
+   * id when the event fires — useful for `await`-based sequencing.
+   *
+   * The returned id can be passed to `cancel` to abort before it fires.
+   */
   scheduleOnce(time: number, callback?: () => void): number | Promise<number> {
     // increment for the next event
     this.eventId++;
@@ -97,9 +118,12 @@ export class Scheduler {
     event.source = dummySource;
   }
 
-  /*
-  Initialized a repeating event
-  */
+  /**
+   * Schedule a repeating event starting at `time` (AudioContext seconds, absolute).
+   *
+   * @param frequency Seconds between each firing.
+   * @returns An id for `cancel` / `updateCallback`.
+   */
   scheduleRepeating(time: number, frequency: number, callback: () => void): number {
     // create a dummy buffer to trigger the event
     const dummyBuffer = this.audioCtx.createBuffer(1, 1, 44100);
@@ -149,6 +173,7 @@ export class Scheduler {
     }
   }
 
+  /** Returns `false` (not `undefined`) when the event isn't found. */
   getEvent(id: number): SchedulerEvent | false {
     const event = this.queue.find((e) => e.id === id);
     return event || false;
@@ -163,6 +188,7 @@ export class Scheduler {
     this.queue.length = 0;
   }
 
+  /** Cancels the event with the given id. No-op if `id` is `undefined` or not found. */
   cancel(id?: number): void {
     if (typeof id !== "undefined") {
       const event = this.getEvent(id);

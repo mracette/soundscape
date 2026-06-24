@@ -9,6 +9,19 @@ interface AudioPlayerOptions {
   loop?: boolean;
 }
 
+/**
+ * Wraps a single looping audio voice in the WebAudio graph.
+ *
+ * On `init`, the audio file is fetched and — when `offlineRendering` is true —
+ * rendered through an `OfflineAudioContext` with a fade applied at the loop
+ * boundary. That pre-render bakes the fade into the buffer so that looping
+ * is click-free without real-time processing on every cycle.
+ *
+ * A `BufferSourceNode` is single-use by spec: once started it cannot be
+ * restarted. `start()` reuses the existing node and falls back to `reload()`
+ * (which builds a fresh node from the same buffer) if the node has already
+ * been used.
+ */
 export class AudioPlayerWrapper {
   context: AudioContext;
   path: string;
@@ -39,6 +52,10 @@ export class AudioPlayerWrapper {
     Object.assign(this, { ...defaults, ...options });
   }
 
+  /**
+   * Fetch and (optionally) offline-render the audio buffer. Must be awaited
+   * before calling `start`; `bufferSource` is not valid until this resolves.
+   */
   init(): Promise<void> {
     return new Promise((resolve, reject) => {
       // setup
@@ -67,6 +84,11 @@ export class AudioPlayerWrapper {
     this.bufferSource.disconnect();
   }
 
+  /**
+   * Start playback at `time` (AudioContext seconds, absolute).
+   * If the underlying `BufferSourceNode` has already been started, reloads a
+   * fresh one before starting — this is the normal path after the first play.
+   */
   start(time: number): void {
     try {
       this.bufferSource.start(time);
@@ -76,6 +98,7 @@ export class AudioPlayerWrapper {
     }
   }
 
+  /** Stop at `time` (AudioContext seconds). Omit to stop immediately. */
   stop(time?: number): void {
     try {
       this.bufferSource.stop(time);
