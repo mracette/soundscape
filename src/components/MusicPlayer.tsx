@@ -134,6 +134,9 @@ export const MusicPlayer = () => {
 
   /* Mute Hook */
   useEffect(() => {
+    // The app effects chain (premaster) only exists once initAppState resolves.
+    if (!wawLoadStatus) return;
+
     const startMute = () => {
       WAW.getEffects().premaster.gain.value = 0;
     };
@@ -147,7 +150,7 @@ export const MusicPlayer = () => {
     } else {
       stopMute();
     }
-  }, [WAW, mute]);
+  }, [WAW, mute, wawLoadStatus]);
 
   return (
     <>
