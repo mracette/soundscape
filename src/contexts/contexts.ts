@@ -1,10 +1,6 @@
 import { createContext } from "react";
 import { WebAudioWrapper } from "../classes/WebAudioWrapper";
 
-export interface LandingPageContextValue {
-  [key: string]: unknown;
-}
-
 export interface LayoutContextValue {
   vw: number;
   vh: number;
@@ -42,18 +38,33 @@ export interface CreditEntry {
   link?: string;
 }
 
+export interface AnalyserConfig {
+  power?: number;
+  smoothingTimeConstant?: number;
+  minDecibels?: number;
+  maxDecibels?: number;
+  split?: boolean;
+  numBuckets?: number;
+  minFrequency?: number;
+  maxFrequency?: number;
+  xEasing?: string;
+  yEasing?: string;
+  yExponent?: number;
+  gainBoost?: number;
+}
+
 export interface VoiceConfig {
   name: string;
-  length?: string;
-  quantizeLength?: string;
-  [key: string]: unknown;
+  length: string;
+  quantizeLength: string;
+  noFade?: boolean;
 }
 
 export interface GroupConfig {
   name: string;
   polyphony: number;
   voices: VoiceConfig[];
-  analyser?: Record<string, unknown>;
+  analyser: AnalyserConfig;
 }
 
 export interface SongContextValue {
@@ -73,20 +84,35 @@ export interface InfoContextValue {
   credits: CreditEntry[];
 }
 
-export interface ApplicationContextValue {
-  [key: string]: unknown;
-}
-
 export interface WebAudioContextValue {
   WAW: WebAudioWrapper;
   wawLoadStatus: boolean;
 }
 
-export const LandingPageContext = createContext<LandingPageContextValue | undefined>(undefined);
+export interface SongThemes {
+  canvasFade: boolean;
+  resizeType?: string;
+  buttonColor: string;
+  openButtonColor: string;
+  contentPanelColor: string;
+  contentPanelText?: string;
+  panelResetButton: string;
+  panelRandomizeButton: string;
+  panelMuteButton: string;
+  groupSoloButton: string;
+  groupMuteButton: string;
+}
+
+export interface AppConfigEntry {
+  id: string;
+  audio: Omit<SongContextValue, "id">;
+  themes: SongThemes;
+  info: { credits: CreditEntry[] };
+}
+
 export const LayoutContext = createContext<LayoutContextValue | undefined>(undefined);
 export const TestingContext = createContext<TestingContextValue | undefined>(undefined);
 export const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 export const SongContext = createContext<SongContextValue | undefined>(undefined);
 export const InfoContext = createContext<InfoContextValue | undefined>(undefined);
-export const ApplicationContext = createContext<ApplicationContextValue | undefined>(undefined);
 export const WebAudioContext = createContext<WebAudioContextValue | undefined>(undefined);

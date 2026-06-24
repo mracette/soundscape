@@ -11,12 +11,12 @@ interface Voice {
 
 interface ResetCallback {
   name: string;
-  (): void;
+  resetCallback: () => void;
 }
 
 interface RandomizeCallback {
   name: string;
-  (): void;
+  randomizeCallback: () => void;
 }
 
 interface MusicPlayerState {

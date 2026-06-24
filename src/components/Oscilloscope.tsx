@@ -6,8 +6,6 @@ import { ThemeContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 
-import { Analyser } from "../classes/Analyser";
-
 import "../styles/components/Oscilloscope.css";
 
 interface Props {
@@ -22,7 +20,7 @@ export const Oscilloscope = (props: Props) => {
   const { WAW } = useContext(WebAudioContext)!;
   const { spectrumFunction } = useContext(ThemeContext)!;
   const { id } = useContext(SongContext)!;
-  const analyser = (WAW.getAnalysers(id) as { groupAnalysers: Record<string, Analyser> }).groupAnalysers[props.name + "-osc"];
+  const analyser = WAW.getAnalysers(id).groupAnalysers[props.name + "-osc"];
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 

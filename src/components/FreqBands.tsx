@@ -8,8 +8,6 @@ import { ThemeContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 
-import { Analyser } from "../classes/Analyser";
-
 import "../styles/components/FreqBands.css";
 
 interface Props {
@@ -20,7 +18,7 @@ export const FreqBands = (props: Props) => {
   const { spectrumFunction } = useContext(ThemeContext)!;
   const { bpm, timeSignature } = useContext(SongContext)!;
   const { WAW } = useContext(WebAudioContext)!;
-  const analyser = (WAW.getAnalysers() as { premaster: Analyser }).premaster;
+  const analyser = WAW.getAnalysers().premaster!;
 
   const secondsPerBar = (60 / bpm) * timeSignature;
 

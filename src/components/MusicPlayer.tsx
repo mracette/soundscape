@@ -78,13 +78,13 @@ export const MusicPlayer = () => {
 
   const handleReset = useCallback(() => {
     resetCallbacks.forEach((obj) => {
-      (obj as any).resetCallback();
+      obj.resetCallback();
     });
   }, [resetCallbacks]);
 
   const handleRandomize = useCallback(() => {
     randomizeCallbacks.forEach((obj) => {
-      (obj as any).randomizeCallback();
+      obj.randomizeCallback();
     });
   }, [randomizeCallbacks]);
 
@@ -135,11 +135,11 @@ export const MusicPlayer = () => {
   /* Mute Hook */
   useEffect(() => {
     const startMute = () => {
-      (WAW.getEffects() as any).premaster.gain.value = 0;
+      WAW.getEffects().premaster.gain.value = 0;
     };
 
     const stopMute = () => {
-      (WAW.getEffects() as any).premaster.gain.value = 1;
+      WAW.getEffects().premaster.gain.value = 1;
     };
 
     if (mute) {
