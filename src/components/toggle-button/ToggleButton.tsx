@@ -273,8 +273,7 @@ export const ToggleButton = (props: Props) => {
   useEffect(() => {
     if (player) {
       return () => {
-        // LATENT BUG: AudioPlayerWrapper.stop() requires a number arg; called here without one
-        (player.stop as (t?: number) => void)();
+        player.stop();
         player.disconnect();
       };
     }

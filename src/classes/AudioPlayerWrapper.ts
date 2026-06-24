@@ -76,7 +76,7 @@ export class AudioPlayerWrapper {
     }
   }
 
-  stop(time: number): void {
+  stop(time?: number): void {
     try {
       this.bufferSource.stop(time);
     } catch (err) {

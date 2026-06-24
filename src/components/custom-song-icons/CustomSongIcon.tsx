@@ -100,22 +100,21 @@ export function CustomSongIcon(props: Props) {
     }
 
     // cleanup
-    // LATENT BUG: canvasRef.current may be null after unmount; preserved as-is
     return () => {
       stopAnimation();
       if (listen) {
-        canvasRef.current!.removeEventListener("touchstart", beginAnimation);
-        canvasRef.current!.removeEventListener("touchstart", handleSetSelected);
-        canvasRef.current!.removeEventListener("touchstart", stopAnimation);
-        canvasRef.current!.removeEventListener(
+        canvasRef.current?.removeEventListener("touchstart", beginAnimation);
+        canvasRef.current?.removeEventListener("touchstart", handleSetSelected);
+        canvasRef.current?.removeEventListener("touchstart", stopAnimation);
+        canvasRef.current?.removeEventListener(
           "touchstart",
           handleUnsetSelected
         );
 
-        canvasRef.current!.removeEventListener("mouseover", beginAnimation);
-        canvasRef.current!.removeEventListener("mouseover", handleSetSelected);
-        canvasRef.current!.removeEventListener("mouseout", stopAnimation);
-        canvasRef.current!.removeEventListener("mouseout", handleUnsetSelected);
+        canvasRef.current?.removeEventListener("mouseover", beginAnimation);
+        canvasRef.current?.removeEventListener("mouseover", handleSetSelected);
+        canvasRef.current?.removeEventListener("mouseout", stopAnimation);
+        canvasRef.current?.removeEventListener("mouseout", handleUnsetSelected);
       }
     };
   }, [dispatch, props.name, animate, listen, setCustomStyles]);
