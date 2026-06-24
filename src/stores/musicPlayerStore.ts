@@ -61,10 +61,9 @@ export const useMusicPlayerStore = create<MusicPlayerState>()((set) => ({
   addVoice: (voice) => set((s) => ({ voices: [...s.voices, voice] })),
   updateVoiceState: ({ id, newState }) =>
     set((s) => ({
-      voices: [
-        ...s.voices.filter((v) => v.id !== id),
-        { ...s.voices.find((v) => v.id === id)!, voiceState: newState },
-      ],
+      voices: s.voices.map((v) =>
+        v.id === id ? { ...v, voiceState: newState } : v
+      ),
     })),
   addGroupSolo: (name) => set({ groupSolos: [name] }),
   removeGroupSolo: () => set({ groupSolos: [] }),
