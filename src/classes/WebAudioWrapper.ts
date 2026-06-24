@@ -97,6 +97,19 @@ interface WrapperValues {
   am: number[];
 }
 
+/**
+ * Central audio engine. Owns the AudioContext, Scheduler, and the entire WebAudio
+ * node graph for the app.
+ *
+ * Two-phase lifecycle:
+ *   1. `initAppState()` — called once per session. Builds the persistent effects chain
+ *      (filters, reverb, premaster) and the premaster analyser. Guarded by `status.app`.
+ *   2. `initSongState(id)` — called per song, lazily. Builds that song's group gain nodes,
+ *      per-group analysers, and voice players. Guarded by `status[id]`.
+ *
+ * Song voices route through their group's GainNode → effectsChainEntry → (effects chain)
+ * → premaster → AudioContext.destination.
+ */
 export class WebAudioWrapper {
   config: Record<string, SongAudioConfig>;
   nodes: Partial<WrapperNodes>;
@@ -143,6 +156,11 @@ export class WebAudioWrapper {
     this.scheduler = scheduler;
   }
 
+  /**
+   * Builds the session-persistent WebAudio graph: effect values lookup tables,
+   * the effects chain (filters → reverb dry/wet → premaster), and the premaster
+   * analyser. The `status.app` guard makes repeated calls safe (idempotent).
+   */
   async initAppState(): Promise<boolean> {
     /*
      * These are WebAudio nodes that will be used across songs, and should persist
@@ -157,6 +175,11 @@ export class WebAudioWrapper {
     return true;
   }
 
+  /**
+   * Lazily builds per-song nodes: group GainNodes, per-group analysers (one for 3D
+   * visualizations, one for oscilloscopes), and voice AudioPlayerWrappers. The
+   * `status[id]` guard prevents re-initialization on repeat visits to the same song.
+   */
   async initSongState(id: string): Promise<boolean> {
     /*
      * These are WebAudio nodes that are specific to the chosen song. They can
@@ -172,6 +195,17 @@ export class WebAudioWrapper {
     return true;
   }
 
+  /**
+   * Wires the session-level effects chain and loads the convolver impulse response.
+   *
+   * Node routing:
+   *   effectsChainEntry → lpFilter → hpFilter → reverbDry ─┐
+   *                                           └→ reverbWet → reverb ─┘→ effectsChainExit → premaster → destination
+   *
+   * Each song's group GainNodes connect upstream to effectsChainEntry.
+   * The reverb is a ConvolverNode loaded from an impulse-response wav; the promise
+   * resolves only after that async decode completes.
+   */
   _initAppEffects(): Promise<void> {
     return new Promise((resolve, reject) => {
       const effects = {} as AppEffects;
@@ -409,6 +443,10 @@ export class WebAudioWrapper {
     });
   }
 
+  /**
+   * No-arg: returns the full analysers container (including `premaster` and per-song entries).
+   * With `songId`: returns only that song's `{ groupAnalysers }` object.
+   */
   getAnalysers(): NodesAnalysers;
   getAnalysers(songId: string): SongAnalysers;
   getAnalysers(songId: string | null = null): NodesAnalysers | SongAnalysers {
@@ -417,6 +455,10 @@ export class WebAudioWrapper {
       : this.nodes.analysers!;
   }
 
+  /**
+   * No-arg: returns the full app-level effects object (premaster, filters, reverb nodes, etc.).
+   * With `songId`: returns only that song's `{ groupNodes }` object.
+   */
   getEffects(): AppEffects;
   getEffects(songId: string): SongEffects;
   getEffects(songId: string | null = null): AppEffects | SongEffects {
@@ -437,6 +479,11 @@ export class WebAudioWrapper {
     return this.config[songId];
   }
 
+  /**
+   * Applies a named effect at position `value` (1-based index into the pre-calculated
+   * lookup tables in `this.values`). "lp"/"hp" set filter frequency + Q; "am" sets
+   * reverb wet/dry gains such that wet + dry = 1.
+   */
   setEffects(name: string, value: number): void {
     switch (name) {
       case "lp": {

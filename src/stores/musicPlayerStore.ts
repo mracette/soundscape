@@ -1,3 +1,15 @@
+/**
+ * Cross-component state hub for the music player.
+ *
+ * `voices` is the source of truth for which sounds are active — the viz reads
+ * it each frame and background mode iterates it to toggle voices on/off.
+ * `Voice.ref` is the toggle button's DOM node; background mode calls `.click()`
+ * on it programmatically rather than dispatching audio events directly.
+ *
+ * `resetCallbacks` / `randomizeCallbacks` are registries: each instrument
+ * component registers itself by name on mount so the global Reset/Randomize
+ * buttons can reach every component without prop drilling.
+ */
 import { create } from "zustand";
 
 type VoiceState = "stopped" | "pending-start" | "active" | "pending-stop";
