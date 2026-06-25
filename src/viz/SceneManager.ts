@@ -3,6 +3,12 @@ import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
 import { FrameTelemetry, TelemetrySnapshot } from "./telemetry";
 
+// Cap the render loop to 60fps. On high-refresh displays (120Hz+) RAF would
+// otherwise render 2x as often — pure heat/battery for an ambient visualizer,
+// with no visible benefit (motion is time-based, not per-frame).
+const TARGET_FPS = 60;
+const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
+
 // stats.js has no bundled types — minimal shim for the dynamic import
 interface StatsPanel {
   update(value: number, maxValue: number): void;
@@ -75,6 +81,7 @@ export class SceneManager {
   protected fpcControl!: boolean;
   protected telemetry?: FrameTelemetry;
   protected perfPanels?: { cpu: StatsPanel; gpu: StatsPanel };
+  protected lastFrameTime = 0;
 
   // Fields set by init() and subclasses
   // public: scene is read by CanvasViz (newScene.disposeAll(newScene.scene))
@@ -220,6 +227,15 @@ export class SceneManager {
    * `requestAnimationFrame`.
    */
   animate() {
+    this.currentFrame = requestAnimationFrame(this.animate);
+
+    // Frame-rate cap: skip this tick unless ~1/60s has elapsed since the last
+    // rendered frame. Aligns to the interval to avoid drift.
+    const now = performance.now();
+    const elapsed = now - this.lastFrameTime;
+    if (elapsed < FRAME_INTERVAL_MS) return;
+    this.lastFrameTime = now - (elapsed % FRAME_INTERVAL_MS);
+
     this.showStats && this.helpers.stats?.begin();
     this.telemetry?.beginFrame();
     this.render();
@@ -230,7 +246,6 @@ export class SceneManager {
       this.perfPanels.cpu.update(snap.cpuMs, 33);
       this.perfPanels.gpu.update(snap.gpuMs ?? 0, 33);
     }
-    this.currentFrame = requestAnimationFrame(this.animate);
   }
 
   // Subclasses must implement render(); base class calls it in animate() and onWindowResize()
