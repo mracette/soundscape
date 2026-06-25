@@ -124,8 +124,7 @@ export const CanvasViz = (props: Props) => {
 
     return () => {
       if (flags.showVisuals) {
-        newScene!.stop();
-        newScene!.disposeAll(newScene!.scene);
+        newScene!.dispose();
         if (newScene!.resizeMethod === "cinematic") {
           removeWindowListeners(resizeFunction!);
         }

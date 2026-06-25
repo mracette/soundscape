@@ -156,6 +156,16 @@ export class SceneManager {
   }
 
   /**
+   * Full teardown on unmount: stop the loop, free the scene's GPU resources, and
+   * dispose the renderer's too — deterministic release rather than waiting for GC.
+   */
+  dispose() {
+    this.stop();
+    this.disposeAll(this.scene);
+    this.renderer.dispose();
+  }
+
+  /**
    * Recompute `sceneDimensions` from the current `resizeMethod`.
    * "fullscreen" uses `window.innerWidth/Height`; "cinematic" uses the canvas
    * element's CSS dimensions. Called in the constructor and in `onWindowResize`.
