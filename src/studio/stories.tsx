@@ -11,6 +11,9 @@ import { MoonriseIcon } from "../components/custom-song-icons/MoonriseIcon";
 import { ComingSoonIcon } from "../components/custom-song-icons/ComingSoonIcon";
 import { LoadingIcon } from "../components/custom-song-icons/LoadingIcon";
 import * as styles from "./studio.css";
+import { Icon } from "../components/Icon";
+import { SocialIcons } from "../components/iconography/SocialIcons";
+import { SharingIcons } from "../components/iconography/SharingIcons";
 
 export interface Story {
   id: string;
@@ -110,6 +113,36 @@ const MenuStory = () => (
   </ThemeContext.Provider>
 );
 
+const ICON_NAMES = [
+  "icon-envelope", "icon-equalizer", "icon-github", "icon-headphones",
+  "icon-home", "icon-info", "icon-instagram", "icon-list", "icon-make-group",
+  "icon-menu", "icon-music", "icon-pause", "icon-pause2", "icon-play2",
+  "icon-play3", "icon-plus", "icon-spotify", "icon-stop", "icon-stop2",
+  "icon-twitter", "icon-volume-high", "icon-volume-low", "icon-volume-medium",
+  "icon-volume-mute", "icon-volume-mute2",
+];
+
+const IconGalleryStory = () => (
+  <div style={{ width: "100%" }}>
+    <div className={styles.iconGrid}>
+      {ICON_NAMES.map((name) => (
+        <div key={name} className={styles.iconCell}>
+          <Icon
+            divClassList={styles.iconCellSvg}
+            svgClassList="icon icon-white"
+            name={name}
+          />
+          <span>{name}</span>
+        </div>
+      ))}
+    </div>
+    <div className={styles.iconSection}>Social Icons</div>
+    <SocialIcons />
+    <div className={styles.iconSection}>Sharing Icons</div>
+    <SharingIcons />
+  </div>
+);
+
 export const stories: Story[] = [
   { id: "swamp", title: "Swamp Icon", group: "Song Icons", Component: SwampStory },
   { id: "mornings", title: "Mornings Icon", group: "Song Icons", Component: MorningsStory },
@@ -118,4 +151,5 @@ export const stories: Story[] = [
   { id: "loading", title: "Loading Icon", group: "Song Icons", Component: LoadingStory },
   { id: "toggle", title: "Toggle Button", group: "Buttons", Component: ToggleStory },
   { id: "menu", title: "Menu Button", group: "Buttons", Component: MenuStory },
+  { id: "icons", title: "Icon Gallery", group: "Misc", Component: IconGalleryStory },
 ];

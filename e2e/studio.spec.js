@@ -31,3 +31,8 @@ test("menu button story renders the radial menu", async ({ page }) => {
   await page.goto("/studio/menu", { waitUntil: "domcontentloaded" });
   await expect(page.locator(".menu-button-parent")).toBeVisible();
 });
+
+test("icon gallery story renders the icon grid", async ({ page }) => {
+  await page.goto("/studio/icons", { waitUntil: "domcontentloaded" });
+  await expect(page.getByText("icon-home", { exact: true })).toBeVisible();
+});
