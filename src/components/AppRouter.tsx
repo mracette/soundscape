@@ -1,9 +1,14 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Redirect } from "wouter";
 import { ThemeContext, ThemeContextValue, SongContextValue, InfoContextValue, AppConfigEntry } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { InfoContext } from "../contexts/contexts";
 import { MusicPlayer } from "./MusicPlayer";
 import { LandingPage } from "./LandingPage";
+
+const Studio = import.meta.env.DEV
+  ? lazy(() => import("../studio/Studio").then((m) => ({ default: m.Studio })))
+  : null;
 
 interface Props {
   appConfig: AppConfigEntry[];
@@ -47,6 +52,22 @@ export const AppRouter = (props: Props) => {
           );
         }}
       </Route>
+      {Studio && (
+        <Route path="/studio/:storyId">
+          {(params) => (
+            <Suspense fallback={null}>
+              <Studio storyId={params.storyId} />
+            </Suspense>
+          )}
+        </Route>
+      )}
+      {Studio && (
+        <Route path="/studio">
+          <Suspense fallback={null}>
+            <Studio />
+          </Suspense>
+        </Route>
+      )}
       <Route>
         <LandingPage spectrumFunction={props.spectrumFunctions.stars} />
       </Route>
