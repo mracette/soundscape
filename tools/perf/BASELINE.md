@@ -1,55 +1,66 @@
 # Perf baseline
 
-Commit: `d6b0df1` • Date: 2026-06-25 • Scene: swamp • Branch: `perf-review`
+Commit: `99143c2` • Scene scenario: **idle → one voice per group (all visuals active)**
 
 Captured with `tools/perf/perf-run.mjs` against the worktree dev server (`:3100`).
-CPU ms / heap / commits / longtasks are reliable everywhere; **GPU ms is only
-measurable on real hardware** (headed run) — SwiftShader (headless) has no timer
-query.
+CPU ms / heap / commits / longtasks are reliable everywhere; **GPU ms requires
+real hardware** (headed run) — SwiftShader (headless) has no timer query.
 
-## Headless (CPU / heap / React commits / long tasks)
+## Real GPU (headed, on real hardware) — the authoritative baseline
 
+### swamp
 | checkpoint | CPU ms | GPU ms | budget % | heap MB | commits | longtasks |
 |---|---|---|---|---|---|---|
-| idle | 1.10 | — | 7 | 14.4 | 5 | 40 |
-| 4 voices active | 1.00 | — | 6 | 16.7 | 10 | 148 |
-| after randomize | 1.00 | — | 6 | 17.9 | 14 | 195 |
+| idle | 0.90 | 0.54 | 9 | 18.3 | 5 | 2 |
+| all groups active | 1.00 | 0.63 | 10 | 16.8 | 15 | 2 |
 
-Notes:
-- **CPU render is ~1ms/frame** headless — the JS render() + per-frame Analyser
-  work is cheap on this scene. (Real-hardware CPU will differ slightly; GPU is the
-  unknown — fill in below.)
-- **Heap grows ~14.4 → 17.9 MB** as voices start (audio buffers) — small, stable.
-- **React commits per interaction are minimal** (a few per checkpoint) —
-  re-render waste is not a hotspot (consistent with the earlier finding).
-- `longtasks` is cumulative since load; most of the count is initial
-  compile/asset-decode, not steady-state.
-
-## Real GPU (headed — run locally on real hardware)
-
-Run on a machine with a real GPU:
-```
-node tools/perf/perf-run.mjs --headed --label baseline-headed
-```
-This fills in **GPU ms** via `EXT_disjoint_timer_query` (confirmed available in
-Chrome on this hardware). Paste the resulting table here.
-
+### mornings
 | checkpoint | CPU ms | GPU ms | budget % | heap MB | commits | longtasks |
 |---|---|---|---|---|---|---|
-| _(run --headed to fill in)_ | | | | | | |
+| idle | 0.90 | 0.41 | 8 | 30.8 | 5 | 1 |
+| all groups active | 2.10 | 0.47 | 15 | 18.6 | 15 | 1 |
+
+### moonrise
+| checkpoint | CPU ms | GPU ms | budget % | heap MB | commits | longtasks |
+|---|---|---|---|---|---|---|
+| idle | 1.50 | 1.01 | 15 | 26.8 | 5 | 0 |
+| all groups active | 1.60 | 0.98 | 16 | 37.9 | 15 | 0 |
+
+## Findings
+
+- **The cost is CPU/JS, not GPU.** GPU is ≤1ms/frame in every scene/state →
+  shaders/draws are cheap. Optimization targets JavaScript, not the GPU.
+- **mornings is the standout:** idle→active CPU **0.9 → 2.1ms (+130%)** while GPU
+  barely moves — the per-frame JS for the active subjects (Analyser FFT/bucketing
+  + subject updates) scales with voices. Clearest target.
+- **moonrise has the highest *resting* cost:** idle CPU 1.5 + GPU 1.0 (~15% budget
+  at rest) — its always-on elements (stars/particles). Second target.
+- **swamp is cheap** (barely moves, ≤10% budget).
+- **All scenes sit under ~16% of the 16.7ms frame budget on this hardware** — no
+  dropped frames, large headroom. So B2 is *efficiency/headroom* work (lower CPU →
+  battery; and these numbers scale up materially on weaker/mobile GPUs), not a
+  perf rescue.
+- Heap is GC-noisy (mornings idle 30.8 → active 18.6 went *down*) — treat as a soft
+  signal, not a target. React commits per interaction stay minimal (re-renders not
+  a factor, as expected).
+
+## Headless reference (CI-portable metrics; GPU not measurable headless)
+
+For run-to-run CPU/heap/commit/longtask regression checks without a GPU:
+`node tools/perf/perf-run.mjs --label <name>` (defaults to all scenes).
 
 ## How to reproduce
 
 1. `tools/worktree-dev.sh perf-review quality 3100` (or any worktree on `:3100`).
-2. `node tools/perf/perf-run.mjs --label <name> [--headed]`.
+2. Headed (full, real GPU): `node tools/perf/perf-run.mjs --headed --label <name>`.
+   Headless (CPU/heap only): `node tools/perf/perf-run.mjs --label <name>`.
 3. Diff `tools/perf/reports/<name>.json` against this baseline.
-4. Live overlay: open `http://localhost:3100/play/swamp?perf=1` in real Chrome —
-   the stats.js panels show FPS / MS / **CPU ms** / **GPU ms** live.
+4. Live overlay: `http://localhost:3100/play/<scene>?perf=1` in real Chrome —
+   stats.js panels show FPS / MS / CPU ms / GPU ms live.
 
 ## Hand-off to B2 (optimization)
 
-This baseline is B2's input. From the headless data, **CPU render and re-renders
-are already cheap** — so the first question for B2 is whether the real cost is
-**GPU** (answered by a `--headed` run) or in a specific path (the Analyser
-FFT/bucketing, scene draw). Optimize the checkpoint with the highest
-CPU ms / budget %, prove it with a before/after harness diff.
+No perf fire — the app is healthy on real hardware. If B2 proceeds, the data says:
+target **JS, not GPU**, starting with **mornings' per-frame subject/analyser work
+when loaded** (the +1.2ms idle→active jump), then **moonrise's always-on baseline**.
+Prove each change with a before/after `--headed` harness diff against this baseline.
