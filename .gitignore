@@ -43,3 +43,6 @@ yarn-error.log*
 # worktree asset symlinks (created by tools/worktree-dev.sh)
 /public/models
 /public/fonts
+
+# perf run artifacts
+tools/perf/reports/
