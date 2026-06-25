@@ -72,14 +72,35 @@ for (const song of SONGS) {
   };
 
   await sample("idle");
-  const toggles = p.locator(".toggle-button");
-  const n = Math.min(4, await toggles.count());
-  for (let i = 0; i < n; i++) { await toggles.nth(i).click(); await p.waitForTimeout(700); }
-  await p.waitForTimeout(2000);
-  await sample("4 voices active");
-  await p.locator("#toggle-button-panel-randomize").click().catch(() => {});
-  await p.waitForTimeout(2500);
-  await sample("after randomize");
+
+  // Activate one voice in every group — this unlocks all of the scene's visual
+  // subjects (the meaningful full-render-load state). One per group stays within
+  // every polyphony cap, so none get overridden.
+  const groups = p.locator(".toggle-button-group");
+  const gn = await groups.count();
+  for (let i = 0; i < gn; i++) {
+    await groups.nth(i).locator(".toggle-button").first().click();
+  }
+
+  // Voice starts are quantized — wait until every group actually has an ACTIVE
+  // voice (that is when CanvasViz turns the group's visuals on), polling the
+  // store via the read-only seam. Then settle a few frames before sampling.
+  await p
+    .waitForFunction(
+      () => {
+        const s = window.__soundscape?.store();
+        if (!s || s.voices.length === 0) return false;
+        const allGroups = new Set(s.voices.map((v) => v.group));
+        const activeGroups = new Set(
+          s.voices.filter((v) => v.voiceState === "active").map((v) => v.group)
+        );
+        return activeGroups.size >= allGroups.size;
+      },
+      { timeout: 30000 }
+    )
+    .catch(() => {});
+  await p.waitForTimeout(1500);
+  await sample("all groups active");
 
   report.scenes.push({ song, samples });
 }
