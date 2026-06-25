@@ -119,3 +119,7 @@ export const iconSection = style({
   textTransform: "uppercase",
   letterSpacing: "0.1em",
 });
+
+export const galleryWrap = style({ width: "100%" });
+
+export const loadingStory = style({ textAlign: "center" });

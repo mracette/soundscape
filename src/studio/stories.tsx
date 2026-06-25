@@ -32,7 +32,7 @@ const ComingSoonStory = () => <ComingSoonIcon name="coming-soon" dispatch={noop}
 const LoadingStory = () => {
   const [loading, setLoading] = useState(true);
   return (
-    <div style={{ textAlign: "center" }}>
+    <div className={styles.loadingStory}>
       <LoadingIcon isLoading={loading} />
       <button
         className={styles.controlButton}
@@ -123,7 +123,7 @@ const ICON_NAMES = [
 ];
 
 const IconGalleryStory = () => (
-  <div style={{ width: "100%" }}>
+  <div className={styles.galleryWrap}>
     <div className={styles.iconGrid}>
       {ICON_NAMES.map((name) => (
         <div key={name} className={styles.iconCell}>
