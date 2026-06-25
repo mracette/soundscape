@@ -58,9 +58,19 @@ For run-to-run CPU/heap/commit/longtask regression checks without a GPU:
 4. Live overlay: `http://localhost:3100/play/<scene>?perf=1` in real Chrome —
    stats.js panels show FPS / MS / CPU ms / GPU ms live.
 
-## Hand-off to B2 (optimization)
+## Investigation: mornings' +1.2ms-when-loaded → B2 parked
 
-No perf fire — the app is healthy on real hardware. If B2 proceeds, the data says:
-target **JS, not GPU**, starting with **mornings' per-frame subject/analyser work
-when loaded** (the +1.2ms idle→active jump), then **moonrise's always-on baseline**.
-Prove each change with a before/after `--headed` harness diff against this baseline.
+Profiled mornings at full visual load (`tools/perf/perf-profile.mjs`). The JS is
+cheap and has **no hotspot** — 94% of samples are `(program)` (native + vsync
+idle); every JS function (the three.js render path, `getByteFrequencyData`,
+`renderMelody`, …) is <0.2% self-time each. Since JS runs identically headless and
+headed, the headed-only +1.2ms is **WebGL draw-call / native-driver overhead**
+from the extra active meshes — not optimizable JavaScript.
+
+The only lever is **draw-call reduction** (merging/instancing the per-voice scene
+geometry) — an involved, risky change to the hand-tuned art for marginal headroom
+(all scenes already <16% of the frame budget on real hardware).
+
+**Decision: B2 parked.** No cheap win; the app is healthy. The measure-first step
+did its job. Revisit only if perf becomes a real concern (e.g. weak/mobile GPUs) —
+the telemetry overlay, harness, profiler, and this baseline are the tools to do it.
