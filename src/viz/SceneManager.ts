@@ -374,6 +374,12 @@ export class SceneManager {
         this.sceneDimensions.height
       );
     }
+    // autoClear is off, so nothing wipes the drawing buffer between frames. A
+    // freshly sized buffer can hold uninitialized GPU memory that survives the
+    // first paint (whose clear color is transparent and may not cover the whole
+    // viewport). Clear once here — the first paint runs through onWindowResize —
+    // so that garbage never shows.
+    this.renderer.clear();
     this.render(true);
   }
 

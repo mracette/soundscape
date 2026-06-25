@@ -9,6 +9,9 @@ import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 import { CanvasSlider } from "./canvas/CanvasSlider";
 
 import "../styles/components/EffectsPanel.css";
+import { flexPanel } from "../styles/shared/layout.css";
+import { buttonWhite, groupedButtons } from "../styles/shared/buttons.css";
+import { cx } from "../utils/cx";
 
 const EFFECT_INTERVAL = 4; // in beats
 
@@ -117,7 +120,7 @@ export const EffectsPanel = () => {
   }, [WAW, amValue]);
 
   return (
-    <div id="effects-panel" className="flex-panel">
+    <div id="effects-panel" className={flexPanel}>
       <h2>Background Mode</h2>
       <p>
         Automatically varies the music over time. Ideal for extended listening.
@@ -199,7 +202,7 @@ export const EffectsPanel = () => {
 
       <div className="flex-row">
         <button
-          className="button-white grouped-buttons"
+          className={cx(buttonWhite, groupedButtons)}
           id="effects-panel-reset"
           onClick={() => {
             setHpValue(1);
@@ -214,7 +217,7 @@ export const EffectsPanel = () => {
         </button>
 
         <button
-          className="button-white grouped-buttons"
+          className={cx(buttonWhite, groupedButtons)}
           id="effects-panel-randomize"
           onClick={() => {
             const h = 1 + 99 * Math.random();

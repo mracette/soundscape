@@ -6,6 +6,8 @@ import { SwampIcon } from "./custom-song-icons/SwampIcon";
 import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
 import { LayoutContext } from "../contexts/contexts";
 import "../styles/components/LandingPage.css";
+import { buttonWhite } from "../styles/shared/buttons.css";
+import { cx } from "../utils/cx";
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
 import { LandingPageMobile } from "./LandingPageMobile";
@@ -114,7 +116,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className="info-page-button button-white">
+          <button role="link" className={cx("info-page-button", buttonWhite)}>
             Join the Discord
           </button>
         </a>
@@ -126,7 +128,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className="info-page-button button-white">
+          <button role="link" className={cx("info-page-button", buttonWhite)}>
             View the source
           </button>
         </a>
@@ -138,7 +140,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className="info-page-button button-white">
+          <button role="link" className={cx("info-page-button", buttonWhite)}>
             Send an email
           </button>
         </a>
