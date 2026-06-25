@@ -21,3 +21,13 @@ test("selecting a story navigates and renders it", async ({ page }) => {
   await expect(page).toHaveURL(/\/studio\/loading$/);
   await expect(page.locator("#custom-loading-icon")).toBeAttached();
 });
+
+test("toggle button story renders the toggle", async ({ page }) => {
+  await page.goto("/studio/toggle", { waitUntil: "domcontentloaded" });
+  await expect(page.locator("button.toggle-button")).toBeVisible();
+});
+
+test("menu button story renders the radial menu", async ({ page }) => {
+  await page.goto("/studio/menu", { waitUntil: "domcontentloaded" });
+  await expect(page.locator(".menu-button-parent")).toBeVisible();
+});

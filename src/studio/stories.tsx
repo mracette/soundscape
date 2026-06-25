@@ -1,4 +1,10 @@
-import { useState, type ComponentType } from "react";
+import { useState, useRef, type ComponentType } from "react";
+import { ThemeContext, type ThemeContextValue } from "../contexts/contexts";
+import {
+  ToggleButtonView,
+  type ToggleButtonViewHandle,
+} from "../components/toggle-button/ToggleButtonView";
+import { MenuButtonParent } from "../components/menu-button/MenuButtonParent";
 import { SwampIcon } from "../components/custom-song-icons/SwampIcon";
 import { MorningsIcon } from "../components/custom-song-icons/MorningsIcon";
 import { MoonriseIcon } from "../components/custom-song-icons/MoonriseIcon";
@@ -35,10 +41,81 @@ const LoadingStory = () => {
   );
 };
 
+const ToggleStory = () => {
+  const viewRef = useRef<ToggleButtonViewHandle>(null);
+  const [active, setActive] = useState(false);
+  return (
+    <ToggleButtonView
+      ref={viewRef}
+      active={active}
+      onClick={() => {
+        const next = !active;
+        setActive(next);
+        viewRef.current?.runAnimation(next ? "start" : "stop", 600);
+      }}
+    />
+  );
+};
+
+const mockTheme: ThemeContextValue = {
+  id: "studio",
+  spectrumFunction: () => "#ffffff",
+  canvasFade: false,
+  resizeType: "",
+  buttonColor: "rgba(255, 76, 122, 0.9)",
+  openButtonColor: "rgba(0, 225, 158, 0.9)",
+  contentPanelColor: "rgba(20, 27, 36, 0.95)",
+  panelResetButton: "",
+  panelRandomizeButton: "",
+  panelMuteButton: "",
+  groupSoloButton: "",
+  groupMuteButton: "",
+};
+
+const MenuStory = () => (
+  <ThemeContext.Provider value={mockTheme}>
+    <div className={styles.menuStage}>
+      <MenuButtonParent
+        childButtonProps={[
+          {
+            id: "home",
+            iconName: "icon-home",
+            content: (
+              <div className="flex-panel">
+                <h2>Home</h2>
+              </div>
+            ),
+          },
+          {
+            id: "info",
+            iconName: "icon-info",
+            content: (
+              <div className="flex-panel">
+                <h2>Info</h2>
+              </div>
+            ),
+          },
+          {
+            id: "list",
+            iconName: "icon-list",
+            content: (
+              <div className="flex-panel">
+                <h2>List</h2>
+              </div>
+            ),
+          },
+        ]}
+      />
+    </div>
+  </ThemeContext.Provider>
+);
+
 export const stories: Story[] = [
   { id: "swamp", title: "Swamp Icon", group: "Song Icons", Component: SwampStory },
   { id: "mornings", title: "Mornings Icon", group: "Song Icons", Component: MorningsStory },
   { id: "moonrise", title: "Moonrise Icon", group: "Song Icons", Component: MoonriseStory },
   { id: "coming-soon", title: "Coming Soon Icon", group: "Song Icons", Component: ComingSoonStory },
   { id: "loading", title: "Loading Icon", group: "Song Icons", Component: LoadingStory },
+  { id: "toggle", title: "Toggle Button", group: "Buttons", Component: ToggleStory },
+  { id: "menu", title: "Menu Button", group: "Buttons", Component: MenuStory },
 ];
