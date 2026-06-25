@@ -8,6 +8,11 @@ import { FrameTelemetry, TelemetrySnapshot } from "./telemetry";
 // with no visible benefit (motion is time-based, not per-frame).
 const TARGET_FPS = 60;
 const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
+// Jitter margin: render when within this of the target interval. Without it, a
+// true 60Hz display (frames arriving a hair under 16.67ms) gets halved to 30fps;
+// the margin sits safely between a 120Hz frame (8.33ms) and a 60Hz one (16.67ms),
+// so 60Hz renders every frame and 120Hz renders every other = 60.
+const FRAME_TOLERANCE_MS = 4;
 
 // stats.js has no bundled types — minimal shim for the dynamic import
 interface StatsPanel {
@@ -229,12 +234,11 @@ export class SceneManager {
   animate() {
     this.currentFrame = requestAnimationFrame(this.animate);
 
-    // Frame-rate cap: skip this tick unless ~1/60s has elapsed since the last
-    // rendered frame. Aligns to the interval to avoid drift.
+    // Frame-rate cap: skip this tick unless ~1/60s (minus a jitter margin) has
+    // elapsed since the last rendered frame.
     const now = performance.now();
-    const elapsed = now - this.lastFrameTime;
-    if (elapsed < FRAME_INTERVAL_MS) return;
-    this.lastFrameTime = now - (elapsed % FRAME_INTERVAL_MS);
+    if (now - this.lastFrameTime < FRAME_INTERVAL_MS - FRAME_TOLERANCE_MS) return;
+    this.lastFrameTime = now;
 
     this.showStats && this.helpers.stats?.begin();
     this.telemetry?.beginFrame();
