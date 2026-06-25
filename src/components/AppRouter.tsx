@@ -1,5 +1,5 @@
 import { Switch, Route, Redirect } from "wouter";
-import { ThemeContext, ThemeContextValue, SongContextValue, InfoContextValue, AppConfigEntry } from "../contexts/contexts";
+import { ThemeContext, ThemeContextValue, SongContextValue, InfoContextValue, AppConfigEntry, SongId } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { InfoContext } from "../contexts/contexts";
 import { MusicPlayer } from "./MusicPlayer";
@@ -7,7 +7,7 @@ import { LandingPage } from "./LandingPage";
 
 interface Props {
   appConfig: AppConfigEntry[];
-  spectrumFunctions: Record<string, (n: number) => unknown>;
+  spectrumFunctions: Record<string, (n: number) => string>;
 }
 
 export const AppRouter = (props: Props) => {
@@ -15,7 +15,7 @@ export const AppRouter = (props: Props) => {
     <Switch>
       <Route path="/play/:songId">
         {(params) => {
-          const songId = params.songId as string;
+          const songId = params.songId as SongId;
           const song = props.appConfig.find((s) => s.id === songId);
           if (!song) {
             return <Redirect to="/" />;

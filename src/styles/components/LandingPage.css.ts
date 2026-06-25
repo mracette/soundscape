@@ -6,21 +6,9 @@ import {
   hotPink,
   mSize,
   moonYellow,
-  offBlack2,
   vw,
   xxlSize,
 } from "../settings";
-
-globalStyle(".announcement", {
-  backgroundColor: offBlack2,
-  fontSize: mSize,
-  display: "flex",
-  justifyContent: "center",
-  textAlign: "center",
-  position: "absolute",
-  bottom: "20px",
-  width: "100%",
-});
 
 globalStyle("#landing-page-canvas", {
   zIndex: -1,

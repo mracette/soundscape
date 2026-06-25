@@ -1,5 +1,5 @@
 import { globalFontFace, globalStyle } from "@vanilla-extract/css";
-import { hotBlue, hotGreen, hotPink, mSize, offBlack2, vh, vw } from "./settings";
+import { hotBlue, hotGreen, hotPink, offBlack2, vh, vw } from "./settings";
 
 globalFontFace("Lato", {
   fontStyle: "normal",
@@ -29,6 +29,24 @@ globalStyle("canvas", {
 
 globalStyle("h1, h2, h3, h4, h5, h6", {
   fontWeight: "normal",
+});
+
+globalStyle("h2, h3", {
+  color: "white",
+  textTransform: "capitalize",
+});
+
+globalStyle("h2", {
+  fontSize: vh(3),
+  margin: `0 0 ${vh(1)} 0`,
+});
+
+globalStyle("h3", {
+  fontSize: vh(2.25),
+  margin: 0,
+  padding: `0 ${vh(1)} 0 0`,
+  flex: "0 0 content",
+  whiteSpace: "nowrap",
 });
 
 globalStyle("a", {
@@ -93,14 +111,3 @@ globalStyle(".hot-blue", {
   color: hotBlue,
 });
 
-globalStyle(".announcement", {
-  backgroundColor: offBlack2,
-  fontSize: mSize,
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  position: "absolute",
-  bottom: "0px",
-  height: "50px",
-  width: "100vw",
-});

@@ -5,6 +5,7 @@ import { TestingContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
+import { MusicalDuration } from "../../contexts/contexts";
 import { nextSubdivision } from "../../utils/audioUtils";
 import "../../styles/components/Icon.css";
 import "../../styles/components/ToggleButton.css";
@@ -36,8 +37,8 @@ interface AnimationTargets {
 interface Props {
   name: string;
   groupName: string;
-  length?: string;
-  quantizeLength?: string;
+  length?: MusicalDuration;
+  quantizeLength?: MusicalDuration;
 }
 
 export const ToggleButton = (props: Props) => {

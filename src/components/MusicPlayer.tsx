@@ -24,6 +24,7 @@ export const MusicPlayer = () => {
 
   const [songLoadStatus, setSongLoadStatus] = useState(false);
   const [canvasLoadStatus, setCanvasLoadStatus] = useState(false);
+
   // Must be referentially stable: it is a dependency of CanvasViz's scene-init
   // effect, and this component is not compiler-memoized (its render calls
   // store.reset()). Without useCallback the scene re-initializes on every render.
@@ -35,6 +36,7 @@ export const MusicPlayer = () => {
   // A lazy useState initializer runs once, synchronously, before children render;
   // a useEffect would run after children register and wipe them.
   useState(() => useMusicPlayerStore.getState().reset());
+  
   const resetCallbacks = useMusicPlayerStore((s) => s.resetCallbacks);
   const randomizeCallbacks = useMusicPlayerStore((s) => s.randomizeCallbacks);
   const voices = useMusicPlayerStore((s) => s.voices);
