@@ -2,14 +2,17 @@ import { ThemeContext, type ThemeContextValue } from "../../contexts/contexts";
 import { MenuButtonParent } from "../../components/menu-button/MenuButtonParent";
 import * as styles from "./MenuStory.css";
 
+// Mirrors the swamp song theme so the menu reads like it does in the app
+// (dark button, white icon, translucent-white when open) rather than with
+// arbitrary demo colors.
 const mockTheme: ThemeContextValue = {
   id: "studio",
   spectrumFunction: () => "#ffffff",
   canvasFade: false,
   resizeType: "",
-  buttonColor: "rgba(255, 76, 122, 0.9)",
-  openButtonColor: "rgba(0, 225, 158, 0.9)",
-  contentPanelColor: "rgba(20, 27, 36, 0.95)",
+  buttonColor: "rgba(31, 38, 47, 1)",
+  openButtonColor: "rgba(255, 255, 255, 0.15)",
+  contentPanelColor: "rgba(31, 38, 47, 0.65)",
   panelResetButton: "",
   panelRandomizeButton: "",
   panelMuteButton: "",
