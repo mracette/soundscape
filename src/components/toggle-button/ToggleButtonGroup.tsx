@@ -11,8 +11,13 @@ import { ThemeContext, VoiceConfig } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
-import "../../styles/components/ToggleButtonGroup.css";
-import "../../styles/components/Oscilloscope.css";
+import {
+  soloButton,
+  muteButton,
+  toggleButtonGroup,
+  toggleButtons,
+} from "../../styles/components/ToggleButtonGroup.css";
+import { cx } from "../../utils/cx";
 
 interface Props {
   name: string;
@@ -135,7 +140,7 @@ export const ToggleButtonGroup = (props: Props) => {
   }, [solo, removeGroupSolo, addGroupSolo, name]);
 
   return (
-    <div className="toggle-button-group flex-col">
+    <div className={cx(toggleButtonGroup, "toggle-button-group", "flex-col")}>
       <div className="flex-row">
         <h3>
           {name} ({polyphony} /{" "}
@@ -152,7 +157,7 @@ export const ToggleButtonGroup = (props: Props) => {
         />
 
         <button
-          className="solo-button"
+          className={cx(soloButton, "solo-button")}
           style={
             solo
               ? {
@@ -166,7 +171,7 @@ export const ToggleButtonGroup = (props: Props) => {
         </button>
 
         <button
-          className="mute-button"
+          className={cx(muteButton, "mute-button")}
           style={
             mute
               ? {
@@ -180,7 +185,7 @@ export const ToggleButtonGroup = (props: Props) => {
         </button>
       </div>
 
-      <div className="toggle-buttons flex-row">
+      <div className={cx(toggleButtons, "flex-row")}>
         {useMemo(
           () =>
             props.voices.map((voice) => (

@@ -53,6 +53,10 @@ globalStyle("a", {
   color: "inherit",
 });
 
+globalStyle("span, p", {
+  fontSize: "1.75rem",
+});
+
 globalStyle("button, .button", {
   cursor: "pointer",
 });

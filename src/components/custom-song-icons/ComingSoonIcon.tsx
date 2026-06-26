@@ -1,7 +1,6 @@
 import { rotatePoint, TAU, CanvasCoordinates } from "../../utils/mathUtils";
 
 import { CustomSongIcon } from "./CustomSongIcon";
-import "../../styles/components/LandingPage.css";
 
 const addPad = 0.8;
 

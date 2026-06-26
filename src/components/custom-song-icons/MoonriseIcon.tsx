@@ -1,7 +1,6 @@
 import { TAU, rotatePoint, CanvasCoordinates } from "../../utils/mathUtils";
 
 import { CustomSongIcon } from "./CustomSongIcon";
-import "../../styles/components/LandingPage.css";
 
 const animate = (context: CanvasRenderingContext2D, cycle: number, coords: CanvasCoordinates) => {
   for (let i = 0; i < 5; i++) {

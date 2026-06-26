@@ -8,7 +8,7 @@ import { ThemeContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 
-import "../styles/components/FreqBands.css";
+import { freqBands, freqBandsCanvas } from "../styles/components/FreqBands.css";
 
 interface Props {
   animate?: boolean;
@@ -86,9 +86,10 @@ export const FreqBands = (props: Props) => {
 
   return useMemo(
     () => (
-      <div id="freq-bands">
+      <div id="freq-bands" className={freqBands}>
         <Canvas
           id="freq-bands-canvas"
+          className={freqBandsCanvas}
           onLoad={(canvas) => {
             canvasRef.current = canvas;
             contextRef.current = canvas.getContext("2d");

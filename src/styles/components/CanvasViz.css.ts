@@ -1,6 +1,6 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 
-globalStyle("#canvas-viz-parent", {
+export const canvasVizParent = style({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -8,7 +8,7 @@ globalStyle("#canvas-viz-parent", {
   zIndex: -1000,
 });
 
-globalStyle("#canvas-viz", {
+export const canvasViz = style({
   backgroundColor: "white",
   zIndex: -999,
   margin: "auto",

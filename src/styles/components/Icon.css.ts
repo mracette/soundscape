@@ -14,45 +14,6 @@ globalStyle(".toggle-icon", {
   left: 0,
 });
 
-globalStyle(".sharing-link", {
-  padding: vh(1),
-});
-
-globalStyle(".sharing-link img", {
-  width: vh(6),
-  height: vh(6),
-});
-
-globalStyle(".info-panel-icon", {
-  width: vh(5),
-  height: vh(5),
-});
-
-globalStyle(".icon-row", {
-  width: "100%",
-});
-
-globalStyle(".coming-soon-icon-row", {
-  margin: "5vh 0 5vh 0",
-});
-
-globalStyle(".icon-row-child", {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  width: vh(6),
-  height: vh(6),
-  padding: vh(1),
-});
-
-globalStyle(".icon-row-child:first-child", {
-  marginLeft: 0,
-});
-
-globalStyle(".icon-row-child:last-child", {
-  marginRight: 0,
-});
-
 globalStyle(".menu-button-icon", {
   position: "absolute",
   width: "100%",

@@ -1,7 +1,7 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { vh } from "../settings";
 
-globalStyle(".toggle-button", {
+export const toggleButton = style({
   position: "relative",
   borderRadius: "50%",
   border: "none",
@@ -11,17 +11,17 @@ globalStyle(".toggle-button", {
   zIndex: 99,
   marginRight: vh(3),
   cursor: "pointer",
+  selectors: {
+    "&:focus": {
+      outline: "none",
+    },
+    "&:last-child": {
+      marginRight: 0,
+    },
+  },
 });
 
-globalStyle(".toggle-button:focus", {
-  outline: "none",
-});
-
-globalStyle(".toggle-button:last-child", {
-  marginRight: 0,
-});
-
-globalStyle(".svg-circle", {
+export const svgCircle = style({
   position: "absolute",
   display: "inline",
   top: 0,

@@ -8,7 +8,8 @@ import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 import { MusicalDuration } from "../../contexts/contexts";
 import { nextSubdivision } from "../../utils/audioUtils";
 import "../../styles/components/Icon.css";
-import "../../styles/components/ToggleButton.css";
+import { toggleButton, svgCircle } from "../../styles/components/ToggleButton.css";
+import { cx } from "../../utils/cx";
 
 const START_PARAMS = {
   rotateZ: "-180",
@@ -243,7 +244,7 @@ export const ToggleButton = (props: Props) => {
 
   return (
     <button
-      className="toggle-button"
+      className={cx(toggleButton, "toggle-button")}
       ref={buttonRef}
       onClick={() => {
         switch (playerState) {
@@ -280,7 +281,7 @@ export const ToggleButton = (props: Props) => {
         }}
       >
         <circle
-          className="svg-circle"
+          className={svgCircle}
           cx={buttonRadius}
           cy={buttonRadius}
           r={buttonRadius - buttonBorder / 2}

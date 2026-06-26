@@ -1,7 +1,7 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import { hotGreen, mSize, moonYellow } from "../settings";
 
-globalStyle(".new-label", {
+export const newLabel = style({
   position: "absolute",
   top: "15px",
   left: "15px",
@@ -9,26 +9,21 @@ globalStyle(".new-label", {
   color: hotGreen,
 });
 
-globalStyle(".custom-song-icon", {
+export const customSongIcon = style({
   display: "block",
   margin: 0,
   width: "25rem",
   height: "25rem",
 });
 
-globalStyle(".custom-song-icon-mobile", {
+export const customSongIconMobile = style({
   display: "block",
   margin: 0,
   width: "15rem",
   height: "15rem",
 });
 
-globalStyle("#loading-button-wrapper", {
-  width: "25rem",
-  height: "25rem",
-});
-
-globalStyle("#loading-button", {
+export const loadingButton = style({
   position: "absolute",
   width: "25rem",
   height: "25rem",
@@ -41,7 +36,7 @@ globalStyle("#loading-button", {
   backgroundColor: "rgba(255, 0, 0, 0)",
 });
 
-globalStyle("#loading-button *", {
+globalStyle(`${loadingButton} *`, {
   textTransform: "none",
   fontSize: mSize,
   color: moonYellow,

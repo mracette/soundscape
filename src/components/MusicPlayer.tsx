@@ -12,7 +12,6 @@ import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 import { nextSubdivision } from "../utils/audioUtils";
-import "../styles/components/MusicPlayer.css";
 
 export const MusicPlayer = () => {
   const { flags } = useContext(TestingContext)!;

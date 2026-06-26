@@ -1,7 +1,7 @@
 import { boundedSin, TAU, CanvasCoordinates } from "../../utils/mathUtils";
 
 import { CustomSongIcon } from "./CustomSongIcon";
-import "../../styles/components/CustomSongIcons.css";
+import { loadingButton } from "../../styles/components/CustomSongIcons.css";
 
 const period = 2;
 const bsin = boundedSin(period, 0, 1, 0);
@@ -62,6 +62,7 @@ export function LoadingIcon(props: Props) {
       {!props.isLoading && (
         <button
           id="loading-button"
+          className={loadingButton}
           disabled={props.isLoading}
           style={{
             cursor: props.isLoading ? "none" : "pointer",

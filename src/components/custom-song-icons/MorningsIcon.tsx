@@ -1,7 +1,6 @@
 import { boundedSin, CanvasCoordinates } from "../../utils/mathUtils";
 
 import { CustomSongIcon } from "./CustomSongIcon";
-import "../../styles/components/LandingPage.css";
 
 const bsin = boundedSin(2, 0, 1, -1.5);
 
