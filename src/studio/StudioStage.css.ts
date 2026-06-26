@@ -19,8 +19,8 @@ export const stageControls = style({
 export const stageCanvas = style({
   flex: 1,
   display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
+  alignItems: "flex-start",
+  justifyContent: "flex-end",
   overflow: "auto",
   padding: "2rem",
 });
