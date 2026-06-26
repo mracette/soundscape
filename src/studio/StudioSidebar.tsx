@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { stories } from "./stories";
-import * as styles from "./studio.css";
+import * as styles from "./StudioSidebar.css";
 
 export const StudioSidebar = ({ activeId }: { activeId: string }) => {
   const groups = stories.reduce<string[]>((acc, s) => {

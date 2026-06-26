@@ -1,15 +1,13 @@
-import { useState } from "react";
 import { StudioSidebar } from "./StudioSidebar";
 import { StudioStage } from "./StudioStage";
 import { stories } from "./stories";
-import * as styles from "./studio.css";
+import * as styles from "./Studio.css";
 
 interface Props {
   storyId?: string;
 }
 
 export const Studio = ({ storyId }: Props) => {
-  const [light, setLight] = useState(false);
   const active = stories.find((s) => s.id === storyId) ?? stories[0];
 
   return (
@@ -19,11 +17,7 @@ export const Studio = ({ storyId }: Props) => {
       </header>
       <div className={styles.body}>
         <StudioSidebar activeId={active.id} />
-        <StudioStage
-          story={active}
-          light={light}
-          onToggleLight={() => setLight((v) => !v)}
-        />
+        <StudioStage story={active} />
       </div>
     </div>
   );
