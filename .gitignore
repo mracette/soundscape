@@ -39,3 +39,10 @@ yarn-error.log*
 /test-results
 /playwright-report
 /playwright/.cache
+
+# worktree asset symlinks (created by tools/worktree-dev.sh)
+/public/models
+/public/fonts
+
+# perf run artifacts
+tools/perf/reports/

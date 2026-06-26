@@ -1,12 +1,28 @@
 import * as THREE from "three";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
+import { FrameTelemetry, TelemetrySnapshot } from "./telemetry";
+
+// Cap the render loop to 60fps. On high-refresh displays (120Hz+) RAF would
+// otherwise render 2x as often — pure heat/battery for an ambient visualizer,
+// with no visible benefit (motion is time-based, not per-frame).
+const TARGET_FPS = 60;
+const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
+// Jitter margin: render when within this of the target interval. Without it, a
+// true 60Hz display (frames arriving a hair under 16.67ms) gets halved to 30fps;
+// the margin sits safely between a 120Hz frame (8.33ms) and a 60Hz one (16.67ms),
+// so 60Hz renders every frame and 120Hz renders every other = 60.
+const FRAME_TOLERANCE_MS = 4;
 
 // stats.js has no bundled types — minimal shim for the dynamic import
+interface StatsPanel {
+  update(value: number, maxValue: number): void;
+}
 interface StatsInstance {
   begin(): void;
   end(): void;
   showPanel(panel: number): void;
+  addPanel(panel: StatsPanel): StatsPanel;
   dom: HTMLElement;
 }
 
@@ -68,6 +84,9 @@ export class SceneManager {
   protected spectrumFunction!: (n: number) => string;
   protected showStats!: boolean;
   protected fpcControl!: boolean;
+  protected telemetry?: FrameTelemetry;
+  protected perfPanels?: { cpu: StatsPanel; gpu: StatsPanel };
+  protected lastFrameTime = 0;
 
   // Fields set by init() and subclasses
   // public: scene is read by CanvasViz (newScene.disposeAll(newScene.scene))
@@ -97,7 +116,8 @@ export class SceneManager {
         height: null,
       },
       spectrumFunction: (_n: number) => "#FFFFFF",
-      showStats: false,
+      // Perf telemetry + stats overlay opt-in via ?perf=1 (off in production).
+      showStats: new URLSearchParams(window.location.search).has("perf"),
       fpcControl: false,
     };
 
@@ -119,11 +139,30 @@ export class SceneManager {
     this.subjects = this.initSubjects();
     this.lights = this.initLights();
     this.helpers = this.initHelpers();
+
+    if (this.showStats) {
+      this.telemetry = new FrameTelemetry(
+        this.renderer.getContext() as WebGLRenderingContext
+      );
+      (window as unknown as { __perf: unknown }).__perf = {
+        snapshot: (): TelemetrySnapshot => this.telemetry!.snapshot(),
+      };
+    }
   }
 
   /** Cancel the RAF loop. Call `animate()` to restart it. */
   stop() {
     window.cancelAnimationFrame(this.currentFrame);
+  }
+
+  /**
+   * Full teardown on unmount: stop the loop, free the scene's GPU resources, and
+   * dispose the renderer's too — deterministic release rather than waiting for GC.
+   */
+  dispose() {
+    this.stop();
+    this.disposeAll(this.scene);
+    this.renderer.dispose();
   }
 
   /**
@@ -203,10 +242,24 @@ export class SceneManager {
    * `requestAnimationFrame`.
    */
   animate() {
-    this.showStats && this.helpers.stats?.begin();
-    this.render();
-    this.showStats && this.helpers.stats?.end();
     this.currentFrame = requestAnimationFrame(this.animate);
+
+    // Frame-rate cap: skip this tick unless ~1/60s (minus a jitter margin) has
+    // elapsed since the last rendered frame.
+    const now = performance.now();
+    if (now - this.lastFrameTime < FRAME_INTERVAL_MS - FRAME_TOLERANCE_MS) return;
+    this.lastFrameTime = now;
+
+    this.showStats && this.helpers.stats?.begin();
+    this.telemetry?.beginFrame();
+    this.render();
+    this.telemetry?.endFrame();
+    this.showStats && this.helpers.stats?.end();
+    if (this.telemetry && this.perfPanels) {
+      const snap = this.telemetry.snapshot();
+      this.perfPanels.cpu.update(snap.cpuMs, 33);
+      this.perfPanels.gpu.update(snap.gpuMs ?? 0, 33);
+    }
   }
 
   // Subclasses must implement render(); base class calls it in animate() and onWindowResize()
@@ -278,13 +331,20 @@ export class SceneManager {
       gltfLoader: new GLTFLoader(),
     };
     if (this.showStats) {
-      import("stats.js").then(({ default: Stats }) => {
+      import("stats.js").then((mod) => {
+        const Stats = mod.default as unknown as {
+          new (): StatsInstance;
+          Panel: new (name: string, fg: string, bg: string) => StatsPanel;
+        };
         const s = new Stats();
         s.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
         s.dom.style.left = null!;
         s.dom.style.right = "0px";
         document.body.appendChild(s.dom);
         helpers.stats = s;
+        const cpu = s.addPanel(new Stats.Panel("CPU ms", "#0ff", "#002"));
+        const gpu = s.addPanel(new Stats.Panel("GPU ms", "#f0f", "#202"));
+        this.perfPanels = { cpu, gpu };
       });
     }
     return helpers;
