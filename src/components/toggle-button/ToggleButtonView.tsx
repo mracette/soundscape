@@ -81,11 +81,21 @@ export const ToggleButtonView = ({ active, onClick, ref }: Props) => {
           backgroundColor = STOP_PARAMS.backgroundColor;
           points = STOP_PARAMS.points;
 
-          gsap.to(circleSvg, {
-            strokeDashoffset: 0,
-            duration: seconds,
-            ease: "none",
-          });
+          // fill always begins from a full offset regardless of current value.
+          // The active->stopped re-render resets the resting offset to 0 before
+          // gsap reads it, so a plain gsap.to(0) would be a no-op and snap the
+          // ring full instead of filling it in gradually.
+          gsap.fromTo(
+            circleSvg,
+            {
+              strokeDashoffset: 2 * Math.PI * (buttonRadius - buttonBorder / 2),
+            },
+            {
+              strokeDashoffset: 0,
+              duration: seconds,
+              ease: "none",
+            }
+          );
         }
 
         // run icon animation (morph polygon points)
