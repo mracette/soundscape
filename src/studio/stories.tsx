@@ -24,10 +24,22 @@ export interface Story {
 
 const noop = () => {};
 
-const SwampStory = () => <SwampIcon name="swamp" dispatch={noop} />;
-const MorningsStory = () => <MorningsIcon name="mornings" dispatch={noop} />;
-const MoonriseStory = () => <MoonriseIcon name="moonrise" dispatch={noop} />;
-const ComingSoonStory = () => <ComingSoonIcon name="coming-soon" dispatch={noop} />;
+const SongIconsStory = () => (
+  <div id="song-selection-panel">
+    <div className="song-link">
+      <SwampIcon name="swamp" dispatch={noop} />
+    </div>
+    <div className="song-link">
+      <MorningsIcon name="mornings" dispatch={noop} />
+    </div>
+    <div className="song-link">
+      <MoonriseIcon name="moonrise" dispatch={noop} />
+    </div>
+    <div className="song-link">
+      <ComingSoonIcon name="coming-soon" dispatch={noop} />
+    </div>
+  </div>
+);
 
 const LoadingStory = () => {
   const [loading, setLoading] = useState(true);
@@ -144,11 +156,8 @@ const IconGalleryStory = () => (
 );
 
 export const stories: Story[] = [
-  { id: "swamp", title: "Swamp Icon", group: "Song Icons", Component: SwampStory },
-  { id: "mornings", title: "Mornings Icon", group: "Song Icons", Component: MorningsStory },
-  { id: "moonrise", title: "Moonrise Icon", group: "Song Icons", Component: MoonriseStory },
-  { id: "coming-soon", title: "Coming Soon Icon", group: "Song Icons", Component: ComingSoonStory },
-  { id: "loading", title: "Loading Icon", group: "Song Icons", Component: LoadingStory },
+  { id: "song-icons", title: "Song Icons", group: "Icons", Component: SongIconsStory },
+  { id: "loading", title: "Loading Icon", group: "Icons", Component: LoadingStory },
   { id: "toggle", title: "Toggle Button", group: "Buttons", Component: ToggleStory },
   { id: "menu", title: "Menu Button", group: "Buttons", Component: MenuStory },
   { id: "icons", title: "Icon Gallery", group: "Misc", Component: IconGalleryStory },
