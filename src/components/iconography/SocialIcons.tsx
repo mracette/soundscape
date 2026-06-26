@@ -26,12 +26,6 @@ export const SocialIcons = (props: Props) => {
         name="icon-twitter"
         link="https://twitter.com/markracette"
       />
-      {/* <Icon
-        divClassList={iconRowChild}
-        svgClassList={props.svgClassList || "icon-white"}
-        name="icon-instagram"
-        link="https://instagram.com/rgb.ig"
-      /> */}
       <Icon
         divClassList={iconRowChild}
         svgClassList={props.svgClassList || "icon-white"}

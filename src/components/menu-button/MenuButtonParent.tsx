@@ -46,7 +46,6 @@ export const MenuButtonParent = (props: Props) => {
       style={{
         top,
         left,
-        // visibility: isLoading ? "hidden" : "visible",
       }}
     >
       <button
