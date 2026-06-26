@@ -10,7 +10,7 @@ export const ToggleStory = () => {
   return (
     <ToggleButtonView
       ref={viewRef}
-      active={active}
+      initialActive={false}
       onClick={() => {
         const next = !active;
         setActive(next);

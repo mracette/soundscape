@@ -1,3 +1,4 @@
+import { Redirect } from "wouter";
 import { StudioSidebar } from "./StudioSidebar";
 import { StudioStage } from "./StudioStage";
 import { stories } from "./stories";
@@ -8,7 +9,13 @@ interface Props {
 }
 
 export const Studio = ({ storyId }: Props) => {
-  const active = stories.find((s) => s.id === storyId) ?? stories[0];
+  const active = stories.find((s) => s.id === storyId);
+
+  // Bare /studio or an unknown story id resolves to the default story's URL so
+  // the path and the highlighted sidebar entry always agree.
+  if (!active) {
+    return <Redirect to={`/studio/${stories[0].id}`} replace />;
+  }
 
   return (
     <div className={styles.root}>

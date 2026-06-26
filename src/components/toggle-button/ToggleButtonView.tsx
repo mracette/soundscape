@@ -31,12 +31,12 @@ export interface ToggleButtonViewHandle {
 }
 
 interface Props {
-  active: boolean;
+  initialActive: boolean;
   onClick: () => void;
   ref?: Ref<ToggleButtonViewHandle>;
 }
 
-export const ToggleButtonView = ({ active, onClick, ref }: Props) => {
+export const ToggleButtonView = ({ initialActive, onClick, ref }: Props) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const circleRef = useRef<SVGSVGElement>(null);
   const iconDivRef = useRef<HTMLDivElement>(null);
@@ -46,12 +46,12 @@ export const ToggleButtonView = ({ active, onClick, ref }: Props) => {
   const buttonRadius = vh ? vh * 3.5 : 0;
   const buttonBorder = vh ? (vh * 3.5) / 15 : 0;
 
-  // The ring's resting offset is seeded once from the mount-time active state;
-  // gsap owns strokeDashoffset thereafter (each animation ends at the correct
-  // resting value). Driving this off the live `active` prop would let the
-  // active->stopped re-render reset the offset out from under gsap, snapping
-  // or flashing the ring instead of letting it animate.
-  const [initialActive] = useState(active);
+  // The ring's resting offset is seeded once from initialActive; gsap owns
+  // strokeDashoffset thereafter (each animation ends at the correct resting
+  // value). The prop is read only at mount by design: re-reading a live value on
+  // every render would let the active->stopped re-render reset the offset out
+  // from under gsap, snapping or flashing the ring instead of letting it animate.
+  const [restingActive] = useState(initialActive);
 
   useImperativeHandle(
     ref,
@@ -144,7 +144,7 @@ export const ToggleButtonView = ({ active, onClick, ref }: Props) => {
         width={2 * buttonRadius}
         height={2 * buttonRadius}
         style={{
-          strokeDashoffset: initialActive
+          strokeDashoffset: restingActive
             ? 2 * Math.PI * (buttonRadius - buttonBorder / 2)
             : 0,
         }}

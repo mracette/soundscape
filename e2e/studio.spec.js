@@ -1,5 +1,10 @@
 const { test, expect } = require("@playwright/test");
 
+// /studio is only mounted when import.meta.env.DEV is true (AppRouter gates it).
+// These tests therefore require the dev server — playwright.config.js starts it
+// with `pnpm start` (vite). Against a production build (`vite preview`) every
+// /studio route falls through to the landing page and all of these tests fail.
+
 test("/studio loads the sidebar and the default story", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (err) => pageErrors.push(err));

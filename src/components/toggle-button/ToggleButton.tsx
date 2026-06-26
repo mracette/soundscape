@@ -138,7 +138,7 @@ export const ToggleButton = (props: Props) => {
   return (
     <ToggleButtonView
       ref={viewRef}
-      active={playerState === "active"}
+      initialActive={playerState === "active"}
       onClick={() => {
         switch (playerState) {
           case "stopped": // start if stopped
