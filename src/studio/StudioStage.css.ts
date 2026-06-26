@@ -20,7 +20,7 @@ export const stageCanvas = style({
   flex: 1,
   display: "flex",
   alignItems: "flex-start",
-  justifyContent: "flex-end",
+  justifyContent: "flex-start",
   overflow: "auto",
   padding: "2rem",
 });
