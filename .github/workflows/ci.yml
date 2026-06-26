@@ -25,4 +25,4 @@ jobs:
           # Audio/model assets are gitignored and absent in CI; fetch them from the
           # CDN instead (requires permissive CORS on the CloudFront distribution).
           REACT_APP_ASSET_LOCATION: cloudfront
-          REACT_APP_ASSET_DOMAIN: https://dwhp4p8tx0lwn.cloudfront.net
+          REACT_APP_ASSET_DOMAIN: https://cdn.soundscape.world
