@@ -1,7 +1,7 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { hotGreen } from "../settings";
 
-globalStyle(".new-label", {
+export const newLabel = style({
   position: "absolute",
   top: "15px",
   left: "15px",
@@ -9,14 +9,14 @@ globalStyle(".new-label", {
   color: hotGreen,
 });
 
-globalStyle(".custom-song-icon", {
+export const customSongIcon = style({
   display: "block",
   margin: 0,
   width: "25rem",
   height: "25rem",
 });
 
-globalStyle(".custom-song-icon-mobile", {
+export const customSongIconMobile = style({
   display: "block",
   margin: 0,
   width: "15rem",

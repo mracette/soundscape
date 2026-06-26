@@ -2,7 +2,11 @@ import { useRef, useContext, useEffect, useMemo } from "react";
 import { CanvasCoordinates } from "../../utils/mathUtils";
 
 import { Canvas } from "../canvas/Canvas";
-import "../../styles/components/LandingPage.css";
+import {
+  newLabel,
+  customSongIcon,
+  customSongIconMobile,
+} from "../../styles/components/CustomSongIcons.css";
 
 import { LayoutContext } from "../../contexts/contexts";
 
@@ -127,10 +131,10 @@ export function CustomSongIcon(props: Props) {
           // border: isNew ? "1px solid" : "0px solid",
         }}
       >
-        {isNew && <span className="new-label">New!</span>}
+        {isNew && <span className={newLabel}>New!</span>}
         <Canvas
           id={id}
-          className={isMobile ? "custom-song-icon-mobile" : "custom-song-icon"}
+          className={isMobile ? customSongIconMobile : customSongIcon}
           onLoad={(canvas) => (canvasRef.current = canvas)}
           resize={false}
         />

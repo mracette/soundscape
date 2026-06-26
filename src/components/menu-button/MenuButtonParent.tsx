@@ -4,7 +4,8 @@ import { MenuButtonChild } from "./MenuButtonChild";
 import { Icon } from "./../Icon";
 import { ThemeContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
-import "../../styles/components/MenuButtonParent.css";
+import { menuButton, menuButtonParent } from "../../styles/components/MenuButtonParent.css";
+import { cx } from "../../utils/cx";
 
 interface ChildButtonProp {
   id: string;
@@ -41,18 +42,14 @@ export const MenuButtonParent = (props: Props) => {
 
   return (
     <div
-      className="menu-button"
+      className={menuButton}
       style={{
         top,
         left,
       }}
     >
       <button
-        className={
-          isOpen
-            ? `menu-button-parent menu-button-parent-open`
-            : `menu-button-parent`
-        }
+        className={cx(menuButtonParent, isOpen && "menu-button-parent-open")}
         style={{
           zIndex: numOfChildren + 1,
           width,

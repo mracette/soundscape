@@ -30,7 +30,7 @@ test("toggle button story renders the toggle", async ({ page }) => {
 
 test("menu button story renders the radial menu", async ({ page }) => {
   await page.goto("/studio/menu", { waitUntil: "domcontentloaded" });
-  await expect(page.locator(".menu-button-parent")).toBeVisible();
+  await expect(page.locator(".menu-button-child").first()).toBeVisible();
 });
 
 test("icon gallery story renders the icon grid", async ({ page }) => {

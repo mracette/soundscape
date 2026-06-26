@@ -1,5 +1,8 @@
 import { createContext } from "react";
 import { WebAudioWrapper } from "../classes/WebAudioWrapper";
+import appConfigJson from "../app-config.json";
+
+export type SongId = (typeof appConfigJson)[number]["id"];
 
 export interface LayoutContextValue {
   vw: number;
@@ -19,7 +22,7 @@ export interface TestingContextValue {
 
 export interface ThemeContextValue {
   id: string;
-  spectrumFunction: (n: number) => unknown;
+  spectrumFunction: (n: number) => string;
   canvasFade: boolean;
   resizeType: string;
   buttonColor: string;
@@ -38,6 +41,8 @@ export interface CreditEntry {
   link?: string;
 }
 
+export type MusicalDuration = `${number}m` | `${number}n`;
+
 export interface AnalyserConfig {
   power?: number;
   smoothingTimeConstant?: number;
@@ -55,8 +60,8 @@ export interface AnalyserConfig {
 
 export interface VoiceConfig {
   name: string;
-  length: string;
-  quantizeLength: string;
+  length: MusicalDuration;
+  quantizeLength: MusicalDuration;
   noFade?: boolean;
 }
 
@@ -74,8 +79,8 @@ export interface SongContextValue {
   timeSignature: number;
   keySignature: string;
   ambientTrack?: boolean;
-  ambientTrackLength?: string;
-  ambientTrackQuantize?: unknown;
+  ambientTrackLength?: MusicalDuration;
+  ambientTrackQuantize?: boolean;
   groups: GroupConfig[];
 }
 
@@ -104,7 +109,7 @@ export interface SongThemes {
 }
 
 export interface AppConfigEntry {
-  id: string;
+  id: SongId;
   audio: Omit<SongContextValue, "id">;
   themes: SongThemes;
   info: { credits: CreditEntry[] };

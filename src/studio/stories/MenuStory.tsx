@@ -1,5 +1,6 @@
 import { ThemeContext, type ThemeContextValue } from "../../contexts/contexts";
 import { MenuButtonParent } from "../../components/menu-button/MenuButtonParent";
+import { flexPanel } from "../../styles/shared/layout.css";
 import * as styles from "./MenuStory.css";
 
 // Mirrors the swamp song theme so the menu reads like it does in the app
@@ -29,7 +30,7 @@ export const MenuStory = () => (
             id: "home",
             iconName: "icon-home",
             content: (
-              <div className="flex-panel">
+              <div className={flexPanel}>
                 <h2>Home</h2>
               </div>
             ),
@@ -38,7 +39,7 @@ export const MenuStory = () => (
             id: "info",
             iconName: "icon-info",
             content: (
-              <div className="flex-panel">
+              <div className={flexPanel}>
                 <h2>Info</h2>
               </div>
             ),
@@ -47,7 +48,7 @@ export const MenuStory = () => (
             id: "music",
             iconName: "icon-music",
             content: (
-              <div className="flex-panel">
+              <div className={flexPanel}>
                 <h2>Music</h2>
               </div>
             ),

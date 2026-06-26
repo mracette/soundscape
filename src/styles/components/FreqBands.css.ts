@@ -1,13 +1,13 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { vh } from "../settings";
 
-globalStyle("#freq-bands", {
+export const freqBands = style({
   top: vh(1.5),
   left: vh(1.5),
   position: "absolute",
 });
 
-globalStyle("#freq-bands-canvas", {
+export const freqBandsCanvas = style({
   padding: 0,
   margin: 0,
   height: vh(9),

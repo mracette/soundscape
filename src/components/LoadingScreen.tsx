@@ -1,5 +1,8 @@
 import { LoadingIcon } from "../components/custom-song-icons/LoadingIcon";
-import "../styles/components/LandingPage.css";
+import {
+  landingPageHeader,
+  landingPageTitle,
+} from "../styles/components/LandingPage.css";
 
 export const LoadingScreen = () => {
   return (
@@ -8,9 +11,9 @@ export const LoadingScreen = () => {
       className="front-most off-black fullscreen"
       style={{ paddingTop: "10rem" }}
     >
-      <div className="landing-page-header">
+      <div className={landingPageHeader}>
         <div className="flex-row">
-          <h1 id="landing-page-soundscape-title">Soundscape</h1>
+          <h1 id="landing-page-soundscape-title" className={landingPageTitle}>Soundscape</h1>
         </div>
         <div className="flex-row">
           <span>Loading...</span>

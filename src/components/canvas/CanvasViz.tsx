@@ -18,7 +18,8 @@ import {
   addWindowListeners,
   removeWindowListeners,
 } from "../../utils/jsUtils";
-import "../../styles/components/CanvasViz.css";
+import { canvasVizParent, canvasViz } from "../../styles/components/CanvasViz.css";
+import { cx } from "../../utils/cx";
 
 interface Props {
   songLoadStatus: boolean;
@@ -124,8 +125,7 @@ export const CanvasViz = (props: Props) => {
 
     return () => {
       if (flags.showVisuals) {
-        newScene!.stop();
-        newScene!.disposeAll(newScene!.scene);
+        newScene!.dispose();
         if (newScene!.resizeMethod === "cinematic") {
           removeWindowListeners(resizeFunction!);
         }
@@ -144,8 +144,8 @@ export const CanvasViz = (props: Props) => {
   ]);
 
   return (
-    <div id="canvas-viz-parent" className="fullscreen">
-      <canvas id="canvas-viz" ref={canvasRef}></canvas>
+    <div id="canvas-viz-parent" className={cx(canvasVizParent, "fullscreen")}>
+      <canvas id="canvas-viz" className={canvasViz} ref={canvasRef}></canvas>
       {canvasFade && <CanvasFade ref={canvasRef} />}
     </div>
   );

@@ -10,8 +10,11 @@ import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { WebAudioWrapper } from "../classes/WebAudioWrapper";
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
-import appConfig from "../app-config.json";
+import { AppConfigEntry } from "../contexts/contexts";
+import _appConfig from "../app-config.json";
 import { installTestHooks } from "../testHooks";
+
+const appConfig = _appConfig as unknown as AppConfigEntry[];
 
 const starsPalette = new ColorPalette(
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.182,"y":-0.138},"scale":{"x":1,"y":1},"rotation":0,"angleStart":2.105,"angleEnd":6.283,"angleOffset":0,"radius":0.5}',
@@ -25,33 +28,33 @@ const morningsPalette = new ColorPalette(
   '{"start":0,"end":1}'
 );
 
-const swampPalette = (n: number) => {
+const swampPalette = (n: number): string => {
   const darkBlue = new chroma("#5669AE");
   const purple = new chroma("#9A4A91");
   const green = new chroma("#53DD6C");
   n = clamp(n, 0, 1);
   if (n <= 0.5) {
-    return chroma.mix(darkBlue, purple, n / 0.5, "rgb");
+    return chroma.mix(darkBlue, purple, n / 0.5, "rgb").hex();
   } else {
-    return chroma.mix(purple, green, (n - 0.5) / 0.5);
+    return chroma.mix(purple, green, (n - 0.5) / 0.5).hex();
   }
 };
 
-const morningsPaletteDiscrete: unknown[] = [];
-const moonrisePaletteDiscrete: unknown[] = [];
-const starsPaletteDiscrete: unknown[] = [];
+const morningsPaletteDiscrete: string[] = [];
+const moonrisePaletteDiscrete: string[] = [];
+const starsPaletteDiscrete: string[] = [];
 
 // instead of querying the full palettes, use a discrete, in-memory versions to save compute
 for (let i = 0; i <= 255; i++) {
   morningsPaletteDiscrete.push(morningsPalette.rgbValueAt(i / 255));
   moonrisePaletteDiscrete.push(
-    new d3Color.color(d3Chromatic.interpolateViridis(i / 255)).brighter(1.5)
+    d3Color.color(d3Chromatic.interpolateViridis(i / 255))!.brighter(1.5).toString()
   );
   starsPaletteDiscrete.push(starsPalette.rgbValueAt(i / 255));
 }
 
 // define spectrum functions here since they don't do well in json
-const spectrumFunctions: Record<string, (n: number) => unknown> = {
+const spectrumFunctions: Record<string, (n: number) => string> = {
   moonrise: (n: number) => moonrisePaletteDiscrete[Math.round(n * 255)],
   mornings: (n: number) => morningsPaletteDiscrete[Math.round(n * 255)],
   stars: (n: number) => starsPaletteDiscrete[Math.round(n * 255)],
@@ -111,7 +114,6 @@ export const AppWrap = () => {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      // can be accessed in scss as vw(n), vh(n) OR in css as --vw * n, --vh * n
       document.documentElement.style.setProperty(
         "--vw",
         `${viewportWidth / 100}px`

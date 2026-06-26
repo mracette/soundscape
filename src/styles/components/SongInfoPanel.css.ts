@@ -1,29 +1,12 @@
-import { globalStyle } from "@vanilla-extract/css";
-import { vh } from "../settings";
+import { globalStyle, style } from "@vanilla-extract/css";
 
-globalStyle("#song-info-panel", {
+export const songInfoPanel = style({
   color: "white",
   display: "flex",
   flexDirection: "column",
   flexWrap: "nowrap",
 });
 
-globalStyle("#song-info-panel p", {
+globalStyle(`${songInfoPanel} p`, {
   display: "inline-block",
-});
-
-globalStyle(".social-link", {
-  display: "inline-block",
-});
-
-globalStyle(".padded-row", {
-  marginTop: vh(4),
-});
-
-globalStyle(".row-margin-bottom", {
-  marginBottom: vh(2),
-});
-
-globalStyle(".row-margin-top", {
-  marginTop: vh(2),
 });

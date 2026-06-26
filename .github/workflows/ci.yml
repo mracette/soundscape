@@ -1,5 +1,8 @@
 name: CI
-on: [push, pull_request]
+on:
+  push:
+    branches: [master, 2026-overhaul, quality]
+  pull_request:
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -18,3 +21,8 @@ jobs:
       - run: pnpm exec eslint src/
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+        env:
+          # Audio/model assets are gitignored and absent in CI; fetch them from the
+          # CDN instead (requires permissive CORS on the CloudFront distribution).
+          REACT_APP_ASSET_LOCATION: cloudfront
+          REACT_APP_ASSET_DOMAIN: https://cdn.soundscape.world

@@ -3,6 +3,7 @@ import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
+import { MusicalDuration } from "../../contexts/contexts";
 import { nextSubdivision } from "../../utils/audioUtils";
 import {
   ToggleButtonView,
@@ -14,8 +15,8 @@ type PlayerState = "stopped" | "pending-start" | "active" | "pending-stop";
 interface Props {
   name: string;
   groupName: string;
-  length?: string;
-  quantizeLength?: string;
+  length?: MusicalDuration;
+  quantizeLength?: MusicalDuration;
 }
 
 export const ToggleButton = (props: Props) => {

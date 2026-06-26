@@ -4,7 +4,7 @@ import { SwampIcon } from "./custom-song-icons/SwampIcon";
 import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
 import { Link } from "wouter";
 
-import "../styles/components/LandingPage.css";
+import { songLinkMobile } from "../styles/components/LandingPage.css";
 
 interface Props {
   dispatch: (action: { type: string | null }) => void;
@@ -20,7 +20,7 @@ export const LandingPageMobile = ({ dispatch }: Props) => {
         alignItems: "center",
       }}
     >
-      <Link href="/play/swamp" className="song-link-mobile">
+      <Link href="/play/swamp" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <SwampIcon name="swamp" dispatch={dispatch} />
           <div>
@@ -32,7 +32,7 @@ export const LandingPageMobile = ({ dispatch }: Props) => {
           </div>
         </div>
       </Link>
-      <Link href="/play/mornings" className="song-link-mobile">
+      <Link href="/play/mornings" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <MorningsIcon name="mornings" dispatch={dispatch} />
           <div>
@@ -44,7 +44,7 @@ export const LandingPageMobile = ({ dispatch }: Props) => {
           </div>
         </div>
       </Link>
-      <Link href="/play/moonrise" className="song-link-mobile">
+      <Link href="/play/moonrise" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <MoonriseIcon name="moonrise" dispatch={dispatch} />
           <div>
@@ -56,7 +56,7 @@ export const LandingPageMobile = ({ dispatch }: Props) => {
           </div>
         </div>
       </Link>
-      <Link href="/info" className="song-link-mobile">
+      <Link href="/info" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <div>
             <ComingSoonIcon name="coming-soon" dispatch={dispatch} />

@@ -6,7 +6,7 @@ import { ThemeContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 
-import "../styles/components/Oscilloscope.css";
+import { oscilloscope, oscilloscopeCanvas } from "../styles/components/Oscilloscope.css";
 
 interface Props {
   name: string;
@@ -71,9 +71,10 @@ export const Oscilloscope = (props: Props) => {
 
   return useMemo(
     () => (
-      <div id="oscilloscope">
+      <div id="oscilloscope" className={oscilloscope}>
         <Canvas
           id="oscilloscope-canvas"
+          className={oscilloscopeCanvas}
           onLoad={(canvas) => {
             canvasRef.current = canvas;
             contextRef.current = canvas.getContext("2d");

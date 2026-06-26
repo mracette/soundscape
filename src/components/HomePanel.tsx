@@ -1,17 +1,19 @@
 import { Link } from "wouter";
 
-import "../styles/components/MenuButtonContentWrapper.css";
+import { flexPanel } from "../styles/shared/layout.css";
+import { buttonWhite, groupedButtons } from "../styles/shared/buttons.css";
+import { cx } from "../utils/cx";
 
 export const HomePanel = () => {
   return (
-    <div id="home-panel" className="flex-panel">
+    <div id="home-panel" className={flexPanel}>
       <h2>Return Home?</h2>
       <p>This will stop your current session.</p>
       <div className="flex-row">
         <Link href="/">
           <button
             style={{ width: "20rem" }}
-            className="grouped-buttons button-white"
+            className={cx(groupedButtons, buttonWhite)}
           >
             Proceed
           </button>
