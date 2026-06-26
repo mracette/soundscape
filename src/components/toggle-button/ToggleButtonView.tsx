@@ -1,4 +1,10 @@
-import { useRef, useContext, useImperativeHandle, type Ref } from "react";
+import {
+  useRef,
+  useState,
+  useContext,
+  useImperativeHandle,
+  type Ref,
+} from "react";
 import { gsap } from "gsap";
 import { LayoutContext } from "../../contexts/contexts";
 import "../../styles/components/Icon.css";
@@ -38,6 +44,13 @@ export const ToggleButtonView = ({ active, onClick, ref }: Props) => {
   const { vh } = useContext(LayoutContext)!;
   const buttonRadius = vh ? vh * 3.5 : 0;
   const buttonBorder = vh ? (vh * 3.5) / 15 : 0;
+
+  // The ring's resting offset is seeded once from the mount-time active state;
+  // gsap owns strokeDashoffset thereafter (each animation ends at the correct
+  // resting value). Driving this off the live `active` prop would let the
+  // active->stopped re-render reset the offset out from under gsap, snapping
+  // or flashing the ring instead of letting it animate.
+  const [initialActive] = useState(active);
 
   useImperativeHandle(
     ref,
@@ -81,21 +94,11 @@ export const ToggleButtonView = ({ active, onClick, ref }: Props) => {
           backgroundColor = STOP_PARAMS.backgroundColor;
           points = STOP_PARAMS.points;
 
-          // fill always begins from a full offset regardless of current value.
-          // The active->stopped re-render resets the resting offset to 0 before
-          // gsap reads it, so a plain gsap.to(0) would be a no-op and snap the
-          // ring full instead of filling it in gradually.
-          gsap.fromTo(
-            circleSvg,
-            {
-              strokeDashoffset: 2 * Math.PI * (buttonRadius - buttonBorder / 2),
-            },
-            {
-              strokeDashoffset: 0,
-              duration: seconds,
-              ease: "none",
-            }
-          );
+          gsap.to(circleSvg, {
+            strokeDashoffset: 0,
+            duration: seconds,
+            ease: "none",
+          });
         }
 
         // run icon animation (morph polygon points)
@@ -140,7 +143,7 @@ export const ToggleButtonView = ({ active, onClick, ref }: Props) => {
         width={2 * buttonRadius}
         height={2 * buttonRadius}
         style={{
-          strokeDashoffset: active
+          strokeDashoffset: initialActive
             ? 2 * Math.PI * (buttonRadius - buttonBorder / 2)
             : 0,
         }}
