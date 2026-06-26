@@ -111,11 +111,11 @@ const MenuStory = () => (
             ),
           },
           {
-            id: "list",
-            iconName: "icon-list",
+            id: "music",
+            iconName: "icon-music",
             content: (
               <div className="flex-panel">
-                <h2>List</h2>
+                <h2>Music</h2>
               </div>
             ),
           },
@@ -126,12 +126,8 @@ const MenuStory = () => (
 );
 
 const ICON_NAMES = [
-  "icon-envelope", "icon-equalizer", "icon-github", "icon-headphones",
-  "icon-home", "icon-info", "icon-instagram", "icon-list", "icon-make-group",
-  "icon-menu", "icon-music", "icon-pause", "icon-pause2", "icon-play2",
-  "icon-play3", "icon-plus", "icon-spotify", "icon-stop", "icon-stop2",
-  "icon-twitter", "icon-volume-high", "icon-volume-low", "icon-volume-medium",
-  "icon-volume-mute", "icon-volume-mute2",
+  "icon-envelope", "icon-equalizer", "icon-github", "icon-home",
+  "icon-info", "icon-music", "icon-plus", "icon-twitter",
 ];
 
 const IconGalleryStory = () => (
