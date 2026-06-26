@@ -26,6 +26,21 @@ type SplitAnalyser = { left: AnalyserNode; right: AnalyserNode };
 type SplitUint8 = { left: Uint8Array<ArrayBuffer>; right: Uint8Array<ArrayBuffer> };
 type FftData = Uint8Array<ArrayBuffer> | SplitUint8;
 
+/**
+ * Wraps one or two WebAudio `AnalyserNode`s and post-processes their FFT/time output.
+ *
+ * Two modes selected by `params.split`:
+ *   - mono (default): a single stereo AnalyserNode; `this.analyser` is `AnalyserNode`.
+ *   - split: a `ChannelSplitterNode` feeds separate left/right AnalyserNodes;
+ *     `this.analyser` is `{ left: AnalyserNode; right: AnalyserNode }`.
+ *
+ * FFT resolution is controlled by `power` (fftSize = 2^power; default 13 → 8192 bins).
+ * Frequency output can be bucketed into `numBuckets` bands with optional x/y easing curves.
+ *
+ * Data methods (`getFrequencyData`, `getFrequencyBuckets`, `getTimeData`) refresh
+ * `this.fftData` / `this.bucketData` / `this.timeData` **in place** and return void —
+ * callers read from those fields after calling, not from a return value.
+ */
 export class Analyser {
   input: AudioNode;
   context: AudioContext;
@@ -146,6 +161,11 @@ export class Analyser {
     this.createDataStructure();
   }
 
+  /**
+   * Creates and connects the AnalyserNode(s) to `this.input`.
+   * In split mode, a ChannelSplitterNode fans the stereo input to separate left/right
+   * AnalyserNodes — processing nodes (gain boost) are not supported in split mode.
+   */
   createAudioNodes(split = this.split): void {
     if (split) {
       // if split === true, this.analyser is an obj with 'left' and 'right' properties
@@ -223,6 +243,11 @@ export class Analyser {
     }
   }
 
+  /**
+   * Refreshes `this.fftData` in place from the AnalyserNode, then applies `yEasing`
+   * in place if set. Pass `channel` ("left"/"right") for split analysers.
+   * Returns void — read from `this.fftData` after calling.
+   */
   getFrequencyData(channel?: string): void {
     if (channel === "left" || channel === "right") {
       const sa = this.analyser as SplitAnalyser;
@@ -243,10 +268,15 @@ export class Analyser {
     }
   }
 
+  /**
+   * Returns a fresh array of `{ data, freq }` objects for the bins within
+   * [minFrequency, maxFrequency]. Unlike the other data methods, this allocates
+   * a new array on every call — not suitable for hot render loops.
+   */
   getFrequencyBins(channel?: string): { data: number; freq: number }[] {
     const fBins: { data: number; freq: number }[] = [];
-    // LATENT BUG: getFrequencyData returns void; .slice() on undefined will throw at runtime
-    const data = (this.getFrequencyData(channel) as any).slice(
+    this.getFrequencyData(channel);
+    const data = (this.fftData as Uint8Array<ArrayBuffer>).slice(
       this.binMin,
       this.binMax + 1
     );
@@ -261,6 +291,11 @@ export class Analyser {
     return fBins;
   }
 
+  /**
+   * Refreshes `this.bucketData` in place: aggregates FFT bins into `numBuckets` bands
+   * (averaged, with optional `xEasing` applied to the bin-to-bucket mapping).
+   * Returns void — read from `this.bucketData` after calling.
+   */
   getFrequencyBuckets(channel?: string): void {
     this.getFrequencyData(channel);
 
@@ -284,6 +319,11 @@ export class Analyser {
     this.bucketData.forEach((d, i, a) => (a[i] = d / this.bucketCounts[i]));
   }
 
+  /**
+   * Refreshes `this.timeData` in place from the AnalyserNode's waveform data.
+   * Pass `channel` ("left"/"right") for split analysers.
+   * Returns void — read from `this.timeData` after calling.
+   */
   getTimeData(channel?: string): void {
     if (channel === "left" || channel === "right") {
       const sa = this.analyser as SplitAnalyser;

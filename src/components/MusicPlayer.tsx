@@ -1,7 +1,4 @@
-// libs
-import { useContext, useRef, useState, useCallback, useEffect, useMemo, type ComponentType } from "react";
-
-// components
+import { useContext, useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { CanvasViz } from "./canvas/CanvasViz";
 import { EffectsPanel } from "./EffectsPanel";
 import { FreqBands } from "./FreqBands";
@@ -10,20 +7,11 @@ import { SongInfoPanel } from "./SongInfoPanel";
 import { ToggleButtonPanel } from "./toggle-button/ToggleButtonPanel";
 import { HomePanel } from "./HomePanel";
 import { LoadingScreen } from "../components/LoadingScreen";
-
-// context
 import { SongContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
-
-// store
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
-
-// other
 import { nextSubdivision } from "../utils/audioUtils";
-
-// styles
-import "../styles/components/MusicPlayer.css";
 
 export const MusicPlayer = () => {
   const { flags } = useContext(TestingContext)!;
@@ -35,14 +23,19 @@ export const MusicPlayer = () => {
 
   const [songLoadStatus, setSongLoadStatus] = useState(false);
   const [canvasLoadStatus, setCanvasLoadStatus] = useState(false);
-  const handleSetCanvasLoadStatus = useCallback(
-    (status: boolean) => {
-      setCanvasLoadStatus(status);
-    },
-    [setCanvasLoadStatus]
-  );
 
+  // Must be referentially stable: it is a dependency of CanvasViz's scene-init
+  // effect, and this component is not compiler-memoized (its render calls
+  // store.reset()). Without useCallback the scene re-initializes on every render.
+  const handleSetCanvasLoadStatus = useCallback((status: boolean) => {
+    setCanvasLoadStatus(status);
+  }, []);
+
+  // Reset the store before child ToggleButtons mount and register their voices.
+  // A lazy useState initializer runs once, synchronously, before children render;
+  // a useEffect would run after children register and wipe them.
   useState(() => useMusicPlayerStore.getState().reset());
+  
   const resetCallbacks = useMusicPlayerStore((s) => s.resetCallbacks);
   const randomizeCallbacks = useMusicPlayerStore((s) => s.randomizeCallbacks);
   const voices = useMusicPlayerStore((s) => s.voices);
@@ -89,32 +82,35 @@ export const MusicPlayer = () => {
 
   const handleReset = useCallback(() => {
     resetCallbacks.forEach((obj) => {
-      (obj as any).resetCallback();
+      obj.resetCallback();
     });
   }, [resetCallbacks]);
 
   const handleRandomize = useCallback(() => {
     randomizeCallbacks.forEach((obj) => {
-      (obj as any).randomizeCallback();
+      obj.randomizeCallback();
     });
   }, [randomizeCallbacks]);
 
   /* Background Mode Callback */
   const triggerRandomVoice = useCallback(() => {
-    const viableOne = voices.filter(
-      (v) => !v.voiceState.includes("pending")
-    );
-    const randomOne = Math.floor(Math.random() * viableOne.length);
-    voices[randomOne].ref.click();
+    const viable = voices.filter((v) => !v.voiceState.includes("pending"));
+    if (viable.length === 0) return;
 
-    // trigger an additional voice when less than 1/2 are active
-    if (viableOne.length >= voices.length) {
-      const viableTwo = viableOne.filter(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (p, i) => i !== randomOne && (p as any).groupName !== (randomOne as any).groupName
+    const first = viable[Math.floor(Math.random() * viable.length)];
+    first.ref.click();
+
+    // When fewer than half the voices are active, also trigger a second voice
+    // from a different group to build the mix up.
+    const activeCount = voices.filter((v) => v.voiceState === "active").length;
+    if (activeCount < voices.length / 2) {
+      const viableTwo = viable.filter(
+        (v) => v.id !== first.id && v.group !== first.group
       );
-      const randomTwo = Math.floor(Math.random() * viableTwo.length);
-      voices[randomTwo].ref.click();
+      if (viableTwo.length > 0) {
+        const second = viableTwo[Math.floor(Math.random() * viableTwo.length)];
+        second.ref.click();
+      }
     }
   }, [voices]);
 
@@ -145,12 +141,15 @@ export const MusicPlayer = () => {
 
   /* Mute Hook */
   useEffect(() => {
+    // The app effects chain (premaster) only exists once initAppState resolves.
+    if (!wawLoadStatus) return;
+
     const startMute = () => {
-      (WAW.getEffects() as any).premaster.gain.value = 0;
+      WAW.getEffects().premaster.gain.value = 0;
     };
 
     const stopMute = () => {
-      (WAW.getEffects() as any).premaster.gain.value = 1;
+      WAW.getEffects().premaster.gain.value = 1;
     };
 
     if (mute) {
@@ -158,12 +157,14 @@ export const MusicPlayer = () => {
     } else {
       stopMute();
     }
-  }, [WAW, mute]);
+  }, [WAW, mute, wawLoadStatus]);
 
-  const HomePanelMemo = useMemo(() => <HomePanel />, []);
-  const SongInfoPanelMemo = useMemo(() => <SongInfoPanel />, []);
-  const EffectsPanelMemo = useMemo(() => <EffectsPanel />, []);
-  const ToggleButtonPanelMemo = useMemo(
+  // Memoized because this component is not compiler-memoized (impure render);
+  // without these the panels remount on every store change (e.g. each toggle).
+  const homePanel = useMemo(() => <HomePanel />, []);
+  const songInfoPanel = useMemo(() => <SongInfoPanel />, []);
+  const effectsPanel = useMemo(() => <EffectsPanel />, []);
+  const toggleButtonPanel = useMemo(
     () => (
       <ToggleButtonPanel
         handleRandomize={handleRandomize}
@@ -178,41 +179,31 @@ export const MusicPlayer = () => {
       {songLoadStatus && (
         <>
           <FreqBands animate={false} />
-          {/* extra props name/direction/separation/parentSize passed but unused by MenuButtonParent — latent */}
-          {(() => {
-            const MBP = MenuButtonParent as ComponentType<any>;
-            return (
-              <MBP
-                name="Menu"
-                direction="right"
-                separation="6rem"
-                parentSize="5rem"
-                childButtonProps={[
-                  {
-                    id: "home",
-                    iconName: "icon-home",
-                    content: HomePanelMemo,
-                  },
-                  {
-                    autoOpen: true,
-                    id: "toggles",
-                    iconName: "icon-music",
-                    content: ToggleButtonPanelMemo,
-                  },
-                  {
-                    id: "effects",
-                    iconName: "icon-equalizer",
-                    content: EffectsPanelMemo,
-                  },
-                  {
-                    id: "song-info",
-                    iconName: "icon-info",
-                    content: SongInfoPanelMemo,
-                  },
-                ]}
-              />
-            );
-          })()}
+          <MenuButtonParent
+            childButtonProps={[
+              {
+                id: "home",
+                iconName: "icon-home",
+                content: homePanel,
+              },
+              {
+                autoOpen: true,
+                id: "toggles",
+                iconName: "icon-music",
+                content: toggleButtonPanel,
+              },
+              {
+                id: "effects",
+                iconName: "icon-equalizer",
+                content: effectsPanel,
+              },
+              {
+                id: "song-info",
+                iconName: "icon-info",
+                content: songInfoPanel,
+              },
+            ]}
+          />
           <CanvasViz songLoadStatus={songLoadStatus} handleSetCanvasLoadStatus={handleSetCanvasLoadStatus} />
         </>
       )}

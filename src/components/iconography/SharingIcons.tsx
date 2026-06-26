@@ -1,5 +1,5 @@
-// styles
-import "../../styles/components/Icon.css";
+import { sharingLink, iconRow } from "../../styles/components/iconography.css";
+import { cx } from "../../utils/cx";
 
 interface Props {
   divClassList?: string;
@@ -13,12 +13,12 @@ export const SharingIcons = (props: Props) => {
   return (
     <div
       id="sharing-icons"
-      className={"icon-row flex-row " + props.divClassList}
+      className={cx(iconRow, "flex-row", props.divClassList)}
     >
       {
         <>
           <a
-            className="sharing-link"
+            className={sharingLink}
             href={`https://twitter.com/share?url=${url};text=${tagline};via=markracette`}
             target="_blank"
             rel="noopener noreferrer"
@@ -29,7 +29,7 @@ export const SharingIcons = (props: Props) => {
             />
           </a>
           <a
-            className="sharing-link"
+            className={sharingLink}
             href={`http://www.facebook.com/sharer.php?u=${url}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -40,7 +40,7 @@ export const SharingIcons = (props: Props) => {
             />
           </a>
           <a
-            className="sharing-link"
+            className={sharingLink}
             href={`http://reddit.com/submit?url=${url}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -51,7 +51,7 @@ export const SharingIcons = (props: Props) => {
             />
           </a>
           <a
-            className="sharing-link"
+            className={sharingLink}
             href={`http://pinterest.com/pin/create/link/?url=${url}`}
             target="_blank"
             rel="noopener noreferrer"
@@ -62,7 +62,7 @@ export const SharingIcons = (props: Props) => {
             />
           </a>
           <a
-            className="sharing-link"
+            className={sharingLink}
             href={`https://www.tumblr.com/widgets/share/tool?canonicalUrl=${url}&title=Soundscape&caption=${tagline}`}
             target="_blank"
             rel="noopener noreferrer"

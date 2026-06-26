@@ -1,14 +1,14 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { vh } from "../settings";
 
-globalStyle(".menu-button-child", {
+export const menuButtonChild = style({
   transitionDuration: "200ms",
   position: "absolute",
   borderRadius: "50%",
   border: `${vh(0.2)} solid white`,
 });
 
-globalStyle(".arrow", {
+export const arrow = style({
   position: "absolute",
   width: 0,
   height: 0,

@@ -1,8 +1,11 @@
 import { useRef } from "react";
 import { clamp } from "../../utils/mathUtils";
 
-// components
 import { Canvas } from "./Canvas";
+import {
+  canvasSlider,
+  canvasSliderWrapper,
+} from "../../styles/components/EffectsPanel.css";
 
 const thumbRadius = 1 / 4;
 const trackHeight = 1 / 12;
@@ -75,7 +78,7 @@ export const CanvasSlider = (props: Props) => {
   };
   return (
     <div
-      className="canvas-slider-wrapper"
+      className={canvasSliderWrapper}
       onMouseDown={(e) => {
         e.preventDefault();
         const startPosition = parseFloat(String(e.clientX));
@@ -91,7 +94,7 @@ export const CanvasSlider = (props: Props) => {
     >
       <Canvas
         id={props.id}
-        className="canvas-slider"
+        className={canvasSlider}
         onLoad={(canvas) => {
           canvasRef.current = canvas;
           contextRef.current = canvas.getContext("2d");

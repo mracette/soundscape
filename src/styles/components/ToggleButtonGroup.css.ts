@@ -1,7 +1,7 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 import { vh } from "../settings";
 
-globalStyle(".solo-button, .mute-button", {
+const soloMuteBase = style({
   fontSize: vh(1.5),
   color: "white",
   padding: 0,
@@ -12,30 +12,28 @@ globalStyle(".solo-button, .mute-button", {
   backgroundColor: "rgba(255, 255, 255, 0)",
 });
 
-globalStyle(".solo-button", {
-  marginLeft: vh(1),
-  borderWidth: ".2rem .1rem .2rem .2rem",
-});
+export const soloButton = style([
+  soloMuteBase,
+  {
+    marginLeft: vh(1),
+    borderWidth: ".2rem .1rem .2rem .2rem",
+  },
+]);
 
-globalStyle(".solo-button-active", {
-  backgroundColor: "rgba(135, 206, 250, 0.5)",
-});
+export const muteButton = style([
+  soloMuteBase,
+  {
+    borderWidth: ".2rem .2rem .2rem .1rem",
+  },
+]);
 
-globalStyle(".mute-button", {
-  borderWidth: ".2rem .2rem .2rem .1rem",
-});
-
-globalStyle(".mute-button-active", {
-  backgroundColor: "rgba(255, 255, 159, 0.5)",
-});
-
-globalStyle(".toggle-button-group", {
+export const toggleButtonGroup = style({
   display: "flex",
   flexDirection: "column",
   flexWrap: "nowrap",
 });
 
-globalStyle(".toggle-buttons", {
+export const toggleButtons = style({
   display: "flex",
   flexDirection: "row",
   flexWrap: "nowrap",

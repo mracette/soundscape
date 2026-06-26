@@ -1,32 +1,19 @@
-import { globalStyle } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import {
   fontColor,
   hotBlue,
   hotGreen,
   hotPink,
   mSize,
-  moonYellow,
-  offBlack2,
   vw,
   xxlSize,
 } from "../settings";
 
-globalStyle(".announcement", {
-  backgroundColor: offBlack2,
-  fontSize: mSize,
-  display: "flex",
-  justifyContent: "center",
-  textAlign: "center",
-  position: "absolute",
-  bottom: "20px",
-  width: "100%",
-});
-
-globalStyle("#landing-page-canvas", {
+export const landingPageCanvas = style({
   zIndex: -1,
 });
 
-globalStyle("#landing-page-soundscape-title-wrapper", {
+export const landingPageTitleWrapper = style({
   paddingTop: "10rem",
   "@media": {
     "screen and (max-width: 670px)": {
@@ -35,7 +22,7 @@ globalStyle("#landing-page-soundscape-title-wrapper", {
   },
 });
 
-globalStyle("#landing-page-soundscape-title", {
+export const landingPageTitle = style({
   fontFamily: "'Satisfy'",
   fontSize: xxlSize,
   fontWeight: 400,
@@ -55,7 +42,7 @@ globalStyle("#landing-page-soundscape-title", {
   },
 });
 
-globalStyle(".landing-page-header", {
+export const landingPageHeader = style({
   fontSize: mSize,
   color: fontColor,
   display: "flex",
@@ -67,40 +54,27 @@ globalStyle(".landing-page-header", {
   gap: "0.5rem",
 });
 
-globalStyle(".landing-page-header .flex-row", {
+globalStyle(`${landingPageHeader} .flex-row`, {
   justifyContent: "center",
 });
 
-globalStyle("#landing-page", {
+export const landingPage = style({
   overflow: "auto",
 });
 
-globalStyle("#landing-page-song-title", {
+export const landingPageSongTitle = style({
   color: hotPink,
 });
 
-globalStyle("#landing-page-bpm", {
+export const landingPageBpm = style({
   color: hotGreen,
 });
 
-globalStyle("#landing-page-key", {
+export const landingPageKey = style({
   color: hotBlue,
 });
 
-globalStyle(".filler", {
-  display: "inline-block",
-  width: "100%",
-  height: "25rem",
-});
-
-globalStyle(".mobile-song-icon-wrapper", {
-  borderColor: moonYellow,
-  borderWidth: "1px",
-  borderStyle: "solid",
-  borderBottomWidth: "0px",
-});
-
-globalStyle("#song-selection-panel", {
+export const songSelectionPanel = style({
   width: vw(75),
   display: "flex",
   flexDirection: "row",
@@ -111,45 +85,47 @@ globalStyle("#song-selection-panel", {
   marginTop: "2rem",
 });
 
-globalStyle(".song-link", {
+export const songLink = style({
   borderRadius: "50%",
+  selectors: {
+    "&:hover": {
+      backgroundColor: "rgba(255,255,255,.05)",
+      backdropFilter: "blur(3px)",
+    },
+  },
 });
 
-globalStyle(".song-link:hover", {
-  backgroundColor: "rgba(255,255,255,.05)",
-  backdropFilter: "blur(3px)",
-});
-
-globalStyle(".song-link-mobile", {
+export const songLinkMobile = style({
   textDecoration: "none",
   maxWidth: "320px",
   display: "block",
   borderRadius: "1rem",
   width: "100%",
   margin: "1rem 0",
+  selectors: {
+    "&:hover": {
+      backgroundColor: "rgba(255,255,255,.05)",
+      backdropFilter: "blur(3px)",
+    },
+  },
 });
 
-globalStyle(".song-link-mobile>div", {
+globalStyle(`${songLinkMobile}>div`, {
   flexBasis: "50%",
 });
 
-globalStyle(".song-link-mobile:hover", {
-  backgroundColor: "rgba(255,255,255,.05)",
-  backdropFilter: "blur(3px)",
-});
-
-globalStyle(".info-row", {
+export const infoRow = style({
   marginBottom: "1.5rem",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
 });
 
-globalStyle(".info-row>p", {
+globalStyle(`${infoRow}>p`, {
   textAlign: "center",
 });
 
-globalStyle(".info-subheader", {
+export const infoSubheader = style({
   fontSize: "3rem",
   marginBottom: "4rem",
   textTransform: "none",
@@ -158,17 +134,14 @@ globalStyle(".info-subheader", {
   textAlign: "center",
 });
 
-globalStyle(".info-page-button", {
+export const infoPageButton = style({
   fontSize: mSize,
   borderRadius: "4px",
   width: "140px",
-});
-
-globalStyle(".info-page-button:hover", {
-  backgroundColor: "rgba(255, 255, 255, 0.1)",
-  transitionDuration: "250ms",
-});
-
-globalStyle("span,p", {
-  fontSize: "1.75rem",
+  selectors: {
+    "&:hover": {
+      backgroundColor: "rgba(255, 255, 255, 0.1)",
+      transitionDuration: "250ms",
+    },
+  },
 });

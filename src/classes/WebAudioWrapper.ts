@@ -10,39 +10,14 @@ import { loadArrayBuffer } from "../utils/audioUtils";
 import { Analyser } from "./Analyser";
 import { Scheduler } from "./Scheduler";
 import { AudioPlayerWrapper } from "./AudioPlayerWrapper";
+import {
+  VoiceConfig,
+  GroupConfig,
+  SongContextValue,
+  AppConfigEntry,
+  SongId,
+} from "../contexts/contexts";
 
-// appConfig is a heterogeneous JSON structure; each entry's shape varies per song.
-// We type the subset that WebAudioWrapper reads directly and use `any` for the rest.
-interface VoiceConfig {
-  name: string;
-  length: string;
-  noFade?: boolean;
-  [key: string]: unknown;
-}
-
-interface GroupConfig {
-  name: string;
-  voices: VoiceConfig[];
-  analyser?: Record<string, unknown>;
-  [key: string]: unknown;
-}
-
-interface SongAudioConfig {
-  bpm: number;
-  timeSignature: number;
-  ambientTrack?: boolean;
-  ambientTrackLength?: string;
-  groups: GroupConfig[];
-  [key: string]: unknown;
-}
-
-interface AppConfigEntry {
-  id: string;
-  audio: SongAudioConfig;
-  [key: string]: unknown;
-}
-
-// Effects nodes for the app-level audio chain
 interface AppEffects {
   premaster: GainNode;
   effectsChainEntry: GainNode;
@@ -52,26 +27,19 @@ interface AppEffects {
   reverbDry: GainNode;
   reverbWet: GainNode;
   reverb: ConvolverNode;
-  // per-song group nodes keyed by song id
-  [id: string]: unknown;
 }
 
 interface SongEffects {
   groupNodes: Record<string, GainNode>;
 }
 
-// Shape is dynamic: top-level has 'premaster', then song-id keys
-// Typed as any-indexed to allow both known keys and song-id dynamic keys
-type NodesEffects = AppEffects;
-
-interface NodesAnalysers {
-  premaster?: Analyser;
-  [id: string]: Analyser | { groupAnalysers: Record<string, Analyser> } | undefined;
+interface SongAnalysers {
+  groupAnalysers: Record<string, Analyser>;
 }
 
-interface NodesVoices {
-  [id: string]: Record<string, AudioPlayerWrapper>;
-}
+type NodesEffects = AppEffects & Partial<Record<SongId, SongEffects>>;
+type NodesAnalysers = { premaster?: Analyser } & Partial<Record<SongId, SongAnalysers>>;
+type NodesVoices = Partial<Record<SongId, Record<string, AudioPlayerWrapper>>>;
 
 interface WrapperNodes {
   effects: NodesEffects;
@@ -93,24 +61,37 @@ interface WrapperValues {
   am: number[];
 }
 
+/**
+ * Central audio engine. Owns the AudioContext, Scheduler, and the entire WebAudio
+ * node graph for the app.
+ *
+ * Two-phase lifecycle:
+ *   1. `initAppState()` — called once per session. Builds the persistent effects chain
+ *      (filters, reverb, premaster) and the premaster analyser. Guarded by `status.app`.
+ *   2. `initSongState(id)` — called per song, lazily. Builds that song's group gain nodes,
+ *      per-group analysers, and voice players. Guarded by `status[id]`.
+ *
+ * Song voices route through their group's GainNode → effectsChainEntry → (effects chain)
+ * → premaster → AudioContext.destination.
+ */
 export class WebAudioWrapper {
-  config: Record<string, SongAudioConfig>;
+  config: Record<SongId, Omit<SongContextValue, "id">>;
   nodes: Partial<WrapperNodes>;
   values: WrapperValues;
-  status: Record<string, boolean>;
+  status: Record<SongId, boolean>;
   audioCtx: AudioContext;
   scheduler: Scheduler;
 
   constructor(appConfig: AppConfigEntry[]) {
     const props = {
-      config: {} as Record<string, SongAudioConfig>,
+      config: {} as Record<SongId, Omit<SongContextValue, "id">>,
       nodes: {} as Partial<WrapperNodes>,
       values: {
         FADE_LENGTH: 0.025,
         FADE_LENGTH_AMBIENT: 0.01,
         NUM_EFFECT_VALUES: 100,
       } as WrapperValues,
-      status: {} as Record<string, boolean>,
+      status: {} as Record<SongId, boolean>,
     };
 
     const audioCtx = new AudioContext({
@@ -139,6 +120,11 @@ export class WebAudioWrapper {
     this.scheduler = scheduler;
   }
 
+  /**
+   * Builds the session-persistent WebAudio graph: effect values lookup tables,
+   * the effects chain (filters → reverb dry/wet → premaster), and the premaster
+   * analyser. The `status.app` guard makes repeated calls idempotent.
+   */
   async initAppState(): Promise<boolean> {
     /*
      * These are WebAudio nodes that will be used across songs, and should persist
@@ -153,7 +139,12 @@ export class WebAudioWrapper {
     return true;
   }
 
-  async initSongState(id: string): Promise<boolean> {
+  /**
+   * Lazily builds per-song nodes: group GainNodes, per-group analysers (one for 3D
+   * visualizations, one for oscilloscopes), and voice AudioPlayerWrappers. The
+   * `status[id]` guard prevents re-initialization on repeat visits to the same song.
+   */
+  async initSongState(id: SongId): Promise<boolean> {
     /*
      * These are WebAudio nodes that are specific to the chosen song. They can
      * persist across the session to avoid re-initialization if a user re-visits
@@ -168,6 +159,17 @@ export class WebAudioWrapper {
     return true;
   }
 
+  /**
+   * Wires the session-level effects chain and loads the convolver impulse response.
+   *
+   * Node routing:
+   *   effectsChainEntry → lpFilter → hpFilter → reverbDry ─┐
+   *                                           └→ reverbWet → reverb ─┘→ effectsChainExit → premaster → destination
+   *
+   * Each song's group GainNodes connect upstream to effectsChainEntry.
+   * The reverb is a ConvolverNode loaded from an impulse-response wav; the promise
+   * resolves only after that async decode completes.
+   */
   _initAppEffects(): Promise<void> {
     return new Promise((resolve, reject) => {
       const effects = {} as AppEffects;
@@ -182,7 +184,7 @@ export class WebAudioWrapper {
       effects.reverbWet = initGain(this.audioCtx, 0);
       effects.reverb = this.audioCtx.createConvolver();
 
-      // routing
+      // effects chain routing
       effects.effectsChainEntry.connect(effects.lpFilter);
       effects.lpFilter.connect(effects.hpFilter);
       effects.hpFilter.connect(effects.reverbDry);
@@ -193,7 +195,7 @@ export class WebAudioWrapper {
       effects.effectsChainExit.connect(effects.premaster);
       effects.premaster.connect(this.audioCtx.destination);
 
-      this.nodes.effects = effects;
+      this.nodes.effects = effects as NodesEffects;
 
       // set initial filter values
       this.setEffects("lp", 100);
@@ -294,7 +296,7 @@ export class WebAudioWrapper {
     });
   }
 
-  _initSongEffects(id: string): Promise<void> {
+  _initSongEffects(id: SongId): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         const groupNodes: Record<string, GainNode> = {};
@@ -303,7 +305,7 @@ export class WebAudioWrapper {
           groupNodes[group.name].connect(this.nodes.effects!.effectsChainEntry);
         });
         // Song effects stored as dynamic key on the effects object
-        (this.nodes.effects as any)[id] = { groupNodes } as SongEffects;
+        this.nodes.effects![id] = { groupNodes } as SongEffects;
         resolve();
       } catch (err) {
         reject(err);
@@ -311,12 +313,12 @@ export class WebAudioWrapper {
     });
   }
 
-  _initSongAnalysers(id: string): Promise<void> {
+  _initSongAnalysers(id: SongId): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         const groupAnalysers: Record<string, Analyser> = {};
         this.config[id].groups.forEach((group) => {
-          const songEffects = (this.nodes.effects as any)[id] as SongEffects;
+          const songEffects = this.nodes.effects![id] as SongEffects;
           // one analyser for 3D vizualizations
           groupAnalysers[group.name] = new Analyser(
             this.audioCtx,
@@ -348,12 +350,12 @@ export class WebAudioWrapper {
     });
   }
 
-  _initSongVoices(id: string): Promise<void> {
+  _initSongVoices(id: SongId): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         const voices: Record<string, AudioPlayerWrapper> = {};
         const promises: Promise<void>[] = [];
-        const songEffects = (this.nodes.effects as any)[id] as SongEffects;
+        const songEffects = this.nodes.effects![id] as SongEffects;
         // ambient track
         if (this.config[id].ambientTrack) {
           const pathToAudio = getPathToAudio(id, "ambient-track", "vbr");
@@ -405,26 +407,47 @@ export class WebAudioWrapper {
     });
   }
 
-  getAnalysers(songId: string | null = null): NodesAnalysers | unknown {
-    return songId ? this.nodes.analysers![songId] : this.nodes.analysers;
+  /**
+   * No-arg: returns the full analysers container (including `premaster` and per-song entries).
+   * With `songId`: returns only that song's `{ groupAnalysers }` object.
+   */
+  getAnalysers(): NodesAnalysers;
+  getAnalysers(songId: SongId): SongAnalysers;
+  getAnalysers(songId: SongId | null = null): NodesAnalysers | SongAnalysers {
+    return songId
+      ? (this.nodes.analysers![songId] as SongAnalysers)
+      : this.nodes.analysers!;
   }
 
-  getEffects(songId: string | null = null): unknown {
-    return songId ? (this.nodes.effects as any)[songId] : this.nodes.effects;
+  /**
+   * No-arg: returns the full app-level effects object (premaster, filters, reverb nodes, etc.).
+   * With `songId`: returns only that song's `{ groupNodes }` object.
+   */
+  getEffects(): AppEffects;
+  getEffects(songId: SongId): SongEffects;
+  getEffects(songId: SongId | null = null): AppEffects | SongEffects {
+    return songId
+      ? (this.nodes.effects![songId] as SongEffects)
+      : this.nodes.effects!;
   }
 
   getValues(): WrapperValues {
     return this.values;
   }
 
-  getVoices(songId: string): Record<string, AudioPlayerWrapper> {
-    return this.nodes.voices![songId];
+  getVoices(songId: SongId): Record<string, AudioPlayerWrapper> {
+    return this.nodes.voices![songId]!;
   }
 
-  getConfig(songId: string): SongAudioConfig {
+  getConfig(songId: SongId): Omit<SongContextValue, "id"> {
     return this.config[songId];
   }
 
+  /**
+   * Applies a named effect at position `value` (1-based index into the pre-calculated
+   * lookup tables in `this.values`). "lp"/"hp" set filter frequency + Q; "am" sets
+   * reverb wet/dry gains such that wet + dry = 1.
+   */
   setEffects(name: string, value: number): void {
     switch (name) {
       case "lp": {

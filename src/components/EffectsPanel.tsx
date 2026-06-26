@@ -8,7 +8,17 @@ import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 
 import { CanvasSlider } from "./canvas/CanvasSlider";
 
-import "../styles/components/EffectsPanel.css";
+import {
+  sliderLabel,
+  sliderRow,
+  effectsControlsRow,
+  switchControl,
+  slider,
+  round,
+} from "../styles/components/EffectsPanel.css";
+import { flexPanel } from "../styles/shared/layout.css";
+import { buttonWhite, groupedButtons } from "../styles/shared/buttons.css";
+import { cx } from "../utils/cx";
 
 const EFFECT_INTERVAL = 4; // in beats
 
@@ -117,15 +127,15 @@ export const EffectsPanel = () => {
   }, [WAW, amValue]);
 
   return (
-    <div id="effects-panel" className="flex-panel">
+    <div id="effects-panel" className={flexPanel}>
       <h2>Background Mode</h2>
       <p>
         Automatically varies the music over time. Ideal for extended listening.
       </p>
 
-      <div className="flex-row slider-row">
+      <div className={cx("flex-row", sliderRow)}>
         <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-          <label className="switch">
+          <label className={switchControl}>
             <input
               type="checkbox"
               onInput={(e) => {
@@ -133,7 +143,7 @@ export const EffectsPanel = () => {
                 setVoicesBackgroundMode(checked);
               }}
             />
-            <span className="slider round"></span>
+            <span className={cx(slider, round, "slider", "round")}></span>
           </label>
         </div>
         <div className="flex-col">
@@ -142,9 +152,9 @@ export const EffectsPanel = () => {
           </span>
         </div>
       </div>
-      <div className="flex-row slider-row">
+      <div className={cx("flex-row", sliderRow)}>
         <div className="flex-col">
-          <label className="switch">
+          <label className={switchControl}>
             <input
               type="checkbox"
               onInput={(e) => {
@@ -152,7 +162,7 @@ export const EffectsPanel = () => {
                 setBackgroundMode(checked);
               }}
             />
-            <span className="slider round"></span>
+            <span className={cx(slider, round, "slider", "round")}></span>
           </label>
         </div>
         <div className="flex-col">
@@ -161,12 +171,12 @@ export const EffectsPanel = () => {
           </span>
         </div>
       </div>
-      <h2 id="effects-controls-row">Visuals</h2>
+      <h2 id="effects-controls-row" className={effectsControlsRow}>Visuals</h2>
       <p>Pause visuals to improve performance and save power.</p>
 
-      <div className="flex-row slider-row">
+      <div className={cx("flex-row", sliderRow)}>
         <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-          <label className="switch">
+          <label className={switchControl}>
             <input
               type="checkbox"
               onInput={(e) => {
@@ -174,7 +184,7 @@ export const EffectsPanel = () => {
                 setPauseVisuals(checked);
               }}
             />
-            <span className="slider round"></span>
+            <span className={cx(slider, round, "slider", "round")}></span>
           </label>
         </div>
         <div className="flex-col">
@@ -186,7 +196,7 @@ export const EffectsPanel = () => {
 
       <div
         id="effects-controls-row"
-        className="flex-row"
+        className={cx("flex-row", effectsControlsRow)}
         style={{ justifyContent: "space-between" }}
       >
         <div className="flex-col">
@@ -199,7 +209,7 @@ export const EffectsPanel = () => {
 
       <div className="flex-row">
         <button
-          className="button-white grouped-buttons"
+          className={cx(buttonWhite, groupedButtons)}
           id="effects-panel-reset"
           onClick={() => {
             setHpValue(1);
@@ -214,7 +224,7 @@ export const EffectsPanel = () => {
         </button>
 
         <button
-          className="button-white grouped-buttons"
+          className={cx(buttonWhite, groupedButtons)}
           id="effects-panel-randomize"
           onClick={() => {
             const h = 1 + 99 * Math.random();
@@ -233,7 +243,7 @@ export const EffectsPanel = () => {
       </div>
 
       <div className="flex-row">
-        <h3 className="slider-label">highpass filter</h3>
+        <h3 className={sliderLabel}>highpass filter</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -243,7 +253,7 @@ export const EffectsPanel = () => {
         />
       </div>
       <div className="flex-row">
-        <h3 className="slider-label">lowpass filter</h3>
+        <h3 className={sliderLabel}>lowpass filter</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -254,7 +264,7 @@ export const EffectsPanel = () => {
         />
       </div>
       <div className="flex-row">
-        <h3 className="slider-label">ambience</h3>
+        <h3 className={sliderLabel}>ambience</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider

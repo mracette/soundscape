@@ -1,12 +1,28 @@
 import * as THREE from "three";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
+import { FrameTelemetry, TelemetrySnapshot } from "./telemetry";
+
+// Cap the render loop to 60fps. On high-refresh displays (120Hz+) RAF would
+// otherwise render 2x as often — pure heat/battery for an ambient visualizer,
+// with no visible benefit (motion is time-based, not per-frame).
+const TARGET_FPS = 60;
+const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
+// Jitter margin: render when within this of the target interval. Without it, a
+// true 60Hz display (frames arriving a hair under 16.67ms) gets halved to 30fps;
+// the margin sits safely between a 120Hz frame (8.33ms) and a 60Hz one (16.67ms),
+// so 60Hz renders every frame and 120Hz renders every other = 60.
+const FRAME_TOLERANCE_MS = 4;
 
 // stats.js has no bundled types — minimal shim for the dynamic import
+interface StatsPanel {
+  update(value: number, maxValue: number): void;
+}
 interface StatsInstance {
   begin(): void;
   end(): void;
   showPanel(panel: number): void;
+  addPanel(panel: StatsPanel): StatsPanel;
   dom: HTMLElement;
 }
 
@@ -41,6 +57,17 @@ interface LoadModelOptions {
   [key: string]: unknown;
 }
 
+/**
+ * Base class for every visualizer scene. Owns the three.js renderer, camera,
+ * and RAF loop, and defines the initialization lifecycle that subclasses fill in:
+ * `initScene` → `initRender` → `initCamera` → `initControls` → `initSubjects`
+ * → `initLights` → `initHelpers`. Call `init()` once after constructing, then
+ * `animate()` / `stop()` to start and halt the render loop.
+ *
+ * Subclasses must override `render()` — the base implementation is a no-op.
+ * All other `init*` methods have default implementations that subclasses can
+ * override or extend.
+ */
 export class SceneManager {
   // Core options (set via Object.assign in constructor)
   protected songId!: string | null;
@@ -57,6 +84,9 @@ export class SceneManager {
   protected spectrumFunction!: (n: number) => string;
   protected showStats!: boolean;
   protected fpcControl!: boolean;
+  protected telemetry?: FrameTelemetry;
+  protected perfPanels?: { cpu: StatsPanel; gpu: StatsPanel };
+  protected lastFrameTime = 0;
 
   // Fields set by init() and subclasses
   // public: scene is read by CanvasViz (newScene.disposeAll(newScene.scene))
@@ -86,7 +116,8 @@ export class SceneManager {
         height: null,
       },
       spectrumFunction: (_n: number) => "#FFFFFF",
-      showStats: false,
+      // Perf telemetry + stats overlay opt-in via ?perf=1 (off in production).
+      showStats: new URLSearchParams(window.location.search).has("perf"),
       fpcControl: false,
     };
 
@@ -99,6 +130,7 @@ export class SceneManager {
     this.setSceneDimensions();
   }
 
+  /** Run all init* lifecycle methods in order and assign results to instance fields. */
   init() {
     this.scene = this.initScene();
     this.renderer = this.initRender();
@@ -107,12 +139,37 @@ export class SceneManager {
     this.subjects = this.initSubjects();
     this.lights = this.initLights();
     this.helpers = this.initHelpers();
+
+    if (this.showStats) {
+      this.telemetry = new FrameTelemetry(
+        this.renderer.getContext() as WebGLRenderingContext
+      );
+      (window as unknown as { __perf: unknown }).__perf = {
+        snapshot: (): TelemetrySnapshot => this.telemetry!.snapshot(),
+      };
+    }
   }
 
+  /** Cancel the RAF loop. Call `animate()` to restart it. */
   stop() {
     window.cancelAnimationFrame(this.currentFrame);
   }
 
+  /**
+   * Full teardown on unmount: stop the loop, free the scene's GPU resources, and
+   * dispose the renderer's too — deterministic release rather than waiting for GC.
+   */
+  dispose() {
+    this.stop();
+    this.disposeAll(this.scene);
+    this.renderer.dispose();
+  }
+
+  /**
+   * Recompute `sceneDimensions` from the current `resizeMethod`.
+   * "fullscreen" uses `window.innerWidth/Height`; "cinematic" uses the canvas
+   * element's CSS dimensions. Called in the constructor and in `onWindowResize`.
+   */
   setSceneDimensions() {
     this.sceneDimensions = {
       width:
@@ -130,6 +187,12 @@ export class SceneManager {
     };
   }
 
+  /**
+   * Recursively walk `obj`'s descendants and invoke `callback` on every leaf
+   * (a node with no children). Intermediate branch nodes are skipped.
+   * Names in `exceptions` are matched with `includes()` against `child.name`
+   * and excluded from the callback.
+   */
   applyAll(
     obj: THREE.Object3D,
     callback: (child: THREE.Object3D) => void,
@@ -147,6 +210,13 @@ export class SceneManager {
     });
   }
 
+  /**
+   * Recursively free GPU resources for `obj` and every descendant: geometries,
+   * materials, and any texture maps stored as properties on the material
+   * (e.g. `map`, `bumpMap`, `normalMap`, `envMap`). Children are removed from
+   * the parent after disposal so three.js doesn't hold stale references.
+   * Call this before discarding a scene to prevent GPU memory leaks.
+   */
   disposeAll(obj: any, material = true, geometry = true) {
     while (obj.children.length > 0) {
       this.disposeAll(obj.children[0], material, geometry);
@@ -164,11 +234,32 @@ export class SceneManager {
     }
   }
 
+  /**
+   * Single RAF tick: bracket stats, call `render()`, then re-queue itself.
+   * Subclasses that need to drive the loop at a different cadence (e.g. Swamp,
+   * Moonrise) call `super.animate()` from their own overridden `animate()`.
+   * Bound to `this` in the constructor so it can be passed directly to
+   * `requestAnimationFrame`.
+   */
   animate() {
-    this.showStats && this.helpers.stats?.begin();
-    this.render();
-    this.showStats && this.helpers.stats?.end();
     this.currentFrame = requestAnimationFrame(this.animate);
+
+    // Frame-rate cap: skip this tick unless ~1/60s (minus a jitter margin) has
+    // elapsed since the last rendered frame.
+    const now = performance.now();
+    if (now - this.lastFrameTime < FRAME_INTERVAL_MS - FRAME_TOLERANCE_MS) return;
+    this.lastFrameTime = now;
+
+    this.showStats && this.helpers.stats?.begin();
+    this.telemetry?.beginFrame();
+    this.render();
+    this.telemetry?.endFrame();
+    this.showStats && this.helpers.stats?.end();
+    if (this.telemetry && this.perfPanels) {
+      const snap = this.telemetry.snapshot();
+      this.perfPanels.cpu.update(snap.cpuMs, 33);
+      this.perfPanels.gpu.update(snap.gpuMs ?? 0, 33);
+    }
   }
 
   // Subclasses must implement render(); base class calls it in animate() and onWindowResize()
@@ -240,13 +331,20 @@ export class SceneManager {
       gltfLoader: new GLTFLoader(),
     };
     if (this.showStats) {
-      import("stats.js").then(({ default: Stats }) => {
+      import("stats.js").then((mod) => {
+        const Stats = mod.default as unknown as {
+          new (): StatsInstance;
+          Panel: new (name: string, fg: string, bg: string) => StatsPanel;
+        };
         const s = new Stats();
         s.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
         s.dom.style.left = null!;
         s.dom.style.right = "0px";
         document.body.appendChild(s.dom);
         helpers.stats = s;
+        const cpu = s.addPanel(new Stats.Panel("CPU ms", "#0ff", "#002"));
+        const gpu = s.addPanel(new Stats.Panel("GPU ms", "#f0f", "#202"));
+        this.perfPanels = { cpu, gpu };
       });
     }
     return helpers;
@@ -276,9 +374,22 @@ export class SceneManager {
         this.sceneDimensions.height
       );
     }
+    // autoClear is off, so nothing wipes the drawing buffer between frames. A
+    // freshly sized buffer can hold uninitialized GPU memory that survives the
+    // first paint (whose clear color is transparent and may not cover the whole
+    // viewport). Clear once here — the first paint runs through onWindowResize —
+    // so that garbage never shows.
+    this.renderer.clear();
     this.render(true);
   }
 
+  /**
+   * Load a GLTF/GLB model for this scene via the shared `gltfLoader`.
+   * The asset URL is built from env vars: `REACT_APP_ASSET_LOCATION` selects
+   * "local" (BASE_URL/models/…) or "cloudfront" (REACT_APP_ASSET_DOMAIN/…).
+   * Format (.glb vs .gltf) is read from `REACT_APP_MODEL_FORMAT_<SONGID>`,
+   * falling back to `REACT_APP_MODEL_FORMAT`.
+   */
   loadModel(options: LoadModelOptions = { name: "" }): Promise<GLTF> {
     const { name } = options;
     const format =

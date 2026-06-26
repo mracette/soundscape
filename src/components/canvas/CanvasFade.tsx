@@ -1,6 +1,5 @@
 import { useRef, useEffect, RefObject } from "react";
 
-// utils
 import { addWindowListeners, removeWindowListeners } from "../../utils/jsUtils";
 
 const trackParentSize = (child: HTMLCanvasElement, parent: HTMLCanvasElement) => {

@@ -1,11 +1,8 @@
 import { useContext, type ReactNode } from "react";
 
-// contexts
 import { LayoutContext } from "../../contexts/contexts";
 import { ThemeContext } from "../../contexts/contexts";
-
-// styles
-import "../../styles/components/MenuButtonContentWrapper.css";
+import { menuButtonContent } from "../../styles/components/MenuButtonContentWrapper.css";
 
 interface Props {
   content?: ReactNode;
@@ -21,7 +18,7 @@ export const MenuButtonContentWrapper = (props: Props) => {
 
   return (
     <div
-      className="menu-button-content"
+      className={menuButtonContent}
       style={{
         visibility: (!props.parentIsOpen && "hidden") as "hidden" | undefined,
         background: contentPanelColor,

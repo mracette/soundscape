@@ -1,17 +1,11 @@
 import { useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
-// components
 import { MenuButtonContentWrapper } from "./MenuButtonContentWrapper";
 import { Icon } from "../../components/Icon";
-
-// contexts
 import { ThemeContext } from "../../contexts/contexts";
-
-// hooks
 import { useOutsideClick } from "../../hooks/useOutsideClick";
-
-// styles
-import "../../styles/components/MenuButtonChild.css";
+import { menuButtonChild, arrow } from "../../styles/components/MenuButtonChild.css";
+import { cx } from "../../utils/cx";
 
 interface Props {
   id?: string;
@@ -55,7 +49,7 @@ export const MenuButtonChild = (props: Props) => {
     useCallback(() => {
       if (isOpen) setIsOpen(false);
     }, [isOpen]),
-    ["menu-button-child"]
+    [menuButtonChild]
   );
 
   return (
@@ -63,7 +57,7 @@ export const MenuButtonChild = (props: Props) => {
       <div id="test" ref={nodeRef}>
         <button
           id="menu-button-child"
-          className="menu-button-child"
+          className={cx(menuButtonChild, "menu-button-child")}
           style={{
             background: isOpen ? openButtonColor : buttonColor,
             opacity: props.parentIsOpen ? 1 : 0,
@@ -88,7 +82,7 @@ export const MenuButtonChild = (props: Props) => {
             - TODO: implement arrow directionality based on which side the content is display and how the menu opens
             */}
         <div
-          className="arrow"
+          className={arrow}
           style={{
             borderBottomColor: contentPanelColor,
             display: (!isOpen && "none") as "none" | undefined,

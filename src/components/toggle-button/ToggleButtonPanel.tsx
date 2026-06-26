@@ -1,17 +1,11 @@
-// libs
 import { useContext } from "react";
-
-// components
 import { ToggleButtonGroup } from "./ToggleButtonGroup";
-
-// contexts
 import { ThemeContext } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
-
-// store
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
-
-// styles
+import { flexPanel } from "../../styles/shared/layout.css";
+import { buttonWhite, groupedButtons } from "../../styles/shared/buttons.css";
+import { cx } from "../../utils/cx";
 
 interface Props {
   handleReset: () => void;
@@ -29,7 +23,7 @@ export const ToggleButtonPanel = (props: Props) => {
   const { groups } = useContext(SongContext)!;
 
   return (
-    <div id="toggle-button-panel" className="flex-panel">
+    <div id="toggle-button-panel" className={flexPanel}>
       <div className="flex-row" style={{ justifyContent: "space-between" }}>
         <div className="flex-col">
           <h2>Voices</h2>
@@ -41,7 +35,7 @@ export const ToggleButtonPanel = (props: Props) => {
 
       <div className="flex-row">
         <button
-          className="button-white grouped-buttons"
+          className={cx(buttonWhite, groupedButtons)}
           id="toggle-button-panel-reset"
           onClick={props.handleReset}
         >
@@ -50,7 +44,7 @@ export const ToggleButtonPanel = (props: Props) => {
 
         <button
           id="toggle-button-panel-randomize"
-          className="button-white grouped-buttons"
+          className={cx(buttonWhite, groupedButtons)}
           onClick={props.handleRandomize}
         >
           Randomize
@@ -69,7 +63,7 @@ export const ToggleButtonPanel = (props: Props) => {
 
         <button
           id="toggle-button-panel-mute"
-          className="button-white grouped-buttons"
+          className={cx(buttonWhite, groupedButtons)}
           style={
             mute
               ? {

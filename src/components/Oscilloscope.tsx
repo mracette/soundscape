@@ -6,9 +6,7 @@ import { ThemeContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 
-import { Analyser } from "../classes/Analyser";
-
-import "../styles/components/Oscilloscope.css";
+import { oscilloscope, oscilloscopeCanvas } from "../styles/components/Oscilloscope.css";
 
 interface Props {
   name: string;
@@ -22,7 +20,7 @@ export const Oscilloscope = (props: Props) => {
   const { WAW } = useContext(WebAudioContext)!;
   const { spectrumFunction } = useContext(ThemeContext)!;
   const { id } = useContext(SongContext)!;
-  const analyser = (WAW.getAnalysers(id) as { groupAnalysers: Record<string, Analyser> }).groupAnalysers[props.name + "-osc"];
+  const analyser = WAW.getAnalysers(id).groupAnalysers[props.name + "-osc"];
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
 
@@ -73,9 +71,10 @@ export const Oscilloscope = (props: Props) => {
 
   return useMemo(
     () => (
-      <div id="oscilloscope">
+      <div id="oscilloscope" className={oscilloscope}>
         <Canvas
           id="oscilloscope-canvas"
+          className={oscilloscopeCanvas}
           onLoad={(canvas) => {
             canvasRef.current = canvas;
             contextRef.current = canvas.getContext("2d");

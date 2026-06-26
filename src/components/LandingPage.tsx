@@ -1,23 +1,28 @@
-// libs
 import { useRef, useEffect, useContext, useReducer } from "react";
 import { Link } from "wouter";
-
-// components
 import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
 import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
 import { SwampIcon } from "./custom-song-icons/SwampIcon";
 import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
-
-// context
 import { LayoutContext } from "../contexts/contexts";
-
-// styles
-import "../styles/components/LandingPage.css";
-
-// utils
+import {
+  landingPageCanvas,
+  landingPage,
+  landingPageHeader,
+  landingPageTitleWrapper,
+  landingPageTitle,
+  landingPageSongTitle,
+  landingPageBpm,
+  landingPageKey,
+  songSelectionPanel,
+  songLink,
+  infoSubheader,
+  infoRow,
+  infoPageButton,
+} from "../styles/components/LandingPage.css";
+import { buttonWhite } from "../styles/shared/buttons.css";
+import { cx } from "../utils/cx";
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
-
-// other
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
 import { LandingPageMobile } from "./LandingPageMobile";
 
@@ -89,11 +94,11 @@ export const LandingPage = (props: LandingPageProps) => {
 
   return (
     <>
-      <canvas id="landing-page-canvas" className="fullscreen" ref={canvasRef} />
-      <div id="landing-page" className="fullscreen transparent">
-        <div className="landing-page-header">
-          <div className="flex-row" id="landing-page-soundscape-title-wrapper">
-            <h1 id="landing-page-soundscape-title">Soundscape</h1>
+      <canvas id="landing-page-canvas" className={cx(landingPageCanvas, "fullscreen")} ref={canvasRef} />
+      <div id="landing-page" className={cx(landingPage, "fullscreen", "transparent")}>
+        <div className={landingPageHeader}>
+          <div className={cx("flex-row", landingPageTitleWrapper)} id="landing-page-soundscape-title-wrapper">
+            <h1 id="landing-page-soundscape-title" className={landingPageTitle}>Soundscape</h1>
           </div>
           <Switch>
             <Route path="/">
@@ -115,41 +120,41 @@ export const LandingPage = (props: LandingPageProps) => {
 function InfoPageInner() {
   return (
     <div className="flex-col" style={{ alignItems: "center" }}>
-      <h3 className="info-subheader">
+      <h3 className={cx(infoSubheader, "info-subheader")}>
         The immersive music visualizer that lets you build your own beats
       </h3>
-      <div className="info-row">
+      <div className={infoRow}>
         <p>Join the Discord for updates on new content</p>
         <a
           href="https://discord.gg/7u7e4ZbeQk"
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className="info-page-button button-white">
+          <button role="link" className={cx(infoPageButton, buttonWhite)}>
             Join the Discord
           </button>
         </a>
       </div>
-      <div className="info-row">
+      <div className={infoRow}>
         <p>View the source code for Soundscape</p>
         <a
           href="https://github.com/mracette/soundscape"
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className="info-page-button button-white">
+          <button role="link" className={cx(infoPageButton, buttonWhite)}>
             View the source
           </button>
         </a>
       </div>
-      <div className="info-row">
+      <div className={infoRow}>
         <p>Questions or comments?</p>
         <a
           href="mailto:markracette+soundscape@gmail.com"
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className="info-page-button button-white">
+          <button role="link" className={cx(infoPageButton, buttonWhite)}>
             Send an email
           </button>
         </a>
@@ -177,19 +182,20 @@ function LandingPageInner() {
           <>
             <span
               id={selected.name ? "landing-page-song-title" : "choose-a-song"}
+              className={selected.name ? landingPageSongTitle : undefined}
             >
               {selected.name || "Choose a song to begin"}
             </span>
             {selected.bpm && (
               <>
                 <span>&nbsp;|&nbsp;</span>{" "}
-                <span id="landing-page-bpm">{` ${selected.bpm} bpm`}</span>
+                <span id="landing-page-bpm" className={landingPageBpm}>{` ${selected.bpm} bpm`}</span>
               </>
             )}
             {selected.key && (
               <>
                 <span>&nbsp;|&nbsp;</span>{" "}
-                <span id="landing-page-key">{selected.key}</span>
+                <span id="landing-page-key" className={landingPageKey}>{selected.key}</span>
               </>
             )}
           </>
@@ -198,17 +204,17 @@ function LandingPageInner() {
       {isMobile ? (
         <LandingPageMobile dispatch={dispatch} />
       ) : (
-        <div id="song-selection-panel">
-          <Link className="song-link" href="/play/swamp">
+        <div id="song-selection-panel" className={songSelectionPanel}>
+          <Link className={cx(songLink, "song-link")} href="/play/swamp">
             <SwampIcon name="swamp" dispatch={dispatch} />
           </Link>
-          <Link className="song-link" href="/play/mornings">
+          <Link className={cx(songLink, "song-link")} href="/play/mornings">
             <MorningsIcon name="mornings" dispatch={dispatch} />
           </Link>
-          <Link className="song-link" href="/play/moonrise">
+          <Link className={cx(songLink, "song-link")} href="/play/moonrise">
             <MoonriseIcon name="moonrise" dispatch={dispatch} />
           </Link>
-          <Link className="song-link" href="/info">
+          <Link className={cx(songLink, "song-link")} href="/info">
             <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
           </Link>
         </div>

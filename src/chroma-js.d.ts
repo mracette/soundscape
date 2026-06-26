@@ -2,6 +2,7 @@
 declare module "chroma-js" {
   interface Color {
     gl(): [number, number, number, number];
+    hex(): string;
   }
   interface Scale {
     (t: number): Color;

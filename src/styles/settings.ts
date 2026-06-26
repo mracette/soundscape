@@ -1,4 +1,3 @@
-// colors
 export const fontColor = "#ffffff";
 export const lightGrey = "#d8d8d8";
 export const offBlack = "#1f262f";
@@ -9,7 +8,6 @@ export const hotPink = "rgb(255, 76, 122)";
 export const hotGreen = "rgb(0, 225, 158)";
 export const hotBlue = "rgb(0, 249, 255)";
 
-// sizing
 export const sSize = "0.8rem";
 export const mSize = "1.6rem";
 export const lSize = "3.2rem";

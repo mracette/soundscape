@@ -1,11 +1,12 @@
 import { useRef, useContext, useEffect, useMemo } from "react";
 import { CanvasCoordinates } from "../../utils/mathUtils";
 
-// components
 import { Canvas } from "../canvas/Canvas";
-
-// styles
-import "../../styles/components/LandingPage.css";
+import {
+  newLabel,
+  customSongIcon,
+  customSongIconMobile,
+} from "../../styles/components/CustomSongIcons.css";
 
 import { LayoutContext } from "../../contexts/contexts";
 
@@ -103,22 +104,21 @@ export function CustomSongIcon(props: Props) {
     }
 
     // cleanup
-    // LATENT BUG: canvasRef.current may be null after unmount; preserved as-is
     return () => {
       stopAnimation();
       if (listen) {
-        canvasRef.current!.removeEventListener("touchstart", beginAnimation);
-        canvasRef.current!.removeEventListener("touchstart", handleSetSelected);
-        canvasRef.current!.removeEventListener("touchstart", stopAnimation);
-        canvasRef.current!.removeEventListener(
+        canvasRef.current?.removeEventListener("touchstart", beginAnimation);
+        canvasRef.current?.removeEventListener("touchstart", handleSetSelected);
+        canvasRef.current?.removeEventListener("touchstart", stopAnimation);
+        canvasRef.current?.removeEventListener(
           "touchstart",
           handleUnsetSelected
         );
 
-        canvasRef.current!.removeEventListener("mouseover", beginAnimation);
-        canvasRef.current!.removeEventListener("mouseover", handleSetSelected);
-        canvasRef.current!.removeEventListener("mouseout", stopAnimation);
-        canvasRef.current!.removeEventListener("mouseout", handleUnsetSelected);
+        canvasRef.current?.removeEventListener("mouseover", beginAnimation);
+        canvasRef.current?.removeEventListener("mouseover", handleSetSelected);
+        canvasRef.current?.removeEventListener("mouseout", stopAnimation);
+        canvasRef.current?.removeEventListener("mouseout", handleUnsetSelected);
       }
     };
   }, [dispatch, props.name, animate, listen, setCustomStyles]);
@@ -131,10 +131,10 @@ export function CustomSongIcon(props: Props) {
           // border: isNew ? "1px solid" : "0px solid",
         }}
       >
-        {isNew && <span className="new-label">New!</span>}
+        {isNew && <span className={newLabel}>New!</span>}
         <Canvas
           id={id}
-          className={isMobile ? "custom-song-icon-mobile" : "custom-song-icon"}
+          className={isMobile ? customSongIconMobile : customSongIcon}
           onLoad={(canvas) => (canvasRef.current = canvas)}
           resize={false}
         />

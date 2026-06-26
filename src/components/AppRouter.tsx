@@ -1,18 +1,18 @@
-// libs
-import { Switch, Route } from "wouter";
-
-// context
-import { ThemeContext, ThemeContextValue, SongContextValue, InfoContextValue } from "../contexts/contexts";
+import { lazy, Suspense } from "react";
+import { Switch, Route, Redirect } from "wouter";
+import { ThemeContext, ThemeContextValue, SongContextValue, InfoContextValue, AppConfigEntry, SongId } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
 import { InfoContext } from "../contexts/contexts";
-
-// components
 import { MusicPlayer } from "./MusicPlayer";
 import { LandingPage } from "./LandingPage";
 
+const Studio = import.meta.env.DEV
+  ? lazy(() => import("../studio/Studio").then((m) => ({ default: m.Studio })))
+  : null;
+
 interface Props {
-  appConfig: any[];
-  spectrumFunctions: Record<string, (n: number) => unknown>;
+  appConfig: AppConfigEntry[];
+  spectrumFunctions: Record<string, (n: number) => string>;
 }
 
 export const AppRouter = (props: Props) => {
@@ -20,34 +20,29 @@ export const AppRouter = (props: Props) => {
     <Switch>
       <Route path="/play/:songId">
         {(params) => {
-          const songId = params.songId as string;
+          const songId = params.songId as SongId;
+          const song = props.appConfig.find((s) => s.id === songId);
+          if (!song) {
+            return <Redirect to="/" />;
+          }
           return (
             <ThemeContext.Provider
               value={{
-                // provide the song's theme context
                 id: songId,
                 spectrumFunction: props.spectrumFunctions[songId],
-                ...props.appConfig.find((song) => {
-                  return song.id === songId;
-                })["themes"],
+                ...song.themes,
               } as ThemeContextValue}
             >
               <SongContext.Provider
                 value={{
-                  // provide the song context
                   id: songId,
-                  ...props.appConfig.find((song) => {
-                    return song.id === songId;
-                  })["audio"],
+                  ...song.audio,
                 } as SongContextValue}
               >
                 <InfoContext.Provider
                   value={{
-                    // provide extra information about the song
                     id: songId,
-                    ...props.appConfig.find((song) => {
-                      return song.id === songId;
-                    })["info"],
+                    ...song.info,
                   } as InfoContextValue}
                 >
                   <MusicPlayer />
@@ -57,6 +52,22 @@ export const AppRouter = (props: Props) => {
           );
         }}
       </Route>
+      {Studio && (
+        <Route path="/studio/:storyId">
+          {(params) => (
+            <Suspense fallback={null}>
+              <Studio storyId={params.storyId} />
+            </Suspense>
+          )}
+        </Route>
+      )}
+      {Studio && (
+        <Route path="/studio">
+          <Suspense fallback={null}>
+            <Studio />
+          </Suspense>
+        </Route>
+      )}
       <Route>
         <LandingPage spectrumFunction={props.spectrumFunctions.stars} />
       </Route>

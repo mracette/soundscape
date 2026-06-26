@@ -1,6 +1,5 @@
 import { useRef, useEffect, useContext } from "react";
 
-// scenes
 import { Moonrise } from "../../viz/scenes/moonrise/Moonrise";
 import { Mornings } from "../../viz/scenes/mornings/Mornings";
 import { Swamp } from "../../viz/scenes/swamp/Swamp";
@@ -8,27 +7,19 @@ import { Swamp } from "../../viz/scenes/swamp/Swamp";
 // scene base
 import { SceneManager } from "../../viz/SceneManager";
 
-// context
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { ThemeContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
-
-// store
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
-
-// components
 import { CanvasFade } from "./CanvasFade";
-
-// utils
 import {
   cinematicResize,
   addWindowListeners,
   removeWindowListeners,
 } from "../../utils/jsUtils";
-
-// styles
-import "../../styles/components/CanvasViz.css";
+import { canvasVizParent, canvasViz } from "../../styles/components/CanvasViz.css";
+import { cx } from "../../utils/cx";
 
 interface Props {
   songLoadStatus: boolean;
@@ -76,7 +67,7 @@ export const CanvasViz = (props: Props) => {
         if (flags.showVisuals) {
           newScene = new Moonrise(
             canvasRef.current!,
-            (WAW.getAnalysers(id) as any).groupAnalysers,
+            WAW.getAnalysers(id).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {}
           );
@@ -89,7 +80,7 @@ export const CanvasViz = (props: Props) => {
         if (flags.showVisuals) {
           newScene = new Mornings(
             canvasRef.current!,
-            (WAW.getAnalysers(id) as any).groupAnalysers,
+            WAW.getAnalysers(id).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {
               spectrumFunction: specFn,
@@ -105,7 +96,7 @@ export const CanvasViz = (props: Props) => {
         if (flags.showVisuals) {
           newScene = new Swamp(
             canvasRef.current!,
-            (WAW.getAnalysers(id) as any).groupAnalysers,
+            WAW.getAnalysers(id).groupAnalysers,
             () => handleSetCanvasLoadStatus(true),
             {
               spectrumFunction: specFn,
@@ -134,8 +125,7 @@ export const CanvasViz = (props: Props) => {
 
     return () => {
       if (flags.showVisuals) {
-        newScene!.stop();
-        newScene!.disposeAll(newScene!.scene);
+        newScene!.dispose();
         if (newScene!.resizeMethod === "cinematic") {
           removeWindowListeners(resizeFunction!);
         }
@@ -154,8 +144,8 @@ export const CanvasViz = (props: Props) => {
   ]);
 
   return (
-    <div id="canvas-viz-parent" className="fullscreen">
-      <canvas id="canvas-viz" ref={canvasRef}></canvas>
+    <div id="canvas-viz-parent" className={cx(canvasVizParent, "fullscreen")}>
+      <canvas id="canvas-viz" className={canvasViz} ref={canvasRef}></canvas>
       {canvasFade && <CanvasFade ref={canvasRef} />}
     </div>
   );
