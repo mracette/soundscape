@@ -121,5 +121,3 @@ export const iconSection = style({
 });
 
 export const galleryWrap = style({ width: "100%" });
-
-export const loadingStory = style({ textAlign: "center" });

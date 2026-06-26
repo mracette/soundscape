@@ -42,40 +42,16 @@ const animateLoading = (context: CanvasRenderingContext2D, cycle: number, coords
   context.stroke();
 };
 
-const animateReady = (context: CanvasRenderingContext2D, _cycle: number, coords: CanvasCoordinates) => {
-  context.fillStyle = "#141b24";
-  context.globalCompositeOperation = "source-over";
-  context.beginPath();
-  context.arc(coords.nx(0), coords.ny(0)!, coords.getHeight()! / 2.5, 0, TAU);
-  context.fill();
-  context.stroke();
-};
-
 interface Props {
   name?: string;
-  isLoading?: boolean;
 }
 
 export function LoadingIcon(props: Props) {
   return (
-    <div>
-      {!props.isLoading && (
-        <button
-          id="loading-button"
-          disabled={props.isLoading}
-          style={{
-            cursor: props.isLoading ? "none" : "pointer",
-          }}
-        >
-          {" "}
-          <h2>Enter</h2>{" "}
-        </button>
-      )}
-      <CustomSongIcon
-        name={props.name}
-        id="custom-loading-icon"
-        animate={props.isLoading ? animateLoading : animateReady}
-      />
-    </div>
+    <CustomSongIcon
+      name={props.name}
+      id="custom-loading-icon"
+      animate={animateLoading}
+    />
   );
 }

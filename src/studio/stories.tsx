@@ -41,20 +41,7 @@ const SongIconsStory = () => (
   </div>
 );
 
-const LoadingStory = () => {
-  const [loading, setLoading] = useState(true);
-  return (
-    <div className={styles.loadingStory}>
-      <LoadingIcon isLoading={loading} />
-      <button
-        className={styles.controlButton}
-        onClick={() => setLoading((v) => !v)}
-      >
-        {loading ? "Set ready" : "Set loading"}
-      </button>
-    </div>
-  );
-};
+const LoadingStory = () => <LoadingIcon />;
 
 const ToggleStory = () => {
   const viewRef = useRef<ToggleButtonViewHandle>(null);

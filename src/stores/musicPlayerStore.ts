@@ -43,7 +43,6 @@ interface MusicPlayerState {
   groupSolos: string[];
   resetCallbacks: ResetCallback[];
   randomizeCallbacks: RandomizeCallback[];
-  isLoading: boolean;
   backgroundMode: boolean;
   pauseVisuals: boolean;
   mute: boolean;
@@ -69,7 +68,6 @@ const initialState = {
   groupSolos: [],
   resetCallbacks: [],
   randomizeCallbacks: [],
-  isLoading: true,
   backgroundMode: false,
   pauseVisuals: false,
   mute: false,
