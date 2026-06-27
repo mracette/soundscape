@@ -1,5 +1,5 @@
 import { globalStyle } from "@vanilla-extract/css";
-import { moonYellow, vh } from "../settings";
+import { moonYellow } from "../settings";
 
 globalStyle(".icon", {
   height: "100%",

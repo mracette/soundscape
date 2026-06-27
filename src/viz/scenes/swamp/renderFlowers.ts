@@ -39,7 +39,7 @@ export const renderFlowers = (
         intense *
         bSin(extras.beats + acc + cycle * (i / subjects.flowers.length));
       (flower.material as THREE.MeshBasicMaterial).color.set(
-        (chroma as any)
+        chroma
           .mix(extras.colors.darkFlower, extras.colors.flower, mod, "rgb")
           .hex()
       );

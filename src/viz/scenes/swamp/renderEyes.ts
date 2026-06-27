@@ -23,7 +23,7 @@ export const renderEyes = (
     const active = (extras.beats + i) % period > 0.13;
     const eyes = subjects.eyes[i];
     (eyes.material as THREE.MeshBasicMaterial).color = new THREE.Color(
-      (chroma as any)
+      chroma
         .mix(
           (eyes.material as THREE.MeshBasicMaterial).userData.baseColor,
           COLORS.black,

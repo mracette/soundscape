@@ -8,5 +8,6 @@ declare module "d3-ease" {
   export const easePolyIn: PolyEasingFactory;
   export const easePolyOut: PolyEasingFactory;
   export const easePolyInOut: PolyEasingFactory;
+  export function easeQuad(t: number): number;
   export function easeQuadInOut(t: number): number;
 }

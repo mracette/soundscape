@@ -29,9 +29,9 @@ const morningsPalette = new ColorPalette(
 );
 
 const swampPalette = (n: number): string => {
-  const darkBlue = new chroma("#5669AE");
-  const purple = new chroma("#9A4A91");
-  const green = new chroma("#53DD6C");
+  const darkBlue = chroma("#5669AE");
+  const purple = chroma("#9A4A91");
+  const green = chroma("#53DD6C");
   n = clamp(n, 0, 1);
   if (n <= 0.5) {
     return chroma.mix(darkBlue, purple, n / 0.5, "rgb").hex();

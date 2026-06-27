@@ -30,7 +30,14 @@ export default [
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": "warn",
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: "^_",
+        },
+      ],
       // Deliberate `as any` casts preserve runtime where types are imperfect
       // (older @types/three, dynamic WebAudio shapes); advisory, not blocking.
       "@typescript-eslint/no-explicit-any": "warn",

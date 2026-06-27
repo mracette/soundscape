@@ -191,8 +191,6 @@ export default class FirstPersonControls {
   }
 
   bind(scope: this, fn: (event: KeyboardEvent) => void): () => void {
-    return function () {
-      fn.apply(scope, arguments as unknown as [KeyboardEvent]);
-    };
+    return (...args: unknown[]) => fn.apply(scope, args as [KeyboardEvent]);
   }
 }

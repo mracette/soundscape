@@ -10,7 +10,7 @@ const intense = 5;
 const period = 1;
 const bSin = boundedSin(period, 0, 1);
 // easeQuad is not in the d3-ease shim (maps to easeQuadInOut at runtime)
-const ease = (n: number) => (d3 as any).easeQuad(n) as number;
+const ease = (n: number) => d3.easeQuad(n);
 
 interface Shroom {
   mesh: THREE.Mesh;
@@ -37,7 +37,7 @@ export const renderShrooms = (
     subjects.shrooms.forEach((shroom, index) => {
       const mod = bSin(extras.beats + (index % 2 === 0 ? period / 2 : 0));
       (shroom.mesh.material as THREE.MeshBasicMaterial).color.set(
-        (chroma as any)
+        chroma
           .mix(
             COLORS.black,
             shroom.baseColor,

@@ -32,6 +32,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.61.0",
+    "@types/chroma-js": "^3.1.2",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "@types/three": "0.103.2",

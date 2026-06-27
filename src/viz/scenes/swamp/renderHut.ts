@@ -52,14 +52,14 @@ export const renderHut = (
     const ratio = Math.abs(
       clamp((cycle - boundOne) / (boundTwo - boundOne), 0, 1)
     );
-    const mixed = (chroma as any).mix(colorOne, colorTwo, ratio, "rgb").hex();
+    const mixed = chroma.mix(colorOne, colorTwo, ratio, "rgb").hex();
     subjects.light.color.set(mixed);
     subjects.light.intensity = vol * 10000 * intense;
     (subjects.hut.material as THREE.MeshBasicMaterial).color.set(
-      (chroma as any).mix(COLORS.moonYellow, mixed, vol * 11.5 * intense, "rgb").hex()
+      chroma.mix(COLORS.moonYellow, mixed, vol * 11.5 * intense, "rgb").hex()
     );
     (subjects.background.material as THREE.MeshBasicMaterial).color.set(
-      (chroma as any).mix("#000000", mixed, vol * 2.5 * intense, "rgb").hex()
+      chroma.mix("#000000", mixed, vol * 2.5 * intense, "rgb").hex()
     );
 
     prev = cycle;

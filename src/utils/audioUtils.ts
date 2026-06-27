@@ -126,8 +126,14 @@ export const createAudioPlayer = (
             if (offlineRendering) {
               const bufferLength = options.renderLength || buffer.length;
               const bufferDuration = bufferLength / buffer.sampleRate;
-              const offline = new ((window as any).OfflineAudioContext ||
-                (window as any).webkitOfflineAudioContext)(2, bufferLength, buffer.sampleRate) as OfflineAudioContext;
+              const OfflineCtx =
+                window.OfflineAudioContext ||
+                (
+                  window as unknown as {
+                    webkitOfflineAudioContext: typeof OfflineAudioContext;
+                  }
+                ).webkitOfflineAudioContext;
+              const offline = new OfflineCtx(2, bufferLength, buffer.sampleRate);
 
               offline.oncomplete = (event: OfflineAudioCompletionEvent) => {
                 const { renderedBuffer } = event;

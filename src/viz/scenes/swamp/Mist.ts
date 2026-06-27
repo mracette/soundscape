@@ -50,7 +50,7 @@ export class Mist {
       const oy = (y + RANGES.y / 2) / RANGES.y;
       orientations.push(ox, oy);
       // chroma-js shim types as any; calls are safe at runtime
-      const color = new THREE.Color((chroma as any)(extras.spectrumFunction(ox)).hex());
+      const color = new THREE.Color(chroma(extras.spectrumFunction(ox)).hex());
       colors.push(color.r, color.g, color.b, 1);
     }
     // THREE.Float32Attribute is a legacy r108 alias for Float32BufferAttribute; typed in @types/three

@@ -11,20 +11,20 @@ import { Analyser } from "../../../classes/Analyser";
 import { clamp } from "../../../utils/mathUtils";
 
 export const COLORS = {
-  black: (chroma as any)("#000000").hex() as string,
-  vine: (chroma as any)("#010503").darken(0.8).hex() as string,
-  tree: (chroma as any)("#0A0805").darken(0.085).hex() as string,
-  fog: (chroma as any)("#cccccc").hex() as string,
-  flower: (chroma as any)("#DA4167").hex() as string,
-  darkGreen: (chroma as any)("darkgreen").darken(1.95).hex() as string,
-  darkFlower: (chroma as any)("#DA4167").darken(4.5).hex() as string,
-  mushroom: (chroma as any)("#3F250B").darken(2.5).hex() as string,
-  chimney: (chroma as any)("#040404").darken(1).hex() as string,
-  roof: (chroma as any)("#0E0F0C").hex() as string,
-  darkBlue: (chroma as any)("#5669AE").hex() as string,
-  purple: (chroma as any)("#9A4A91").hex() as string,
-  green: (chroma as any)("#53DD6C").hex() as string,
-  moonYellow: (chroma as any)("#f6f2d5").hex() as string,
+  black: chroma("#000000").hex() as string,
+  vine: chroma("#010503").darken(0.8).hex() as string,
+  tree: chroma("#0A0805").darken(0.085).hex() as string,
+  fog: chroma("#cccccc").hex() as string,
+  flower: chroma("#DA4167").hex() as string,
+  darkGreen: chroma("darkgreen").darken(1.95).hex() as string,
+  darkFlower: chroma("#DA4167").darken(4.5).hex() as string,
+  mushroom: chroma("#3F250B").darken(2.5).hex() as string,
+  chimney: chroma("#040404").darken(1).hex() as string,
+  roof: chroma("#0E0F0C").hex() as string,
+  darkBlue: chroma("#5669AE").hex() as string,
+  purple: chroma("#9A4A91").hex() as string,
+  green: chroma("#53DD6C").hex() as string,
+  moonYellow: chroma("#f6f2d5").hex() as string,
 };
 
 interface SwampExtras {
@@ -153,7 +153,7 @@ export class Swamp extends SceneManager {
             (name.includes("sphere") || name.includes("cylinder")) &&
             mesh.material.name.includes("eyes")
           ) {
-            const halfWay = (chroma as any)(this.spectrumFunction(0.35)).hex() as string;
+            const halfWay = chroma(this.spectrumFunction(0.35)).hex() as string;
             mesh.material = new THREE.MeshBasicMaterial({
               color: new THREE.Color(halfWay),
               side: THREE.DoubleSide,
@@ -211,7 +211,7 @@ export class Swamp extends SceneManager {
                 color = COLORS.flower;
               }
               const mat = new THREE.MeshBasicMaterial({
-                color: (chroma as any).mix(color, COLORS.black, 0.5, "rgb").hex(),
+                color: chroma.mix(color, COLORS.black, 0.5, "rgb").hex(),
                 side: THREE.DoubleSide,
               });
               mesh.material = mat;

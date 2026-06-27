@@ -9,6 +9,19 @@ export interface TelemetrySnapshot {
 const FRAME_BUDGET_MS = 1000 / 60;
 const WINDOW = 60; // frames retained for the rolling median
 
+// EXT_disjoint_timer_query (WebGL1) has no lib.dom types — declare the subset used.
+interface DisjointTimerQueryExt {
+  createQueryEXT(): WebGLQuery;
+  beginQueryEXT(target: number, query: WebGLQuery): void;
+  endQueryEXT(target: number): void;
+  deleteQueryEXT(query: WebGLQuery): void;
+  getQueryObjectEXT(query: WebGLQuery, pname: number): number;
+  readonly TIME_ELAPSED_EXT: number;
+  readonly GPU_DISJOINT_EXT: number;
+  readonly QUERY_RESULT_EXT: number;
+  readonly QUERY_RESULT_AVAILABLE_EXT: number;
+}
+
 /**
  * Per-frame compute telemetry. CPU time wraps the JS render() call; GPU time
  * uses the WebGL1 EXT_disjoint_timer_query extension (async — results arrive a
@@ -17,8 +30,7 @@ const WINDOW = 60; // frames retained for the rolling median
  */
 export class FrameTelemetry {
   private gl: WebGLRenderingContext;
-  // EXT_disjoint_timer_query has no TS types; treat as a loose record.
-  private ext: Record<string, unknown> | null;
+  private ext: DisjointTimerQueryExt | null;
   private cpu: number[] = [];
   private gpu: number[] = [];
   private t0 = 0;
@@ -27,15 +39,15 @@ export class FrameTelemetry {
 
   constructor(gl: WebGLRenderingContext) {
     this.gl = gl;
-    this.ext = gl.getExtension("EXT_disjoint_timer_query") as
-      | Record<string, unknown>
-      | null;
+    this.ext = gl.getExtension(
+      "EXT_disjoint_timer_query"
+    ) as DisjointTimerQueryExt | null;
   }
 
   beginFrame(): void {
     this.t0 = performance.now();
     if (this.ext && !this.active) {
-      const e = this.ext as any;
+      const e = this.ext;
       const q = e.createQueryEXT();
       e.beginQueryEXT(e.TIME_ELAPSED_EXT, q);
       this.active = q;
@@ -45,7 +57,7 @@ export class FrameTelemetry {
   endFrame(): void {
     this.record(this.cpu, performance.now() - this.t0);
     if (this.ext && this.active) {
-      const e = this.ext as any;
+      const e = this.ext;
       e.endQueryEXT(e.TIME_ELAPSED_EXT);
       this.pending.push(this.active);
       this.active = null;
@@ -55,7 +67,7 @@ export class FrameTelemetry {
 
   private pollGpu(): void {
     if (!this.ext) return;
-    const e = this.ext as any;
+    const e = this.ext;
     // A disjoint event means all in-flight timings are unreliable — discard them.
     if (this.gl.getParameter(e.GPU_DISJOINT_EXT)) {
       this.pending.forEach((q) => e.deleteQueryEXT(q));
