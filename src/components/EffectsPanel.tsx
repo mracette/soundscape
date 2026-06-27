@@ -109,7 +109,7 @@ export const EffectsPanel = () => {
         triggerRandomEffects
       );
       // stop event
-    } else if (!backgroundMode) {
+    } else {
       WAW.scheduler.cancel(backgroundModeEventRef.current!);
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
