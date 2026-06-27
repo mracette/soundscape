@@ -34,3 +34,15 @@ public/audio/*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# playwright
+/test-results
+/playwright-report
+/playwright/.cache
+
+# worktree asset symlinks (created by tools/worktree-dev.sh)
+/public/models
+/public/fonts
+
+# perf run artifacts
+tools/perf/reports/
