@@ -38,8 +38,8 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
-      // Deliberate `as any` casts preserve runtime where types are imperfect
-      // (older @types/three, dynamic WebAudio shapes); advisory, not blocking.
+      // On everywhere except src/viz (turned off there — see the trailing
+      // override) so new untyped code outside the three.js layer is still caught.
       "@typescript-eslint/no-explicit-any": "warn",
       // The `cond && sideEffect()` short-circuit is an established pattern in
       // this codebase; eslint:recommended never flagged it.
@@ -56,5 +56,11 @@ export default [
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/immutability": "warn",
     },
+  },
+  {
+    // three.js types (@types/three@0.103) lag the runtime (three@0.108); the viz
+    // layer casts across that gap deliberately rather than maintain type shims.
+    files: ["src/viz/**/*.{ts,tsx}"],
+    rules: { "@typescript-eslint/no-explicit-any": "off" },
   },
 ];
