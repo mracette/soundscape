@@ -1,4 +1,4 @@
-import { useRef, useEffect, useContext, useReducer } from "react";
+import { useRef, useEffect, useContext, useState } from "react";
 import { Link } from "wouter";
 import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
 import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
@@ -28,42 +28,15 @@ import { LandingPageMobile } from "./LandingPageMobile";
 
 import { Route, Switch, Redirect } from "wouter";
 
-type State = { name: string | null; bpm: string | null; key: string | null };
-type Action = { type: string | null };
+type Selected = { name: string | null; bpm: string | null; key: string | null };
 
-export const landingPageReducer = (state: State, action: Action): State => {
-  switch (action.type) {
-    case "moonrise":
-      return {
-        name: "Moonrise",
-        bpm: "120",
-        key: "G Minor",
-      };
-    case "mornings":
-      return {
-        name: "Mornings",
-        bpm: "92",
-        key: "Eb Major",
-      };
-    case "swamp":
-      return {
-        name: "Swamp",
-        bpm: "75",
-        key: "Eb Minor",
-      };
-    case "coming-soon":
-      return {
-        name: "Information & Updates",
-        bpm: null,
-        key: null,
-      };
-    default:
-      return {
-        name: null,
-        bpm: null,
-        key: null,
-      };
-  }
+const NONE: Selected = { name: null, bpm: null, key: null };
+
+const SONGS: Record<string, Selected> = {
+  moonrise: { name: "Moonrise", bpm: "120", key: "G Minor" },
+  mornings: { name: "Mornings", bpm: "92", key: "Eb Major" },
+  swamp: { name: "Swamp", bpm: "75", key: "Eb Minor" },
+  "coming-soon": { name: "Information & Updates", bpm: null, key: null },
 };
 
 interface LandingPageProps {
@@ -165,11 +138,8 @@ function InfoPageInner() {
 
 function LandingPageInner() {
   const { isMobile } = useContext(LayoutContext)!;
-  const [selected, dispatch] = useReducer(landingPageReducer, {
-    name: null,
-    bpm: null,
-    key: null,
-  });
+  const [selected, setSelected] = useState<Selected>(NONE);
+  const select = (id: string | null) => setSelected(id ? SONGS[id] ?? NONE : NONE);
   return (
     <>
       <div className="flex-row">
@@ -182,7 +152,7 @@ function LandingPageInner() {
           <>
             <span
               id={selected.name ? "landing-page-song-title" : "choose-a-song"}
-              className={selected.name ? landingPageSongTitle : undefined}
+              className={cx(selected.name && landingPageSongTitle)}
             >
               {selected.name || "Choose a song to begin"}
             </span>
@@ -202,20 +172,20 @@ function LandingPageInner() {
         )}
       </div>
       {isMobile ? (
-        <LandingPageMobile dispatch={dispatch} />
+        <LandingPageMobile onSelect={select} />
       ) : (
         <div id="song-selection-panel" className={songSelectionPanel}>
           <Link className={cx(songLink, "song-link")} href="/play/swamp">
-            <SwampIcon name="swamp" dispatch={dispatch} />
+            <SwampIcon name="swamp" onSelect={select} />
           </Link>
           <Link className={cx(songLink, "song-link")} href="/play/mornings">
-            <MorningsIcon name="mornings" dispatch={dispatch} />
+            <MorningsIcon name="mornings" onSelect={select} />
           </Link>
           <Link className={cx(songLink, "song-link")} href="/play/moonrise">
-            <MoonriseIcon name="moonrise" dispatch={dispatch} />
+            <MoonriseIcon name="moonrise" onSelect={select} />
           </Link>
           <Link className={cx(songLink, "song-link")} href="/info">
-            <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
+            <ComingSoonIcon name="coming-soon" onSelect={select} />
           </Link>
         </div>
       )}

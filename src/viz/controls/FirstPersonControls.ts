@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { clamp } from "../../utils/mathUtils";
 
 export default class FirstPersonControls {
   object: THREE.Object3D;
@@ -158,7 +159,7 @@ export default class FirstPersonControls {
     if (this.lookRight) this.lon += actualLookSpeed; // * verticalLookRatio;
     if (this.lookLeft) this.lon -= actualLookSpeed; // * verticalLookRatio;
 
-    this.lat = Math.max(-85, Math.min(85, this.lat));
+    this.lat = clamp(this.lat, -85, 85);
     this.phi = THREE.Math.degToRad(90 - this.lat);
     this.theta = THREE.Math.degToRad(this.lon);
 

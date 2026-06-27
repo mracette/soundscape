@@ -58,13 +58,11 @@ export const ToggleButtonGroup = (props: Props) => {
 
   /* Solo and Mute Effects */
   useEffect(() => {
-    if (solo && !mute) {
+    if (solo) {
       groupNode.gain.value = 1;
-    } else if (solo && mute) {
-      groupNode.gain.value = 1;
-    } else if (!solo && mute) {
+    } else if (mute) {
       groupNode.gain.value = 0;
-    } else if (!solo && !mute && groupSolos.length === 0) {
+    } else if (groupSolos.length === 0) {
       groupNode.gain.value = 1;
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -105,7 +103,7 @@ export const ToggleButtonGroup = (props: Props) => {
         .getState()
         .voices.filter((v) => v.group === name);
       const ePoly = props.polyphony === -1 ? current.length : props.polyphony;
-      const count = Math.ceil(Math.random() * ePoly);
+      const count = Math.min(current.length, Math.ceil(Math.random() * ePoly));
       const idsToEnable: string[] = [];
       while (idsToEnable.length < count) {
         const rand = Math.floor(Math.random() * current.length);
@@ -127,8 +125,8 @@ export const ToggleButtonGroup = (props: Props) => {
       });
     };
 
-    addResetCallback({ name, resetCallback: handleReset });
-    addRandomizeCallback({ name, randomizeCallback: handleRandomize });
+    addResetCallback({ name, callback: handleReset });
+    addRandomizeCallback({ name, callback: handleRandomize });
   }, [addResetCallback, addRandomizeCallback, name, props.polyphony]);
 
   const handleToggleSolo = useCallback(() => {

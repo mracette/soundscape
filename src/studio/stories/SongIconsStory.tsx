@@ -12,16 +12,16 @@ const noop = () => {};
 export const SongIconsStory = () => (
   <div className={songSelectionPanel}>
     <div className={songLink}>
-      <SwampIcon name="swamp" dispatch={noop} />
+      <SwampIcon name="swamp" onSelect={noop} />
     </div>
     <div className={songLink}>
-      <MorningsIcon name="mornings" dispatch={noop} />
+      <MorningsIcon name="mornings" onSelect={noop} />
     </div>
     <div className={songLink}>
-      <MoonriseIcon name="moonrise" dispatch={noop} />
+      <MoonriseIcon name="moonrise" onSelect={noop} />
     </div>
     <div className={songLink}>
-      <ComingSoonIcon name="coming-soon" dispatch={noop} />
+      <ComingSoonIcon name="coming-soon" onSelect={noop} />
     </div>
   </div>
 );

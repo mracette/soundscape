@@ -2,15 +2,13 @@ import { useRef, useCallback, useEffect, useContext } from "react";
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
-import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
+import { useMusicPlayerStore, VoiceState } from "../../stores/musicPlayerStore";
 import { MusicalDuration } from "../../contexts/contexts";
 import { nextSubdivision } from "../../utils/audioUtils";
 import {
   ToggleButtonView,
   ToggleButtonViewHandle,
 } from "./ToggleButtonView";
-
-type PlayerState = "stopped" | "pending-start" | "active" | "pending-stop";
 
 interface Props {
   name: string;
@@ -47,12 +45,12 @@ export const ToggleButton = (props: Props) => {
     ? timeSignature * parseInt(quantizeLength!)
     : 1;
 
-  const changePlayerState = useCallback(
-    (newState: PlayerState) => {
+  const changeVoiceState = useCallback(
+    (newState: VoiceState) => {
       // cancel current event for this toggle (necessary to stop a pending start)
       scheduler.cancel(animationEventRef.current);
 
-      const initialState: PlayerState =
+      const initialState: VoiceState =
         newState === "active" ? "pending-start" : "pending-stop";
 
       updateVoiceState({ id: name, newState: initialState });
@@ -120,10 +118,10 @@ export const ToggleButton = (props: Props) => {
       (playerState === "active" || playerState === "pending-start")
     ) {
       // stop player and remove from the override list
-      changePlayerState("stopped");
+      changeVoiceState("stopped");
       clearVoiceOverride(groupName, name);
     }
-  }, [playerState, changePlayerState, name, override, clearVoiceOverride, groupName]);
+  }, [playerState, changeVoiceState, name, override, clearVoiceOverride, groupName]);
 
   /* Cleanup Hook */
   useEffect(() => {
@@ -142,13 +140,13 @@ export const ToggleButton = (props: Props) => {
       onClick={() => {
         switch (playerState) {
           case "stopped": // start if stopped
-            changePlayerState("active");
+            changeVoiceState("active");
             break;
           case "active": // stop if active
-            changePlayerState("stopped");
+            changeVoiceState("stopped");
             break;
           case "pending-start": // cancel start if triggered on pending-start
-            changePlayerState("stopped");
+            changeVoiceState("stopped");
             break;
           case "pending-stop":
             break; // do nothing if triggered on pending-stop

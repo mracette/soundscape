@@ -32,6 +32,9 @@ export const nextSubdivision = (
   return nextSubdivision;
 };
 
+export const averageVolume = (fftData: Uint8Array): number =>
+  fftData.reduce((sum, v) => sum + v, 0) / fftData.length / 255;
+
 // effects chain parameters
 export const effectParams = {
   lpFilter: {

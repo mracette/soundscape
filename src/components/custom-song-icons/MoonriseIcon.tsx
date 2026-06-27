@@ -18,13 +18,13 @@ const animate = (context: CanvasRenderingContext2D, cycle: number, coords: Canva
 
 interface Props {
   name?: string;
-  dispatch: (action: { type: string | null }) => void;
+  onSelect: (id: string | null) => void;
 }
 
 export function MoonriseIcon(props: Props) {
   return (
     <CustomSongIcon
-      dispatch={props.dispatch}
+      onSelect={props.onSelect}
       name={props.name}
       id="custom-moonrise-icon"
       animate={animate}

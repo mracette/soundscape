@@ -18,7 +18,7 @@ interface Props {
   animate: (ctx: CanvasRenderingContext2D, cycle: number, coords: CanvasCoordinates) => void;
   listen?: boolean;
   isNew?: boolean;
-  dispatch?: (action: { type: string | null }) => void;
+  onSelect?: (id: string | null) => void;
   setCustomStyles?: (ctx: CanvasRenderingContext2D) => void;
 }
 
@@ -30,7 +30,7 @@ export function CustomSongIcon(props: Props) {
   const animationRef = useRef<number | undefined>(undefined);
   const coordsRef = useRef<CanvasCoordinates | undefined>(undefined);
 
-  const { animate, id, listen, setCustomStyles, dispatch, isNew } = props;
+  const { animate, id, listen, setCustomStyles, onSelect, isNew } = props;
 
   const { isMobile } = useContext(LayoutContext)!;
 
@@ -56,8 +56,8 @@ export function CustomSongIcon(props: Props) {
       }
     };
 
-    const handleSetSelected = () => dispatch!({ type: props.name ?? null });
-    const handleUnsetSelected = () => dispatch!({ type: null });
+    const handleSetSelected = () => onSelect!(props.name ?? null);
+    const handleUnsetSelected = () => onSelect!(null);
 
     const setStyles = () => {
       contextRef.current!.lineWidth = coordsRef.current!.getWidth() / 128;
@@ -121,7 +121,7 @@ export function CustomSongIcon(props: Props) {
         canvasRef.current?.removeEventListener("mouseout", handleUnsetSelected);
       }
     };
-  }, [dispatch, props.name, animate, listen, setCustomStyles]);
+  }, [onSelect, props.name, animate, listen, setCustomStyles]);
 
   return useMemo(() => {
     return (

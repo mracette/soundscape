@@ -1,5 +1,6 @@
 import chroma from "chroma-js";
 import { boundedSin } from "../../../utils/mathUtils";
+import { averageVolume } from "../../../utils/audioUtils";
 import { Analyser } from "../../../classes/Analyser";
 import * as THREE from "three";
 
@@ -29,8 +30,7 @@ export const renderFlowers = (
 ) => {
   analyser.getFrequencyData();
   const fftData = analyser.fftData as Uint8Array;
-  const vol =
-    fftData.reduce((a, b) => a + b) / fftData.length / 255;
+  const vol = averageVolume(fftData);
   if (vol > 0) {
     acc += vol;
     subjects.flowers.forEach((flower, i) => {

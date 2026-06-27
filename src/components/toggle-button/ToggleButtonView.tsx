@@ -12,14 +12,12 @@ import { toggleButton, svgCircle } from "../../styles/components/ToggleButton.cs
 import { cx } from "../../utils/cx";
 
 const START_PARAMS = {
-  rotateZ: "-180",
   backgroundColor: "rgba(255, 255, 255, .3)",
   points:
     "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188",
 };
 
 const STOP_PARAMS = {
-  rotateZ: "0",
   backgroundColor: "rgba(255, 255, 255, 0)",
   points:
     "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100",

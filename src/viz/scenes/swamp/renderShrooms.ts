@@ -1,6 +1,7 @@
 import chroma from "chroma-js";
 import { COLORS } from "./Swamp";
 import { boundedSin } from "../../../utils/mathUtils";
+import { averageVolume } from "../../../utils/audioUtils";
 import * as d3 from "d3-ease";
 import { Analyser } from "../../../classes/Analyser";
 import * as THREE from "three";
@@ -31,8 +32,7 @@ export const renderShrooms = (
 ) => {
   analyser.getFrequencyData();
   const fftData = analyser.fftData as Uint8Array;
-  const vol =
-    fftData.reduce((a, b) => a + b) / fftData.length / 255;
+  const vol = averageVolume(fftData);
   if (vol > 0) {
     subjects.shrooms.forEach((shroom, index) => {
       const mod = bSin(extras.beats + (index % 2 === 0 ? period / 2 : 0));

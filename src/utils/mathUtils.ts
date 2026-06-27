@@ -87,9 +87,9 @@ const clamp = (n: number, min: number, max: number): number => {
   return Math.max(Math.min(max, n), min);
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const normalize = (n: number, min: number, max: number, clamp: any = false): number => {
-  return clamp ? (n - min) / (max - min) : (clamp(n, min, max) - min) / (max - min);
+const normalize = (n: number, min: number, max: number, doClamp = false): number => {
+  const norm = (n - min) / (max - min);
+  return doClamp ? clamp(norm, 0, 1) : norm;
 };
 
 const lerp = (n0: number, n1: number, t: number): number => {

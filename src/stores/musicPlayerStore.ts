@@ -12,7 +12,7 @@
  */
 import { create } from "zustand";
 
-type VoiceState = "stopped" | "pending-start" | "active" | "pending-stop";
+export type VoiceState = "stopped" | "pending-start" | "active" | "pending-stop";
 
 interface Voice {
   id: string;
@@ -27,22 +27,17 @@ interface GroupState {
   playerOverrides: string[];
 }
 
-interface ResetCallback {
+interface NamedCallback {
   name: string;
-  resetCallback: () => void;
-}
-
-interface RandomizeCallback {
-  name: string;
-  randomizeCallback: () => void;
+  callback: () => void;
 }
 
 interface MusicPlayerState {
   voices: Voice[];
   groups: Record<string, GroupState>;
   groupSolos: string[];
-  resetCallbacks: ResetCallback[];
-  randomizeCallbacks: RandomizeCallback[];
+  resetCallbacks: NamedCallback[];
+  randomizeCallbacks: NamedCallback[];
   backgroundMode: boolean;
   pauseVisuals: boolean;
   mute: boolean;
@@ -57,10 +52,15 @@ interface MusicPlayerState {
   updateVoiceState: (args: { id: string; newState: VoiceState }) => void;
   addGroupSolo: (name: string) => void;
   removeGroupSolo: () => void;
-  addResetCallback: (cb: ResetCallback) => void;
-  addRandomizeCallback: (cb: RandomizeCallback) => void;
+  addResetCallback: (cb: NamedCallback) => void;
+  addRandomizeCallback: (cb: NamedCallback) => void;
   reset: () => void;
 }
+
+const upsertByName = (
+  list: NamedCallback[],
+  cb: NamedCallback
+): NamedCallback[] => [...list.filter((o) => o.name !== cb.name), cb];
 
 const initialState = {
   voices: [],
@@ -136,18 +136,8 @@ export const useMusicPlayerStore = create<MusicPlayerState>()((set) => ({
   addGroupSolo: (name) => set({ groupSolos: [name] }),
   removeGroupSolo: () => set({ groupSolos: [] }),
   addResetCallback: (cb) =>
-    set((s) => ({
-      resetCallbacks: [
-        ...s.resetCallbacks.filter((o) => o.name !== cb.name),
-        cb,
-      ],
-    })),
+    set((s) => ({ resetCallbacks: upsertByName(s.resetCallbacks, cb) })),
   addRandomizeCallback: (cb) =>
-    set((s) => ({
-      randomizeCallbacks: [
-        ...s.randomizeCallbacks.filter((o) => o.name !== cb.name),
-        cb,
-      ],
-    })),
+    set((s) => ({ randomizeCallbacks: upsertByName(s.randomizeCallbacks, cb) })),
   reset: () => set(initialState),
 }));

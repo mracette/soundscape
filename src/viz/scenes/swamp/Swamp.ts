@@ -8,6 +8,7 @@ import { renderFlowers } from "./renderFlowers";
 import { renderShrooms } from "./renderShrooms";
 import { renderEyes } from "./renderEyes";
 import { Analyser } from "../../../classes/Analyser";
+import { clamp } from "../../../utils/mathUtils";
 
 export const COLORS = {
   black: (chroma as any)("#000000").hex() as string,
@@ -231,7 +232,7 @@ export class Swamp extends SceneManager {
     const fovMax = 50;
     const aspectMin = 0.5;
     const aspectMax = 3;
-    const aspectAdj = Math.max(aspectMin, Math.min(aspectRatio, aspectMax));
+    const aspectAdj = clamp(aspectRatio, aspectMin, aspectMax);
     const newFov =
       fovMax -
       ((fovMax - fovMin) * (aspectAdj - aspectMin)) / (aspectMax - aspectMin);

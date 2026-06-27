@@ -7,10 +7,10 @@ import { Link } from "wouter";
 import { songLinkMobile } from "../styles/components/LandingPage.css";
 
 interface Props {
-  dispatch: (action: { type: string | null }) => void;
+  onSelect: (id: string | null) => void;
 }
 
-export const LandingPageMobile = ({ dispatch }: Props) => {
+export const LandingPageMobile = ({ onSelect }: Props) => {
   return (
     <div
       style={{
@@ -22,7 +22,7 @@ export const LandingPageMobile = ({ dispatch }: Props) => {
     >
       <Link href="/play/swamp" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
-          <SwampIcon name="swamp" dispatch={dispatch} />
+          <SwampIcon name="swamp" onSelect={onSelect} />
           <div>
             <span>Swamp</span>
             <div>
@@ -34,7 +34,7 @@ export const LandingPageMobile = ({ dispatch }: Props) => {
       </Link>
       <Link href="/play/mornings" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
-          <MorningsIcon name="mornings" dispatch={dispatch} />
+          <MorningsIcon name="mornings" onSelect={onSelect} />
           <div>
             <span>Mornings</span>
             <div>
@@ -46,7 +46,7 @@ export const LandingPageMobile = ({ dispatch }: Props) => {
       </Link>
       <Link href="/play/moonrise" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
-          <MoonriseIcon name="moonrise" dispatch={dispatch} />
+          <MoonriseIcon name="moonrise" onSelect={onSelect} />
           <div>
             <span>Moonrise</span>
             <div>
@@ -59,7 +59,7 @@ export const LandingPageMobile = ({ dispatch }: Props) => {
       <Link href="/info" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <div>
-            <ComingSoonIcon name="coming-soon" dispatch={dispatch} />
+            <ComingSoonIcon name="coming-soon" onSelect={onSelect} />
           </div>
           <div>
             <span>Information & Updates</span>

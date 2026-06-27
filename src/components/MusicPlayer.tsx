@@ -82,13 +82,13 @@ export const MusicPlayer = () => {
 
   const handleReset = useCallback(() => {
     resetCallbacks.forEach((obj) => {
-      obj.resetCallback();
+      obj.callback();
     });
   }, [resetCallbacks]);
 
   const handleRandomize = useCallback(() => {
     randomizeCallbacks.forEach((obj) => {
-      obj.randomizeCallback();
+      obj.callback();
     });
   }, [randomizeCallbacks]);
 
@@ -133,7 +133,7 @@ export const MusicPlayer = () => {
         triggerRandomVoice
       );
       // stop event
-    } else if (!backgroundMode) {
+    } else {
       WAW.scheduler.cancel(backgroundModeEventRef.current ?? undefined);
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */

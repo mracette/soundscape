@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Analyser } from "../../../classes/Analyser";
 import { boundedSin } from "../../../utils/mathUtils";
+import { averageVolume } from "../../../utils/audioUtils";
 
 const w = 64 + 1;
 const grey = new THREE.Color(0x333333);
@@ -26,7 +27,7 @@ export const renderMelody = (
 ) => {
   analyser.getFrequencyData();
   const fftData = analyser.fftData as Uint8Array;
-  const vol = fftData.reduce((a, b) => a + b) / fftData.length / 255;
+  const vol = averageVolume(fftData);
   const leftColors = (subjects.leftPage.geometry as THREE.BufferGeometry)
     .attributes.customColor as THREE.BufferAttribute;
   const rightColors = (subjects.rightPage.geometry as THREE.BufferGeometry)
