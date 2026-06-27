@@ -11,8 +11,6 @@ import { Analyser } from "./Analyser";
 import { Scheduler } from "./Scheduler";
 import { AudioPlayerWrapper } from "./AudioPlayerWrapper";
 import {
-  VoiceConfig,
-  GroupConfig,
   SongContextValue,
   AppConfigEntry,
   SongId,

@@ -59,7 +59,7 @@ export class Analyser {
   yEasing!: ((n: number) => number) | undefined;
   xExponent!: number | undefined;
   yExponent!: number | undefined;
-  binMethod!: string;
+  binMethod!: 'center' | 'start' | 'end';
   fftSize!: number;
   frequencyBinCount!: number;
   nyquist!: number;

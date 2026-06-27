@@ -98,9 +98,6 @@ export class Scheduler {
     }
   }
 
-  /*
-  Increment a repeating event
-  */
   incrementRepeating(event: RepeatingEvent): void {
     event.count++;
     // the web audio spec doesn't allow buffer source nodes to be reused
@@ -198,7 +195,7 @@ export class Scheduler {
 
         try {
           event.source.stop();
-          /* eslint-disable-next-line no-empty */
+          /* eslint-disable-next-line */
         } catch (e) {}
 
         event.source.disconnect();

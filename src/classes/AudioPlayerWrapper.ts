@@ -92,6 +92,7 @@ export class AudioPlayerWrapper {
   start(time: number): void {
     try {
       this.bufferSource.start(time);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       this.reload();
       this.bufferSource.start(time);
@@ -102,6 +103,7 @@ export class AudioPlayerWrapper {
   stop(time?: number): void {
     try {
       this.bufferSource.stop(time);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       return;
     }
