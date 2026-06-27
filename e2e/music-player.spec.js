@@ -1,11 +1,11 @@
-const { test, expect } = require("@playwright/test");
-const {
+import { test, expect } from "@playwright/test";
+import {
   gotoScene,
   getGroup,
   readPolyphony,
   readGain,
   premasterGain,
-} = require("./helpers");
+} from "./helpers.js";
 
 test.beforeEach(async ({ page }) => {
   await gotoScene(page, "swamp");

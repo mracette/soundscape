@@ -1,5 +1,5 @@
-const { test, expect } = require("@playwright/test");
-const { gotoScene } = require("./helpers");
+import { test, expect } from "@playwright/test";
+import { gotoScene } from "./helpers.js";
 
 test.beforeEach(async ({ page }) => {
   await gotoScene(page, "swamp");

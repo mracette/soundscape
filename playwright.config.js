@@ -1,6 +1,6 @@
-const { defineConfig, devices } = require("@playwright/test");
+import { defineConfig, devices } from "@playwright/test";
 
-module.exports = defineConfig({
+export default defineConfig({
   testDir: "./e2e",
   // CI fetches all audio/model assets from the CDN over the network, so scene-load
   // + interaction tests need more headroom than the local-asset run.

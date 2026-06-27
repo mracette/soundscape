@@ -1,4 +1,4 @@
-const { test, expect } = require("@playwright/test");
+import { test, expect } from "@playwright/test";
 
 // /studio is only mounted when import.meta.env.DEV is true (AppRouter gates it).
 // These tests therefore require the dev server — playwright.config.js starts it

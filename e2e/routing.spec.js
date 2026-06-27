@@ -1,5 +1,5 @@
-const { test, expect } = require("@playwright/test");
-const { gotoScene, SONGS } = require("./helpers");
+import { test, expect } from "@playwright/test";
+import { gotoScene, SONGS } from "./helpers.js";
 
 test("/ renders the landing page with song links", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });

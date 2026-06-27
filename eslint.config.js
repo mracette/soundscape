@@ -1,10 +1,10 @@
-const js = require("@eslint/js");
-const globals = require("globals");
-const reactHooks = require("eslint-plugin-react-hooks");
-const reactRefresh = require("eslint-plugin-react-refresh");
-const tseslint = require("typescript-eslint");
+import js from "@eslint/js";
+import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import tseslint from "typescript-eslint";
 
-module.exports = [
+export default [
   { ignores: ["build/**", "node_modules/**", "e2e/**", "*.config.js"] },
   // Keep eslint-disable directives carried over from the pre-TS source even
   // when the rule doesn't currently fire, so --fix doesn't strip them.

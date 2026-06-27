@@ -1,4 +1,4 @@
-const { expect } = require("@playwright/test");
+import { expect } from "@playwright/test";
 
 const SONGS = ["swamp", "mornings", "moonrise"];
 
@@ -62,7 +62,7 @@ async function premasterGain(page) {
   return page.evaluate(() => window.__soundscape.premasterGain());
 }
 
-module.exports = {
+export {
   SONGS,
   installWebglCounter,
   webglContextCount,

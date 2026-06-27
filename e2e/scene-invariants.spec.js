@@ -1,11 +1,10 @@
-const { test, expect } = require("@playwright/test");
-const {
+import { test, expect } from "@playwright/test";
+import {
   SONGS,
   installWebglCounter,
   webglContextCount,
   gotoScene,
-  getGroup,
-} = require("./helpers");
+} from "./helpers.js";
 
 for (const song of SONGS) {
   test(`${song}: exactly one WebGL context, stable across interaction`, async ({
