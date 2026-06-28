@@ -49,15 +49,23 @@ export class TempoClock {
   }
 
   /**
+   * Beat count of the next boundary that is a whole multiple of `intervalBeats`,
+   * strictly after `fromTime`. The beat count is rate-invariant: as the rate
+   * changes, this target stays fixed while its wall-clock time (`timeAt`) moves,
+   * which is what lets a pending voice re-resolve its start against the live grid.
+   */
+  nextBoundaryBeat(intervalBeats: number, fromTime: number): number {
+    const beatsNow = this.beatsAt(fromTime);
+    return (Math.floor(beatsNow / intervalBeats) + 1) * intervalBeats;
+  }
+
+  /**
    * AudioContext time of the next boundary that is a whole multiple of
    * `intervalBeats`, strictly after `fromTime`. Drift-aware replacement for
    * `nextSubdivision`.
    */
   nextBoundary(intervalBeats: number, fromTime: number): number {
-    const beatsNow = this.beatsAt(fromTime);
-    const nextMultiple =
-      (Math.floor(beatsNow / intervalBeats) + 1) * intervalBeats;
-    return this.timeAt(nextMultiple);
+    return this.timeAt(this.nextBoundaryBeat(intervalBeats, fromTime));
   }
 
   get currentRate(): number {

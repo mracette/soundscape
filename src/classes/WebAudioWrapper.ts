@@ -60,6 +60,18 @@ interface WrapperValues {
   am: number[];
 }
 
+interface TransportRequest {
+  player: AudioPlayerWrapper;
+  clock: TempoClock;
+  targetBeat: number;
+  action: "start" | "stop";
+  onCommit: (time: number) => void;
+}
+
+/** Poll period (ms) and commit horizon (s) for the boundary transport. */
+const TRANSPORT_TICK_MS = 15;
+const TRANSPORT_LOOKAHEAD = 0.04;
+
 /**
  * Central audio engine. Owns the AudioContext, Scheduler, and the entire WebAudio
  * node graph for the app.
@@ -81,6 +93,8 @@ export class WebAudioWrapper {
   audioCtx: AudioContext;
   scheduler: Scheduler;
   tempoClocks: Partial<Record<SongId, TempoClock>> = {};
+  private transportQueue = new Map<string, TransportRequest>();
+  private transportTimer: number | null = null;
 
   constructor(appConfig: AppConfigEntry[]) {
     const props = {
@@ -455,6 +469,59 @@ export class WebAudioWrapper {
     const voices = this.getVoices(songId);
     for (const name in voices) {
       voices[name].setPlaybackRate(rate, now);
+    }
+  }
+
+  /**
+   * Queue a voice to start/stop on the next `intervalBeats` boundary, committing
+   * the actual `start`/`stop` only once that boundary is within the look-ahead
+   * horizon. Committing late means the boundary's wall-clock time is resolved
+   * against the live clock — so a Drift change mid-glide can't leave a voice
+   * scheduled against a stale grid. `key` (the voice name) dedupes and cancels.
+   */
+  scheduleAtBoundary(
+    key: string,
+    player: AudioPlayerWrapper,
+    clock: TempoClock,
+    intervalBeats: number,
+    action: "start" | "stop",
+    onCommit: (time: number) => void
+  ): void {
+    const targetBeat = clock.nextBoundaryBeat(
+      intervalBeats,
+      this.audioCtx.currentTime
+    );
+    this.transportQueue.set(key, { player, clock, targetBeat, action, onCommit });
+    if (this.transportTimer === null) {
+      this.transportTimer = window.setInterval(
+        () => this.tickTransport(),
+        TRANSPORT_TICK_MS
+      );
+    }
+  }
+
+  /** Drop a pending boundary request (re-toggle before it commits, or unmount). */
+  cancelBoundary(key: string): void {
+    this.transportQueue.delete(key);
+  }
+
+  private tickTransport(): void {
+    const now = this.audioCtx.currentTime;
+    for (const [key, req] of this.transportQueue) {
+      const time = req.clock.timeAt(req.targetBeat);
+      if (time <= now + TRANSPORT_LOOKAHEAD) {
+        if (req.action === "start") {
+          req.player.start(time);
+        } else {
+          req.player.stop(time);
+        }
+        req.onCommit(time);
+        this.transportQueue.delete(key);
+      }
+    }
+    if (this.transportQueue.size === 0 && this.transportTimer !== null) {
+      window.clearInterval(this.transportTimer);
+      this.transportTimer = null;
     }
   }
 

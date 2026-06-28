@@ -92,12 +92,14 @@ export class AudioPlayerWrapper {
    */
   start(time: number): void {
     try {
-      this.bufferSource.playbackRate.setValueAtTime(this.playbackRate, time);
+      // Seed the rate as the source's base value (not an event pinned at `time`),
+      // so a Drift change between scheduling and `time` still governs the rate the
+      // voice comes in at — otherwise it starts at a stale rate (wrong pitch+tempo).
+      this.bufferSource.playbackRate.value = this.playbackRate;
       this.bufferSource.start(time);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       this.reload();
-      this.bufferSource.playbackRate.setValueAtTime(this.playbackRate, time);
       this.bufferSource.start(time);
     }
   }

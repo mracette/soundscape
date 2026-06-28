@@ -47,7 +47,9 @@ export const ToggleButton = (props: Props) => {
 
   const changeVoiceState = useCallback(
     (newState: VoiceState) => {
-      // cancel current event for this toggle (necessary to stop a pending start)
+      // drop any pending boundary commit + status change for this toggle
+      // (necessary to stop a pending start)
+      WAW.cancelBoundary(name);
       scheduler.cancel(animationEventRef.current);
 
       const initialState: VoiceState =
@@ -56,38 +58,35 @@ export const ToggleButton = (props: Props) => {
       updateVoiceState({ id: name, newState: initialState });
       queueVoice(groupName, name, initialState);
 
-      // calculate time till next loop start
-      const quantizedStartSeconds = tempoClock.nextBoundary(
+      // predicted boundary drives only the visual countdown; the audio start/stop
+      // and the status change commit against the live clock at the boundary, so a
+      // Drift change before then can't bring the voice in off-grid or off-pitch.
+      const predictedSeconds = tempoClock.nextBoundary(
         quantizedStartBeats,
         audioCtx.currentTime
       );
-
-      switch (newState) {
-        case "active":
-          player.start(quantizedStartSeconds);
-          break;
-        case "stopped":
-          player.stop(quantizedStartSeconds);
-          break;
-        default:
-          break;
-      }
-
-      // schedule a status change
-      animationEventRef.current = scheduler.scheduleOnce(
-        quantizedStartSeconds,
-        () => {
-          updateVoiceState({ id: name, newState });
-        }
-      ) as number;
-
-      // convert to millis for animations
-      const quantizedStartMillis =
-        (quantizedStartSeconds - audioCtx.currentTime) * 1000;
       const animationType = newState === "stopped" ? "stop" : "start";
-      viewRef.current!.runAnimation(animationType, quantizedStartMillis);
+      viewRef.current!.runAnimation(
+        animationType,
+        (predictedSeconds - audioCtx.currentTime) * 1000
+      );
+
+      const action = newState === "active" ? "start" : "stop";
+      WAW.scheduleAtBoundary(
+        name,
+        player,
+        tempoClock,
+        quantizedStartBeats,
+        action,
+        (time) => {
+          animationEventRef.current = scheduler.scheduleOnce(time, () => {
+            updateVoiceState({ id: name, newState });
+          }) as number;
+        }
+      );
     },
     [
+      WAW,
       scheduler,
       name,
       audioCtx,
@@ -126,11 +125,12 @@ export const ToggleButton = (props: Props) => {
   useEffect(() => {
     if (player) {
       return () => {
+        WAW.cancelBoundary(name);
         player.stop();
         player.disconnect();
       };
     }
-  }, [player]);
+  }, [WAW, name, player]);
 
   return (
     <ToggleButtonView
