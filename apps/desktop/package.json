@@ -2,6 +2,8 @@
   "name": "@soundscape/desktop",
   "version": "0.0.0",
   "private": true,
+  "description": "Soundscape — immersive music visualizer (desktop)",
+  "author": "mracette",
   "type": "module",
   "main": "src/main.js",
   "scripts": {
@@ -9,7 +11,7 @@
     "bundle:assets": "node scripts/sync-assets.mjs",
     "dev": "electron .",
     "start": "electron .",
-    "pack": "electron-builder --dir",
+    "package:dir": "electron-builder --dir",
     "dist": "electron-builder"
   },
   "devDependencies": {
