@@ -9,7 +9,16 @@ export const detectHost = (
   ua: string,
   win: Window & typeof globalThis
 ): Host => {
-  if ((win as unknown as { Capacitor?: unknown }).Capacitor) return "capacitor";
+  const cap = (
+    win as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }
+  ).Capacitor;
+  // The native Capacitor bridge injects window.Capacitor before app code runs
+  // and reports isNativePlatform() === true. If Capacitor core ever leaks into
+  // the web bundle it also defines window.Capacitor, but isNativePlatform()
+  // returns false there — so check the method, not just the object.
+  if (cap?.isNativePlatform ? cap.isNativePlatform() : Boolean(cap)) {
+    return "capacitor";
+  }
   if (ua.includes("Electron")) return "electron";
   return "web";
 };
