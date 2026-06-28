@@ -1,4 +1,4 @@
-import { TARGET_PROPERTIES } from "./types";
+import { TARGET_PROPERTIES, MEASURE_VALUES } from "./types";
 
 export interface ValidationResult {
   valid: boolean;
@@ -6,10 +6,23 @@ export interface ValidationResult {
 }
 
 const TARGET_SET = new Set<string>(TARGET_PROPERTIES);
-const MEASURES = new Set(["volume", "bucket"]);
+const MEASURES = new Set<string>(MEASURE_VALUES);
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function rejectUnknownKeys(
+  obj: Record<string, unknown>,
+  allowed: readonly string[],
+  path: string,
+  errors: string[]
+): void {
+  for (const key of Object.keys(obj)) {
+    if (!allowed.includes(key)) {
+      errors.push(`${path} has unknown property "${key}"`);
+    }
+  }
 }
 
 /** Validate the object stored at `object.userData.soundscape`. */
@@ -37,20 +50,25 @@ export function validateBinding(
     errors.push(`${path} must be an object`);
     return;
   }
+  rejectUnknownKeys(value, ["target", "source", "transform"], path, errors);
 
   const target = value.target;
   if (!isPlainObject(target)) {
     errors.push(`${path}.target must be an object`);
-  } else if (!TARGET_SET.has(String(target.property))) {
-    errors.push(
-      `${path}.target.property "${String(target.property)}" is not a known target`
-    );
+  } else {
+    rejectUnknownKeys(target, ["property"], `${path}.target`, errors);
+    if (!TARGET_SET.has(String(target.property))) {
+      errors.push(
+        `${path}.target.property "${String(target.property)}" is not a known target`
+      );
+    }
   }
 
   const source = value.source;
   if (!isPlainObject(source)) {
     errors.push(`${path}.source must be an object`);
   } else {
+    rejectUnknownKeys(source, ["band", "measure", "bucket"], `${path}.source`, errors);
     if (typeof source.band !== "string" || source.band.length === 0) {
       errors.push(`${path}.source.band must be a non-empty string`);
     }
@@ -72,6 +90,7 @@ export function validateBinding(
   if (!isPlainObject(transform)) {
     errors.push(`${path}.transform must be an object`);
   } else {
+    rejectUnknownKeys(transform, ["exponent", "ease", "smoothing", "outMin", "outMax"], `${path}.transform`, errors);
     if (typeof transform.outMin !== "number") {
       errors.push(`${path}.transform.outMin must be a number`);
     }
@@ -94,6 +113,7 @@ export function validateBinding(
       if (!isPlainObject(transform.smoothing)) {
         errors.push(`${path}.transform.smoothing must be an object`);
       } else {
+        rejectUnknownKeys(transform.smoothing, ["attack", "release"], `${path}.transform.smoothing`, errors);
         for (const key of ["attack", "release"] as const) {
           const v = transform.smoothing[key];
           if (typeof v !== "number" || v < 0 || v > 1) {

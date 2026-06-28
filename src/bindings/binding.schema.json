@@ -31,8 +31,9 @@
       },
       "allOf": [
         {
-          "if": { "properties": { "measure": { "const": "bucket" } } },
-          "then": { "required": ["bucket"] }
+          "if": { "required": ["measure"], "properties": { "measure": { "const": "bucket" } } },
+          "then": { "required": ["bucket"] },
+          "else": { "not": { "required": ["bucket"] } }
         }
       ]
     },

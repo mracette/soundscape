@@ -29,7 +29,9 @@ describe("validateUserData", () => {
   });
 
   it("rejects a non-object", () => {
-    expect(validateUserData(null).valid).toBe(false);
+    const r = validateUserData(null);
+    expect(r.valid).toBe(false);
+    expect(r.errors.join(" ")).toContain("userData must be an object");
   });
 
   it("rejects missing bindings array", () => {
@@ -106,6 +108,20 @@ describe("validateUserData", () => {
     });
     expect(r.valid).toBe(false);
     expect(r.errors.join(" ")).toContain("smoothing.attack must be a number in [0,1]");
+  });
+
+  it("rejects unknown properties on a binding's objects", () => {
+    const r = validateUserData({
+      bindings: [
+        {
+          target: { property: "opacity" },
+          source: { band: "melody", measure: "volume" },
+          transform: { outMin: 0, outMax: 1, expnent: 2 },
+        },
+      ],
+    });
+    expect(r.valid).toBe(false);
+    expect(r.errors.join(" ")).toContain('unknown property "expnent"');
   });
 
   it("reports the index of the offending binding", () => {
