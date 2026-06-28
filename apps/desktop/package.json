@@ -1,0 +1,21 @@
+{
+  "name": "@soundscape/desktop",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "build:renderer": "pnpm --filter soundscape exec vite build --mode desktop",
+    "dev": "electron .",
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "steamworks.js": "^0.4.0"
+  }
+}
