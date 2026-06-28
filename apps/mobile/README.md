@@ -25,8 +25,8 @@ These are one-time installs. The Capacitor CLI and project dependencies install 
 
 ### iOS
 
-- **Xcode** — present on this machine (Xcode 26.3). Keep it updated via the Mac App Store.
-- **CocoaPods** — **not installed**. Required for `cap add ios` and `cap sync` on iOS.
+- **Xcode 15+** — required to build and run the iOS app. Keep it updated via the Mac App Store.
+- **CocoaPods** — required for `cap add ios` and `cap sync` on iOS. Install it if you don't already have it:
 
   ```bash
   brew install cocoapods
@@ -58,7 +58,7 @@ These are one-time installs. The Capacitor CLI and project dependencies install 
   sdkmanager --licenses
   ```
 
-- **JDK 21** — this machine has JDK 22, but the Android Gradle Plugin requires JDK 21. Install Temurin 21:
+- **JDK 21** — the Android Gradle Plugin requires JDK 21 (newer JDKs such as 22 are not yet supported). Install Temurin 21:
 
   ```bash
   brew install --cask temurin@21
