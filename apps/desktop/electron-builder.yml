@@ -10,6 +10,7 @@ extraResources:
     to: app
     filter:
       - "**/*"
+      - "!audio/wav/{swamp,mornings,moonrise}/**"
 mac:
   target: dmg
   category: public.app-category.music

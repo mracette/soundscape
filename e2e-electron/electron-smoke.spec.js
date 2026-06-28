@@ -5,21 +5,13 @@ import { readdirSync, existsSync } from "node:fs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const distDir = join(root, "apps", "desktop", "dist");
-const macDir = readdirSync(distDir).find((d) => d.startsWith("mac"));
-const appBinary = join(
-  distDir,
-  macDir,
-  "Soundscape.app",
-  "Contents",
-  "MacOS",
-  "Soundscape"
-);
 
 test("packaged app boots offline over app:// and renders a scene", async () => {
-  expect(
-    existsSync(appBinary),
-    `packaged app not found at ${appBinary} — run package:dir first`
-  ).toBe(true);
+  expect(existsSync(distDir), `dist/ not found at ${distDir} — run \`pnpm --filter @soundscape/desktop package:dir\` first`).toBe(true);
+  const macDir = readdirSync(distDir).find((d) => d.startsWith("mac"));
+  expect(macDir, `no mac* build dir under ${distDir}`).toBeTruthy();
+  const appBinary = join(distDir, macDir, "Soundscape.app", "Contents", "MacOS", "Soundscape");
+  expect(existsSync(appBinary), `packaged app not found at ${appBinary}`).toBe(true);
 
   const app = await electron.launch({ executablePath: appBinary });
   const page = await app.firstWindow();

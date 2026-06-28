@@ -14,12 +14,6 @@ These are the USER ACTIONS required to ship Soundscape on Steam. None of them ar
    ```
    export STEAM_APP_ID=<your_app_id>
    ```
-3. Add the `steamworks.js` native module to `asarUnpack` in `apps/desktop/electron-builder.yml` so Electron can load it at runtime:
-   ```yaml
-   asarUnpack:
-     - "node_modules/steamworks.js/dist/**"
-   ```
-
 ## Build per-OS artifacts
 
 Run the Task 6 build script for each target platform (see `apps/desktop/scripts/`):
@@ -37,7 +31,7 @@ Output lands in `apps/desktop/dist/`.
 ```bash
 steamcmd \
   +login <your_steam_username> \
-  +run_app_build ../steam/app_build.vdf \
+  +run_app_build steam/app_build.vdf \
   +quit
 ```
 
@@ -52,3 +46,7 @@ Create a separate depot for the Linux AppImage and map it to the Steam Deck hard
 - Set the build live in Steamworks App Admin → Builds (choose a branch, e.g. `default`).
 - Fill in the store page: description, screenshots, trailer, age rating, tags.
 - Submit for Valve review (typically 3–5 business days for new apps).
+
+## Steam in-game overlay (not yet wired)
+
+The Steam in-game overlay is **not active** in the current build. Enabling it requires calling `electronEnableSteamOverlay()` from `steamworks.js` **before** `app.whenReady()` — it works by appending required Chromium command-line switches, so calling it after the browser process starts has no effect. Wire this up when you integrate your real Steam App ID.
