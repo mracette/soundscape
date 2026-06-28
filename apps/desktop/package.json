@@ -6,6 +6,7 @@
   "main": "src/main.js",
   "scripts": {
     "build:renderer": "pnpm --filter soundscape exec vite build --mode desktop",
+    "bundle:assets": "node scripts/sync-assets.mjs",
     "dev": "electron .",
     "start": "electron .",
     "pack": "electron-builder --dir",

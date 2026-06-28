@@ -1,0 +1,258 @@
+[
+  {
+    "local": "audio/vbr/moonrise/ambient-track.mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/ambient-track.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/kick-snare[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/kick-snare%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/fast-hats[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/fast-hats%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/rides[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/rides%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/belly-percs[2].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/belly-percs%5B2%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/rhodes-arps[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/rhodes-arps%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/rhodes-chords[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/rhodes-chords%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/rhodes-sad[2].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/rhodes-sad%5B2%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/sub-desc[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/sub-desc%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/sub-simple[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/sub-simple%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/sub-bouncey[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/sub-bouncey%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/melody-trance[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/melody-trance%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/melody-bluesy[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/melody-bluesy%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/melody-soft[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/melody-soft%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/atmo-water[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/atmo-water%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/atmo-swirl[16].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/atmo-swirl%5B16%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/atmo-crunch[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/atmo-crunch%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/moonrise/atmo-photay[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/atmo-photay%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/ambient-track.mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/ambient-track.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/rhythm-drums[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/rhythm-drums%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/rhythm-kick[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/rhythm-kick%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/rhythm-reverse[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/rhythm-reverse%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/rhythm-tops[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/rhythm-tops%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/harmony-one[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/harmony-one%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/harmony-two[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/harmony-two%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/harmony-three[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/harmony-three%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/bass-one[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/bass-one%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/bass-two[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/bass-two%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/bass-three[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/bass-three%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/melody-one[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/melody-one%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/melody-two[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/melody-two%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/melody-three[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/melody-three%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/extra-sweep[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/extra-sweep%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/extra-pad[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/extra-pad%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/mornings/extra-jammy[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/mornings/extra-jammy%5B8%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/ambient-track.mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/ambient-track.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/rhythm-kick[1].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/rhythm-kick%5B1%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/rhythm-snaps[2].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/rhythm-snaps%5B2%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/rhythm-snare[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/rhythm-snare%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/rhythm-hats[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/rhythm-hats%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/rhythm-breath[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/rhythm-breath%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/bass-long[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/bass-long%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/bass-sequence[2].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/bass-sequence%5B2%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/bass-octave[2].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/bass-octave%5B2%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/harmony-build[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/harmony-build%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/harmony-tattletale[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/harmony-tattletale%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/harmony-triplets[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/harmony-triplets%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/piano-dark[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/piano-dark%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/piano-dreary[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/piano-dreary%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/piano-theme[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/piano-theme%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/piano-drips[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/piano-drips%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/extras-texture[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/extras-texture%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/extras-critters[4].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/extras-critters%5B4%5D.mp3"
+  },
+  {
+    "local": "audio/vbr/swamp/extras-riser[8].mp3",
+    "url": "https://cdn.soundscape.world/app/audio/vbr/swamp/extras-riser%5B8%5D.mp3"
+  },
+  {
+    "local": "models/swamp/swamp.glb",
+    "url": "https://cdn.soundscape.world/app/models/swamp/glb/swamp.glb"
+  },
+  {
+    "local": "models/mornings/house.glb",
+    "url": "https://cdn.soundscape.world/app/models/mornings/glb/house.glb"
+  },
+  {
+    "local": "models/mornings/paintings.glb",
+    "url": "https://cdn.soundscape.world/app/models/mornings/glb/paintings.glb"
+  },
+  {
+    "local": "models/mornings/table.glb",
+    "url": "https://cdn.soundscape.world/app/models/mornings/glb/table.glb"
+  },
+  {
+    "local": "models/mornings/flowers.glb",
+    "url": "https://cdn.soundscape.world/app/models/mornings/glb/flowers.glb"
+  },
+  {
+    "local": "models/mornings/spiral_plant.glb",
+    "url": "https://cdn.soundscape.world/app/models/mornings/glb/spiral_plant.glb"
+  },
+  {
+    "local": "models/mornings/bookcase.glb",
+    "url": "https://cdn.soundscape.world/app/models/mornings/glb/bookcase.glb"
+  },
+  {
+    "local": "models/moonrise/landscape.glb",
+    "url": "https://cdn.soundscape.world/app/models/moonrise/glb/landscape.glb"
+  },
+  {
+    "local": "models/moonrise/pine-tree.glb",
+    "url": "https://cdn.soundscape.world/app/models/moonrise/glb/pine-tree.glb"
+  },
+  {
+    "local": "models/moonrise/lily.glb",
+    "url": "https://cdn.soundscape.world/app/models/moonrise/glb/lily.glb"
+  }
+]
