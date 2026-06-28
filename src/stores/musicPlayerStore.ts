@@ -39,9 +39,11 @@ interface MusicPlayerState {
   resetCallbacks: NamedCallback[];
   randomizeCallbacks: NamedCallback[];
   backgroundMode: boolean;
+  drift: number;
   pauseVisuals: boolean;
   mute: boolean;
   setBackgroundMode: (v: boolean) => void;
+  setDrift: (v: number) => void;
   setPauseVisuals: (v: boolean) => void;
   startMute: () => void;
   stopMute: () => void;
@@ -69,6 +71,7 @@ const initialState = {
   resetCallbacks: [],
   randomizeCallbacks: [],
   backgroundMode: false,
+  drift: 0,
   pauseVisuals: false,
   mute: false,
 };
@@ -76,6 +79,7 @@ const initialState = {
 export const useMusicPlayerStore = create<MusicPlayerState>()((set) => ({
   ...initialState,
   setBackgroundMode: (v) => set({ backgroundMode: v }),
+  setDrift: (v) => set({ drift: v }),
   setPauseVisuals: (v) => set({ pauseVisuals: v }),
   startMute: () => set({ mute: true }),
   stopMute: () => set({ mute: false }),
