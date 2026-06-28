@@ -42,9 +42,11 @@ export class AnalyserSignalSource implements SignalSource {
     if (!band) return 0;
     if (source.measure === "bucket") {
       const v = band.bucketData[source.bucket ?? 0];
-      return v === undefined ? 0 : v / 255;
+      // empty analyser buckets can be 0/0 = NaN; out-of-range is undefined
+      return Number.isFinite(v) ? v / 255 : 0;
     }
     const fft = band.fftData;
-    return averageVolume(fft instanceof Uint8Array ? fft : fft.left);
+    const vol = averageVolume(fft instanceof Uint8Array ? fft : fft.left);
+    return Number.isFinite(vol) ? vol : 0;
   }
 }

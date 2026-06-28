@@ -49,4 +49,26 @@ describe("BindingEvaluator", () => {
     expect(e.evaluate(0.5)).toBe(3);
     expect(e.evaluate(1)).toBe(1);
   });
+
+  it("maps a non-finite signal to outMin (NaN-safe)", () => {
+    const e = new BindingEvaluator(binding({ outMin: 2, outMax: 6 }), linear);
+    expect(e.evaluate(NaN)).toBe(2);
+  });
+
+  it("composes exponent before ease (pins pipeline order)", () => {
+    const affine = (t: number) => t * 0.5 + 0.25;
+    const e = new BindingEvaluator(binding({ exponent: 2 }), affine);
+    // 0.5 -> ^2 = 0.25 -> affine = 0.375 (the reversed order would give 0.25)
+    expect(e.evaluate(0.5)).toBeCloseTo(0.375, 10);
+  });
+
+  it("eases release toward a falling signal over successive frames", () => {
+    const e = new BindingEvaluator(
+      binding({ smoothing: { attack: 1, release: 0.5 } }),
+      linear
+    );
+    expect(e.evaluate(1)).toBeCloseTo(1, 10);   // attack=1 -> instant to 1
+    expect(e.evaluate(0)).toBeCloseTo(0.5, 10); // release: 1 + (0-1)*0.5
+    expect(e.evaluate(0)).toBeCloseTo(0.25, 10);// 0.5 + (0-0.5)*0.5
+  });
 });

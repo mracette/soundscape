@@ -34,9 +34,11 @@ applyColorParity(renderer);
 const camera = new PerspectiveCamera(50, 1, 0.1, 100);
 camera.position.set(0, 0, 4);
 
-// Authoring scene: one emissive box carrying a binding in userData, exactly as
-// a Blender export would. Round-tripped through glTF below so the test reads it
-// back through GLTFLoader's extras->userData path.
+// Authoring scene: one emissive box carrying a binding in userData. Round-tripped
+// through glTF below (GLTFExporter -> GLTFLoader) so the test exercises the
+// extras->userData plumbing the runtime depends on. This stands in for the glTF a
+// Blender export will feed; Blender's own serialization specifics (extras-as-string,
+// mesh-under-Group) are validated against a real .gltf in Phase 4/5.
 function buildAuthoringScene(): Scene {
   const scene = new Scene();
   const mesh = new Mesh(
@@ -101,4 +103,4 @@ async function main(): Promise<void> {
   };
 }
 
-main();
+main().catch((err) => console.error(err));

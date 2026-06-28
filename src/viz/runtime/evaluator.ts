@@ -3,7 +3,9 @@ import { resolveEase, type EaseFn } from "./ease";
 
 const clamp = (v: number, lo: number, hi: number): number =>
   v < lo ? lo : v > hi ? hi : v;
-const clamp01 = (v: number): number => clamp(v, 0, 1);
+// NaN-safe: a non-finite signal (e.g. an empty analyser bucket's 0/0) maps to 0
+// rather than propagating NaN through the pipeline onto a material, where it sticks.
+const clamp01 = (v: number): number => (v > 0 ? (v < 1 ? v : 1) : 0);
 
 /**
  * Evaluates one binding's transform each frame, holding the attack/release
@@ -24,7 +26,8 @@ export class BindingEvaluator {
   /**
    * Map a raw 0..1 signal to the target's output value. Pipeline: clamp to
    * [0,1] → attack/release envelope (when configured) → `^exponent` → ease →
-   * lerp into [outMin, outMax] → clamp to that range.
+   * lerp into [outMin, outMax] → clamp to that range. Overshoot eases
+   * (e.g. easeBackOut) are clipped to the range by this final clamp.
    */
   evaluate(signal: number): number {
     const t = this.binding.transform;

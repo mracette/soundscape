@@ -30,6 +30,16 @@ describe("AnalyserSignalSource", () => {
     expect(src.read({ band: "rhythm", measure: "bucket", bucket: 9 })).toBe(0);
   });
 
+  it("returns 0 for a NaN bucket value", () => {
+    const src = new AnalyserSignalSource({ rhythm: fakeBand([], [NaN]) });
+    expect(src.read({ band: "rhythm", measure: "bucket", bucket: 0 })).toBe(0);
+  });
+
+  it("returns 0 for an empty fft (volume)", () => {
+    const src = new AnalyserSignalSource({ bass: fakeBand([], []) });
+    expect(src.read({ band: "bass", measure: "volume" })).toBe(0);
+  });
+
   it("update() refreshes every band's analyser", () => {
     let calls = 0;
     const band: AnalyserLike = {

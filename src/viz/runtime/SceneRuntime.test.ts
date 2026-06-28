@@ -51,12 +51,13 @@ describe("SceneRuntime", () => {
   });
 
   it("skips objects with invalid bindings without throwing", () => {
-    const mesh = new Mesh(undefined, new MeshStandardMaterial());
+    const material = new MeshStandardMaterial();
+    material.emissiveIntensity = 0.123; // sentinel, distinct from the default
+    const mesh = new Mesh(undefined, material);
     mesh.userData.soundscape = { bindings: [{ target: { property: "nope" } }] };
     const runtime = new SceneRuntime({ scene: mesh, signalSource: constantSource(1) });
     expect(() => runtime.update(0)).not.toThrow();
-    // default MeshStandardMaterial.emissiveIntensity is untouched
-    expect((mesh.material as MeshStandardMaterial).emissiveIntensity).toBe(1);
+    expect(material.emissiveIntensity).toBe(0.123); // untouched -> binding was skipped
   });
 
   it("calls the signal source's optional update() once per frame", () => {

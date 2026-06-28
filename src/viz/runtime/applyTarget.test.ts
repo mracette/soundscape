@@ -29,4 +29,10 @@ describe("applyTarget", () => {
     expect(obj.rotation.y).toBe(1.5);
     expect(obj.position.z).toBe(-2);
   });
+
+  it("is a no-op on an object with no material", () => {
+    const obj = new Object3D();
+    expect(() => applyTarget(obj, "emissiveIntensity", 1)).not.toThrow();
+    expect(() => applyTarget(obj, "opacity", 0.5)).not.toThrow();
+  });
 });

@@ -14,6 +14,7 @@ interface BoundTarget {
   evaluator: BindingEvaluator;
 }
 
+/** Constructor options for {@link SceneRuntime}. */
 export interface SceneRuntimeOptions {
   scene: Object3D;
   animations?: AnimationClip[];
