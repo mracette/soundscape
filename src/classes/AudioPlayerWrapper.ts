@@ -33,6 +33,7 @@ export class AudioPlayerWrapper {
   fadeLength!: number;
   loop!: boolean;
   bufferSource!: AudioBufferSourceNode;
+  playbackRate = 1;
 
   constructor(context: AudioContext, path: string, options: AudioPlayerOptions) {
     // bind
@@ -91,11 +92,24 @@ export class AudioPlayerWrapper {
    */
   start(time: number): void {
     try {
+      this.bufferSource.playbackRate.setValueAtTime(this.playbackRate, time);
       this.bufferSource.start(time);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       this.reload();
+      this.bufferSource.playbackRate.setValueAtTime(this.playbackRate, time);
       this.bufferSource.start(time);
+    }
+  }
+
+  /** Set this voice's playback rate (pitch + tempo) at AudioContext time `atTime`. */
+  setPlaybackRate(rate: number, atTime: number): void {
+    this.playbackRate = rate;
+    try {
+      this.bufferSource.playbackRate.setValueAtTime(rate, atTime);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      // Node not started yet; the field is applied on start().
     }
   }
 
@@ -118,6 +132,7 @@ export class AudioPlayerWrapper {
     newSource.loop = this.loop;
     newSource.loopStart = 0;
     newSource.loopEnd = this.bufferSource.buffer!.duration;
+    newSource.playbackRate.value = this.playbackRate;
     newSource.connect(this.destination);
 
     this.bufferSource = newSource;
