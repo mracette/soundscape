@@ -10,6 +10,7 @@ import { loadArrayBuffer } from "../utils/audioUtils";
 import { Analyser } from "./Analyser";
 import { Scheduler } from "./Scheduler";
 import { AudioPlayerWrapper } from "./AudioPlayerWrapper";
+import { TempoClock } from "./TempoClock";
 import {
   SongContextValue,
   AppConfigEntry,
@@ -79,6 +80,7 @@ export class WebAudioWrapper {
   status: Record<SongId, boolean>;
   audioCtx: AudioContext;
   scheduler: Scheduler;
+  tempoClocks: Partial<Record<SongId, TempoClock>> = {};
 
   constructor(appConfig: AppConfigEntry[]) {
     const props = {
@@ -152,6 +154,7 @@ export class WebAudioWrapper {
       await this._initSongEffects(id);
       await this._initSongAnalysers(id);
       await this._initSongVoices(id);
+      this.tempoClocks[id] = new TempoClock(this.config[id].bpm);
       this.status[id] = true;
     }
     return true;
@@ -435,6 +438,24 @@ export class WebAudioWrapper {
 
   getVoices(songId: SongId): Record<string, AudioPlayerWrapper> {
     return this.nodes.voices![songId]!;
+  }
+
+  getTempoClock(songId: SongId): TempoClock {
+    return this.tempoClocks[songId]!;
+  }
+
+  /**
+   * Apply a playback `rate` (1 = normal, 0.5 = the Drift floor) to the song's
+   * tempo clock and every one of its voices at the current time. Instant; the
+   * Drift knob steps this to produce a glide.
+   */
+  setDriftRate(songId: SongId, rate: number): void {
+    const now = this.audioCtx.currentTime;
+    this.getTempoClock(songId).setRate(rate, now);
+    const voices = this.getVoices(songId);
+    for (const name in voices) {
+      voices[name].setPlaybackRate(rate, now);
+    }
   }
 
   getConfig(songId: SongId): Omit<SongContextValue, "id"> {
