@@ -1,5 +1,9 @@
 [
   {
+    "local": "audio/wav/application/impulse-response.wav",
+    "url": "https://cdn.soundscape.world/app/audio/wav/application/impulse-response.wav"
+  },
+  {
     "local": "audio/vbr/moonrise/ambient-track.mp3",
     "url": "https://cdn.soundscape.world/app/audio/vbr/moonrise/ambient-track.mp3"
   },

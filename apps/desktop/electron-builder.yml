@@ -10,7 +10,6 @@ extraResources:
     to: app
     filter:
       - "**/*"
-      - "!audio/wav/**/*"
 mac:
   target: dmg
   category: public.app-category.music

@@ -1,6 +1,6 @@
 import { app, BrowserWindow, protocol, net } from "electron";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { dirname, join, normalize } from "node:path";
+import { dirname, join, normalize, extname } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -42,7 +42,10 @@ const createWindow = () => {
 app.whenReady().then(() => {
   protocol.handle("app", (request) => {
     const { pathname } = new URL(request.url);
-    const filePath = normalize(join(buildDir, decodeURIComponent(pathname)));
+    const decoded = decodeURIComponent(pathname);
+    // Extensionless paths are client-side routes → serve index.html (SPA fallback).
+    const rel = extname(decoded) ? decoded : "/index.html";
+    const filePath = normalize(join(buildDir, rel));
     return net.fetch(pathToFileURL(filePath).toString());
   });
 
