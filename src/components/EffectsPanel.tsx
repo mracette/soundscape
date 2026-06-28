@@ -42,7 +42,7 @@ export const EffectsPanel = () => {
     (s) => s.setBackgroundMode
   );
   const setPauseVisuals = useMusicPlayerStore((s) => s.setPauseVisuals);
-  const setDrift = useMusicPlayerStore((s) => s.setDrift);
+  const setTimeWarp = useMusicPlayerStore((s) => s.setTimeWarp);
   const { bpm, id } = useContext(SongContext)!;
   const { WAW } = useContext(WebAudioContext)!;
 
@@ -52,8 +52,8 @@ export const EffectsPanel = () => {
   const [hpValue, setHpValue] = useState(1);
   const [lpValue, setLpValue] = useState(100);
   const [amValue, setAmValue] = useState(1);
-  const [driftValue, setDriftValue] = useState(1);
-  const driftGlideRef = useRef<number | null>(null);
+  const [timeWarpValue, setTimeWarpValue] = useState(1);
+  const timeWarpGlideRef = useRef<number | null>(null);
 
   const effectsTargets = useRef<{
     time: number | null;
@@ -130,23 +130,23 @@ export const EffectsPanel = () => {
   }, [WAW, amValue]);
 
   // slider 1..100 -> rate 1.0..0.5 (one octave / half tempo at the floor)
-  const driftToRate = (v: number) => 1 - ((v - 1) / 99) * 0.5;
+  const timeWarpToRate = (v: number) => 1 - ((v - 1) / 99) * 0.5;
 
-  const handleDrift = (v: number) => {
-    setDriftValue(v);
-    setDrift((v - 1) / 99);
-    const targetRate = driftToRate(v);
+  const handleTimeWarp = (v: number) => {
+    setTimeWarpValue(v);
+    setTimeWarp((v - 1) / 99);
+    const targetRate = timeWarpToRate(v);
     const startRate = WAW.getTempoClock(id).currentRate;
     const steps = 20;
     let i = 0;
-    if (driftGlideRef.current) window.clearInterval(driftGlideRef.current);
-    driftGlideRef.current = window.setInterval(() => {
+    if (timeWarpGlideRef.current) window.clearInterval(timeWarpGlideRef.current);
+    timeWarpGlideRef.current = window.setInterval(() => {
       i++;
       const r = startRate + (targetRate - startRate) * (i / steps);
-      WAW.setDriftRate(id, r);
+      WAW.setTimeWarpRate(id, r);
       if (i >= steps) {
-        window.clearInterval(driftGlideRef.current!);
-        driftGlideRef.current = null;
+        window.clearInterval(timeWarpGlideRef.current!);
+        timeWarpGlideRef.current = null;
       }
     }, 30);
   };
@@ -268,10 +268,14 @@ export const EffectsPanel = () => {
       </div>
 
       <div className="flex-row">
-        <h3 className={sliderLabel}>drift</h3>
+        <h3 className={sliderLabel}>time warp</h3>
       </div>
       <div className="flex-row">
-        <CanvasSlider id="drift" value={driftValue} handleValue={handleDrift} />
+        <CanvasSlider
+          id="time-warp"
+          value={timeWarpValue}
+          handleValue={handleTimeWarp}
+        />
       </div>
       <div className="flex-row">
         <h3 className={sliderLabel}>highpass filter</h3>

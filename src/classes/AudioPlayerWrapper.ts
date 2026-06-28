@@ -93,7 +93,7 @@ export class AudioPlayerWrapper {
   start(time: number): void {
     try {
       // Seed the rate as the source's base value (not an event pinned at `time`),
-      // so a Drift change between scheduling and `time` still governs the rate the
+      // so a Time Warp change between scheduling and `time` still governs the rate the
       // voice comes in at — otherwise it starts at a stale rate (wrong pitch+tempo).
       this.bufferSource.playbackRate.value = this.playbackRate;
       this.bufferSource.start(time);

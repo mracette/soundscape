@@ -459,11 +459,11 @@ export class WebAudioWrapper {
   }
 
   /**
-   * Apply a playback `rate` (1 = normal, 0.5 = the Drift floor) to the song's
+   * Apply a playback `rate` (1 = normal, 0.5 = the Time Warp floor) to the song's
    * tempo clock and every one of its voices at the current time. Instant; the
-   * Drift knob steps this to produce a glide.
+   * Time Warp knob steps this to produce a glide.
    */
-  setDriftRate(songId: SongId, rate: number): void {
+  setTimeWarpRate(songId: SongId, rate: number): void {
     const now = this.audioCtx.currentTime;
     this.getTempoClock(songId).setRate(rate, now);
     const voices = this.getVoices(songId);
@@ -476,7 +476,7 @@ export class WebAudioWrapper {
    * Queue a voice to start/stop on the next `intervalBeats` boundary, committing
    * the actual `start`/`stop` only once that boundary is within the look-ahead
    * horizon. Committing late means the boundary's wall-clock time is resolved
-   * against the live clock — so a Drift change mid-glide can't leave a voice
+   * against the live clock — so a Time Warp change mid-glide can't leave a voice
    * scheduled against a stale grid. `key` (the voice name) dedupes and cancels.
    */
   scheduleAtBoundary(

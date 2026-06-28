@@ -60,7 +60,7 @@ export const ToggleButton = (props: Props) => {
 
       // predicted boundary drives only the visual countdown; the audio start/stop
       // and the status change commit against the live clock at the boundary, so a
-      // Drift change before then can't bring the voice in off-grid or off-pitch.
+      // Time Warp change before then can't bring the voice in off-grid or off-pitch.
       const predictedSeconds = tempoClock.nextBoundary(
         quantizedStartBeats,
         audioCtx.currentTime

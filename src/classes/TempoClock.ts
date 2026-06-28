@@ -2,7 +2,7 @@
  * Single source of truth for musical time under a variable playback rate.
  *
  * The original grid (`nextSubdivision` in audioUtils) maps wall-clock seconds to
- * beats with a constant BPM. Drift changes the rate, so the grid must integrate a
+ * beats with a constant BPM. Time Warp changes the rate, so the grid must integrate a
  * rate that can change. This clock does that by re-anchoring on every rate change:
  * between changes the rate is constant, so beats <-> time is a simple linear map,
  * and the accumulated beat count carries across changes for continuity.
@@ -61,7 +61,7 @@ export class TempoClock {
 
   /**
    * AudioContext time of the next boundary that is a whole multiple of
-   * `intervalBeats`, strictly after `fromTime`. Drift-aware replacement for
+   * `intervalBeats`, strictly after `fromTime`. Time-Warp-aware replacement for
    * `nextSubdivision`.
    */
   nextBoundary(intervalBeats: number, fromTime: number): number {
