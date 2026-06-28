@@ -39,7 +39,17 @@ const createWindow = () => {
   }
 };
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Steam is optional: the app runs identically with no app id / no Steam client.
+  // Real app id comes from the user's Steamworks page; 480 is Valve's public test id.
+  try {
+    const steamworks = await import("steamworks.js");
+    const appId = Number(process.env.STEAM_APP_ID) || 480;
+    steamworks.init(appId);
+  } catch (err) {
+    console.warn("Steam SDK not initialized:", err?.message ?? err);
+  }
+
   protocol.handle("app", (request) => {
     const { pathname } = new URL(request.url);
     const decoded = decodeURIComponent(pathname);

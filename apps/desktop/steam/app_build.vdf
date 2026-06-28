@@ -1,0 +1,15 @@
+"appbuild"
+{
+  "appid" "YOUR_APP_ID"
+  "desc" "Soundscape desktop build"
+  "buildoutput" "../dist/steam-output"
+  "contentroot" "../dist"
+  "setlive" ""
+  "depots"
+  {
+    "YOUR_DEPOT_ID"
+    {
+      "FileMapping" { "LocalPath" "*" "DepotPath" "." "recursive" "1" }
+    }
+  }
+}
