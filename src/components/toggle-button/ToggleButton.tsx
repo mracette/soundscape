@@ -4,7 +4,6 @@ import { TestingContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
 import { useMusicPlayerStore, VoiceState } from "../../stores/musicPlayerStore";
 import { MusicalDuration } from "../../contexts/contexts";
-import { nextSubdivision } from "../../utils/audioUtils";
 import {
   ToggleButtonView,
   ToggleButtonViewHandle,
@@ -22,7 +21,7 @@ export const ToggleButton = (props: Props) => {
   const animationEventRef = useRef<number | undefined>(undefined);
 
   const { WAW } = useContext(WebAudioContext)!;
-  const { id, timeSignature, bpm } = useContext(SongContext)!;
+  const { id, timeSignature } = useContext(SongContext)!;
   const { flags } = useContext(TestingContext)!;
   const { name, groupName, quantizeLength } = props;
   const addVoice = useMusicPlayerStore((s) => s.addVoice);
@@ -40,6 +39,7 @@ export const ToggleButton = (props: Props) => {
 
   const { scheduler, audioCtx } = WAW;
   const player = WAW.getVoices(id)[name];
+  const tempoClock = WAW.getTempoClock(id);
 
   const quantizedStartBeats = flags.quantizeSamples
     ? timeSignature * parseInt(quantizeLength!)
@@ -57,10 +57,9 @@ export const ToggleButton = (props: Props) => {
       queueVoice(groupName, name, initialState);
 
       // calculate time till next loop start
-      const quantizedStartSeconds = nextSubdivision(
-        audioCtx,
-        bpm,
-        quantizedStartBeats
+      const quantizedStartSeconds = tempoClock.nextBoundary(
+        quantizedStartBeats,
+        audioCtx.currentTime
       );
 
       switch (newState) {
@@ -92,7 +91,7 @@ export const ToggleButton = (props: Props) => {
       scheduler,
       name,
       audioCtx,
-      bpm,
+      tempoClock,
       quantizedStartBeats,
       player,
       updateVoiceState,
