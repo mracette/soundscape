@@ -1,0 +1,50 @@
+import { averageVolume } from "../../utils/audioUtils";
+import type { Source } from "../../bindings";
+
+/**
+ * The structural subset of the legacy `Analyser` (`src/classes/Analyser.ts`)
+ * the runtime relies on. Kept as an interface so tests supply a fake and the
+ * runtime never imports `three-legacy`.
+ */
+export interface AnalyserLike {
+  getFrequencyData(): void;
+  getFrequencyBuckets(): void;
+  fftData: Uint8Array | { left: Uint8Array; right: Uint8Array };
+  bucketData: number[];
+}
+
+/** Yields a 0..1 level for a binding's source each frame. */
+export interface SignalSource {
+  /** Refresh any per-frame state (e.g. pull fresh FFT data). Optional. */
+  update?(): void;
+  read(source: Source): number;
+}
+
+/**
+ * Reads live per-band `Analyser`s. Bands are keyed by name (matching
+ * `source.band` — the per-song analyser groups like "bass"/"rhythm"). Call
+ * `update()` once per frame to refresh every analyser, then `read()` is a cheap
+ * lookup: `measure:"volume"` is the band's mean level; `measure:"bucket"` is
+ * one normalized frequency bucket.
+ */
+export class AnalyserSignalSource implements SignalSource {
+  constructor(private readonly bands: Record<string, AnalyserLike>) {}
+
+  update(): void {
+    for (const band of Object.values(this.bands)) {
+      band.getFrequencyData();
+      band.getFrequencyBuckets();
+    }
+  }
+
+  read(source: Source): number {
+    const band = this.bands[source.band];
+    if (!band) return 0;
+    if (source.measure === "bucket") {
+      const v = band.bucketData[source.bucket ?? 0];
+      return v === undefined ? 0 : v / 255;
+    }
+    const fft = band.fftData;
+    return averageVolume(fft instanceof Uint8Array ? fft : fft.left);
+  }
+}
