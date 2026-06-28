@@ -42,7 +42,8 @@ export const EffectsPanel = () => {
     (s) => s.setBackgroundMode
   );
   const setPauseVisuals = useMusicPlayerStore((s) => s.setPauseVisuals);
-  const { bpm } = useContext(SongContext)!;
+  const setDrift = useMusicPlayerStore((s) => s.setDrift);
+  const { bpm, id } = useContext(SongContext)!;
   const { WAW } = useContext(WebAudioContext)!;
 
   const [backgroundMode, setBackgroundMode] = useState(false);
@@ -51,6 +52,8 @@ export const EffectsPanel = () => {
   const [hpValue, setHpValue] = useState(1);
   const [lpValue, setLpValue] = useState(100);
   const [amValue, setAmValue] = useState(1);
+  const [driftValue, setDriftValue] = useState(1);
+  const driftGlideRef = useRef<number | null>(null);
 
   const effectsTargets = useRef<{
     time: number | null;
@@ -125,6 +128,28 @@ export const EffectsPanel = () => {
   useEffect(() => {
     WAW.setEffects("am", amValue);
   }, [WAW, amValue]);
+
+  // slider 1..100 -> rate 1.0..0.5 (one octave / half tempo at the floor)
+  const driftToRate = (v: number) => 1 - ((v - 1) / 99) * 0.5;
+
+  const handleDrift = (v: number) => {
+    setDriftValue(v);
+    setDrift((v - 1) / 99);
+    const targetRate = driftToRate(v);
+    const startRate = WAW.getTempoClock(id).currentRate;
+    const steps = 20;
+    let i = 0;
+    if (driftGlideRef.current) window.clearInterval(driftGlideRef.current);
+    driftGlideRef.current = window.setInterval(() => {
+      i++;
+      const r = startRate + (targetRate - startRate) * (i / steps);
+      WAW.setDriftRate(id, r);
+      if (i >= steps) {
+        window.clearInterval(driftGlideRef.current!);
+        driftGlideRef.current = null;
+      }
+    }, 30);
+  };
 
   return (
     <div id="effects-panel" className={flexPanel}>
@@ -242,6 +267,12 @@ export const EffectsPanel = () => {
         </button>
       </div>
 
+      <div className="flex-row">
+        <h3 className={sliderLabel}>drift</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider id="drift" value={driftValue} handleValue={handleDrift} />
+      </div>
       <div className="flex-row">
         <h3 className={sliderLabel}>highpass filter</h3>
       </div>
