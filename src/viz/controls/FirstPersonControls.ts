@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import { clamp } from "../../utils/mathUtils";
 
 export default class FirstPersonControls {

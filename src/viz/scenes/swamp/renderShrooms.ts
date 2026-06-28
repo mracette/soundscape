@@ -4,7 +4,7 @@ import { boundedSin } from "../../../utils/mathUtils";
 import { averageVolume } from "../../../utils/audioUtils";
 import * as d3 from "d3-ease";
 import { Analyser } from "../../../classes/Analyser";
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 
 const intense = 5;
 const period = 1;

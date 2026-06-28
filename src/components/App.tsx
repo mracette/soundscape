@@ -1,6 +1,6 @@
 import { AppWrap } from "./AppWrap";
 import { WebGLUnavailable } from "./WebGLUnavailable";
-import { WEBGL } from "three/examples/jsm/WebGL";
+import { WEBGL } from "three-legacy/examples/jsm/WebGL";
 import "../styles/app.css";
 
 export const App = () => {

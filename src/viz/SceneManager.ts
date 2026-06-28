@@ -1,5 +1,5 @@
-import * as THREE from "three";
-import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import * as THREE from "three-legacy";
+import { GLTFLoader, GLTF } from "three-legacy/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
 import { FrameTelemetry, TelemetrySnapshot } from "./telemetry";
 

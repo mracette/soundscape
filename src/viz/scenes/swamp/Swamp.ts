@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import { SceneManager } from "../../SceneManager";
 import chroma from "chroma-js";
 import FirstPersonControls from "../../controls/FirstPersonControls";

@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import { Analyser } from "../../../classes/Analyser";
 
 interface HarmonySubjects {

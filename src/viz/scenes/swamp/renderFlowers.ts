@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 import { boundedSin } from "../../../utils/mathUtils";
 import { averageVolume } from "../../../utils/audioUtils";
 import { Analyser } from "../../../classes/Analyser";
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 
 const cycle = 2;
 const bSin = boundedSin(cycle, 0, 1);

@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import * as d3 from "d3-ease";
 import chroma from "chroma-js";
 import { lerp, gaussianRand, boundedSin } from "../../../utils/mathUtils";
