@@ -490,5 +490,258 @@
       "t": 1,
       "expected": 1
     }
+  ],
+  "evaluator": [
+    {
+      "label": "minimal",
+      "binding": {
+        "target": {
+          "property": "emissiveIntensity"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "exponent",
+      "binding": {
+        "target": {
+          "property": "scale"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "exponent": 2
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.25,
+        1,
+        1,
+        0.09,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "ease-cubicOut",
+      "binding": {
+        "target": {
+          "property": "scale"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "ease": "cubicOut"
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.875,
+        1,
+        1,
+        0.657,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "ease-backOut-clamped",
+      "binding": {
+        "target": {
+          "property": "scale"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "ease": "backOut"
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        1,
+        1,
+        1,
+        0.90713226,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "smoothing",
+      "binding": {
+        "target": {
+          "property": "opacity"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "smoothing": {
+            "attack": 0.8,
+            "release": 0.2
+          }
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.4,
+        0.88,
+        0.976,
+        0.8408,
+        0.67264,
+        0.538112
+      ]
+    },
+    {
+      "label": "inverted-range",
+      "binding": {
+        "target": {
+          "property": "position.y"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 1,
+          "outMax": 0
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        1,
+        0.5,
+        0,
+        0,
+        0.7,
+        1,
+        1
+      ]
+    },
+    {
+      "label": "combined",
+      "binding": {
+        "target": {
+          "property": "position.y"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": -2,
+          "outMax": 3,
+          "exponent": 1.5,
+          "ease": "quadInOut",
+          "smoothing": {
+            "attack": 0.6,
+            "release": 0.3
+          }
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        -2,
+        -1.73,
+        1.4863251789035408,
+        2.733643620124952,
+        1.4022396055185364,
+        -0.7640470504467198,
+        -1.5760681383032251
+      ]
+    }
   ]
 }
