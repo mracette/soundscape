@@ -4,11 +4,11 @@ from . import bindings_model
 
 
 def export_gltf(filepath):
-    """Sync every bound object's ID-prop, then export the scene to a .glb with
-    custom-property extras enabled so the bindings ride into node extras."""
+    """Sync all objects' ID-props (sync_to_idprop removes stale props for
+    unbound objects), then export the scene to a .glb with custom-property
+    extras enabled so the bindings ride into node extras."""
     for obj in bpy.data.objects:
-        if len(obj.soundscape_bindings) > 0:
-            bindings_model.sync_to_idprop(obj)
+        bindings_model.sync_to_idprop(obj)
     bpy.ops.export_scene.gltf(
         filepath=filepath,
         export_format="GLB",

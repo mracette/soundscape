@@ -1,6 +1,24 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, test } from "vitest";
+import * as d3ease from "d3-ease";
 import { easeQuadInOut } from "d3-ease";
 import { resolveEase } from "./ease";
+
+// The curated ease names authored by the Blender addon (tools/blender/addon/bindings_model.py
+// EASE_NAMES) must each resolve to a real d3-ease function, or resolveEase() silently falls
+// back to linear and the bake diverges from the runtime.
+const CURATED_EASE_NAMES = [
+  "linear",
+  "quadIn", "quadOut", "quadInOut",
+  "cubicIn", "cubicOut", "cubicInOut",
+  "sinIn", "sinOut", "sinInOut",
+  "expIn", "expOut", "expInOut",
+  "backOut",
+];
+
+test.each(CURATED_EASE_NAMES)("curated ease %s resolves to a real d3-ease fn", (name) => {
+  const key = "ease" + name.charAt(0).toUpperCase() + name.slice(1);
+  expect(typeof (d3ease as Record<string, unknown>)[key]).toBe("function");
+});
 
 describe("resolveEase", () => {
   it("returns a linear pass-through when name is undefined", () => {

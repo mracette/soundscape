@@ -18,6 +18,8 @@ TARGET_PROPERTIES = [
 MEASURES = ["volume", "bucket"]
 
 # Curated d3-ease short names the runtime's resolveEase() understands.
+# Each entry must resolve to a real d3-ease export (easeXxx); guarded by the
+# curated-ease test in src/viz/runtime/ease.test.ts.
 EASE_NAMES = [
     "linear",
     "quadIn",
@@ -29,9 +31,9 @@ EASE_NAMES = [
     "sinIn",
     "sinOut",
     "sinInOut",
-    "expoIn",
-    "expoOut",
-    "expoInOut",
+    "expIn",
+    "expOut",
+    "expInOut",
     "backOut",
 ]
 

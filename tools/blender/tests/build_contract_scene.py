@@ -21,4 +21,9 @@ def build():
     b.measure = "volume"
     b.out_min = 0.0
     b.out_max = 1.0
+    b.exponent = 2.0
+    b.ease = "cubicOut"
+    b.use_smoothing = True
+    b.smoothing_attack = 0.8
+    b.smoothing_release = 0.2
     return obj

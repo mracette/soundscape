@@ -17,6 +17,8 @@ test.describe("blender glTF export contract", () => {
     execFileSync(BLENDER, ["--background", "--python", SCRIPT], {
       env: { ...process.env, SOUNDSCAPE_FIXTURE_OUT: FIXTURE },
       stdio: "inherit",
+      timeout: 60_000,
+      killSignal: "SIGKILL",
     });
     if (!existsSync(FIXTURE)) throw new Error("fixture not generated: " + FIXTURE);
   });
