@@ -29,7 +29,12 @@ def main():
     assert obj["soundscape"].to_dict()["bindings"][0]["source"]["band"] == "rhythm"
 
     addon.unregister()
-    for name in ("SOUNDSCAPE_PT_panel", "SOUNDSCAPE_OT_binding_add"):
+    for name in (
+        "SOUNDSCAPE_PT_panel",
+        "SOUNDSCAPE_UL_bindings",
+        "SOUNDSCAPE_OT_binding_add",
+        "SOUNDSCAPE_OT_binding_remove",
+    ):
         assert not hasattr(bpy.types, name), f"{name} still registered after unregister"
 
     print("OK test_register")

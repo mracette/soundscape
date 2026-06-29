@@ -14,6 +14,10 @@ class SOUNDSCAPE_OT_binding_add(bpy.types.Operator):
     bl_idname = "soundscape.binding_add"
     bl_label = "Add Binding"
 
+    @classmethod
+    def poll(cls, context):
+        return context.object is not None
+
     def execute(self, context):
         obj = context.object
         obj.soundscape_bindings.add()
@@ -25,6 +29,10 @@ class SOUNDSCAPE_OT_binding_add(bpy.types.Operator):
 class SOUNDSCAPE_OT_binding_remove(bpy.types.Operator):
     bl_idname = "soundscape.binding_remove"
     bl_label = "Remove Binding"
+
+    @classmethod
+    def poll(cls, context):
+        return context.object is not None
 
     def execute(self, context):
         obj = context.object
