@@ -49,3 +49,6 @@ tools/perf/reports/
 
 # blender contract-test fixture (generated headlessly)
 /public/blender-contract.glb
+
+# blender bake-audio generated artifacts
+/tools/blender/bake/__generated__
