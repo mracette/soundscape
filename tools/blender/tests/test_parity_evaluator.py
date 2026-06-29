@@ -6,7 +6,6 @@ def main():
     here = os.path.dirname(os.path.abspath(__file__))
     sys.path.insert(0, os.path.join(here, ".."))  # tools/blender -> import addon
     import json
-    import math
     from addon import evaluator
 
     with open(os.path.join(here, "parity_vectors.json")) as fh:

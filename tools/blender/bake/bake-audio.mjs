@@ -41,20 +41,23 @@ async function main() {
   const server = await createServer({ server: { port: 0 } });
   await server.listen();
   const url = server.resolvedUrls.local[0];
-  const browser = await chromium.launch();
+  let browser;
   try {
+    browser = await chromium.launch();
     const page = await browser.newPage();
-    page.on("pageerror", (e) => { throw e; });
+    let pageError = null;
+    page.on("pageerror", (e) => { pageError = e; });
     await page.goto(`${url}blender-bake-audio.html`, { waitUntil: "load" });
     await page.waitForFunction(() => window.__bakeReady === true);
     const result = await page.evaluate(
       async ({ b64, opts }) => window.__bakeAudio(b64, opts),
       { b64, opts: { analyserConfig, fps, numBuckets, band, sampleRate } }
     );
+    if (pageError) throw pageError;
     writeFileSync(resolve(args.out), JSON.stringify(result));
     console.log(`WROTE ${args.out} (${result.frames.length} frames @ ${result.fps}fps)`);
   } finally {
-    await browser.close();
+    if (browser) await browser.close();
     await server.close();
   }
 }
