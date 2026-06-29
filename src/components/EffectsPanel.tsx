@@ -43,6 +43,7 @@ export const EffectsPanel = () => {
   );
   const setPauseVisuals = useMusicPlayerStore((s) => s.setPauseVisuals);
   const setTimeWarp = useMusicPlayerStore((s) => s.setTimeWarp);
+  const setEnergy = useMusicPlayerStore((s) => s.setEnergy);
   const { bpm, id } = useContext(SongContext)!;
   const { WAW } = useContext(WebAudioContext)!;
 
@@ -54,6 +55,7 @@ export const EffectsPanel = () => {
   const [amValue, setAmValue] = useState(1);
   const [timeWarpValue, setTimeWarpValue] = useState(1);
   const timeWarpGlideRef = useRef<number | null>(null);
+  const [energyValue, setEnergyValue] = useState(50);
 
   const effectsTargets = useRef<{
     time: number | null;
@@ -149,6 +151,11 @@ export const EffectsPanel = () => {
         timeWarpGlideRef.current = null;
       }
     }, 30);
+  };
+
+  const handleEnergy = (v: number) => {
+    setEnergyValue(v);
+    setEnergy((v - 1) / 99);
   };
 
   return (
@@ -275,6 +282,16 @@ export const EffectsPanel = () => {
           id="time-warp"
           value={timeWarpValue}
           handleValue={handleTimeWarp}
+        />
+      </div>
+      <div className="flex-row">
+        <h3 className={sliderLabel}>energy</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider
+          id="energy"
+          value={energyValue}
+          handleValue={handleEnergy}
         />
       </div>
       <div className="flex-row">
