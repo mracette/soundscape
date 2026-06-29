@@ -11,7 +11,6 @@ import { CanvasSlider } from "./canvas/CanvasSlider";
 import {
   sliderLabel,
   sliderRow,
-  effectsControlsRow,
   switchControl,
   slider,
   round,
@@ -42,6 +41,18 @@ const chooseNewValue = (prev: number, min = 1, max = 100): number => {
   return clamp(newValue, min, max);
 };
 
+interface Preset {
+  timeWarp: number;
+  energy: number;
+  ambience: number;
+}
+
+// Slider positions (1-100). Work = present and steady; Ambient = dreamy and slow.
+const PRESETS: Record<"ambient" | "work", Preset> = {
+  ambient: { timeWarp: 40, energy: 25, ambience: 45 },
+  work: { timeWarp: 1, energy: 50, ambience: 10 },
+};
+
 export const EffectsPanel = () => {
   const setVoicesBackgroundMode = useMusicPlayerStore(
     (s) => s.setBackgroundMode
@@ -49,6 +60,7 @@ export const EffectsPanel = () => {
   const setPauseVisuals = useMusicPlayerStore((s) => s.setPauseVisuals);
   const setTimeWarp = useMusicPlayerStore((s) => s.setTimeWarp);
   const setEnergy = useMusicPlayerStore((s) => s.setEnergy);
+  const voicesOn = useMusicPlayerStore((s) => s.backgroundMode);
   const { bpm, id } = useContext(SongContext)!;
   const { WAW } = useContext(WebAudioContext)!;
 
@@ -163,6 +175,15 @@ export const EffectsPanel = () => {
     setEnergy((v - 1) / 99);
   };
 
+  const applyPreset = (p: Preset) => {
+    handleTimeWarp(p.timeWarp);
+    handleEnergy(p.energy);
+    setAmValue(p.ambience);
+    WAW.setEffects("am", p.ambience);
+    setVoicesBackgroundMode(true);
+    setBackgroundMode(true);
+  };
+
   return (
     <div id="effects-panel" className={flexPanel}>
       <h2>Background Mode</h2>
@@ -170,15 +191,30 @@ export const EffectsPanel = () => {
         Automatically varies the music over time. Ideal for extended listening.
       </p>
 
+      <div className="flex-row">
+        <button
+          className={cx(buttonWhite, groupedButtons)}
+          id="preset-ambient"
+          onClick={() => applyPreset(PRESETS.ambient)}
+        >
+          Ambient
+        </button>
+        <button
+          className={cx(buttonWhite, groupedButtons)}
+          id="preset-work"
+          onClick={() => applyPreset(PRESETS.work)}
+        >
+          Work
+        </button>
+      </div>
+
       <div className={cx("flex-row", sliderRow)}>
         <div className="flex-col" style={{ justifyContent: "flex-end" }}>
           <label className={switchControl}>
             <input
               type="checkbox"
-              onInput={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                setVoicesBackgroundMode(checked);
-              }}
+              checked={voicesOn}
+              onChange={(e) => setVoicesBackgroundMode(e.target.checked)}
             />
             <span className={cx(slider, round, "slider", "round")}></span>
           </label>
@@ -194,10 +230,8 @@ export const EffectsPanel = () => {
           <label className={switchControl}>
             <input
               type="checkbox"
-              onInput={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                setBackgroundMode(checked);
-              }}
+              checked={backgroundMode}
+              onChange={(e) => setBackgroundMode(e.target.checked)}
             />
             <span className={cx(slider, round, "slider", "round")}></span>
           </label>
@@ -208,8 +242,6 @@ export const EffectsPanel = () => {
           </span>
         </div>
       </div>
-      <h2 id="effects-controls-row" className={effectsControlsRow}>Visuals</h2>
-      <p>Pause visuals to improve performance and save power.</p>
 
       <div className={cx("flex-row", sliderRow)}>
         <div className="flex-col" style={{ justifyContent: "flex-end" }}>
@@ -231,19 +263,61 @@ export const EffectsPanel = () => {
         </div>
       </div>
 
-      <div
-        id="effects-controls-row"
-        className={cx("flex-row", effectsControlsRow)}
-        style={{ justifyContent: "space-between" }}
-      >
-        <div className="flex-col">
-          <h2>Effects</h2>
-        </div>
-        <div className="flex-col">
-          {backgroundMode && <p className="hot-green">background mode: on</p>}
-        </div>
+      <div className="flex-row">
+        <h3 className={sliderLabel}>time warp</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider
+          id="time-warp"
+          value={timeWarpValue}
+          handleValue={handleTimeWarp}
+        />
+      </div>
+      <div className="flex-row">
+        <h3 className={sliderLabel}>energy</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider
+          id="energy"
+          value={energyValue}
+          handleValue={handleEnergy}
+        />
       </div>
 
+      <div className="flex-row">
+        <h3 className={sliderLabel}>— fine tune —</h3>
+      </div>
+      <div className="flex-row">
+        <h3 className={sliderLabel}>highpass filter</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider
+          id="hp-filter"
+          value={hpValue}
+          handleValue={(v) => setHpValue(v)}
+        />
+      </div>
+      <div className="flex-row">
+        <h3 className={sliderLabel}>lowpass filter</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider
+          id="lp-filter"
+          value={lpValue}
+          handleValue={(v) => setLpValue(v)}
+          reverse={true}
+        />
+      </div>
+      <div className="flex-row">
+        <h3 className={sliderLabel}>ambience</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider
+          id="ambience"
+          handleValue={(v) => setAmValue(v)}
+          value={amValue}
+        />
+      </div>
       <div className="flex-row">
         <button
           className={cx(buttonWhite, groupedButtons)}
@@ -277,58 +351,6 @@ export const EffectsPanel = () => {
         >
           Randomize
         </button>
-      </div>
-
-      <div className="flex-row">
-        <h3 className={sliderLabel}>time warp</h3>
-      </div>
-      <div className="flex-row">
-        <CanvasSlider
-          id="time-warp"
-          value={timeWarpValue}
-          handleValue={handleTimeWarp}
-        />
-      </div>
-      <div className="flex-row">
-        <h3 className={sliderLabel}>energy</h3>
-      </div>
-      <div className="flex-row">
-        <CanvasSlider
-          id="energy"
-          value={energyValue}
-          handleValue={handleEnergy}
-        />
-      </div>
-      <div className="flex-row">
-        <h3 className={sliderLabel}>highpass filter</h3>
-      </div>
-      <div className="flex-row">
-        <CanvasSlider
-          id="hp-filter"
-          value={hpValue}
-          handleValue={(v) => setHpValue(v)}
-        />
-      </div>
-      <div className="flex-row">
-        <h3 className={sliderLabel}>lowpass filter</h3>
-      </div>
-      <div className="flex-row">
-        <CanvasSlider
-          id="lp-filter"
-          value={lpValue}
-          handleValue={(v) => setLpValue(v)}
-          reverse={true}
-        />
-      </div>
-      <div className="flex-row">
-        <h3 className={sliderLabel}>ambience</h3>
-      </div>
-      <div className="flex-row">
-        <CanvasSlider
-          id="ambience"
-          handleValue={(v) => setAmValue(v)}
-          value={amValue}
-        />
       </div>
     </div>
   );
