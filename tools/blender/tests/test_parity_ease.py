@@ -11,6 +11,8 @@ def main():
     with open(os.path.join(here, "parity_vectors.json")) as fh:
         vectors = json.load(fh)["ease"]
 
+    assert len(vectors) >= 98, f"fixture too short: {len(vectors)}"
+
     for v in vectors:
         got = ease.resolve_ease(v["name"])(v["t"])
         assert abs(got - v["expected"]) < 1e-9, (
