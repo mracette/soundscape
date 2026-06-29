@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createServer } from "vite";
 import { chromium } from "@playwright/test";
+
+const ROOT = fileURLToPath(new URL("../../..", import.meta.url));
 
 function parseArgs(argv) {
   const a = {};
@@ -38,7 +41,7 @@ async function main() {
 
   const b64 = readFileSync(audioPath).toString("base64");
 
-  const server = await createServer({ server: { port: 0 } });
+  const server = await createServer({ root: ROOT, server: { port: 0 } });
   await server.listen();
   const url = server.resolvedUrls.local[0];
   let browser;
@@ -48,7 +51,7 @@ async function main() {
     let pageError = null;
     page.on("pageerror", (e) => { pageError = e; });
     await page.goto(`${url}blender-bake-audio.html`, { waitUntil: "load" });
-    await page.waitForFunction(() => window.__bakeReady === true);
+    await page.waitForFunction(() => window.__bakeReady === true, undefined, { timeout: 15000 });
     const result = await page.evaluate(
       async ({ b64, opts }) => window.__bakeAudio(b64, opts),
       { b64, opts: { analyserConfig, fps, numBuckets, band, sampleRate } }

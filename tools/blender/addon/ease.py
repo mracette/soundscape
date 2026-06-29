@@ -77,7 +77,7 @@ def exp_in_out(t):
 
 def back_out(t):
     t = t - 1
-    return t * t * ((t + 1) * _S + t) + 1
+    return t * t * ((_S + 1) * t + _S) + 1
 
 
 EASES = {

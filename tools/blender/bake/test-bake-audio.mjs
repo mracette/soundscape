@@ -1,8 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const OUTDIR = resolve("tools/blender/bake/__generated__");
+const HERE = fileURLToPath(new URL(".", import.meta.url));
+const OUTDIR = resolve(HERE, "__generated__");
 mkdirSync(OUTDIR, { recursive: true });
 const WAV = resolve(OUTDIR, "test-tone.wav");
 const OUT = resolve(OUTDIR, "test-bake.json");
@@ -36,7 +38,7 @@ function fail(msg) { console.log("FAIL", msg); process.exit(1); }
 writeWav(WAV, 44100, 1, 0.5);
 
 execFileSync("node", [
-  resolve("tools/blender/bake/bake-audio.mjs"),
+  resolve(HERE, "bake-audio.mjs"),
   "--audio", WAV, "--out", OUT,
   "--fps", "30", "--buckets", "8", "--band", "test",
   "--config", '{"power":11,"smoothingTimeConstant":0,"minFrequency":20,"maxFrequency":16500}',
