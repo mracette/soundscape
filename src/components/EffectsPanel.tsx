@@ -22,19 +22,24 @@ import { cx } from "../utils/cx";
 
 const EFFECT_INTERVAL = 4; // in beats
 
-const chooseNewValue = (prev: number): number => {
-  const max = 100;
+// Background-mode safe zone for the effect walk so it can never bury the song:
+// the highpass stays <= ~1 kHz (value 72) and the lowpass >= ~3 kHz (value 55).
+// Manual sliders are unconstrained — only the auto-walk is penned.
+const HP_WALK_CEIL = 72;
+const LP_WALK_FLOOR = 55;
+
+const chooseNewValue = (prev: number, min = 1, max = 100): number => {
   const bounds = 35;
   const effectSize = 40;
   let newValue: number;
-  if (prev < bounds) {
+  if (prev < min + bounds) {
     newValue = prev + Math.random() * effectSize;
   } else if (prev > max - bounds) {
     newValue = prev - Math.random() * effectSize;
   } else {
     newValue = prev + (-0.5 + Math.random()) * effectSize;
   }
-  return clamp(newValue, 1, 100);
+  return clamp(newValue, min, max);
 };
 
 export const EffectsPanel = () => {
@@ -77,8 +82,8 @@ export const EffectsPanel = () => {
     ) {
       // set new targets
       effectsTargets.current.time = WAW.audioCtx.currentTime;
-      effectsTargets.current.hp = chooseNewValue(hpValue);
-      effectsTargets.current.lp = chooseNewValue(lpValue);
+      effectsTargets.current.hp = chooseNewValue(hpValue, 1, HP_WALK_CEIL);
+      effectsTargets.current.lp = chooseNewValue(lpValue, LP_WALK_FLOOR, 100);
       effectsTargets.current.am = chooseNewValue(amValue);
     }
     const progress =
