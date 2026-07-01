@@ -16,7 +16,6 @@ interface AnalyserParams {
   xExponent?: number;
   yExponent?: number;
   binMethod?: string;
-  [key: string]: unknown;
 }
 
 // split analyser holds left/right AnalyserNode pair; non-split holds a single AnalyserNode

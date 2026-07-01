@@ -283,7 +283,7 @@ export class WebAudioWrapper {
             power: 6,
             minDecibels: -120,
             maxDecibels: 0,
-            smoothingTimeConstanct: 0.25,
+            smoothingTimeConstant: 0.25,
           }
         );
         this.nodes.analysers = analysers;
