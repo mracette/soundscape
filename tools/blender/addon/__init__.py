@@ -8,14 +8,16 @@ bl_info = {
     "category": "Object",
 }
 
-from . import bindings_model, panel
+from . import bindings_model, panel, bands_model
 
 
 def register():
     bindings_model.register()
     panel.register()
+    bands_model.register()
 
 
 def unregister():
+    bands_model.unregister()
     panel.unregister()
     bindings_model.unregister()
