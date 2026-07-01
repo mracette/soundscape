@@ -12,6 +12,21 @@ import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 import { nextSubdivision } from "../utils/audioUtils";
+import { lerp } from "../utils/mathUtils";
+
+/*
+ * Energy drives the background-mode voice loop, modulating two things: the target
+ * number of active voices and the variability rate. The loop ticks every
+ * VOICE_TICK_BEATS; when off target it steps one voice toward it, and once at
+ * target it occasionally swaps a voice (random out, random in) at a mean spacing
+ * that Energy scales from very slow (calm) to brisk (lively). Voice selection is
+ * random — no per-group weighting.
+ */
+const VOICE_TICK_BEATS = 8;
+const MIN_VOICES = 2; // target at the calm end
+const MAX_VOICE_FRACTION = 0.75; // target at the lively end, as a fraction of the scene
+const CALM_SWAP_BEATS = 320; // mean beats between swaps at lowest Energy
+const LIVELY_SWAP_BEATS = 48; // ...and at highest Energy
 
 export const MusicPlayer = () => {
   const { flags } = useContext(TestingContext)!;
@@ -40,6 +55,7 @@ export const MusicPlayer = () => {
   const randomizeCallbacks = useMusicPlayerStore((s) => s.randomizeCallbacks);
   const voices = useMusicPlayerStore((s) => s.voices);
   const backgroundMode = useMusicPlayerStore((s) => s.backgroundMode);
+  const energy = useMusicPlayerStore((s) => s.energy);
   const mute = useMusicPlayerStore((s) => s.mute);
 
   useEffect(() => {
@@ -97,22 +113,29 @@ export const MusicPlayer = () => {
     const viable = voices.filter((v) => !v.voiceState.includes("pending"));
     if (viable.length === 0) return;
 
-    const first = viable[Math.floor(Math.random() * viable.length)];
-    first.ref.click();
+    const active = viable.filter((v) => v.voiceState === "active");
+    const stopped = viable.filter((v) => v.voiceState === "stopped");
+    const target = Math.max(
+      1,
+      Math.round(lerp(MIN_VOICES, MAX_VOICE_FRACTION * voices.length, energy))
+    );
 
-    // When fewer than half the voices are active, also trigger a second voice
-    // from a different group to build the mix up.
-    const activeCount = voices.filter((v) => v.voiceState === "active").length;
-    if (activeCount < voices.length / 2) {
-      const viableTwo = viable.filter(
-        (v) => v.id !== first.id && v.group !== first.group
-      );
-      if (viableTwo.length > 0) {
-        const second = viableTwo[Math.floor(Math.random() * viableTwo.length)];
-        second.ref.click();
+    const pick = (list: typeof viable) =>
+      list[Math.floor(Math.random() * list.length)];
+
+    if (active.length < target && stopped.length) {
+      pick(stopped).ref.click();
+    } else if (active.length > target) {
+      pick(active).ref.click();
+    } else if (stopped.length && active.length) {
+      // at target: occasionally swap one voice for slow variability
+      const swapBeats = lerp(CALM_SWAP_BEATS, LIVELY_SWAP_BEATS, energy);
+      if (Math.random() < VOICE_TICK_BEATS / swapBeats) {
+        pick(active).ref.click();
+        pick(stopped).ref.click();
       }
     }
-  }, [voices]);
+  }, [voices, energy]);
 
   /* Background Mode Hook */
   useEffect(() => {
@@ -123,7 +146,7 @@ export const MusicPlayer = () => {
     ) {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
         WAW.audioCtx.currentTime + 60 / bpm,
-        (32 * 60) / bpm,
+        (VOICE_TICK_BEATS * 60) / bpm,
         triggerRandomVoice
       );
       // triggerRandomVoice updates when different voices are on

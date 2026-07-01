@@ -25,6 +25,11 @@ const STOP_PARAMS = {
 
 export interface ToggleButtonViewHandle {
   runAnimation: (type: "start" | "stop", durationMs: number) => void;
+  /**
+   * Rescale any in-flight toggle animation to finish in `remainingMs` — called
+   * when a Time Warp change moves the pending commit's boundary time.
+   */
+  retimeAnimation: (remainingMs: number) => void;
   getButton: () => HTMLButtonElement | null;
 }
 
@@ -55,6 +60,23 @@ export const ToggleButtonView = ({ initialActive, onClick, ref }: Props) => {
     ref,
     () => ({
       getButton: () => buttonRef.current,
+      retimeAnimation: (remainingMs) => {
+        const remaining = Math.max(remainingMs, 1) / 1000;
+        const iconDiv = iconDivRef.current!;
+        const targets = [
+          circleRef.current!,
+          iconPolyRef.current!,
+          iconDiv,
+          ...iconDiv.children,
+          buttonRef.current!,
+        ];
+        // timeScale rescales a tween's remaining local time onto the new real
+        // remaining time, preserving each tween's ease and end values.
+        gsap.getTweensOf(targets).forEach((tween) => {
+          const left = tween.duration() - tween.time();
+          if (left > 0) tween.timeScale(left / remaining);
+        });
+      },
       runAnimation: (type, durationMs) => {
         const seconds = durationMs / 1000;
         const circleSvg = circleRef.current!;

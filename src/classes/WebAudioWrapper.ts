@@ -10,6 +10,7 @@ import { loadArrayBuffer } from "../utils/audioUtils";
 import { Analyser } from "./Analyser";
 import { Scheduler } from "./Scheduler";
 import { AudioPlayerWrapper } from "./AudioPlayerWrapper";
+import { TempoClock } from "./TempoClock";
 import {
   SongContextValue,
   AppConfigEntry,
@@ -59,6 +60,19 @@ interface WrapperValues {
   am: number[];
 }
 
+interface TransportRequest {
+  player: AudioPlayerWrapper;
+  clock: TempoClock;
+  targetBeat: number;
+  action: "start" | "stop";
+  onCommit: (time: number) => void;
+  onRetime?: (time: number) => void;
+}
+
+/** Poll period and commit horizon (seconds) for the boundary transport. */
+const TRANSPORT_TICK = 0.015;
+const TRANSPORT_LOOKAHEAD = 0.04;
+
 /**
  * Central audio engine. Owns the AudioContext, Scheduler, and the entire WebAudio
  * node graph for the app.
@@ -79,6 +93,17 @@ export class WebAudioWrapper {
   status: Record<SongId, boolean>;
   audioCtx: AudioContext;
   scheduler: Scheduler;
+  tempoClocks: Partial<Record<SongId, TempoClock>> = {};
+  /**
+   * Last commanded Time Warp rate per song. During a glide this is the audio
+   * ramp's anchor (where the previous segment's ramp landed), which the clock's
+   * midpoint rate must pair with `rate` — the clock's own `currentRate` is a
+   * held midpoint mid-glide, and pairing midpoints compounds into a permanent
+   * clock/audio phase offset.
+   */
+  private timeWarpTargets: Partial<Record<SongId, number>> = {};
+  private transportQueue = new Map<string, TransportRequest>();
+  private transportTick: number | null = null;
 
   constructor(appConfig: AppConfigEntry[]) {
     const props = {
@@ -152,6 +177,7 @@ export class WebAudioWrapper {
       await this._initSongEffects(id);
       await this._initSongAnalysers(id);
       await this._initSongVoices(id);
+      this.tempoClocks[id] = new TempoClock(this.config[id].bpm);
       this.status[id] = true;
     }
     return true;
@@ -435,6 +461,121 @@ export class WebAudioWrapper {
 
   getVoices(songId: SongId): Record<string, AudioPlayerWrapper> {
     return this.nodes.voices![songId]!;
+  }
+
+  getTempoClock(songId: SongId): TempoClock {
+    return this.tempoClocks[songId]!;
+  }
+
+  /**
+   * Apply a playback `rate` (1 = normal, 0.5 = the Time Warp floor) to the song's
+   * tempo clock and every one of its voices. With `glideSeconds > 0` the voices
+   * ramp linearly to `rate` over that window instead of jumping — the Time Warp
+   * knob chains one such call per glide step for a click-free glide.
+   *
+   * The clock cannot ramp: TempoClock's position math assumes a piecewise-
+   * constant rate. Each gliding segment instead holds the midpoint of (previous
+   * commanded rate, `rate`) — by the trapezoid rule the clock's beat integral
+   * then equals the linear ramp's integral exactly at every segment end; within a
+   * segment they diverge by at most (rate delta x glideSeconds / 8): well under
+   * a millisecond of musical position. The glide's final settle call (no glide)
+   * re-pins clock and audio to the same exact rate.
+   */
+  setTimeWarpRate(songId: SongId, rate: number, glideSeconds = 0): void {
+    const now = this.audioCtx.currentTime;
+    const clock = this.getTempoClock(songId);
+    const prevTarget = this.timeWarpTargets[songId] ?? clock.currentRate;
+    const clockRate = glideSeconds > 0 ? (prevTarget + rate) / 2 : rate;
+    this.timeWarpTargets[songId] = rate;
+    clock.setRate(clockRate, now);
+    const voices = this.getVoices(songId);
+    for (const name in voices) {
+      voices[name].setPlaybackRate(rate, now, glideSeconds);
+    }
+    // The rate change moves every pending boundary's wall-clock time; hand the
+    // re-resolved time to each requester so its countdown follows the live grid.
+    for (const req of this.transportQueue.values()) {
+      if (req.clock === clock) {
+        req.onRetime?.(clock.timeAt(req.targetBeat));
+      }
+    }
+  }
+
+  /**
+   * Queue a voice to start/stop on the next `intervalBeats` boundary, committing
+   * the actual `start`/`stop` only once that boundary is within the look-ahead
+   * horizon. Committing late means the boundary's wall-clock time is resolved
+   * against the live clock — so a Time Warp change mid-glide can't leave a voice
+   * scheduled against a stale grid. `key` (the voice name) dedupes and cancels.
+   * `onRetime`, when given, fires on every Time Warp change while the request is
+   * pending, with the boundary's re-resolved wall-clock time — the toggle
+   * countdown animation uses it to finish exactly when the commit lands.
+   */
+  scheduleAtBoundary(
+    key: string,
+    player: AudioPlayerWrapper,
+    clock: TempoClock,
+    intervalBeats: number,
+    action: "start" | "stop",
+    onCommit: (time: number) => void,
+    onRetime?: (time: number) => void
+  ): void {
+    const targetBeat = clock.nextBoundaryBeat(
+      intervalBeats,
+      this.audioCtx.currentTime
+    );
+    this.transportQueue.set(key, {
+      player,
+      clock,
+      targetBeat,
+      action,
+      onCommit,
+      onRetime,
+    });
+    if (this.transportTick === null) {
+      this.armTransportTick();
+    }
+  }
+
+  /** Drop a pending boundary request (re-toggle before it commits, or unmount). */
+  cancelBoundary(key: string): void {
+    this.transportQueue.delete(key);
+  }
+
+  /**
+   * Arm the next transport poll on the audio clock via the Scheduler. Window
+   * timers are throttled to >= 1s in background tabs, which would let a boundary
+   * slip into the past before the tick observes it (Web Audio then clamps the
+   * start to "now" — audibly off-grid). Scheduler events fire off the audio
+   * clock (a dummy BufferSource's `onended`) and are immune to that throttling.
+   * Each tick re-arms itself only while requests remain pending.
+   */
+  private armTransportTick(): void {
+    this.transportTick = this.scheduler.scheduleOnce(
+      this.audioCtx.currentTime + TRANSPORT_TICK,
+      () => this.tickTransport()
+    ) as number;
+  }
+
+  private tickTransport(): void {
+    const now = this.audioCtx.currentTime;
+    for (const [key, req] of this.transportQueue) {
+      const time = req.clock.timeAt(req.targetBeat);
+      if (time <= now + TRANSPORT_LOOKAHEAD) {
+        if (req.action === "start") {
+          req.player.start(time);
+        } else {
+          req.player.stop(time);
+        }
+        req.onCommit(time);
+        this.transportQueue.delete(key);
+      }
+    }
+    if (this.transportQueue.size > 0) {
+      this.armTransportTick();
+    } else {
+      this.transportTick = null;
+    }
   }
 
   getConfig(songId: SongId): Omit<SongContextValue, "id"> {
