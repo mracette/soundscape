@@ -107,12 +107,9 @@ export class AudioPlayerWrapper {
   /** Set this voice's playback rate (pitch + tempo) at AudioContext time `atTime`. */
   setPlaybackRate(rate: number, atTime: number): void {
     this.playbackRate = rate;
-    try {
-      this.bufferSource.playbackRate.setValueAtTime(rate, atTime);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
-      // Node not started yet; the field is applied on start().
-    }
+    // AudioParam automation is valid regardless of node state (setValueAtTime
+    // never throws for an unstarted node); start() re-seeds from the field.
+    this.bufferSource.playbackRate.setValueAtTime(rate, atTime);
   }
 
   /** Stop at `time` (AudioContext seconds). Omit to stop immediately. */
