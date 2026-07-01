@@ -19,7 +19,12 @@ import { flexPanel } from "../styles/shared/layout.css";
 import { buttonWhite, groupedButtons } from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
 
-const EFFECT_INTERVAL = 4; // in beats
+// Effect random-walk timing (beats). The interval is both the spacing between new
+// targets and the transition length, so Energy scales the modulation: calm = slow
+// and sweeping, lively = quicker. The tick is the lerp update granularity.
+const CALM_EFFECT_BEATS = 128;
+const LIVELY_EFFECT_BEATS = 32;
+const EFFECT_TICK_BEATS = 0.25;
 
 // Background-mode safe zone for the effect walk so it can never bury the song:
 // the highpass stays <= ~1 kHz (value 72) and the lowpass >= ~3 kHz (value 55).
@@ -47,10 +52,12 @@ interface Preset {
   ambience: number;
 }
 
-// Slider positions (1-100). Work = present and steady; Ambient = dreamy and slow.
-const PRESETS: Record<"ambient" | "work", Preset> = {
-  ambient: { timeWarp: 40, energy: 25, ambience: 45 },
+// Slider positions (1-100), as a spectrum from present to deeply calm:
+// Work = steady focus bed; Ambient = dreamy and slow; Sleep = slowest and sparsest.
+const PRESETS: Record<"work" | "ambient" | "sleep", Preset> = {
   work: { timeWarp: 1, energy: 50, ambience: 10 },
+  ambient: { timeWarp: 40, energy: 25, ambience: 45 },
+  sleep: { timeWarp: 85, energy: 8, ambience: 70 },
 };
 
 export const EffectsPanel = () => {
@@ -87,7 +94,9 @@ export const EffectsPanel = () => {
   });
 
   const triggerRandomEffects = () => {
-    const intervalSeconds = (EFFECT_INTERVAL * 60) / bpm;
+    const energy = (energyValue - 1) / 99;
+    const intervalSeconds =
+      (lerp(CALM_EFFECT_BEATS, LIVELY_EFFECT_BEATS, energy) * 60) / bpm;
     if (
       !effectsTargets.current.time ||
       effectsTargets.current.time < WAW.audioCtx.currentTime - intervalSeconds
@@ -121,7 +130,7 @@ export const EffectsPanel = () => {
     ) {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
         WAW.audioCtx.currentTime + 60 / bpm,
-        (EFFECT_INTERVAL * 60) / bpm / 16,
+        (EFFECT_TICK_BEATS * 60) / bpm,
         triggerRandomEffects
       );
       // update event
@@ -194,6 +203,13 @@ export const EffectsPanel = () => {
       <div className="flex-row">
         <button
           className={cx(buttonWhite, groupedButtons)}
+          id="preset-work"
+          onClick={() => applyPreset(PRESETS.work)}
+        >
+          Work
+        </button>
+        <button
+          className={cx(buttonWhite, groupedButtons)}
           id="preset-ambient"
           onClick={() => applyPreset(PRESETS.ambient)}
         >
@@ -201,10 +217,10 @@ export const EffectsPanel = () => {
         </button>
         <button
           className={cx(buttonWhite, groupedButtons)}
-          id="preset-work"
-          onClick={() => applyPreset(PRESETS.work)}
+          id="preset-sleep"
+          onClick={() => applyPreset(PRESETS.sleep)}
         >
-          Work
+          Sleep
         </button>
       </div>
 
@@ -322,6 +338,7 @@ export const EffectsPanel = () => {
         <button
           className={cx(buttonWhite, groupedButtons)}
           id="effects-panel-reset"
+          disabled={backgroundMode}
           onClick={() => {
             setHpValue(1);
             setLpValue(100);
@@ -337,6 +354,7 @@ export const EffectsPanel = () => {
         <button
           className={cx(buttonWhite, groupedButtons)}
           id="effects-panel-randomize"
+          disabled={backgroundMode}
           onClick={() => {
             const h = 1 + 99 * Math.random();
             const l = 1 + 99 * Math.random();
