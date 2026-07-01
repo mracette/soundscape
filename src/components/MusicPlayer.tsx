@@ -60,9 +60,14 @@ export const MusicPlayer = () => {
 
   useEffect(() => {
     if (wawLoadStatus && !songLoadStatus) {
-      WAW.initSongState(id).then(() => {
-        setSongLoadStatus(true);
-      });
+      WAW.initSongState(id)
+        .then(() => {
+          setSongLoadStatus(true);
+        })
+        .catch((err) => {
+          // no error UI — the loading screen stays up, but the cause is visible
+          console.error("Failed to initialize song audio:", err);
+        });
     }
 
     // safe to resume and take the init time here (after user gesture)

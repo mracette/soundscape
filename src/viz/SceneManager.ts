@@ -86,6 +86,9 @@ export class SceneManager {
   protected fpcControl!: boolean;
   protected telemetry?: FrameTelemetry;
   protected perfPanels?: { cpu: StatsPanel; gpu: StatsPanel };
+  // The object published on window.__perf — kept so dispose() can tell whether
+  // the global still points at this instance before clearing it.
+  protected perfHandle?: { snapshot(): TelemetrySnapshot };
   protected lastFrameTime = 0;
 
   // Fields set by init() and subclasses
@@ -100,6 +103,11 @@ export class SceneManager {
 
   // Animation frame handle
   protected currentFrame!: number;
+
+  // Set by dispose(). Subclasses start the RAF loop from async asset-load
+  // continuations (`Promise.all(...).then(() => super.animate())`) that
+  // dispose() cannot cancel — this flag lets animate() refuse to (re)start.
+  protected disposed = false;
 
   constructor(canvas: HTMLCanvasElement) {
     const opts = {
@@ -116,7 +124,9 @@ export class SceneManager {
         height: null,
       },
       spectrumFunction: (_n: number) => "#FFFFFF",
-      // Perf telemetry + stats overlay opt-in via ?perf=1 (off in production).
+      // Perf telemetry + stats overlay opt-in via ?perf=1. Deliberately works
+      // in production builds (default-off) so real deployments can be profiled
+      // — see docs/superpowers/specs/2026-06-24-perf-telemetry-design.md.
       showStats: new URLSearchParams(window.location.search).has("perf"),
       fpcControl: false,
     };
@@ -144,9 +154,10 @@ export class SceneManager {
       this.telemetry = new FrameTelemetry(
         this.renderer.getContext() as WebGLRenderingContext
       );
-      (window as unknown as { __perf: unknown }).__perf = {
+      this.perfHandle = {
         snapshot: (): TelemetrySnapshot => this.telemetry!.snapshot(),
       };
+      (window as unknown as { __perf: unknown }).__perf = this.perfHandle;
     }
   }
 
@@ -160,7 +171,14 @@ export class SceneManager {
    * dispose the renderer's too — deterministic release rather than waiting for GC.
    */
   dispose() {
+    this.disposed = true;
     this.stop();
+    // ?perf artifacts outlive the scene unless removed here: the stats overlay
+    // is appended to document.body (a new one per scene switch would stack),
+    // and window.__perf would pin this instance's telemetry + GL context.
+    this.helpers.stats?.dom.remove();
+    const w = window as unknown as { __perf?: unknown };
+    if (this.perfHandle && w.__perf === this.perfHandle) delete w.__perf;
     this.disposeAll(this.scene);
     this.renderer.dispose();
   }
@@ -242,13 +260,23 @@ export class SceneManager {
    * `requestAnimationFrame`.
    */
   animate() {
+    // Guards both the pending re-queue after dispose() and a post-dispose loop
+    // start from a scene's async setup — either would pin the disposed
+    // renderer/canvas/GL context in a RAF loop forever.
+    if (this.disposed) return;
     this.currentFrame = requestAnimationFrame(this.animate);
 
     // Frame-rate cap: skip this tick unless ~1/60s (minus a jitter margin) has
-    // elapsed since the last rendered frame.
+    // elapsed since the last rendered frame. Advance the accumulator by the
+    // exact interval rather than snapping to `now`, so the remainder carries
+    // over — snapping quantizes the rate to refresh/ceil(interval/period),
+    // e.g. 90Hz→45fps, 144Hz→72fps, 165Hz→55fps.
     const now = performance.now();
     if (now - this.lastFrameTime < FRAME_INTERVAL_MS - FRAME_TOLERANCE_MS) return;
-    this.lastFrameTime = now;
+    this.lastFrameTime += FRAME_INTERVAL_MS;
+    // Drift clamp: after a stall (hidden tab, long GC pause) the accumulator
+    // sits far in the past and would render every tick to "catch up" — resync.
+    if (now - this.lastFrameTime > 2 * FRAME_INTERVAL_MS) this.lastFrameTime = now;
 
     this.showStats && this.helpers.stats?.begin();
     this.telemetry?.beginFrame();
@@ -332,6 +360,9 @@ export class SceneManager {
     };
     if (this.showStats) {
       import("stats.js").then((mod) => {
+        // The import can resolve after dispose() — bail so the overlay never
+        // attaches for a scene that's already been torn down.
+        if (this.disposed) return;
         const Stats = mod.default as unknown as {
           new (): StatsInstance;
           Panel: new (name: string, fg: string, bg: string) => StatsPanel;

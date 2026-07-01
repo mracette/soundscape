@@ -16,7 +16,6 @@ interface AnalyserParams {
   xExponent?: number;
   yExponent?: number;
   binMethod?: string;
-  [key: string]: unknown;
 }
 
 // split analyser holds left/right AnalyserNode pair; non-split holds a single AnalyserNode
@@ -276,10 +275,13 @@ export class Analyser {
   getFrequencyBins(channel?: string): { data: number; freq: number }[] {
     const fBins: { data: number; freq: number }[] = [];
     this.getFrequencyData(channel);
-    const data = (this.fftData as Uint8Array<ArrayBuffer>).slice(
-      this.binMin,
-      this.binMax + 1
-    );
+    // Same channel semantics as getFrequencyData: split analysers store
+    // {left, right}, so slice the requested channel's array.
+    const source =
+      channel === "left" || channel === "right"
+        ? (this.fftData as SplitUint8)[channel]
+        : (this.fftData as Uint8Array<ArrayBuffer>);
+    const data = source.slice(this.binMin, this.binMax + 1);
 
     data.forEach((d: number, i: number) => {
       fBins.push({

@@ -88,6 +88,14 @@ export const loadArrayBuffer = (audioFilePath: string): Promise<ArrayBuffer> => 
     request.addEventListener("load", () => {
       if (request.status === 200) {
         resolve(request.response as ArrayBuffer);
+      } else {
+        // 'load' also fires on 404/503 — without this reject the promise
+        // never settles and the loading screen hangs silently
+        reject(
+          new Error(
+            `Failed to load audio (HTTP ${request.status}): ${audioFilePath}`
+          )
+        );
       }
     });
     request.addEventListener("error", (err) => {

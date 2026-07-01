@@ -23,7 +23,7 @@ export const AppRouter = (props: Props) => {
           const songId = params.songId as SongId;
           const song = props.appConfig.find((s) => s.id === songId);
           if (!song) {
-            return <Redirect to="/" />;
+            return <Redirect to="/" replace />;
           }
           return (
             <ThemeContext.Provider
