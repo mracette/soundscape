@@ -58,9 +58,12 @@ export const ToggleButton = (props: Props) => {
       updateVoiceState({ id: name, newState: initialState });
       queueVoice(groupName, name, initialState);
 
-      // predicted boundary drives only the visual countdown; the audio start/stop
-      // and the status change commit against the live clock at the boundary, so a
-      // Time Warp change before then can't bring the voice in off-grid or off-pitch.
+      // the predicted boundary only seeds the visual countdown; the audio
+      // start/stop and the status change commit against the live clock at the
+      // boundary, so a Time Warp change before then can't bring the voice in
+      // off-grid or off-pitch. onRetime (below) rescales the countdown whenever
+      // a rate change moves the boundary, so it ends when the voice actually
+      // starts.
       const predictedSeconds = tempoClock.nextBoundary(
         quantizedStartBeats,
         audioCtx.currentTime
@@ -82,7 +85,11 @@ export const ToggleButton = (props: Props) => {
           animationEventRef.current = scheduler.scheduleOnce(time, () => {
             updateVoiceState({ id: name, newState });
           }) as number;
-        }
+        },
+        (time) =>
+          viewRef.current!.retimeAnimation(
+            (time - audioCtx.currentTime) * 1000
+          )
       );
     },
     [

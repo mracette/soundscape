@@ -66,6 +66,7 @@ interface TransportRequest {
   targetBeat: number;
   action: "start" | "stop";
   onCommit: (time: number) => void;
+  onRetime?: (time: number) => void;
 }
 
 /** Poll period and commit horizon (seconds) for the boundary transport. */
@@ -465,10 +466,18 @@ export class WebAudioWrapper {
    */
   setTimeWarpRate(songId: SongId, rate: number): void {
     const now = this.audioCtx.currentTime;
-    this.getTempoClock(songId).setRate(rate, now);
+    const clock = this.getTempoClock(songId);
+    clock.setRate(rate, now);
     const voices = this.getVoices(songId);
     for (const name in voices) {
       voices[name].setPlaybackRate(rate, now);
+    }
+    // The rate change moves every pending boundary's wall-clock time; hand the
+    // re-resolved time to each requester so its countdown follows the live grid.
+    for (const req of this.transportQueue.values()) {
+      if (req.clock === clock) {
+        req.onRetime?.(clock.timeAt(req.targetBeat));
+      }
     }
   }
 
@@ -478,6 +487,9 @@ export class WebAudioWrapper {
    * horizon. Committing late means the boundary's wall-clock time is resolved
    * against the live clock — so a Time Warp change mid-glide can't leave a voice
    * scheduled against a stale grid. `key` (the voice name) dedupes and cancels.
+   * `onRetime`, when given, fires on every Time Warp change while the request is
+   * pending, with the boundary's re-resolved wall-clock time — the toggle
+   * countdown animation uses it to finish exactly when the commit lands.
    */
   scheduleAtBoundary(
     key: string,
@@ -485,13 +497,21 @@ export class WebAudioWrapper {
     clock: TempoClock,
     intervalBeats: number,
     action: "start" | "stop",
-    onCommit: (time: number) => void
+    onCommit: (time: number) => void,
+    onRetime?: (time: number) => void
   ): void {
     const targetBeat = clock.nextBoundaryBeat(
       intervalBeats,
       this.audioCtx.currentTime
     );
-    this.transportQueue.set(key, { player, clock, targetBeat, action, onCommit });
+    this.transportQueue.set(key, {
+      player,
+      clock,
+      targetBeat,
+      action,
+      onCommit,
+      onRetime,
+    });
     if (this.transportTick === null) {
       this.armTransportTick();
     }
