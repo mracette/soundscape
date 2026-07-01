@@ -245,10 +245,16 @@ export class SceneManager {
     this.currentFrame = requestAnimationFrame(this.animate);
 
     // Frame-rate cap: skip this tick unless ~1/60s (minus a jitter margin) has
-    // elapsed since the last rendered frame.
+    // elapsed since the last rendered frame. Advance the accumulator by the
+    // exact interval rather than snapping to `now`, so the remainder carries
+    // over — snapping quantizes the rate to refresh/ceil(interval/period),
+    // e.g. 90Hz→45fps, 144Hz→72fps, 165Hz→55fps.
     const now = performance.now();
     if (now - this.lastFrameTime < FRAME_INTERVAL_MS - FRAME_TOLERANCE_MS) return;
-    this.lastFrameTime = now;
+    this.lastFrameTime += FRAME_INTERVAL_MS;
+    // Drift clamp: after a stall (hidden tab, long GC pause) the accumulator
+    // sits far in the past and would render every tick to "catch up" — resync.
+    if (now - this.lastFrameTime > 2 * FRAME_INTERVAL_MS) this.lastFrameTime = now;
 
     this.showStats && this.helpers.stats?.begin();
     this.telemetry?.beginFrame();
