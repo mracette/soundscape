@@ -81,7 +81,7 @@ export const LandingPage = (props: LandingPageProps) => {
               <InfoPageInner />
             </Route>
             <Route>
-              <Redirect to="/" />
+              <Redirect to="/" replace />
             </Route>
           </Switch>
         </div>
