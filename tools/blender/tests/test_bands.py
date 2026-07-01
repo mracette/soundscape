@@ -31,6 +31,7 @@ def main():
     assert abs(cfg["smoothingTimeConstant"] - 0.8) < 1e-6, cfg
     assert cfg["minFrequency"] == 20, cfg
     assert cfg["maxFrequency"] == 16500, cfg
+    assert set(cfg) == {"power", "smoothingTimeConstant", "minFrequency", "maxFrequency"}, cfg
 
     addon.unregister()
     assert not hasattr(bpy.types, "SOUNDSCAPE_PT_bands"), "bands panel still registered"
