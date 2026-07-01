@@ -86,6 +86,9 @@ export class SceneManager {
   protected fpcControl!: boolean;
   protected telemetry?: FrameTelemetry;
   protected perfPanels?: { cpu: StatsPanel; gpu: StatsPanel };
+  // The object published on window.__perf — kept so dispose() can tell whether
+  // the global still points at this instance before clearing it.
+  protected perfHandle?: { snapshot(): TelemetrySnapshot };
   protected lastFrameTime = 0;
 
   // Fields set by init() and subclasses
@@ -121,7 +124,9 @@ export class SceneManager {
         height: null,
       },
       spectrumFunction: (_n: number) => "#FFFFFF",
-      // Perf telemetry + stats overlay opt-in via ?perf=1 (off in production).
+      // Perf telemetry + stats overlay opt-in via ?perf=1. Deliberately works
+      // in production builds (default-off) so real deployments can be profiled
+      // — see docs/superpowers/specs/2026-06-24-perf-telemetry-design.md.
       showStats: new URLSearchParams(window.location.search).has("perf"),
       fpcControl: false,
     };
@@ -149,9 +154,10 @@ export class SceneManager {
       this.telemetry = new FrameTelemetry(
         this.renderer.getContext() as WebGLRenderingContext
       );
-      (window as unknown as { __perf: unknown }).__perf = {
+      this.perfHandle = {
         snapshot: (): TelemetrySnapshot => this.telemetry!.snapshot(),
       };
+      (window as unknown as { __perf: unknown }).__perf = this.perfHandle;
     }
   }
 
@@ -167,6 +173,12 @@ export class SceneManager {
   dispose() {
     this.disposed = true;
     this.stop();
+    // ?perf artifacts outlive the scene unless removed here: the stats overlay
+    // is appended to document.body (a new one per scene switch would stack),
+    // and window.__perf would pin this instance's telemetry + GL context.
+    this.helpers.stats?.dom.remove();
+    const w = window as unknown as { __perf?: unknown };
+    if (this.perfHandle && w.__perf === this.perfHandle) delete w.__perf;
     this.disposeAll(this.scene);
     this.renderer.dispose();
   }
@@ -348,6 +360,9 @@ export class SceneManager {
     };
     if (this.showStats) {
       import("stats.js").then((mod) => {
+        // The import can resolve after dispose() — bail so the overlay never
+        // attaches for a scene that's already been torn down.
+        if (this.disposed) return;
         const Stats = mod.default as unknown as {
           new (): StatsInstance;
           Panel: new (name: string, fg: string, bg: string) => StatsPanel;
