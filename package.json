@@ -7,6 +7,10 @@
     "node": ">=22"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "chroma-js": "2.1.2",
     "color-curves": "0.0.7",
     "d3-color": "3.0.1",

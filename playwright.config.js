@@ -9,13 +9,21 @@ export default defineConfig({
   fullyParallel: false,
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
-  use: {
-    baseURL: "http://localhost:3000",
-    ...devices["Desktop Chrome"],
-    launchOptions: {
-      args: ["--autoplay-policy=no-user-gesture-required"],
+  use: { baseURL: "http://localhost:3000" },
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: { args: ["--autoplay-policy=no-user-gesture-required"] },
+      },
     },
-  },
+    {
+      name: "webkit",
+      testMatch: /smoke\.spec\.js/,
+      use: { ...devices["Desktop Safari"] },
+    },
+  ],
   webServer: {
     command: "pnpm start",
     url: "http://localhost:3000",

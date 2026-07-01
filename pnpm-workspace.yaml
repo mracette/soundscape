@@ -1,4 +1,7 @@
+packages:
+  - 'apps/*'
 allowBuilds:
+  electron: true
   '@parcel/watcher': true
   core-js: true
   ejs: true
