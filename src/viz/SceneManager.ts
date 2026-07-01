@@ -101,6 +101,11 @@ export class SceneManager {
   // Animation frame handle
   protected currentFrame!: number;
 
+  // Set by dispose(). Subclasses start the RAF loop from async asset-load
+  // continuations (`Promise.all(...).then(() => super.animate())`) that
+  // dispose() cannot cancel — this flag lets animate() refuse to (re)start.
+  protected disposed = false;
+
   constructor(canvas: HTMLCanvasElement) {
     const opts = {
       songId: null,
@@ -160,6 +165,7 @@ export class SceneManager {
    * dispose the renderer's too — deterministic release rather than waiting for GC.
    */
   dispose() {
+    this.disposed = true;
     this.stop();
     this.disposeAll(this.scene);
     this.renderer.dispose();
@@ -242,6 +248,10 @@ export class SceneManager {
    * `requestAnimationFrame`.
    */
   animate() {
+    // Guards both the pending re-queue after dispose() and a post-dispose loop
+    // start from a scene's async setup — either would pin the disposed
+    // renderer/canvas/GL context in a RAF loop forever.
+    if (this.disposed) return;
     this.currentFrame = requestAnimationFrame(this.animate);
 
     // Frame-rate cap: skip this tick unless ~1/60s (minus a jitter margin) has
