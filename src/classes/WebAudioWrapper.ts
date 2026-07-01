@@ -68,8 +68,8 @@ interface TransportRequest {
   onCommit: (time: number) => void;
 }
 
-/** Poll period (ms) and commit horizon (s) for the boundary transport. */
-const TRANSPORT_TICK_MS = 15;
+/** Poll period and commit horizon (seconds) for the boundary transport. */
+const TRANSPORT_TICK = 0.015;
 const TRANSPORT_LOOKAHEAD = 0.04;
 
 /**
@@ -94,7 +94,7 @@ export class WebAudioWrapper {
   scheduler: Scheduler;
   tempoClocks: Partial<Record<SongId, TempoClock>> = {};
   private transportQueue = new Map<string, TransportRequest>();
-  private transportTimer: number | null = null;
+  private transportTick: number | null = null;
 
   constructor(appConfig: AppConfigEntry[]) {
     const props = {
@@ -492,17 +492,29 @@ export class WebAudioWrapper {
       this.audioCtx.currentTime
     );
     this.transportQueue.set(key, { player, clock, targetBeat, action, onCommit });
-    if (this.transportTimer === null) {
-      this.transportTimer = window.setInterval(
-        () => this.tickTransport(),
-        TRANSPORT_TICK_MS
-      );
+    if (this.transportTick === null) {
+      this.armTransportTick();
     }
   }
 
   /** Drop a pending boundary request (re-toggle before it commits, or unmount). */
   cancelBoundary(key: string): void {
     this.transportQueue.delete(key);
+  }
+
+  /**
+   * Arm the next transport poll on the audio clock via the Scheduler. Window
+   * timers are throttled to >= 1s in background tabs, which would let a boundary
+   * slip into the past before the tick observes it (Web Audio then clamps the
+   * start to "now" — audibly off-grid). Scheduler events fire off the audio
+   * clock (a dummy BufferSource's `onended`) and are immune to that throttling.
+   * Each tick re-arms itself only while requests remain pending.
+   */
+  private armTransportTick(): void {
+    this.transportTick = this.scheduler.scheduleOnce(
+      this.audioCtx.currentTime + TRANSPORT_TICK,
+      () => this.tickTransport()
+    ) as number;
   }
 
   private tickTransport(): void {
@@ -519,9 +531,10 @@ export class WebAudioWrapper {
         this.transportQueue.delete(key);
       }
     }
-    if (this.transportQueue.size === 0 && this.transportTimer !== null) {
-      window.clearInterval(this.transportTimer);
-      this.transportTimer = null;
+    if (this.transportQueue.size > 0) {
+      this.armTransportTick();
+    } else {
+      this.transportTick = null;
     }
   }
 
