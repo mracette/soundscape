@@ -160,6 +160,18 @@ export const EffectsPanel = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [bpm, backgroundMode, triggerRandomEffects]);
 
+  /* Glide Cleanup Hook */
+  // kill an in-flight glide when the song changes or the panel unmounts, so the
+  // interval can't keep firing against a stale song id
+  useEffect(() => {
+    return () => {
+      if (timeWarpGlideRef.current) {
+        window.clearInterval(timeWarpGlideRef.current);
+        timeWarpGlideRef.current = null;
+      }
+    };
+  }, [id]);
+
   /* Effect Value Hooks */
   useEffect(() => {
     WAW.setEffects("hp", hpValue);
