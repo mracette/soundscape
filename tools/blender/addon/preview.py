@@ -108,6 +108,8 @@ class SOUNDSCAPE_OT_preview(bpy.types.Operator):
     _bakes = None
     _frame = 0
     _fps = 30
+    _audio_device = None
+    _audio_handles = None
 
     def invoke(self, context, event):
         if SOUNDSCAPE_OT_preview._running:
@@ -122,19 +124,49 @@ class SOUNDSCAPE_OT_preview(bpy.types.Operator):
         self._snapshot = snapshot_items(self._items)
         self._frame = 0
         self._fps = max((b.fps for b in context.scene.soundscape_bands), default=30)
+        self._start_audio(context.scene)
         wm = context.window_manager
         self._timer = wm.event_timer_add(1.0 / self._fps, window=context.window)
         wm.modal_handler_add(self)
         SOUNDSCAPE_OT_preview._running = True
         return {"RUNNING_MODAL"}
 
+    def _start_audio(self, scene):
+        """Play every configured band stem (audaspace mixes them). Best-effort:
+        if aud is missing or a device won't open, the preview runs visual-only."""
+        self._audio_device = None
+        self._audio_handles = []
+        try:
+            import aud
+
+            device = aud.Device()
+            for band in scene.soundscape_bands:
+                path = bpy.path.abspath(band.stem_path)
+                if path and os.path.exists(path):
+                    self._audio_handles.append(device.play(aud.Sound.file(path)))
+            if self._audio_handles:
+                self._audio_device = device
+        except Exception:  # noqa: BLE001
+            self._audio_device = None
+            self._audio_handles = []
+
     def modal(self, context, event):
         if event.type in {"ESC", "RIGHTMOUSE"}:
             self.cancel(context)
             return {"CANCELLED"}
         if event.type == "TIMER":
-            apply_frame(self._items, self._bakes, self._frame)
-            self._frame += 1
+            # Drive the frame off the audio clock so the visual stays locked to
+            # the sound (and never drifts from the non-real-time modal timer).
+            if self._audio_handles:
+                playing = [h for h in self._audio_handles if h.status]
+                if not playing:
+                    self.cancel(context)
+                    return {"CANCELLED"}
+                frame = int(playing[0].position * self._fps)
+            else:
+                frame = self._frame
+                self._frame += 1
+            apply_frame(self._items, self._bakes, frame)
             for area in context.screen.areas:
                 if area.type == "VIEW_3D":
                     area.tag_redraw()
@@ -145,6 +177,10 @@ class SOUNDSCAPE_OT_preview(bpy.types.Operator):
         if self._timer is not None:
             wm.event_timer_remove(self._timer)
             self._timer = None
+        if self._audio_device is not None:
+            self._audio_device.stopAll()
+            self._audio_device = None
+        self._audio_handles = []
         if self._snapshot is not None:
             restore_snapshot(self._snapshot)
         SOUNDSCAPE_OT_preview._running = False
