@@ -39,6 +39,15 @@ async function main() {
       : JSON.parse(args.config);
   }
 
+  // snappy mode needs the raw instantaneous FFT (no analyser smoothing) — the
+  // offline zero-phase smooth + lead shift is applied afterward instead.
+  const snappyMode = args["snappy-coef"] != null || args["snappy-lead"] != null;
+  let snappy;
+  if (snappyMode) {
+    analyserConfig = { ...analyserConfig, smoothingTimeConstant: 0 };
+    snappy = { coef: Number(args["snappy-coef"] ?? 0.4), leadFrames: Number(args["snappy-lead"] ?? 0) };
+  }
+
   const b64 = readFileSync(audioPath).toString("base64");
 
   const server = await createServer({ root: ROOT, server: { port: 0 } });
@@ -54,7 +63,7 @@ async function main() {
     await page.waitForFunction(() => window.__bakeReady === true, undefined, { timeout: 15000 });
     const result = await page.evaluate(
       async ({ b64, opts }) => window.__bakeAudio(b64, opts),
-      { b64, opts: { analyserConfig, fps, numBuckets, band, sampleRate } }
+      { b64, opts: { analyserConfig, fps, numBuckets, band, sampleRate, snappy } }
     );
     if (pageError) throw pageError;
     writeFileSync(resolve(args.out), JSON.stringify(result));

@@ -76,22 +76,27 @@ class SOUNDSCAPE_OT_bake_bands(bpy.types.Operator):
 
     def execute(self, context):
         out_dir = _cache_dir()
-        for band in context.scene.soundscape_bands:
+        scene = context.scene
+        for band in scene.soundscape_bands:
+            band_dict = {
+                "name": band.name,
+                "stem_path": bpy.path.abspath(band.stem_path),
+                "analyser_config": bands_model.band_analyser_config(band),
+                "num_buckets": band.num_buckets,
+                "fps": band.fps,
+            }
             try:
+                bake_bridge.bake_band(band_dict, out_dir)
                 bake_bridge.bake_band(
-                    {
-                        "name": band.name,
-                        "stem_path": bpy.path.abspath(band.stem_path),
-                        "analyser_config": bands_model.band_analyser_config(band),
-                        "num_buckets": band.num_buckets,
-                        "fps": band.fps,
-                    },
+                    band_dict,
                     out_dir,
+                    snappy={"coef": scene.soundscape_snappy_coef, "lead": scene.soundscape_snappy_lead},
+                    out_name=f"{band.name}.snappy",
                 )
             except Exception as exc:  # noqa: BLE001
                 self.report({"ERROR"}, f"bake {band.name}: {exc}")
                 return {"CANCELLED"}
-        self.report({"INFO"}, f"baked {len(context.scene.soundscape_bands)} band(s)")
+        self.report({"INFO"}, f"baked {len(scene.soundscape_bands)} band(s)")
         return {"FINISHED"}
 
 
@@ -116,7 +121,8 @@ class SOUNDSCAPE_OT_preview(bpy.types.Operator):
             self.report({"WARNING"}, "preview already running (press ESC to stop)")
             return {"CANCELLED"}
         names = [b.name for b in context.scene.soundscape_bands]
-        self._bakes = bake_bridge.load_bakes(_cache_dir(), names)
+        suffix = ".snappy" if context.scene.soundscape_snappy else ""
+        self._bakes = bake_bridge.load_bakes(_cache_dir(), names, suffix)
         if not self._bakes:
             self.report({"ERROR"}, "no bakes — run Bake All Bands first")
             return {"CANCELLED"}
@@ -194,7 +200,12 @@ class SOUNDSCAPE_PT_preview(bpy.types.Panel):
     bl_category = "Soundscape"
 
     def draw(self, context):
+        scene = context.scene
         col = self.layout.column(align=True)
+        col.prop(scene, "soundscape_snappy")
+        if scene.soundscape_snappy:
+            col.prop(scene, "soundscape_snappy_coef")
+            col.prop(scene, "soundscape_snappy_lead")
         col.operator("soundscape.bake_bands", icon="RENDER_ANIMATION")
         col.operator("soundscape.preview", icon="PLAY")
 

@@ -1,4 +1,5 @@
 import { bakeSignal, type BakeResult } from "../bake/bakeSignal";
+import { snappifyFrames } from "../bake/snappify";
 
 interface BakeAudioOpts {
   analyserConfig: Record<string, unknown>;
@@ -6,6 +7,7 @@ interface BakeAudioOpts {
   numBuckets: number;
   band: string;
   sampleRate: number;
+  snappy?: { coef: number; leadFrames: number };
 }
 
 declare global {
@@ -34,7 +36,7 @@ window.__bakeAudio = async (b64, opts) => {
   const decodeCtx = new OfflineAudioContext(1, 1, opts.sampleRate);
   const audio = await decodeCtx.decodeAudioData(bytes.buffer);
   const samples = toMono(audio);
-  return bakeSignal({
+  const result = await bakeSignal({
     samples,
     sampleRate: audio.sampleRate,
     analyserConfig: opts.analyserConfig,
@@ -42,5 +44,9 @@ window.__bakeAudio = async (b64, opts) => {
     numBuckets: opts.numBuckets,
     band: opts.band,
   });
+  if (opts.snappy) {
+    result.frames = snappifyFrames(result.frames, opts.snappy);
+  }
+  return result;
 };
 window.__bakeReady = true;

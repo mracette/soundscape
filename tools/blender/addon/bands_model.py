@@ -93,9 +93,19 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.Scene.soundscape_bands = bpy.props.CollectionProperty(type=BandConfig)
     bpy.types.Scene.soundscape_active_band = bpy.props.IntProperty(default=0)
+    bpy.types.Scene.soundscape_snappy = bpy.props.BoolProperty(name="Snappy (A/B)", default=False)
+    bpy.types.Scene.soundscape_snappy_coef = bpy.props.FloatProperty(
+        name="Zero-phase smoothing", default=0.4, min=0.0, max=0.95
+    )
+    bpy.types.Scene.soundscape_snappy_lead = bpy.props.IntProperty(
+        name="Lead (frames)", default=2, min=0, max=10
+    )
 
 
 def unregister():
+    del bpy.types.Scene.soundscape_snappy_lead
+    del bpy.types.Scene.soundscape_snappy_coef
+    del bpy.types.Scene.soundscape_snappy
     del bpy.types.Scene.soundscape_active_band
     del bpy.types.Scene.soundscape_bands
     for cls in reversed(_classes):
