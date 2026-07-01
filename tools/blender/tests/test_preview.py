@@ -61,6 +61,30 @@ def main():
     assert preview.read_signal({"frames": [{"volume": 0.3, "buckets": [0.9]}]}, "bucket", 0, 0) == 0.9
     assert preview.read_signal({"frames": [{"volume": 0.3, "buckets": [0.9]}]}, "volume", 0, 99) == 0.3
 
+    # non-uniform base scale must round-trip exactly through snapshot/apply_frame/restore,
+    # not collapse to the uniform scale apply_target writes while previewing
+    bpy.ops.mesh.primitive_cube_add()
+    scale_obj = bpy.context.active_object
+    scale_obj.scale = (1.0, 0.4, 2.0)
+    sb = scale_obj.soundscape_bindings.add()
+    sb.target_property = "scale"
+    sb.band = "bass"
+    sb.measure = "volume"
+    sb.out_min = 0.0
+    sb.out_max = 4.0
+
+    scale_items = preview.build_preview_items([scale_obj])
+    scale_snap = preview.snapshot_items(scale_items)
+    preview.apply_frame(scale_items, bakes, 1)
+    assert scale_obj.scale[0] == scale_obj.scale[1] == scale_obj.scale[2], "apply_frame should set scale uniformly"
+    preview.restore_snapshot(scale_snap)
+    for got, expected in zip(scale_obj.scale, (1.0, 0.4, 2.0)):
+        assert abs(got - expected) < 1e-6, f"non-uniform scale restore: got {tuple(scale_obj.scale)}"
+
+    # opacity applies the Alpha socket and makes the material's render method alpha-capable
+    pt.apply_target(obj, "opacity", 0.25)
+    assert obj.active_material.surface_render_method == "BLENDED", "opacity should enable BLENDED for viewport visibility"
+
     addon.unregister()
     print("OK test_preview")
 

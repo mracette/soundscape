@@ -45,15 +45,24 @@ def apply_frame(items, bakes, frame):
 
 
 def snapshot_items(items):
-    return [
-        (it["obj"], it["target_property"], preview_target.read_target(it["obj"], it["target_property"]))
-        for it in items
-    ]
+    snapshot = []
+    for it in items:
+        obj, target_property = it["obj"], it["target_property"]
+        if target_property == "scale":
+            value = tuple(obj.scale)
+        else:
+            value = preview_target.read_target(obj, target_property)
+        snapshot.append((obj, target_property, value))
+    return snapshot
 
 
 def restore_snapshot(snapshot):
     for obj, target_property, old in snapshot:
-        if old is not None:
+        if old is None:
+            continue
+        if target_property == "scale" and isinstance(old, tuple):
+            obj.scale = old
+        else:
             preview_target.apply_target(obj, target_property, old)
 
 
@@ -87,9 +96,11 @@ class SOUNDSCAPE_OT_bake_bands(bpy.types.Operator):
 
 
 class SOUNDSCAPE_OT_preview(bpy.types.Operator):
-    """Live-play the baked signal through the bindings; ESC or the button restores."""
+    """Live-play the baked signal through the bindings. Press ESC to stop and restore."""
     bl_idname = "soundscape.preview"
     bl_label = "Play Preview"
+
+    _running = False
 
     _timer = None
     _items = None
@@ -99,6 +110,9 @@ class SOUNDSCAPE_OT_preview(bpy.types.Operator):
     _fps = 30
 
     def invoke(self, context, event):
+        if SOUNDSCAPE_OT_preview._running:
+            self.report({"WARNING"}, "preview already running (press ESC to stop)")
+            return {"CANCELLED"}
         names = [b.name for b in context.scene.soundscape_bands]
         self._bakes = bake_bridge.load_bakes(_cache_dir(), names)
         if not self._bakes:
@@ -111,6 +125,7 @@ class SOUNDSCAPE_OT_preview(bpy.types.Operator):
         wm = context.window_manager
         self._timer = wm.event_timer_add(1.0 / self._fps, window=context.window)
         wm.modal_handler_add(self)
+        SOUNDSCAPE_OT_preview._running = True
         return {"RUNNING_MODAL"}
 
     def modal(self, context, event):
@@ -132,6 +147,7 @@ class SOUNDSCAPE_OT_preview(bpy.types.Operator):
             self._timer = None
         if self._snapshot is not None:
             restore_snapshot(self._snapshot)
+        SOUNDSCAPE_OT_preview._running = False
 
 
 class SOUNDSCAPE_PT_preview(bpy.types.Panel):

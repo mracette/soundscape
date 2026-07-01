@@ -32,6 +32,16 @@ def apply_target(obj, target_property, value):
         node = _principled(obj)
         if node is not None:
             node.inputs["Alpha"].default_value = value
+            mat = obj.active_material
+            if hasattr(mat, "surface_render_method"):
+                try:
+                    # DITHERED (the default) fakes alpha via per-frame noise that only
+                    # resolves through temporal accumulation; a live-scrubbed opacity
+                    # value keeps perturbing it, so it never converges and just looks
+                    # noisy. BLENDED is an analytic blend, so it stays clean while scrubbing.
+                    mat.surface_render_method = "BLENDED"
+                except Exception:  # noqa: BLE001
+                    pass
 
 
 def read_target(obj, target_property):
@@ -47,8 +57,8 @@ def read_target(obj, target_property):
         return obj.scale[0]
     if target_property == "emissiveIntensity":
         node = _principled(obj)
-        return node.inputs["Emission Strength"].default_value if node else None
+        return node.inputs["Emission Strength"].default_value if node is not None else None
     if target_property == "opacity":
         node = _principled(obj)
-        return node.inputs["Alpha"].default_value if node else None
+        return node.inputs["Alpha"].default_value if node is not None else None
     return None

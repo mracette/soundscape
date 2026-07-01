@@ -6,6 +6,7 @@ def main():
     sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
     import json
+    import tempfile
     from addon import bake_bridge
 
     band = {
@@ -27,8 +28,7 @@ def main():
     assert cfg == band["analyser_config"], cfg
 
     # load_bakes reads written BakeResult JSONs by band name
-    tmp = os.path.join(os.path.dirname(os.path.abspath(__file__)), "__bridge_tmp__")
-    os.makedirs(tmp, exist_ok=True)
+    tmp = tempfile.mkdtemp()
     result = {"fps": 30, "sampleRate": 44100, "durationSec": 1.0, "band": "bass",
               "frames": [{"volume": 0.5, "buckets": [0.1] * 8}]}
     with open(os.path.join(tmp, "bass.json"), "w") as fh:
