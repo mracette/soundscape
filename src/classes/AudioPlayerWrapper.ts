@@ -34,6 +34,8 @@ export class AudioPlayerWrapper {
   loop!: boolean;
   bufferSource!: AudioBufferSourceNode;
   playbackRate = 1;
+  /** True from `start()` until `stop()`; gates AudioParam work in `setPlaybackRate`. */
+  private playing = false;
 
   constructor(context: AudioContext, path: string, options: AudioPlayerOptions) {
     // bind
@@ -102,18 +104,34 @@ export class AudioPlayerWrapper {
       this.reload();
       this.bufferSource.start(time);
     }
+    this.playing = true;
   }
 
-  /** Set this voice's playback rate (pitch + tempo) at AudioContext time `atTime`. */
-  setPlaybackRate(rate: number, atTime: number): void {
+  /**
+   * Set this voice's playback rate (pitch + tempo) at AudioContext time `atTime`.
+   * With `glideSeconds > 0`, the rate ramps linearly from the param's current
+   * value to `rate` over that window (anchored with setValueAtTime so
+   * consecutive ramps chain continuously instead of zippering).
+   *
+   * The rate is always recorded so a later `start()` seeds the live value, but
+   * AudioParam automation only touches a playing source — automating stopped or
+   * not-yet-started nodes is wasted work (a fresh node is seeded on start).
+   */
+  setPlaybackRate(rate: number, atTime: number, glideSeconds = 0): void {
     this.playbackRate = rate;
-    // AudioParam automation is valid regardless of node state (setValueAtTime
-    // never throws for an unstarted node); start() re-seeds from the field.
-    this.bufferSource.playbackRate.setValueAtTime(rate, atTime);
+    if (!this.playing) return;
+    const param = this.bufferSource.playbackRate;
+    if (glideSeconds > 0) {
+      param.setValueAtTime(param.value, atTime);
+      param.linearRampToValueAtTime(rate, atTime + glideSeconds);
+    } else {
+      param.setValueAtTime(rate, atTime);
+    }
   }
 
   /** Stop at `time` (AudioContext seconds). Omit to stop immediately. */
   stop(time?: number): void {
+    this.playing = false;
     try {
       this.bufferSource.stop(time);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

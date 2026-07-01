@@ -32,6 +32,14 @@ const EFFECT_TICK_BEATS = 0.25;
 const HP_WALK_CEIL = 72;
 const LP_WALK_FLOOR = 55;
 
+// Manual Time Warp glide: the rate eases to its target over GLIDE_STEPS
+// segments of GLIDE_STEP_S each. Each step ramps the audio linearly across the
+// segment while the clock holds a matching piecewise-constant rate (see
+// WebAudioWrapper.setTimeWarpRate); a final settle tick pins both to the exact
+// target.
+const GLIDE_STEPS = 20;
+const GLIDE_STEP_S = 0.03;
+
 // The edge-avoidance margin (bounds) and step size (effectSize) were tuned on
 // the full 1-100 range as 35 and 40; they scale with the actual range so a
 // narrowed safe zone (e.g. the background-mode lp walk, 55-100) wanders the same
@@ -171,18 +179,21 @@ export const EffectsPanel = () => {
     setTimeWarp((v - 1) / 99);
     const targetRate = timeWarpToRate(v);
     const startRate = WAW.getTempoClock(id).currentRate;
-    const steps = 20;
     let i = 0;
     if (timeWarpGlideRef.current) window.clearInterval(timeWarpGlideRef.current);
     timeWarpGlideRef.current = window.setInterval(() => {
       i++;
-      const r = startRate + (targetRate - startRate) * (i / steps);
-      WAW.setTimeWarpRate(id, r);
-      if (i >= steps) {
+      if (i <= GLIDE_STEPS) {
+        const r = startRate + (targetRate - startRate) * (i / GLIDE_STEPS);
+        WAW.setTimeWarpRate(id, r, GLIDE_STEP_S);
+      } else {
+        // settle: the last ramp segment has landed; pin clock and audio to the
+        // exact target rate
+        WAW.setTimeWarpRate(id, targetRate);
         window.clearInterval(timeWarpGlideRef.current!);
         timeWarpGlideRef.current = null;
       }
-    }, 30);
+    }, GLIDE_STEP_S * 1000);
   };
 
   const handleEnergy = (v: number) => {

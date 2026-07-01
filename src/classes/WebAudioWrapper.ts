@@ -94,6 +94,14 @@ export class WebAudioWrapper {
   audioCtx: AudioContext;
   scheduler: Scheduler;
   tempoClocks: Partial<Record<SongId, TempoClock>> = {};
+  /**
+   * Last commanded Time Warp rate per song. During a glide this is the audio
+   * ramp's anchor (where the previous segment's ramp landed), which the clock's
+   * midpoint rate must pair with `rate` — the clock's own `currentRate` is a
+   * held midpoint mid-glide, and pairing midpoints compounds into a permanent
+   * clock/audio phase offset.
+   */
+  private timeWarpTargets: Partial<Record<SongId, number>> = {};
   private transportQueue = new Map<string, TransportRequest>();
   private transportTick: number | null = null;
 
@@ -461,16 +469,28 @@ export class WebAudioWrapper {
 
   /**
    * Apply a playback `rate` (1 = normal, 0.5 = the Time Warp floor) to the song's
-   * tempo clock and every one of its voices at the current time. Instant; the
-   * Time Warp knob steps this to produce a glide.
+   * tempo clock and every one of its voices. With `glideSeconds > 0` the voices
+   * ramp linearly to `rate` over that window instead of jumping — the Time Warp
+   * knob chains one such call per glide step for a click-free glide.
+   *
+   * The clock cannot ramp: TempoClock's position math assumes a piecewise-
+   * constant rate. Each gliding segment instead holds the midpoint of (previous
+   * commanded rate, `rate`) — by the trapezoid rule the clock's beat integral
+   * then equals the linear ramp's integral exactly at every segment end; within a
+   * segment they diverge by at most (rate delta x glideSeconds / 8): well under
+   * a millisecond of musical position. The glide's final settle call (no glide)
+   * re-pins clock and audio to the same exact rate.
    */
-  setTimeWarpRate(songId: SongId, rate: number): void {
+  setTimeWarpRate(songId: SongId, rate: number, glideSeconds = 0): void {
     const now = this.audioCtx.currentTime;
     const clock = this.getTempoClock(songId);
-    clock.setRate(rate, now);
+    const prevTarget = this.timeWarpTargets[songId] ?? clock.currentRate;
+    const clockRate = glideSeconds > 0 ? (prevTarget + rate) / 2 : rate;
+    this.timeWarpTargets[songId] = rate;
+    clock.setRate(clockRate, now);
     const voices = this.getVoices(songId);
     for (const name in voices) {
-      voices[name].setPlaybackRate(rate, now);
+      voices[name].setPlaybackRate(rate, now, glideSeconds);
     }
     // The rate change moves every pending boundary's wall-clock time; hand the
     // re-resolved time to each requester so its countdown follows the live grid.
