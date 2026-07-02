@@ -23,6 +23,7 @@
   },
   "scripts": {
     "start": "vite",
+    "stems": "vite --open /stem-inspector.html",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/ --fix",
