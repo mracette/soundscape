@@ -1,5 +1,5 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { hotGreen, vh } from "../settings";
+import { hotGreen, hotGreenGlow, vh } from "../settings";
 
 export const sliderLabel = style({
   paddingTop: vh(1.9),
@@ -53,7 +53,10 @@ export const slider = style({
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: "#ccc",
+  backgroundColor: "rgba(255, 255, 255, 0.12)",
+  border: "1px solid rgba(255, 255, 255, 0.18)",
+  transitionProperty: "background-color, box-shadow",
+  transitionDuration: "200ms",
 });
 
 globalStyle(`${slider}:before`, {
@@ -68,10 +71,11 @@ globalStyle(`${slider}:before`, {
 
 globalStyle(`input:checked + ${slider}`, {
   backgroundColor: hotGreen,
+  boxShadow: `0 0 10px ${hotGreenGlow}`,
 });
 
 globalStyle(`input:focus + ${slider}`, {
-  boxShadow: `0 0 1px ${hotGreen}`,
+  boxShadow: `0 0 1px ${hotGreen}, 0 0 10px ${hotGreenGlow}`,
 });
 
 globalStyle(`input:checked + ${slider}:before`, {
