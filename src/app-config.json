@@ -557,5 +557,144 @@
                 }
             ]
         }
+    },
+    {
+        "id": "prelude",
+        "audio": {
+            "name": "Prelude",
+            "bpm": 100,
+            "timeSignature": 4,
+            "keySignature": "C Major",
+            "ambientTrack": false,
+            "groups": [
+                {
+                    "name": "bass",
+                    "polyphony": 2,
+                    "analyser": {
+                        "power": 11,
+                        "smoothingTimeConstant": 0,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
+                    },
+                    "bake": {
+                        "fps": 30,
+                        "numBuckets": 8,
+                        "snappy": {
+                            "coef": 0.5,
+                            "leadFrames": 2
+                        },
+                        "onset": {
+                            "windowFrames": 9,
+                            "decayPerFrame": 0.8
+                        }
+                    },
+                    "voices": [
+                        {
+                            "name": "bass-a",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "bass-b",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "rhythm",
+                    "polyphony": 2,
+                    "analyser": {
+                        "power": 11,
+                        "smoothingTimeConstant": 0,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
+                    },
+                    "bake": {
+                        "fps": 30,
+                        "numBuckets": 8,
+                        "snappy": {
+                            "coef": 0.5,
+                            "leadFrames": 2
+                        },
+                        "onset": {
+                            "windowFrames": 9,
+                            "decayPerFrame": 0.8
+                        }
+                    },
+                    "voices": [
+                        {
+                            "name": "beat-a",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "beat-b",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "melody",
+                    "polyphony": 2,
+                    "analyser": {
+                        "power": 11,
+                        "smoothingTimeConstant": 0,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
+                    },
+                    "bake": {
+                        "fps": 30,
+                        "numBuckets": 8,
+                        "snappy": {
+                            "coef": 0.5,
+                            "leadFrames": 2
+                        },
+                        "onset": {
+                            "windowFrames": 9,
+                            "decayPerFrame": 0.8
+                        }
+                    },
+                    "voices": [
+                        {
+                            "name": "keys-a",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "keys-b",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                }
+            ]
+        },
+        "themes": {
+            "canvasFade": false,
+            "resizeType": "fullscreen",
+            "buttonColor": "rgba(55, 55, 55, 0.45)",
+            "openButtonColor": "rgba(255, 255, 255, 0.15)",
+            "contentPanelColor": "rgba(55, 55, 55, 0.45)",
+            "contentPanelText": "rgba(0, 0, 0, 1)",
+            "panelResetButton": "rgba(255, 255, 255, 0.3)",
+            "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
+            "panelMuteButton": "rgba(255, 255, 255, 0.3)",
+            "groupSoloButton": "rgba(90.5, 162.2, 240.8, 0.5)",
+            "groupMuteButton": "rgba(777.1, 791, 83.6, 0.5)"
+        },
+        "info": {
+            "credits": [
+                {
+                    "type": "Music, Art & Development:",
+                    "content": "Mark Racette"
+                },
+                {
+                    "type": "Technology:",
+                    "content": "React, Three.js, Anime.js, ColorCurves, Ableton Live, Yamaha P-125"
+                }
+            ]
+        }
     }
 ]

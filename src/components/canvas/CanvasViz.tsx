@@ -6,6 +6,11 @@ import { Swamp } from "../../viz/scenes/swamp/Swamp";
 
 // scene base
 import { SceneManager } from "../../viz/SceneManager";
+import { RuntimeScene } from "../../viz/runtime/RuntimeScene";
+import { BakedSignalSource } from "../../viz/runtime/bakedSignal";
+import { createStemProvider } from "../../viz/runtime/stemProvider";
+import { loadSongBakes, warnIfStale } from "../../viz/runtime/bakeLoader";
+import type { BakeResult } from "../../viz/runtime/bake/bakeSignal";
 
 import { SongContext } from "../../contexts/contexts";
 import { TestingContext } from "../../contexts/contexts";
@@ -36,7 +41,11 @@ export const CanvasViz = (props: Props) => {
   const { flags } = useContext(TestingContext)!;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const sceneRef = useRef<SceneManager | null>(null);
+  const sceneRef = useRef<SceneManager | RuntimeScene | null>(null);
+  // Provider closes over this ref, so bakes arriving after RuntimeScene
+  // construction start driving the scene without re-wiring (bands read 0 until
+  // then — the same missing-bake rule).
+  const preludeBakesRef = useRef<Record<string, BakeResult>>({});
 
   useEffect(() => {
     sceneRef.current && (sceneRef.current.pauseVisuals = pauseVisuals);
@@ -59,9 +68,46 @@ export const CanvasViz = (props: Props) => {
   }, [groups, voices]);
 
   useEffect(() => {
-    let newScene: SceneManager | undefined;
+    let newScene: SceneManager | RuntimeScene | undefined;
     // spectrumFunction is typed (n: number) => unknown in ThemeContext but scenes require (n: number) => string
     const specFn = spectrumFunction as (n: number) => string;
+
+    const buildPreludeScene = () => {
+      const voicesByGroup = groups.map((g) => ({
+        name: g.name,
+        voices: g.voices.map((v) => v.name),
+      }));
+      const players = WAW.getVoices(id);
+      const groupNodes = WAW.getEffects(id).groupNodes;
+      const provider = createStemProvider({
+        now: () => WAW.audioCtx.currentTime,
+        outputLatency: () => WAW.audioCtx.outputLatency ?? 0,
+        groups: voicesByGroup,
+        bakes: preludeBakesRef.current,
+        players,
+        groupGain: (g) => groupNodes[g]?.gain.value ?? 0,
+        activeVoices: () => useMusicPlayerStore.getState().voices,
+      });
+      const scene = new RuntimeScene(canvasRef.current!, {
+        url: `${import.meta.env.BASE_URL}models/prelude/scene.glb`,
+        signalSource: new BakedSignalSource(provider),
+        onLoaded: () => handleSetCanvasLoadStatus(true),
+      });
+      loadSongBakes(
+        import.meta.env.BASE_URL,
+        id,
+        voicesByGroup.flatMap((g) => g.voices)
+      ).then((bakes) => {
+        // Mutate the object the provider captured (don't reassign the ref) so
+        // late-arriving bakes drive the already-constructed scene.
+        Object.assign(preludeBakesRef.current, bakes);
+        for (const [voice, bake] of Object.entries(bakes)) {
+          warnIfStale(bake, players[voice]?.loopDuration ?? null, voice);
+        }
+      });
+      return scene;
+    };
+
     switch (id) {
       case "moonrise":
         if (flags.showVisuals) {
@@ -103,6 +149,14 @@ export const CanvasViz = (props: Props) => {
               bpm,
             }
           );
+          sceneRef.current = newScene;
+        } else {
+          handleSetCanvasLoadStatus(true);
+        }
+        break;
+      case "prelude":
+        if (flags.showVisuals) {
+          newScene = buildPreludeScene();
           sceneRef.current = newScene;
         } else {
           handleSetCanvasLoadStatus(true);
