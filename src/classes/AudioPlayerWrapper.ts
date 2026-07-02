@@ -33,6 +33,10 @@ export class AudioPlayerWrapper {
   fadeLength!: number;
   loop!: boolean;
   bufferSource!: AudioBufferSourceNode;
+  /** AudioContext time passed to the last start(); null until first start. Kept
+   *  through stop() — a scheduled stop leaves the voice audible until the
+   *  boundary, and active-set logic lives in the music-player store. */
+  startedAt: number | null = null;
 
   constructor(context: AudioContext, path: string, options: AudioPlayerOptions) {
     // bind
@@ -97,6 +101,7 @@ export class AudioPlayerWrapper {
       this.reload();
       this.bufferSource.start(time);
     }
+    this.startedAt = time;
   }
 
   /** Stop at `time` (AudioContext seconds). Omit to stop immediately. */
@@ -121,5 +126,10 @@ export class AudioPlayerWrapper {
     newSource.connect(this.destination);
 
     this.bufferSource = newSource;
+  }
+
+  /** Loop length in seconds (buffer duration), or null before init resolves. */
+  get loopDuration(): number | null {
+    return (this.bufferSource as AudioBufferSourceNode | undefined)?.buffer?.duration ?? null;
   }
 }
