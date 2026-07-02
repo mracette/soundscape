@@ -18,6 +18,7 @@ export const hotBlueGlow = "rgba(0, 249, 255, 0.55)";
 export const moonYellowGlow = "rgba(246, 242, 213, 0.5)";
 
 export const panelRadius = "1.5rem";
+export const pillRadius = "999px";
 
 export const easeOrganic = "cubic-bezier(0.45, 0, 0.2, 1)";
 
