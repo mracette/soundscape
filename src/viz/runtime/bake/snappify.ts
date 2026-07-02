@@ -1,5 +1,5 @@
 import type { BakedFrame } from "./bakeSignal";
-import { computeOnsetStrength } from "./bakeUtils";
+import { computeOnsetStrength, type OnsetOptions } from "./bakeUtils";
 
 /**
  * Causal exponential smoothing (forward pass only). Lags the signal — this is the
@@ -71,7 +71,7 @@ function channel(frames: BakedFrame[], pick: (f: BakedFrame) => number): number[
  */
 export function snappifyFrames(
   frames: BakedFrame[],
-  opts: { coef: number; leadFrames: number }
+  opts: { coef: number; leadFrames: number; onset?: OnsetOptions }
 ): BakedFrame[] {
   const { coef, leadFrames } = opts;
   const vol = leadShift(zeroPhaseSmooth(channel(frames, (f) => f.volume), coef), leadFrames);
@@ -93,7 +93,7 @@ export function snappifyFrames(
     buckets: buckets.map((series) => series[i]),
     onset: 0,
   }));
-  const onset = computeOnsetStrength(out);
+  const onset = computeOnsetStrength(out, opts.onset);
   out.forEach((f, i) => {
     f.onset = onset[i];
   });

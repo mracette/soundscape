@@ -62,4 +62,17 @@ describe("snappify", () => {
     expect(zeroPhaseSmooth([], 0.5)).toEqual([]);
     expect(snappifyFrames([], { coef: 0.5, leadFrames: 2 })).toEqual([]);
   });
+
+  test("onset options flow through to computeOnsetStrength", () => {
+    const frames = Array.from({ length: N }, (_, i) => ({
+      volume: 0,
+      buckets: [i === K ? 1 : 0],
+      onset: 0,
+    }));
+    const short = snappifyFrames(frames, { coef: 0.3, leadFrames: 0, onset: { decayPerFrame: 0.1 } });
+    const long = snappifyFrames(frames, { coef: 0.3, leadFrames: 0, onset: { decayPerFrame: 0.95 } });
+    const peakIdx = long.reduce((p, f, i, a) => (f.onset > a[p].onset ? i : p), 0);
+    // a longer decay must retain more energy a few frames after the peak
+    expect(long[peakIdx + 4].onset).toBeGreaterThan(short[peakIdx + 4].onset);
+  });
 });

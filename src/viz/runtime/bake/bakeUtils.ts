@@ -60,6 +60,12 @@ export function computeOnsetFlux(frames: { buckets: number[] }[]): number[] {
   return out;
 }
 
+/** Tuning for computeOnsetStrength. windowFrames: local-mean span; decayPerFrame: envelope retention. */
+export interface OnsetOptions {
+  windowFrames?: number;
+  decayPerFrame?: number;
+}
+
 /**
  * Animation-ready onset signal — the classic MIR post-processing chain
  * (Bello/Dixon, same shape as librosa's onset_strength) over raw spectral flux:
@@ -77,7 +83,7 @@ export function computeOnsetFlux(frames: { buckets: number[] }[]): number[] {
  */
 export function computeOnsetStrength(
   frames: { buckets: number[] }[],
-  opts: { windowFrames?: number; decayPerFrame?: number } = {}
+  opts: OnsetOptions = {}
 ): number[] {
   const { windowFrames = 9, decayPerFrame = 0.8 } = opts;
   const n = frames.length;

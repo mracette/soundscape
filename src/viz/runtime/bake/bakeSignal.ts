@@ -1,6 +1,6 @@
 import { Analyser } from "../../../classes/Analyser";
 import { AnalyserSignalSource, type AnalyserLike } from "../signal";
-import { computeOnsetStrength, frameTimes } from "./bakeUtils";
+import { computeOnsetStrength, frameTimes, type OnsetOptions } from "./bakeUtils";
 
 export interface BakedFrame {
   /** Mean band level, 0..1 (matches the runtime's "volume" measure). */
@@ -30,6 +30,8 @@ export interface BakeOptions {
   /** Number of buckets to read; sets (overrides) the analyser's bucket count. */
   numBuckets: number;
   band?: string;
+  /** Tuning for the baked onset channel (see computeOnsetStrength). */
+  onset?: OnsetOptions;
 }
 
 /**
@@ -92,7 +94,7 @@ export async function bakeSignal(opts: BakeOptions): Promise<BakeResult> {
   source.start();
   await ctx.startRendering();
 
-  const onset = computeOnsetStrength(frames);
+  const onset = computeOnsetStrength(frames, opts.onset);
   frames.forEach((f, i) => {
     f.onset = onset[i];
   });
