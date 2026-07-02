@@ -1,21 +1,17 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { glassNoiseTexture, panelRadius, vh } from "../settings";
+import { panelRadius, vh } from "../settings";
 
 export const menuButtonContent = style({
   visibility: "visible",
   borderRadius: `${panelRadius} ${panelRadius}`,
   position: "absolute",
   width: "auto",
-  // Three layered fake-glass techniques, none of them a real backdrop-filter
-  // blur: a diagonal sheen (glare catching the pane), a fine grain blended
-  // with `overlay` so it reads as frosted texture rather than flat static,
-  // and an inset highlight/shadow pair on the box-shadow below (light
-  // catching the top edge, shadow suggesting glass thickness at the bottom).
-  backgroundImage: `${glassNoiseTexture}, linear-gradient(115deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.02) 28%, rgba(255, 255, 255, 0.02) 72%, rgba(255, 255, 255, 0.1) 100%)`,
-  backgroundBlendMode: "overlay, normal",
+  // Stays translucent (backgroundColor is set per-scene via contentPanelColor
+  // in MenuButtonContentWrapper.tsx) so the WebGL scene behind the panel
+  // stays visible while it's open — no glass-material simulation (no noise,
+  // no sheen, no fake edge-lit-glass highlight), just a soft glow border.
   border: "1px solid rgba(255, 255, 255, 0.22)",
-  boxShadow:
-    "inset 0 1px 0 rgba(255, 255, 255, 0.35), inset 0 -1px 0 rgba(0, 0, 0, 0.25), 0 8px 32px rgba(0, 0, 0, 0.35)",
+  boxShadow: "0 0 24px rgba(255, 255, 255, 0.08), 0 8px 32px rgba(0, 0, 0, 0.35)",
   overflow: "auto",
 });
 
