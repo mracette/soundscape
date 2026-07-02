@@ -1,50 +1,30 @@
-import { useRef, CSSProperties, RefObject } from "react";
-
-import icons from "../assets/svg/iconList.svg";
+import { ComponentType } from "react";
+import { House, Music, SlidersHorizontal, Plus, Info } from "lucide-react";
 
 import "../styles/components/Icon.css";
+
+const ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  "icon-home": House,
+  "icon-music": Music,
+  "icon-equalizer": SlidersHorizontal,
+  "icon-plus": Plus,
+  "icon-info": Info,
+};
 
 interface Props {
   name?: string;
   divClassList?: string;
   svgClassList?: string;
-  style?: CSSProperties;
   link?: string;
-  handleAddIconRef?: (ref: RefObject<SVGUseElement | null>) => void;
 }
 
 export const Icon = (props: Props) => {
-  const iconRef = useRef<SVGUseElement>(null);
-
-  if (props.handleAddIconRef) {
-    props.handleAddIconRef(iconRef);
-  }
+  const IconComponent = props.name ? ICONS[props.name] : null;
+  const content = IconComponent && <IconComponent className={props.svgClassList} />;
 
   return (
     <div className={props.divClassList}>
-      {props.link ? (
-        <a href={props.link}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlnsXlink="http://www.w3.org/1999/xlink"
-            className={props.svgClassList}
-            style={props.style}
-            id={props.name}
-          >
-            <use ref={iconRef} xlinkHref={`${icons}#${props.name}`} />
-          </svg>
-        </a>
-      ) : (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          xmlnsXlink="http://www.w3.org/1999/xlink"
-          className={props.svgClassList}
-          style={props.style}
-          id={props.name}
-        >
-          <use ref={iconRef} xlinkHref={`${icons}#${props.name}`} />
-        </svg>
-      )}
+      {content}
     </div>
   );
 };
