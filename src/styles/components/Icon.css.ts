@@ -1,5 +1,5 @@
 import { globalStyle } from "@vanilla-extract/css";
-import { moonYellow } from "../settings";
+import { moonYellow, moonYellowGlow } from "../settings";
 
 globalStyle(".icon", {
   height: "100%",
@@ -30,6 +30,7 @@ globalStyle(".icon-white", {
 globalStyle(".icon-moon", {
   fill: moonYellow,
   stroke: moonYellow,
+  filter: `drop-shadow(0 0 4px ${moonYellowGlow})`,
 });
 
 globalStyle(".rotate45", {
