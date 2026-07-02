@@ -107,6 +107,23 @@ export function computeOnsetStrength(
   return out;
 }
 
+/** Average all channels of an AudioBuffer(-like) into a fresh mono Float32Array. */
+export function toMono(buf: {
+  length: number;
+  numberOfChannels: number;
+  getChannelData(c: number): Float32Array;
+}): Float32Array {
+  const n = buf.length;
+  if (buf.numberOfChannels === 1) return buf.getChannelData(0).slice();
+  const out = new Float32Array(n);
+  for (let c = 0; c < buf.numberOfChannels; c++) {
+    const data = buf.getChannelData(c);
+    for (let i = 0; i < n; i++) out[i] += data[i];
+  }
+  for (let i = 0; i < n; i++) out[i] /= buf.numberOfChannels;
+  return out;
+}
+
 /**
  * Deterministic mono test signal: seeded-LCG broadband noise in
  * `[-amplitude, amplitude]` for the first `toneSec`, then exact silence to

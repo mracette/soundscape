@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeOnsetFlux, computeOnsetStrength, frameTimes, synthNoise } from "./bakeUtils";
+import { computeOnsetFlux, computeOnsetStrength, frameTimes, synthNoise, toMono } from "./bakeUtils";
 
 describe("frameTimes", () => {
   it("returns floor(duration*fps) frame-center times within (0, duration)", () => {
@@ -57,6 +57,26 @@ describe("computeOnsetStrength", () => {
     expect(computeOnsetStrength([])).toEqual([]);
     const flat = computeOnsetStrength(Array.from({ length: 10 }, () => ({ buckets: [0.5] })));
     expect(flat.every((v) => v === 0)).toBe(true);
+  });
+});
+
+describe("toMono", () => {
+  const fakeBuffer = (channels: number[][]) => ({
+    length: channels[0].length,
+    numberOfChannels: channels.length,
+    getChannelData: (c: number) => new Float32Array(channels[c]),
+  });
+
+  it("averages channels", () => {
+    const m = toMono(fakeBuffer([[1, 0.5], [0, 0.5]]));
+    expect(Array.from(m)).toEqual([0.5, 0.5]);
+  });
+
+  it("copies mono input (not a live view)", () => {
+    const buf = fakeBuffer([[0.25, -0.25]]);
+    const m = toMono(buf);
+    expect(Array.from(m)).toEqual([0.25, -0.25]);
+    expect(m).not.toBe(buf.getChannelData(0));
   });
 });
 

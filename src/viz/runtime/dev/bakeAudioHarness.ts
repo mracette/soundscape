@@ -1,5 +1,5 @@
 import { bakeSignal, type BakeResult } from "../bake/bakeSignal";
-import { normalizeToPeak } from "../bake/bakeUtils";
+import { normalizeToPeak, toMono } from "../bake/bakeUtils";
 import { snappifyFrames } from "../bake/snappify";
 
 interface BakeAudioOpts {
@@ -16,18 +16,6 @@ declare global {
     __bakeReady?: boolean;
     __bakeAudio?: (b64: string, opts: BakeAudioOpts) => Promise<BakeResult>;
   }
-}
-
-function toMono(buf: AudioBuffer): Float32Array {
-  const n = buf.length;
-  if (buf.numberOfChannels === 1) return buf.getChannelData(0).slice();
-  const out = new Float32Array(n);
-  for (let c = 0; c < buf.numberOfChannels; c++) {
-    const data = buf.getChannelData(c);
-    for (let i = 0; i < n; i++) out[i] += data[i];
-  }
-  for (let i = 0; i < n; i++) out[i] /= buf.numberOfChannels;
-  return out;
 }
 
 window.__bakeAudio = async (b64, opts) => {
