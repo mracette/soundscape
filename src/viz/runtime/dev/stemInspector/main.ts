@@ -2,6 +2,7 @@ import appConfigJson from "../../../../app-config.json";
 import { toMono } from "../../bake/bakeUtils";
 import { analyzeStem, DEFAULT_SETTINGS, type BakeSettings, type StemAnalysis } from "./analysis";
 import { drawInspector, type CurveToggles } from "./draw";
+import { StemPlayer } from "./player";
 import { buildSidebarModel, type AppConfigSong, type StemEntry } from "./stemModel";
 import { peakColumns } from "./waveform";
 
@@ -15,6 +16,7 @@ const debug = { ready: false, frames: 0, lastError: null as string | null };
 window.__stemInspector = debug;
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+const player = new StemPlayer();
 const state = {
   analysis: null as StemAnalysis | null,
   variant: "snappy" as "raw" | "snappy",
@@ -95,23 +97,7 @@ async function selectStem(stem: StemEntry): Promise<void> {
   state.playheadSec = 0;
   state.peaks = peakColumns(state.samples, canvas.width);
   await rebake();
-  onStemLoaded(state.audio);
-}
-
-/** Task 8 replaces this hook with player wiring. */
-let onStemLoaded: (buf: AudioBuffer) => void = () => {};
-export function setOnStemLoaded(fn: (buf: AudioBuffer) => void): void {
-  onStemLoaded = fn;
-}
-export function setPlayhead(sec: number): void {
-  state.playheadSec = sec;
-  redraw();
-}
-export function currentFrames() {
-  return frames();
-}
-export function currentFps() {
-  return state.settings.fps;
+  player.load(state.audio);
 }
 
 function numberKnob(label: string, value: number, step: number, onChange: (v: number) => void): HTMLLabelElement {
@@ -231,6 +217,36 @@ function renderSidebar(model: ReturnType<typeof buildSidebarModel>): void {
   }
 }
 
+function renderTransport(): void {
+  const transport = document.getElementById("transport") as HTMLElement;
+  const playBtn = document.createElement("button");
+  playBtn.id = "play";
+  playBtn.textContent = "play/pause";
+  playBtn.addEventListener("click", () => player.toggle());
+  const loopLabel = checkbox("loop", false, (v) => player.setLoop(v));
+  transport.append(playBtn, loopLabel);
+}
+
+canvas.addEventListener("click", (ev) => {
+  if (!state.audio) return;
+  const rect = canvas.getBoundingClientRect();
+  player.seek(((ev.clientX - rect.left) / rect.width) * state.audio.duration);
+});
+
+function tick(): void {
+  requestAnimationFrame(tick);
+  if (!state.audio) return;
+  state.playheadSec = player.position;
+  const fs = frames();
+  const idx = Math.min(fs.length - 1, Math.floor(state.playheadSec * state.settings.fps));
+  const f = fs[idx];
+  const readout = document.getElementById("readout") as HTMLElement;
+  readout.textContent = f
+    ? `t=${state.playheadSec.toFixed(2)}s  frame=${idx}  volume=${f.volume.toFixed(3)}  onset=${f.onset.toFixed(3)}`
+    : "";
+  redraw();
+}
+
 async function main(): Promise<void> {
   const files: { song: string; name: string }[] = await (await fetch("/__stems")).json();
   if (files.length === 0) {
@@ -241,7 +257,9 @@ async function main(): Promise<void> {
   const appConfig = appConfigJson as unknown as AppConfigSong[];
   renderSidebar(buildSidebarModel(appConfig, files));
   renderKnobs();
+  renderTransport();
   sizeCanvas();
+  tick();
   debug.ready = true;
 }
 
