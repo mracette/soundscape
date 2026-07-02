@@ -57,19 +57,26 @@ window.addEventListener("resize", sizeCanvas);
 
 function debounce<A extends unknown[]>(fn: (...a: A) => void, ms: number) {
   let t: ReturnType<typeof setTimeout>;
-  return (...a: A) => {
+  const debounced = (...a: A) => {
     clearTimeout(t);
     t = setTimeout(() => fn(...a), ms);
   };
+  debounced.cancel = () => clearTimeout(t);
+  return debounced;
 }
 
 async function rebake(): Promise<void> {
   if (!state.audio || !state.samples) return;
+  const bucketsChanged = state.toggles.buckets.length !== state.settings.numBuckets;
   state.analysis = await analyzeStem(state.samples, state.audio.sampleRate, state.settings);
   state.toggles.buckets = state.toggles.buckets.slice(0, state.settings.numBuckets);
   while (state.toggles.buckets.length < state.settings.numBuckets) state.toggles.buckets.push(false);
   debug.frames = frames().length;
-  renderKnobs();
+  // Rebuilding the whole knobs panel here would destroy+recreate the input the
+  // user is actively typing in (losing focus/cursor) on every debounced rebake.
+  // Only rerender the pieces whose contents actually changed.
+  if (bucketsChanged) renderBucketToggles();
+  updateSettingsOutput();
   redraw();
 }
 const rebakeDebounced = debounce(() => void rebake().catch((e) => showError(String(e))), 150);
@@ -77,6 +84,10 @@ const rebakeDebounced = debounce(() => void rebake().catch((e) => showError(Stri
 const audioCache = new Map<string, AudioBuffer>();
 
 async function selectStem(stem: StemEntry): Promise<void> {
+  // A knob edit on the previous stem may still have a rebake pending; without
+  // this, its stale timer fires after this stem's synchronous rebake below,
+  // clobbering it with a redundant analyzeStem for the wrong settings.
+  rebakeDebounced.cancel();
   clearError();
   const ctx = new AudioContext();
   try {
@@ -97,6 +108,7 @@ async function selectStem(stem: StemEntry): Promise<void> {
   state.playheadSec = 0;
   state.peaks = peakColumns(state.samples, canvas.width);
   await rebake();
+  renderKnobs(); // preset values changed with the stem -> inputs must re-fill
   player.load(state.audio);
 }
 
@@ -174,20 +186,36 @@ function renderKnobs(): void {
   h3("curves");
   knobs.appendChild(checkbox("volume", state.toggles.volume, (v) => ((state.toggles.volume = v), redraw())));
   knobs.appendChild(checkbox("onset", state.toggles.onset, (v) => ((state.toggles.onset = v), redraw())));
-  state.toggles.buckets.forEach((on, b) => {
-    knobs.appendChild(checkbox(`bucket ${b}`, on, (v) => ((state.toggles.buckets[b] = v), redraw())));
-  });
+  const bucketsContainer = document.createElement("div");
+  bucketsContainer.id = "bucket-toggles";
+  knobs.appendChild(bucketsContainer);
+  renderBucketToggles();
 
   h3("settings (copy into Blender)");
   const out = document.createElement("textarea");
   out.id = "settings-out";
   out.readOnly = true;
-  out.value = JSON.stringify(s, null, 1);
   knobs.appendChild(out);
+  updateSettingsOutput();
   const note = document.createElement("div");
   note.className = "note";
   note.textContent = "analysis is mono, as baked";
   knobs.appendChild(note);
+}
+
+// Stable container so a bucket-count change (the only thing that invalidates
+// these checkboxes) doesn't force a rerender of the whole knobs panel.
+function renderBucketToggles(): void {
+  const container = document.getElementById("bucket-toggles") as HTMLElement;
+  container.replaceChildren();
+  state.toggles.buckets.forEach((on, b) => {
+    container.appendChild(checkbox(`bucket ${b}`, on, (v) => ((state.toggles.buckets[b] = v), redraw())));
+  });
+}
+
+function updateSettingsOutput(): void {
+  const out = document.getElementById("settings-out") as HTMLTextAreaElement;
+  out.value = JSON.stringify(state.settings, null, 1);
 }
 
 function renderSidebar(model: ReturnType<typeof buildSidebarModel>): void {

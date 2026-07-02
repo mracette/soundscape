@@ -62,6 +62,18 @@ export class StemPlayer {
   }
 
   setLoop(on: boolean): void {
+    if (!on && this.loop && this.isPlaying) {
+      // position() clamps wrapped playback to `duration` once loop is false,
+      // but the raw offset+elapsed bookkeeping is still unwrapped and can far
+      // exceed duration. Renormalize against the modulo'd position first, or
+      // the playhead freezes at `duration` while the audio keeps playing.
+      const pos = this.position;
+      this.loop = false;
+      this.source!.loop = false;
+      this.offset = pos;
+      this.startedAt = this.ctx.currentTime;
+      return;
+    }
     this.loop = on;
     if (this.source) this.source.loop = on;
   }
