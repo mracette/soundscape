@@ -89,15 +89,15 @@ async function selectStem(stem: StemEntry): Promise<void> {
   // clobbering it with a redundant analyzeStem for the wrong settings.
   rebakeDebounced.cancel();
   clearError();
-  const ctx = new AudioContext();
-  try {
-    if (!audioCache.has(stem.url)) {
-      const res = await fetch(stem.url);
-      if (!res.ok) throw new Error(`fetch ${stem.url}: HTTP ${res.status}`);
-      audioCache.set(stem.url, await ctx.decodeAudioData(await res.arrayBuffer()));
-    }
-  } finally {
-    void ctx.close();
+  if (!audioCache.has(stem.url)) {
+    const res = await fetch(stem.url);
+    if (!res.ok) throw new Error(`fetch ${stem.url}: HTTP ${res.status}`);
+    // Decode at 44100 (the CLI's default bake rate, see bakeAudioHarness.ts) rather
+    // than the hardware rate a plain AudioContext would use — the Analyser bucket
+    // bin edges derive from context.sampleRate, so a mismatch would misalign
+    // analysis here vs. what the CLI actually bakes.
+    const decodeCtx = new OfflineAudioContext(1, 1, 44100);
+    audioCache.set(stem.url, await decodeCtx.decodeAudioData(await res.arrayBuffer()));
   }
   state.audio = audioCache.get(stem.url)!;
   state.samples = toMono(state.audio);
@@ -276,7 +276,9 @@ function tick(): void {
 }
 
 async function main(): Promise<void> {
-  const files: { song: string; name: string }[] = await (await fetch("/__stems")).json();
+  const stemsRes = await fetch("/__stems");
+  if (!stemsRes.ok) throw new Error(`/__stems: HTTP ${stemsRes.status}`);
+  const files: { song: string; name: string }[] = await stemsRes.json();
   if (files.length === 0) {
     showError(
       "No stems found in public/audio/wav.\nIn a worktree, public/audio is a symlink — run tools/worktree-dev.sh to set it up."

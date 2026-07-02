@@ -47,7 +47,7 @@ execFileSync("node", [
 const r = JSON.parse(readFileSync(OUT, "utf8"));
 if (r.fps !== 30) fail(`fps ${r.fps}`);
 if (Math.abs(r.frames.length - 30) > 1) fail(`frames ${r.frames.length}`);
-if (!r.frames.every((f) => Number.isFinite(f.volume) && f.buckets.length === 8 && f.buckets.every(Number.isFinite))) fail("non-finite or wrong bucket count");
+if (!r.frames.every((f) => Number.isFinite(f.volume) && Number.isFinite(f.onset) && f.buckets.length === 8 && f.buckets.every(Number.isFinite))) fail("non-finite or wrong bucket count");
 const tone = mean(r.frames.slice(0, 14).map((f) => f.volume));
 const silence = mean(r.frames.slice(-8).map((f) => f.volume));
 if (!(tone > silence + 0.05)) fail(`tone(${tone.toFixed(3)}) not > silence(${silence.toFixed(3)})+0.05`);

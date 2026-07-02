@@ -34,7 +34,9 @@ def read_signal(bake, measure, bucket, frame):
         buckets = f["buckets"]
         return buckets[bucket] if bucket < len(buckets) else 0.0
     if measure == "onset":
-        return f["onset"]
+        # Bakes made before the onset feature was added lack this key; default
+        # rather than KeyError inside the modal frame handler.
+        return f.get("onset", 0.0)
     return f["volume"]
 
 

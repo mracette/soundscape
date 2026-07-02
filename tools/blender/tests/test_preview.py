@@ -61,6 +61,11 @@ def main():
     assert preview.read_signal({"frames": [{"volume": 0.3, "buckets": [0.9]}]}, "bucket", 0, 0) == 0.9
     assert preview.read_signal({"frames": [{"volume": 0.3, "buckets": [0.9]}]}, "volume", 0, 99) == 0.3
 
+    # read_signal: onset measure reads the key when present, and defaults to 0.0
+    # for stale bakes made before the onset feature (no KeyError)
+    assert preview.read_signal({"frames": [{"volume": 0.3, "buckets": [], "onset": 0.7}]}, "onset", 0, 0) == 0.7
+    assert preview.read_signal({"frames": [{"volume": 0.3, "buckets": []}]}, "onset", 0, 0) == 0.0
+
     # non-uniform base scale must round-trip exactly through snapshot/apply_frame/restore,
     # not collapse to the uniform scale apply_target writes while previewing
     bpy.ops.mesh.primitive_cube_add()
