@@ -10,7 +10,11 @@ import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 import { CanvasSlider } from "./canvas/CanvasSlider";
 
 import {
-  sliderLabel,
+  sliderLabelPrimary,
+  sliderLabelSecondary,
+  fineTuneDivider,
+  fineTuneDividerLine,
+  fineTuneDividerLabel,
   sliderRow,
   switchControl,
   slider,
@@ -293,7 +297,7 @@ export const EffectsPanel = () => {
       </div>
 
       <div className="flex-row">
-        <h3 className={sliderLabel}>time warp</h3>
+        <h3 className={sliderLabelPrimary}>time warp</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -303,7 +307,7 @@ export const EffectsPanel = () => {
         />
       </div>
       <div className="flex-row">
-        <h3 className={sliderLabel}>energy</h3>
+        <h3 className={sliderLabelPrimary}>energy</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -313,11 +317,13 @@ export const EffectsPanel = () => {
         />
       </div>
 
-      <div className="flex-row">
-        <h3 className={sliderLabel}>— fine tune —</h3>
+      <div className={fineTuneDivider}>
+        <span className={fineTuneDividerLine}></span>
+        <span className={fineTuneDividerLabel}>Fine Tune</span>
+        <span className={fineTuneDividerLine}></span>
       </div>
       <div className="flex-row">
-        <h3 className={sliderLabel}>highpass filter</h3>
+        <h3 className={sliderLabelSecondary}>highpass filter</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -327,7 +333,7 @@ export const EffectsPanel = () => {
         />
       </div>
       <div className="flex-row">
-        <h3 className={sliderLabel}>lowpass filter</h3>
+        <h3 className={sliderLabelSecondary}>lowpass filter</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -338,7 +344,7 @@ export const EffectsPanel = () => {
         />
       </div>
       <div className="flex-row">
-        <h3 className={sliderLabel}>ambience</h3>
+        <h3 className={sliderLabelSecondary}>ambience</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider

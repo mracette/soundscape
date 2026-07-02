@@ -6,6 +6,44 @@ export const sliderLabel = style({
   paddingBottom: vh(0.8),
 });
 
+export const sliderLabelPrimary = style([
+  sliderLabel,
+  {
+    color: "white",
+  },
+]);
+
+export const sliderLabelSecondary = style([
+  sliderLabel,
+  {
+    fontSize: vh(1.6),
+    color: "rgba(255, 255, 255, 0.55)",
+    paddingTop: vh(1.2),
+    paddingBottom: vh(0.4),
+  },
+]);
+
+export const fineTuneDivider = style({
+  display: "flex",
+  alignItems: "center",
+  gap: vh(1),
+  margin: `${vh(2.5)} 0 ${vh(1)} 0`,
+});
+
+export const fineTuneDividerLine = style({
+  flex: "1 1 auto",
+  height: "1px",
+  backgroundColor: "rgba(255, 255, 255, 0.15)",
+});
+
+export const fineTuneDividerLabel = style({
+  fontSize: vh(1.4),
+  color: "rgba(255, 255, 255, 0.5)",
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  whiteSpace: "nowrap",
+});
+
 export const sliderRow = style({
   paddingTop: vh(1),
   paddingBottom: vh(1),
