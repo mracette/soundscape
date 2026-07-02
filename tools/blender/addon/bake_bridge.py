@@ -3,7 +3,7 @@ import os
 import subprocess
 
 # addon dir is tools/blender/addon; the CLI is tools/blender/bake/bake-audio.mjs
-_ADDON_DIR = os.path.dirname(os.path.abspath(__file__))
+_ADDON_DIR = os.path.dirname(os.path.realpath(__file__))
 _DEFAULT_CLI = os.path.normpath(os.path.join(_ADDON_DIR, "..", "bake", "bake-audio.mjs"))
 
 
