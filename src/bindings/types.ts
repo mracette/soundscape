@@ -20,7 +20,7 @@ export const TARGET_PROPERTIES = [
 
 export type TargetProperty = (typeof TARGET_PROPERTIES)[number];
 
-export const MEASURE_VALUES = ["volume", "bucket"] as const;
+export const MEASURE_VALUES = ["volume", "bucket", "onset"] as const;
 export type Measure = (typeof MEASURE_VALUES)[number];
 
 export interface Source {

@@ -7,6 +7,6 @@ export type {
   Binding,
   SoundscapeUserData,
 } from "./types";
-export { TARGET_PROPERTIES } from "./types";
+export { TARGET_PROPERTIES, MEASURE_VALUES } from "./types";
 export { validateUserData, validateBinding } from "./validate";
 export type { ValidationResult } from "./validate";

@@ -153,6 +153,33 @@ describe("validateUserData", () => {
     expect(r.errors.join(" ")).toContain('unknown property "expnent"');
   });
 
+  it("accepts an onset source (no bucket)", () => {
+    const r = validateUserData({
+      bindings: [
+        {
+          target: { property: "emissiveIntensity" },
+          source: { band: "bass", measure: "onset" },
+          transform: { outMin: 0, outMax: 1 },
+        },
+      ],
+    });
+    expect(r.valid).toBe(true);
+  });
+
+  it("rejects bucket alongside onset measure", () => {
+    const r = validateUserData({
+      bindings: [
+        {
+          target: { property: "emissiveIntensity" },
+          source: { band: "bass", measure: "onset", bucket: 2 },
+          transform: { outMin: 0, outMax: 1 },
+        },
+      ],
+    });
+    expect(r.valid).toBe(false);
+    expect(r.errors.join()).toContain('only allowed when measure is "bucket"');
+  });
+
   it("reports the index of the offending binding", () => {
     const r = validateUserData({
       bindings: [

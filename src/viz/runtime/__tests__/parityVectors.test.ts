@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, test, expect } from "vitest";
 import { resolveEase } from "../ease";
 import { BindingEvaluator } from "../evaluator";
+import { MEASURE_VALUES } from "../../../bindings";
 
 const FIXTURE = resolve("tools/blender/tests/parity_vectors.json");
 
@@ -50,7 +51,7 @@ function buildEvaluator() {
 }
 
 function buildFixture() {
-  return { ease: buildEase(), evaluator: buildEvaluator() };
+  return { measures: [...MEASURE_VALUES], ease: buildEase(), evaluator: buildEvaluator() };
 }
 
 describe("parity vectors", () => {

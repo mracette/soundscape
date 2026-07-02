@@ -73,7 +73,7 @@ export function validateBinding(
       errors.push(`${path}.source.band must be a non-empty string`);
     }
     if (!MEASURES.has(String(source.measure))) {
-      errors.push(`${path}.source.measure must be "volume" or "bucket"`);
+      errors.push(`${path}.source.measure must be "volume", "bucket" or "onset"`);
     }
     if (source.measure === "bucket") {
       if (!Number.isInteger(source.bucket) || (source.bucket as number) < 0) {

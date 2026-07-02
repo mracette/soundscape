@@ -1,4 +1,9 @@
 {
+  "measures": [
+    "volume",
+    "bucket",
+    "onset"
+  ],
   "ease": [
     {
       "name": "linear",

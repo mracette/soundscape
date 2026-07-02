@@ -40,6 +40,11 @@ describe("AnalyserSignalSource", () => {
     expect(src.read({ band: "bass", measure: "volume" })).toBe(0);
   });
 
+  it("reads onset as 0 (unsupported live)", () => {
+    const src = new AnalyserSignalSource({ bass: fakeBand([255, 0, 255, 0], []) });
+    expect(src.read({ band: "bass", measure: "onset" })).toBe(0);
+  });
+
   it("update() refreshes every band's analyser", () => {
     let calls = 0;
     const band: AnalyserLike = {

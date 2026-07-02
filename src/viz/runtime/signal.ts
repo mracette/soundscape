@@ -27,6 +27,17 @@ export interface SignalSource {
  * lookup: `measure:"volume"` is the band's mean level; `measure:"bucket"` is
  * one normalized frequency bucket.
  */
+let onsetWarned = false;
+/** Live analysers have no onset detector; baked sources serve it (Phase 5). */
+function warnOnsetOnce(): void {
+  if (!onsetWarned) {
+    onsetWarned = true;
+    console.warn(
+      'AnalyserSignalSource: measure "onset" is only available from baked signals; reading 0.'
+    );
+  }
+}
+
 export class AnalyserSignalSource implements SignalSource {
   constructor(private readonly bands: Record<string, AnalyserLike>) {}
 
@@ -40,6 +51,10 @@ export class AnalyserSignalSource implements SignalSource {
   read(source: Source): number {
     const band = this.bands[source.band];
     if (!band) return 0;
+    if (source.measure === "onset") {
+      warnOnsetOnce();
+      return 0;
+    }
     if (source.measure === "bucket") {
       const v = band.bucketData[source.bucket ?? 0];
       // empty analyser buckets can be 0/0 = NaN; out-of-range is undefined
