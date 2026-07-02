@@ -20,6 +20,8 @@ interface Props {
   zIndex?: number;
   iconName?: string;
   icon?: ReactNode;
+  accentColor?: string;
+  accentGlow?: string;
   menuWidth: number;
   content?: ReactNode;
   config?: unknown;
@@ -60,6 +62,8 @@ export const MenuButtonChild = (props: Props) => {
           className={cx(menuButtonChild, "menu-button-child")}
           style={{
             background: isOpen ? openButtonColor : buttonColor,
+            borderColor: props.accentColor ?? "white",
+            boxShadow: `0 0 ${isOpen ? 16 : 8}px ${props.accentGlow ?? "rgba(255, 255, 255, 0.3)"}`,
             opacity: props.parentIsOpen ? 1 : 0,
             width: props.width,
             height: props.height,

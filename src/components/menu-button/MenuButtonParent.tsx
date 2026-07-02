@@ -13,6 +13,8 @@ interface ChildButtonProp {
   iconName?: string;
   icon?: ReactNode;
   content?: ReactNode;
+  accentColor?: string;
+  accentGlow?: string;
 }
 
 interface Props {
@@ -83,6 +85,8 @@ export const MenuButtonParent = (props: Props) => {
           // button appearance
           iconName={child.iconName}
           icon={child.icon}
+          accentColor={child.accentColor}
+          accentGlow={child.accentGlow}
           zIndex={numOfChildren - index}
           separation={separation}
           width={childWidth}
