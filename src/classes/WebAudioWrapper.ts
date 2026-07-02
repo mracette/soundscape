@@ -532,7 +532,14 @@ export class WebAudioWrapper {
       onCommit,
       onRetime,
     });
-    if (this.transportTick === null) {
+    // Re-arm unless a tick is verifiably still armed: if something cleared the
+    // scheduler out from under the transport, the tracked id points at a dead
+    // event and waiting on it would leave every queued request uncommitted, so
+    // the transport self-heals here instead.
+    if (
+      this.transportTick === null ||
+      !this.scheduler.getEvent(this.transportTick)
+    ) {
       this.armTransportTick();
     }
   }
@@ -540,6 +547,22 @@ export class WebAudioWrapper {
   /** Drop a pending boundary request (re-toggle before it commits, or unmount). */
   cancelBoundary(key: string): void {
     this.transportQueue.delete(key);
+  }
+
+  /**
+   * Tear down the boundary transport: cancel the armed poll tick, drop every
+   * pending request, and reset the re-arm latch. Song unmount must call this
+   * rather than only `scheduler.clear()` — a raw clear kills the armed tick
+   * without firing it (`onended` is nulled before the stop), which would leave
+   * `transportTick` holding a stale event id and block every future
+   * `scheduleAtBoundary` from re-arming for the rest of the session.
+   */
+  clearTransport(): void {
+    if (this.transportTick !== null) {
+      this.scheduler.cancel(this.transportTick);
+      this.transportTick = null;
+    }
+    this.transportQueue.clear();
   }
 
   /**

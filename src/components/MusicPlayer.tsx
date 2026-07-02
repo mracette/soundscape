@@ -83,6 +83,10 @@ export const MusicPlayer = () => {
     // music player cleanup
     if (songLoadStatus) {
       return () => {
+        // tear down the boundary transport before the raw scheduler clear —
+        // clear() alone kills the armed transport tick without firing it,
+        // stranding the transport's re-arm latch for the rest of the session
+        WAW.clearTransport();
         WAW.scheduler.clear();
         WAW.audioCtx.suspend();
         flags.playAmbientTrack &&
