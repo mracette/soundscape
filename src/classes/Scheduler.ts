@@ -73,6 +73,10 @@ export class Scheduler {
       source: dummySource,
     });
 
+    // clamp so a target time within one buffer-length of zero can't produce a
+    // negative start time (which throws)
+    const startTime = Math.max(0, time - dummyBuffer.duration);
+
     if (callback) {
       dummySource.onended = () => {
         callback();
@@ -80,19 +84,20 @@ export class Scheduler {
       };
 
       // start buffer
-      dummySource.start(time - dummyBuffer.duration);
+      dummySource.start(startTime);
 
       return newEventId;
     } else {
       const promise = new Promise<number>(
         (resolve) =>
           (dummySource.onended = () => {
+            this.cancel(newEventId); // self-clean, like the callback path
             resolve(newEventId);
           })
       );
 
       // start buffer
-      dummySource.start(time - dummyBuffer.duration);
+      dummySource.start(startTime);
 
       return promise;
     }

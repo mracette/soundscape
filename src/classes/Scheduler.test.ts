@@ -57,14 +57,20 @@ describe("Scheduler", () => {
       await expect(promise).resolves.toBe(1);
     });
 
-    it("without a callback, leaves the fired event in the queue (promise path never self-cleans)", async () => {
-      // Characterization, likely a leak: the callback path calls cancel() after
-      // firing but the promise path does not, so the event lingers until clear().
+    it("without a callback, removes the fired event from the queue (promise path self-cleans)", async () => {
       const promise = scheduler.scheduleOnce(2);
       ctx.advanceTo(2.5);
       await promise;
-      expect(scheduler.queue).toHaveLength(1);
-      expect(scheduler.getEvent(1)).not.toBe(false);
+      expect(scheduler.queue).toHaveLength(0);
+      expect(scheduler.getEvent(1)).toBe(false);
+    });
+
+    it("clamps a target time within one buffer-length of zero rather than throwing", () => {
+      const cb = vi.fn();
+      scheduler.scheduleOnce(DUMMY_DURATION / 2, cb);
+      expect(ctx.sources[0].startTime).toBe(0);
+      ctx.advanceTo(1);
+      expect(cb).toHaveBeenCalledTimes(1);
     });
   });
 
