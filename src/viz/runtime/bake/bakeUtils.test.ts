@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { frameTimes, synthNoise } from "./bakeUtils";
+import { computeOnsetFlux, computeOnsetStrength, frameTimes, synthNoise } from "./bakeUtils";
 
 describe("frameTimes", () => {
   it("returns floor(duration*fps) frame-center times within (0, duration)", () => {
@@ -9,6 +9,54 @@ describe("frameTimes", () => {
     expect(t[29]).toBeCloseTo(29.5 / 30, 10);
     expect(t[0]).toBeGreaterThan(0);
     expect(t[29]).toBeLessThan(1);
+  });
+});
+
+describe("computeOnsetFlux", () => {
+  it("spikes on bucket increases and ignores decreases", () => {
+    const frames = [
+      { buckets: [0.1, 0.1] },
+      { buckets: [0.8, 0.1] }, // +0.7 attack
+      { buckets: [0.4, 0.1] }, // decay only
+    ];
+    const flux = computeOnsetFlux(frames);
+    expect(flux[0]).toBe(0);
+    expect(flux[1]).toBeCloseTo(0.7, 10);
+    expect(flux[2]).toBe(0);
+  });
+});
+
+describe("computeOnsetStrength", () => {
+  // A hit at frame 10, then a sustained-but-wobbling plateau: raw flux jitters
+  // through the plateau; the processed signal must not.
+  const N = 40;
+  const frames = Array.from({ length: N }, (_, i) => {
+    if (i < 10) return { buckets: [0.05] };
+    if (i === 10) return { buckets: [0.9] };
+    return { buckets: [0.6 + 0.02 * (i % 2)] }; // sustained with small jitter
+  });
+
+  it("pulses on the transient and decays smoothly (no one-frame flicker)", () => {
+    const s = computeOnsetStrength(frames);
+    const peak = Math.max(...s);
+    expect(s[10]).toBe(peak);
+    // envelope: the frames right after the hit hold a decaying tail
+    expect(s[11]).toBeGreaterThan(0.5 * peak);
+    expect(s[11]).toBeLessThan(s[10]);
+    expect(s[12]).toBeLessThan(s[11]);
+  });
+
+  it("suppresses jitter during sustained sound", () => {
+    const s = computeOnsetStrength(frames);
+    const peak = Math.max(...s);
+    // deep into the plateau (past the envelope tail + mean window)
+    for (let i = 25; i < N; i++) expect(s[i]).toBeLessThan(0.05 * peak);
+  });
+
+  it("handles empty and constant input", () => {
+    expect(computeOnsetStrength([])).toEqual([]);
+    const flat = computeOnsetStrength(Array.from({ length: 10 }, () => ({ buckets: [0.5] })));
+    expect(flat.every((v) => v === 0)).toBe(true);
   });
 });
 

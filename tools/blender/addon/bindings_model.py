@@ -15,7 +15,7 @@ TARGET_PROPERTIES = [
     "position.z",
 ]
 
-MEASURES = ["volume", "bucket"]
+MEASURES = ["volume", "bucket", "onset"]
 
 # Curated d3-ease short names the runtime's resolveEase() understands.
 # Each entry must resolve to a real d3-ease export (easeXxx); guarded by the

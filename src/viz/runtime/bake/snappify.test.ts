@@ -48,6 +48,7 @@ describe("snappify", () => {
     const frames = Array.from({ length: N }, (_, i) => ({
       volume: i === K ? 1 : 0,
       buckets: [i === K ? 1 : 0, i === K - 5 ? 1 : 0],
+      onset: 0,
     }));
     const out = snappifyFrames(frames, { coef: 0.6, leadFrames: 2 });
     expect(out.length).toBe(N);

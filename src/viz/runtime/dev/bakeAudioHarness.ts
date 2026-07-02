@@ -1,4 +1,5 @@
 import { bakeSignal, type BakeResult } from "../bake/bakeSignal";
+import { normalizeToPeak } from "../bake/bakeUtils";
 import { snappifyFrames } from "../bake/snappify";
 
 interface BakeAudioOpts {
@@ -47,6 +48,7 @@ window.__bakeAudio = async (b64, opts) => {
   if (opts.snappy) {
     result.frames = snappifyFrames(result.frames, opts.snappy);
   }
+  result.frames = normalizeToPeak(result.frames);
   return result;
 };
 window.__bakeReady = true;

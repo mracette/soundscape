@@ -33,6 +33,8 @@ def read_signal(bake, measure, bucket, frame):
     if measure == "bucket":
         buckets = f["buckets"]
         return buckets[bucket] if bucket < len(buckets) else 0.0
+    if measure == "onset":
+        return f["onset"]
     return f["volume"]
 
 

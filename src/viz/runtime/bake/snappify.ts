@@ -1,4 +1,5 @@
 import type { BakedFrame } from "./bakeSignal";
+import { computeOnsetStrength } from "./bakeUtils";
 
 /**
  * Causal exponential smoothing (forward pass only). Lags the signal — this is the
@@ -64,7 +65,9 @@ function channel(frames: BakedFrame[], pick: (f: BakedFrame) => number): number[
  * into a "snappy" one: zero-phase smooth every channel (volume + each bucket) so
  * it's clean but lag-free, then lead-shift so it anticipates. This is the whole
  * point of the experiment — the same information the current causal bake has, but
- * smoothed without delay and nudged slightly early.
+ * smoothed without delay and nudged slightly early. `onset` is recomputed from
+ * the smoothed+shifted buckets rather than carried over, so flux is measured on
+ * the same clean signal the binding will actually see.
  */
 export function snappifyFrames(
   frames: BakedFrame[],
@@ -85,8 +88,14 @@ export function snappifyFrames(
       )
     );
   }
-  return frames.map((_, i) => ({
+  const out = frames.map((_, i) => ({
     volume: vol[i],
     buckets: buckets.map((series) => series[i]),
+    onset: 0,
   }));
+  const onset = computeOnsetStrength(out);
+  out.forEach((f, i) => {
+    f.onset = onset[i];
+  });
+  return out;
 }
