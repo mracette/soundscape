@@ -11,7 +11,6 @@ import { SongContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
-import { nextSubdivision } from "../utils/audioUtils";
 import { lerp } from "../utils/mathUtils";
 
 /*
@@ -70,11 +69,27 @@ export const MusicPlayer = () => {
         });
     }
 
+    if (songLoadStatus) {
+      // A song revisit is a fresh session: the store resets on mount (see the
+      // reset() above), but the engine singleton keeps the previous visit's
+      // Time Warp state — TempoClock rate (possibly a stranded mid-glide
+      // midpoint) and every voice's recorded playbackRate. Pin the engine back
+      // to the store's default with an immediate set; nothing is audible
+      // during mount, so no ramp is needed.
+      WAW.setTimeWarpRate(id, 1);
+    }
+
     // safe to resume and take the init time here (after user gesture)
     if (songLoadStatus && flags.playAmbientTrack && ambientTrack) {
       let startTime = null;
       if (ambientTrackQuantize) {
-        startTime = nextSubdivision(WAW.audioCtx, bpm, 4);
+        // quantize on the song's TempoClock grid — the same grid voice toggles
+        // commit on — not the rate-oblivious base-BPM wall-clock grid, which
+        // diverges from it whenever Time Warp has re-anchored the clock
+        startTime = WAW.getTempoClock(id).nextBoundary(
+          4,
+          WAW.audioCtx.currentTime
+        );
       }
       WAW.audioCtx.resume();
       WAW.getVoices(id)["ambient"].start(startTime as number);
@@ -83,6 +98,10 @@ export const MusicPlayer = () => {
     // music player cleanup
     if (songLoadStatus) {
       return () => {
+        // tear down the boundary transport before the raw scheduler clear —
+        // clear() alone kills the armed transport tick without firing it,
+        // stranding the transport's re-arm latch for the rest of the session
+        WAW.clearTransport();
         WAW.scheduler.clear();
         WAW.audioCtx.suspend();
         flags.playAmbientTrack &&
@@ -98,7 +117,6 @@ export const MusicPlayer = () => {
     id,
     songLoadStatus,
     ambientTrackQuantize,
-    bpm,
   ]);
 
   const handleReset = useCallback(() => {

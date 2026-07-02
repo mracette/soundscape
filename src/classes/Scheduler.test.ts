@@ -1,78 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { Scheduler } from "./Scheduler";
-
-/**
- * Minimal fake of the WebAudio surface the Scheduler touches. The Scheduler
- * fires callbacks via `BufferSourceNode.onended` on silent 1-sample buffers;
- * here `advanceTo` plays the audio clock forward, firing `onended` (in end-time
- * order, with `currentTime` set to each source's end time) for every started,
- * un-stopped source whose playback has finished. Firing can schedule new
- * sources (the repeating chain), so the scan repeats until nothing is due.
- */
-class FakeBufferSource {
-  buffer: { duration: number } | null = null;
-  onended: (() => void) | null = null;
-  startTime: number | null = null;
-  stopped = false;
-  fired = false;
-
-  constructor(private ctx: FakeAudioContext) {}
-
-  connect(): void {}
-  disconnect(): void {}
-
-  start(when = 0): void {
-    // WebAudio clamps a start time in the past to "now"
-    this.startTime = Math.max(when, this.ctx.currentTime);
-  }
-
-  stop(): void {
-    if (this.startTime === null) throw new Error("InvalidStateError");
-    this.stopped = true;
-  }
-
-  get endTime(): number {
-    return this.startTime! + (this.buffer?.duration ?? 0);
-  }
-}
-
-class FakeAudioContext {
-  currentTime = 0;
-  destination = {};
-  sources: FakeBufferSource[] = [];
-
-  createBuffer(
-    _channels: number,
-    length: number,
-    sampleRate: number
-  ): { duration: number } {
-    return { duration: length / sampleRate };
-  }
-
-  createBufferSource(): FakeBufferSource {
-    const source = new FakeBufferSource(this);
-    this.sources.push(source);
-    return source;
-  }
-
-  advanceTo(time: number): void {
-    for (;;) {
-      const due = this.sources
-        .filter(
-          (s) => !s.fired && !s.stopped && s.startTime !== null && s.endTime <= time
-        )
-        .sort((a, b) => a.endTime - b.endTime)[0];
-      if (!due) break;
-      due.fired = true;
-      this.currentTime = due.endTime;
-      due.onended?.();
-    }
-    this.currentTime = time;
-  }
-}
-
-// 1-sample dummy buffer at 44.1kHz — the lead time the Scheduler subtracts
-const DUMMY_DURATION = 1 / 44100;
+import { FakeAudioContext, DUMMY_DURATION } from "./fakeWebAudio";
 
 describe("Scheduler", () => {
   let ctx: FakeAudioContext;
@@ -129,14 +57,20 @@ describe("Scheduler", () => {
       await expect(promise).resolves.toBe(1);
     });
 
-    it("without a callback, leaves the fired event in the queue (promise path never self-cleans)", async () => {
-      // Characterization, likely a leak: the callback path calls cancel() after
-      // firing but the promise path does not, so the event lingers until clear().
+    it("without a callback, removes the fired event from the queue (promise path self-cleans)", async () => {
       const promise = scheduler.scheduleOnce(2);
       ctx.advanceTo(2.5);
       await promise;
-      expect(scheduler.queue).toHaveLength(1);
-      expect(scheduler.getEvent(1)).not.toBe(false);
+      expect(scheduler.queue).toHaveLength(0);
+      expect(scheduler.getEvent(1)).toBe(false);
+    });
+
+    it("clamps a target time within one buffer-length of zero rather than throwing", () => {
+      const cb = vi.fn();
+      scheduler.scheduleOnce(DUMMY_DURATION / 2, cb);
+      expect(ctx.sources[0].startTime).toBe(0);
+      ctx.advanceTo(1);
+      expect(cb).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -69,9 +69,59 @@ interface TransportRequest {
   onRetime?: (time: number) => void;
 }
 
+/**
+ * One Time Warp glide step as issued to the voices' AudioParams: a linear ramp
+ * from `startRate` to `targetRate` over `rampSeconds` starting at `startTime`,
+ * holding `targetRate` after. The audio's rate over the segment is therefore
+ * known in closed form, which is what lets the tempo clock be trued up to the
+ * audio's exact beat integral however long the segment really lasts.
+ */
+interface GlideSegment {
+  startTime: number;
+  startRate: number;
+  targetRate: number;
+  rampSeconds: number;
+}
+
+/**
+ * The audio rate at `now` and its time-weighted average since the segment
+ * began: the trapezoid over the (possibly still in-flight) ramp portion plus
+ * the hold at the target after it.
+ */
+function glideSegmentRates(
+  seg: GlideSegment,
+  now: number
+): { value: number; average: number } {
+  const gap = now - seg.startTime;
+  if (gap <= 0) {
+    return { value: seg.startRate, average: seg.startRate };
+  }
+  if (gap >= seg.rampSeconds) {
+    const rampAvg = (seg.startRate + seg.targetRate) / 2;
+    return {
+      value: seg.targetRate,
+      average:
+        (seg.rampSeconds * rampAvg + (gap - seg.rampSeconds) * seg.targetRate) /
+        gap,
+    };
+  }
+  const value =
+    seg.startRate + ((seg.targetRate - seg.startRate) * gap) / seg.rampSeconds;
+  return { value, average: (seg.startRate + value) / 2 };
+}
+
 /** Poll period and commit horizon (seconds) for the boundary transport. */
 const TRANSPORT_TICK = 0.015;
 const TRANSPORT_LOOKAHEAD = 0.04;
+/**
+ * Smallest head start (seconds) a sample-accurate `start(time)` is trusted
+ * with. A boundary can land closer than this to "now" when it falls inside the
+ * first poll tick, or when main-thread jank spans the commit window; Web Audio
+ * would clamp `start(pastTime)` to "now" at buffer offset 0, leaving that loop
+ * permanently out of phase. Such commits join mid-loop instead (see
+ * `tickTransport`).
+ */
+const TRANSPORT_MIN_LEAD = 0.01;
 
 /**
  * Central audio engine. Owns the AudioContext, Scheduler, and the entire WebAudio
@@ -95,13 +145,13 @@ export class WebAudioWrapper {
   scheduler: Scheduler;
   tempoClocks: Partial<Record<SongId, TempoClock>> = {};
   /**
-   * Last commanded Time Warp rate per song. During a glide this is the audio
-   * ramp's anchor (where the previous segment's ramp landed), which the clock's
-   * midpoint rate must pair with `rate` — the clock's own `currentRate` is a
-   * held midpoint mid-glide, and pairing midpoints compounds into a permanent
-   * clock/audio phase offset.
+   * The in-flight Time Warp glide segment per song. Each `setTimeWarpRate`
+   * call closes the previous segment — computing the audio's true average rate
+   * over however long it actually lasted — before opening the next, so the
+   * clock's beat integral tracks the audio's exactly even when the glide's
+   * tick timer stretches (background-tab throttling, main-thread jank).
    */
-  private timeWarpTargets: Partial<Record<SongId, number>> = {};
+  private timeWarpGlides: Partial<Record<SongId, GlideSegment>> = {};
   private transportQueue = new Map<string, TransportRequest>();
   private transportTick: number | null = null;
 
@@ -474,20 +524,49 @@ export class WebAudioWrapper {
    * knob chains one such call per glide step for a click-free glide.
    *
    * The clock cannot ramp: TempoClock's position math assumes a piecewise-
-   * constant rate. Each gliding segment instead holds the midpoint of (previous
-   * commanded rate, `rate`) — by the trapezoid rule the clock's beat integral
-   * then equals the linear ramp's integral exactly at every segment end; within a
-   * segment they diverge by at most (rate delta x glideSeconds / 8): well under
-   * a millisecond of musical position. The glide's final settle call (no glide)
-   * re-pins clock and audio to the same exact rate.
+   * constant rate. Each call therefore does two things:
+   *
+   *  1. Closes the previous glide segment. Its audio rate is known in closed
+   *     form (linear ramp over `rampSeconds`, then a hold at the target), so
+   *     the true time-weighted average over the segment's *actual* length —
+   *     however late the tick timer really fired — is credited to the clock
+   *     via `resyncRate`. This keeps the clock's beat integral equal to the
+   *     audio's at every tick even when window timers stretch from 30ms to
+   *     seconds (background-tab throttling, main-thread jank); assuming the
+   *     nominal spacing instead would strand the grid up to ~half a beat off
+   *     the playing loops after a fully throttled glide.
+   *  2. Opens the next segment, holding the ramp's midpoint on the clock —
+   *     by the trapezoid rule that is the segment's exact average if the next
+   *     tick lands on schedule, and step 1 corrects it after the fact if not.
+   *
+   * The glide's final settle call (no glide) closes the last segment the same
+   * way and pins clock and audio to the same exact rate. Within a segment the
+   * clock and audio diverge by at most (rate delta x glideSeconds / 8): well
+   * under a millisecond of musical position.
    */
   setTimeWarpRate(songId: SongId, rate: number, glideSeconds = 0): void {
     const now = this.audioCtx.currentTime;
     const clock = this.getTempoClock(songId);
-    const prevTarget = this.timeWarpTargets[songId] ?? clock.currentRate;
-    const clockRate = glideSeconds > 0 ? (prevTarget + rate) / 2 : rate;
-    this.timeWarpTargets[songId] = rate;
-    clock.setRate(clockRate, now);
+    const seg = this.timeWarpGlides[songId];
+    // `value` is where the voices' AudioParam actually sits right now — the
+    // anchor the new ramp glides from (AudioPlayerWrapper anchors at
+    // param.value the same way) — and `average` trues up the closing segment.
+    const { value, average } = seg
+      ? glideSegmentRates(seg, now)
+      : { value: clock.currentRate, average: clock.currentRate };
+    clock.resyncRate(average, glideSeconds > 0 ? (value + rate) / 2 : rate, now);
+    if (glideSeconds > 0) {
+      this.timeWarpGlides[songId] = {
+        startTime: now,
+        startRate: value,
+        targetRate: rate,
+        rampSeconds: glideSeconds,
+      };
+    } else {
+      // immediate set: audio and clock both hold `rate` exactly from here on,
+      // so there is no segment left to true up
+      delete this.timeWarpGlides[songId];
+    }
     const voices = this.getVoices(songId);
     for (const name in voices) {
       voices[name].setPlaybackRate(rate, now, glideSeconds);
@@ -532,7 +611,14 @@ export class WebAudioWrapper {
       onCommit,
       onRetime,
     });
-    if (this.transportTick === null) {
+    // Re-arm unless a tick is verifiably still armed: if something cleared the
+    // scheduler out from under the transport, the tracked id points at a dead
+    // event and waiting on it would leave every queued request uncommitted, so
+    // the transport self-heals here instead.
+    if (
+      this.transportTick === null ||
+      !this.scheduler.getEvent(this.transportTick)
+    ) {
       this.armTransportTick();
     }
   }
@@ -540,6 +626,22 @@ export class WebAudioWrapper {
   /** Drop a pending boundary request (re-toggle before it commits, or unmount). */
   cancelBoundary(key: string): void {
     this.transportQueue.delete(key);
+  }
+
+  /**
+   * Tear down the boundary transport: cancel the armed poll tick, drop every
+   * pending request, and reset the re-arm latch. Song unmount must call this
+   * rather than only `scheduler.clear()` — a raw clear kills the armed tick
+   * without firing it (`onended` is nulled before the stop), which would leave
+   * `transportTick` holding a stale event id and block every future
+   * `scheduleAtBoundary` from re-arming for the rest of the session.
+   */
+  clearTransport(): void {
+    if (this.transportTick !== null) {
+      this.scheduler.cancel(this.transportTick);
+      this.transportTick = null;
+    }
+    this.transportQueue.clear();
   }
 
   /**
@@ -563,8 +665,21 @@ export class WebAudioWrapper {
       const time = req.clock.timeAt(req.targetBeat);
       if (time <= now + TRANSPORT_LOOKAHEAD) {
         if (req.action === "start") {
-          req.player.start(time);
+          if (time >= now + TRANSPORT_MIN_LEAD) {
+            req.player.start(time);
+          } else {
+            // The boundary is already past or too close for the audio thread
+            // to honor sample-accurately. Rather than let Web Audio clamp the
+            // start to "now" at offset 0 (permanently off-grid), start a hair
+            // ahead at the intra-loop position the voice would have reached
+            // had it started exactly on the boundary — it joins mid-loop, in
+            // phase, with no extra bar of silence. The offset converts the
+            // wall-clock overshoot to buffer seconds via the playback rate.
+            const startAt = now + TRANSPORT_MIN_LEAD;
+            req.player.start(startAt, (startAt - time) * req.player.playbackRate);
+          }
         } else {
+          // a past stop time is clamped to "now" — a few ms late, harmless
           req.player.stop(time);
         }
         req.onCommit(time);

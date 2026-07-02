@@ -56,6 +56,29 @@ describe("TempoClock", () => {
     });
   });
 
+  describe("resyncRate", () => {
+    it("credits the elapsed interval at avgRate instead of the held rate", () => {
+      const clock = new TempoClock(BPM);
+      // held rate 1 for 10s would credit 20 beats; the true average was 0.5
+      clock.resyncRate(0.5, 0.7, 10);
+      expect(clock.beatsAt(10)).toBe(10);
+      expect(clock.currentRate).toBe(0.7);
+      expect(clock.beatsAt(11)).toBeCloseTo(10 + 2 * 0.7, 10);
+    });
+
+    it("is equivalent to setRate when avgRate equals the held rate", () => {
+      const a = new TempoClock(BPM);
+      const b = new TempoClock(BPM);
+      a.setRate(0.8, 4);
+      b.resyncRate(1, 0.8, 4);
+      a.setRate(0.6, 9);
+      b.resyncRate(0.8, 0.6, 9);
+      for (const t of [9, 10, 25]) {
+        expect(b.beatsAt(t)).toBeCloseTo(a.beatsAt(t), 10);
+      }
+    });
+  });
+
   describe("nextBoundary / nextBoundaryBeat", () => {
     it("lands on exact grid multiples of the interval", () => {
       const clock = new TempoClock(BPM);
