@@ -25,6 +25,8 @@ const state = {
   peaks: [] as { min: number; max: number }[],
   settings: structuredClone(DEFAULT_SETTINGS) as BakeSettings,
   toggles: { volume: true, onset: true, buckets: [] } as CurveToggles,
+  /** Display-only preview of the binding transform's `gate` (see evaluator.ts). */
+  displayGate: 0,
   playheadSec: 0,
 };
 
@@ -43,8 +45,25 @@ function frames() {
   return state.analysis ? state.analysis[state.variant].frames : [];
 }
 
+// Same gate-then-rescale the runtime's BindingEvaluator applies (evaluator.ts):
+// below the threshold is exactly 0, the surviving range remaps to 0..1.
+const gateSignal = (v: number, g: number): number => Math.max(0, v - g) / (1 - g);
+
+/** The current variant's frames with the display gate applied to every channel. */
+function displayFrames() {
+  const fs = frames();
+  const g = state.displayGate;
+  if (g <= 0) return fs;
+  return fs.map((f) => ({
+    ...f,
+    volume: gateSignal(f.volume, g),
+    onset: gateSignal(f.onset, g),
+    buckets: f.buckets.map((b) => gateSignal(b, g)),
+  }));
+}
+
 function redraw(): void {
-  drawInspector(canvas, state.peaks, frames(), state.toggles, state.playheadSec, state.audio?.duration ?? 0);
+  drawInspector(canvas, state.peaks, displayFrames(), state.toggles, state.playheadSec, state.audio?.duration ?? 0);
 }
 
 function sizeCanvas(): void {
@@ -184,6 +203,16 @@ function renderKnobs(): void {
   knobs.appendChild(numberKnob("decay", s.onset.decayPerFrame, 0.05, (v) => ((s.onset.decayPerFrame = v), rebakeDebounced())));
 
   h3("curves");
+  knobs.appendChild(
+    numberKnob("gate", state.displayGate, 0.05, (v) => {
+      state.displayGate = Math.min(0.99, Math.max(0, v));
+      redraw();
+    })
+  );
+  const gateNote = document.createElement("div");
+  gateNote.className = "note";
+  gateNote.textContent = "gate previews the binding transform — copy into the binding's Gate field";
+  knobs.appendChild(gateNote);
   knobs.appendChild(checkbox("volume", state.toggles.volume, (v) => ((state.toggles.volume = v), redraw())));
   knobs.appendChild(checkbox("onset", state.toggles.onset, (v) => ((state.toggles.onset = v), redraw())));
   const bucketsContainer = document.createElement("div");
@@ -265,7 +294,7 @@ function tick(): void {
   requestAnimationFrame(tick);
   if (!state.audio) return;
   state.playheadSec = player.position;
-  const fs = frames();
+  const fs = displayFrames(); // readout matches the (possibly gated) curves
   const idx = Math.min(fs.length - 1, Math.floor(state.playheadSec * state.settings.fps));
   const f = fs[idx];
   const readout = document.getElementById("readout") as HTMLElement;

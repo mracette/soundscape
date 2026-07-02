@@ -25,13 +25,20 @@ export class BindingEvaluator {
 
   /**
    * Map a raw 0..1 signal to the target's output value. Pipeline: clamp to
-   * [0,1] → attack/release envelope (when configured) → `^exponent` → ease →
-   * lerp into [outMin, outMax] → clamp to that range. Overshoot eases
-   * (e.g. easeBackOut) are clipped to the range by this final clamp.
+   * [0,1] → gate (when configured) → attack/release envelope (when
+   * configured) → `^exponent` → ease → lerp into [outMin, outMax] → clamp to
+   * that range. Overshoot eases (e.g. easeBackOut) are clipped to the range
+   * by this final clamp. The gate runs before the envelope so a signal that
+   * drops under the threshold feeds 0 into the release, decaying the output
+   * smoothly to true zero instead of truncating the tail.
    */
   evaluate(signal: number): number {
     const t = this.binding.transform;
     let s = clamp01(signal);
+
+    // Gate-then-rescale: below the threshold is exactly 0, and the surviving
+    // range remaps to the full 0..1 so there is no visible step at the gate.
+    if (t.gate !== undefined) s = Math.max(0, s - t.gate) / (1 - t.gate);
 
     if (t.smoothing) {
       const coef = s > this.smoothed ? t.smoothing.attack : t.smoothing.release;

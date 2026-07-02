@@ -53,6 +53,9 @@ class BindingPropertyGroup(bpy.types.PropertyGroup):
     bucket: bpy.props.IntProperty(name="Bucket", default=0, min=0)
     out_min: bpy.props.FloatProperty(name="Out Min", default=0.0)
     out_max: bpy.props.FloatProperty(name="Out Max", default=1.0)
+    # Noise-floor gate: signal <= gate maps to exactly 0, remainder rescales
+    # to 0..1. Schema allows [0,1); 0 = off (omitted from the export).
+    gate: bpy.props.FloatProperty(name="Gate", default=0.0, min=0.0, max=0.99)
     exponent: bpy.props.FloatProperty(name="Exponent", default=1.0, min=0.0001)
     ease: bpy.props.EnumProperty(
         name="Ease", items=_items(EASE_NAMES), default="linear"
@@ -74,6 +77,8 @@ def binding_to_dict(b):
     }
     if b.measure == "bucket":
         d["source"]["bucket"] = b.bucket
+    if b.gate != 0.0:
+        d["transform"]["gate"] = b.gate
     if b.exponent != 1.0:
         d["transform"]["exponent"] = b.exponent
     if b.ease != "linear":

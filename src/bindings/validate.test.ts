@@ -82,6 +82,35 @@ describe("validateUserData", () => {
     expect(r.errors.join(" ")).toContain('only allowed when measure is "bucket"');
   });
 
+  it("rejects a gate outside [0,1)", () => {
+    for (const gate of [-0.1, 1, 1.5]) {
+      const r = validateUserData({
+        bindings: [
+          {
+            target: { property: "opacity" },
+            source: { band: "melody", measure: "volume" },
+            transform: { outMin: 0, outMax: 1, gate },
+          },
+        ],
+      });
+      expect(r.valid).toBe(false);
+      expect(r.errors.join(" ")).toContain("gate must be a number in [0,1)");
+    }
+  });
+
+  it("accepts a gate of 0 (off) and a fractional gate", () => {
+    const r = validateUserData({
+      bindings: [
+        {
+          target: { property: "opacity" },
+          source: { band: "melody", measure: "volume" },
+          transform: { outMin: 0, outMax: 1, gate: 0.15 },
+        },
+      ],
+    });
+    expect(r.valid).toBe(true);
+  });
+
   it("rejects a non-positive exponent", () => {
     const r = validateUserData({
       bindings: [

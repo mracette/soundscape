@@ -27,6 +27,12 @@ class BindingEvaluator:
         t = self.binding["transform"]
         s = _clamp01(signal)
 
+        # Gate-then-rescale before the envelope, mirroring evaluator.ts: below
+        # the threshold is exactly 0; the surviving range remaps to 0..1.
+        gate = t.get("gate")
+        if gate is not None:
+            s = max(0, s - gate) / (1 - gate)
+
         smoothing = t.get("smoothing")
         if smoothing is not None:
             coef = smoothing["attack"] if s > self.smoothed else smoothing["release"]

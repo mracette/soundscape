@@ -83,6 +83,7 @@ class SOUNDSCAPE_PT_panel(bpy.types.Panel):
                 box.prop(b, "bucket")
             box.prop(b, "out_min")
             box.prop(b, "out_max")
+            box.prop(b, "gate")
             box.prop(b, "exponent")
             box.prop(b, "ease")
             box.prop(b, "use_smoothing")

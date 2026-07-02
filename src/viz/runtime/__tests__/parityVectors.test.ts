@@ -35,7 +35,9 @@ const EVAL_CASES = [
   { label: "ease-backOut-clamped", binding: { target: { property: "scale" }, source: { band: "b", measure: "volume" }, transform: { outMin: 0, outMax: 1, ease: "backOut" } } },
   { label: "smoothing", binding: { target: { property: "opacity" }, source: { band: "b", measure: "volume" }, transform: { outMin: 0, outMax: 1, smoothing: { attack: 0.8, release: 0.2 } } } },
   { label: "inverted-range", binding: { target: { property: "position.y" }, source: { band: "b", measure: "volume" }, transform: { outMin: 1, outMax: 0 } } },
-  { label: "combined", binding: { target: { property: "position.y" }, source: { band: "b", measure: "volume" }, transform: { outMin: -2, outMax: 3, exponent: 1.5, ease: "quadInOut", smoothing: { attack: 0.6, release: 0.3 } } } },
+  { label: "gate", binding: { target: { property: "emissiveIntensity" }, source: { band: "b", measure: "volume" }, transform: { outMin: 0, outMax: 1, gate: 0.25 } } },
+  { label: "gate-smoothing", binding: { target: { property: "emissiveIntensity" }, source: { band: "b", measure: "volume" }, transform: { outMin: 0, outMax: 1, gate: 0.4, smoothing: { attack: 0.9, release: 0.25 } } } },
+  { label: "combined", binding: { target: { property: "position.y" }, source: { band: "b", measure: "volume" }, transform: { outMin: -2, outMax: 3, gate: 0.1, exponent: 1.5, ease: "quadInOut", smoothing: { attack: 0.6, release: 0.3 } } } },
 ];
 const SIGNALS = [0, 0.5, 1, 1, 0.3, 0, 0];
 

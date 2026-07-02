@@ -90,12 +90,18 @@ export function validateBinding(
   if (!isPlainObject(transform)) {
     errors.push(`${path}.transform must be an object`);
   } else {
-    rejectUnknownKeys(transform, ["exponent", "ease", "smoothing", "outMin", "outMax"], `${path}.transform`, errors);
+    rejectUnknownKeys(transform, ["gate", "exponent", "ease", "smoothing", "outMin", "outMax"], `${path}.transform`, errors);
     if (typeof transform.outMin !== "number") {
       errors.push(`${path}.transform.outMin must be a number`);
     }
     if (typeof transform.outMax !== "number") {
       errors.push(`${path}.transform.outMax must be a number`);
+    }
+    if (
+      transform.gate !== undefined &&
+      (typeof transform.gate !== "number" || transform.gate < 0 || transform.gate >= 1)
+    ) {
+      errors.push(`${path}.transform.gate must be a number in [0,1)`);
     }
     if (
       transform.exponent !== undefined &&

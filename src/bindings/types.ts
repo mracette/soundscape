@@ -38,6 +38,12 @@ export interface Smoothing {
 }
 
 export interface Transform {
+  /**
+   * Noise-floor gate applied before smoothing: signal ≤ gate maps to exactly
+   * 0 and the surviving range rescales to 0..1 (`max(0, s-gate)/(1-gate)`).
+   * 0 ≤ gate < 1, default 0 (off).
+   */
+  gate?: number;
   /** signal ^ exponent before easing; > 0, default 1. */
   exponent?: number;
   /** d3-ease function name applied after the exponent; resolved at runtime. */

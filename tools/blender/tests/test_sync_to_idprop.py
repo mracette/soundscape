@@ -37,6 +37,7 @@ def main():
     # optional fields appear only when set
     b.measure = "bucket"
     b.bucket = 3
+    b.gate = 0.15
     b.exponent = 2.0
     b.ease = "cubicOut"
     b.use_smoothing = True
@@ -45,6 +46,7 @@ def main():
     bindings_model.sync_to_idprop(obj)
     one = obj["soundscape"].to_dict()["bindings"][0]
     assert one["source"]["bucket"] == 3, one
+    assert abs(one["transform"]["gate"] - 0.15) < 1e-6, one
     assert abs(one["transform"]["exponent"] - 2.0) < 1e-6, one
     assert one["transform"]["ease"] == "cubicOut", one
     assert abs(one["transform"]["smoothing"]["attack"] - 0.8) < 1e-6, one
@@ -52,12 +54,14 @@ def main():
 
     # bucket must NOT leak back when measure returns to volume
     b.measure = "volume"
+    b.gate = 0.0
     b.exponent = 1.0
     b.ease = "linear"
     b.use_smoothing = False
     bindings_model.sync_to_idprop(obj)
     back = obj["soundscape"].to_dict()["bindings"][0]
     assert "bucket" not in back["source"], back
+    assert "gate" not in back["transform"], back
     assert "exponent" not in back["transform"], back
     assert "ease" not in back["transform"], back
     assert "smoothing" not in back["transform"], back

@@ -51,6 +51,7 @@
       "additionalProperties": false,
       "required": ["outMin", "outMax"],
       "properties": {
+        "gate": { "type": "number", "minimum": 0, "exclusiveMaximum": 1 },
         "exponent": { "type": "number", "exclusiveMinimum": 0 },
         "ease": { "type": "string", "minLength": 1 },
         "smoothing": { "$ref": "#/definitions/smoothing" },

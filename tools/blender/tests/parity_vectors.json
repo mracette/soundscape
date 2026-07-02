@@ -704,6 +704,80 @@
       ]
     },
     {
+      "label": "gate",
+      "binding": {
+        "target": {
+          "property": "emissiveIntensity"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "gate": 0.25
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.3333333333333333,
+        1,
+        1,
+        0.06666666666666665,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "gate-smoothing",
+      "binding": {
+        "target": {
+          "property": "emissiveIntensity"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "gate": 0.4,
+          "smoothing": {
+            "attack": 0.9,
+            "release": 0.25
+          }
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.14999999999999997,
+        0.915,
+        0.9915,
+        0.743625,
+        0.55771875,
+        0.41828906250000003
+      ]
+    },
+    {
       "label": "combined",
       "binding": {
         "target": {
@@ -716,6 +790,7 @@
         "transform": {
           "outMin": -2,
           "outMax": 3,
+          "gate": 0.1,
           "exponent": 1.5,
           "ease": "quadInOut",
           "smoothing": {
@@ -735,12 +810,12 @@
       ],
       "expected": [
         -2,
-        -1.73,
-        1.4863251789035408,
-        2.733643620124952,
-        1.4022396055185364,
-        -0.7640470504467198,
-        -1.5760681383032251
+        -1.8103703703703704,
+        1.3520338598757937,
+        2.708507028615725,
+        1.1195559073366197,
+        -0.8997840850092564,
+        -1.622625941158175
       ]
     }
   ]

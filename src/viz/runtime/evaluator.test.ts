@@ -71,4 +71,26 @@ describe("BindingEvaluator", () => {
     expect(e.evaluate(0)).toBeCloseTo(0.5, 10); // release: 1 + (0-1)*0.5
     expect(e.evaluate(0)).toBeCloseTo(0.25, 10);// 0.5 + (0-0.5)*0.5
   });
+
+  it("gates the signal to exactly 0 below the threshold", () => {
+    const e = new BindingEvaluator(binding({ gate: 0.2 }), linear);
+    expect(e.evaluate(0.1)).toBe(0);
+    expect(e.evaluate(0.2)).toBe(0);
+  });
+
+  it("rescales the gated signal so the surviving range spans 0..1", () => {
+    const e = new BindingEvaluator(binding({ gate: 0.2 }), linear);
+    expect(e.evaluate(0.6)).toBeCloseTo(0.5, 10); // (0.6-0.2)/(1-0.2)
+    expect(e.evaluate(1)).toBeCloseTo(1, 10);
+  });
+
+  it("gates before the smoothing envelope (release decays a gated signal to 0)", () => {
+    const e = new BindingEvaluator(
+      binding({ gate: 0.5, smoothing: { attack: 1, release: 0.5 } }),
+      linear
+    );
+    expect(e.evaluate(1)).toBeCloseTo(1, 10);     // gated 1 -> attack=1 instant
+    expect(e.evaluate(0.4)).toBeCloseTo(0.5, 10); // below gate -> 0 input; release halves
+    expect(e.evaluate(0.4)).toBeCloseTo(0.25, 10);
+  });
 });
