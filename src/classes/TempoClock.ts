@@ -49,6 +49,26 @@ export class TempoClock {
   }
 
   /**
+   * Re-anchor at `now`, crediting the interval since the previous anchor at
+   * `avgRate` instead of the held rate, then continue at `rate`.
+   *
+   * A held rate set by `setRate` is only a *prediction* of the interval's
+   * average when the audio is mid-ramp — exact if the next re-anchor lands on
+   * schedule, wrong if the tick timer stretches (background-tab throttling,
+   * main-thread jank). Once the interval's true length is known, the caller
+   * computes the audio's actual time-weighted average rate over it and trues
+   * the clock up here, keeping the clock's beat integral equal to the audio's
+   * for any gap length. `setRate(r, now)` is equivalent to
+   * `resyncRate(currentRate, r, now)`.
+   */
+  resyncRate(avgRate: number, rate: number, now: number): void {
+    this.anchorBeats +=
+      (now - this.anchorTime) * this.beatsPerSecondAtRate1 * avgRate;
+    this.anchorTime = now;
+    this.rate = rate;
+  }
+
+  /**
    * Beat count of the next boundary that is a whole multiple of `intervalBeats`,
    * strictly after `fromTime`. The beat count is rate-invariant: as the rate
    * changes, this target stays fixed while its wall-clock time (`timeAt`) moves,

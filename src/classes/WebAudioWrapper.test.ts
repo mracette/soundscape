@@ -45,6 +45,145 @@ function makeWaw() {
   return { waw, ctx, clock, voice };
 }
 
+/**
+ * Reference model of a WebAudio AudioParam under the automation the glide
+ * issues: `set(rate, at, glide)` mirrors AudioPlayerWrapper.setPlaybackRate —
+ * `setValueAtTime(param.value, at)` + `linearRampToValueAtTime(rate, at+glide)`
+ * for a glide, `setValueAtTime(rate, at)` for an immediate set. The value is
+ * piecewise linear between anchor points and holds after the last one, so the
+ * exact beat integral the audio actually renders can be computed and compared
+ * against the TempoClock's.
+ */
+class RampTrace {
+  private points: Array<{ t: number; v: number }> = [{ t: 0, v: 1 }];
+
+  valueAt(t: number): number {
+    const pts = this.points;
+    if (t >= pts[pts.length - 1].t) return pts[pts.length - 1].v;
+    for (let i = pts.length - 1; i > 0; i--) {
+      const a = pts[i - 1];
+      const b = pts[i];
+      if (t >= a.t) {
+        return b.t === a.t ? b.v : a.v + ((b.v - a.v) * (t - a.t)) / (b.t - a.t);
+      }
+    }
+    return pts[0].v;
+  }
+
+  set(rate: number, at: number, glide: number): void {
+    const vAt = this.valueAt(at);
+    this.points = this.points.filter((p) => p.t < at);
+    // materialize the hold up to `at` so later interpolation can't cut corners
+    this.points.push({ t: at, v: vAt });
+    this.points.push(
+      glide > 0 ? { t: at + glide, v: rate } : { t: at, v: rate }
+    );
+  }
+
+  /** Integral of the rate from t=0 to `to` (trapezoid; exact, model is linear). */
+  integral(to: number): number {
+    let sum = 0;
+    const pts = this.points;
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1];
+      const b = pts[i];
+      if (to <= a.t) break;
+      const t1 = Math.min(b.t, to);
+      if (t1 > a.t) {
+        const vEnd =
+          t1 === b.t ? b.v : a.v + ((b.v - a.v) * (t1 - a.t)) / (b.t - a.t);
+        sum += ((a.v + vEnd) / 2) * (t1 - a.t);
+      }
+    }
+    const last = pts[pts.length - 1];
+    if (to > last.t) sum += last.v * (to - last.t);
+    return sum;
+  }
+}
+
+describe("Time Warp glide clock/audio identity", () => {
+  beforeEach(() => {
+    vi.stubGlobal("AudioContext", FakeAudioContext);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  // EffectsPanel's glide shape (Sleep preset: slider 85 -> rate ~0.5758)
+  const GLIDE_STEPS = 20;
+  const GLIDE_STEP_S = 0.03;
+  const TARGET_RATE = 1 - ((85 - 1) / 99) * 0.5;
+
+  /**
+   * Runs the EffectsPanel glide against WAW with the given inter-tick gaps
+   * (gaps[i] = wait before commanded step i+1; the last gap precedes the
+   * settle call) and returns the clock plus the audio reference trace.
+   */
+  function runGlide(gaps: number[]) {
+    const { waw, ctx, clock, voice } = makeWaw();
+    const trace = new RampTrace();
+    const bps = BPM / 60;
+
+    let t = 0;
+    for (let i = 1; i <= GLIDE_STEPS + 1; i++) {
+      t += gaps[Math.min(i - 1, gaps.length - 1)];
+      ctx.currentTime = t;
+      if (i <= GLIDE_STEPS) {
+        const r = 1 + (TARGET_RATE - 1) * (i / GLIDE_STEPS);
+        waw.setTimeWarpRate(SONG, r, GLIDE_STEP_S);
+      } else {
+        waw.setTimeWarpRate(SONG, TARGET_RATE); // settle
+      }
+      const { rate, atTime, glideSeconds } = voice.rateSets[i - 1];
+      trace.set(rate, atTime, glideSeconds);
+
+      // the identity must hold at every tick, not just at the end
+      expect(clock.beatsAt(t)).toBeCloseTo(bps * trace.integral(t), 9);
+    }
+    return { clock, trace, bps, end: t };
+  }
+
+  it("holds the beat-integral identity for on-schedule 30ms ticks", () => {
+    const { clock, trace, bps, end } = runGlide([GLIDE_STEP_S]);
+    expect(clock.currentRate).toBe(TARGET_RATE);
+    expect(clock.beatsAt(end + 60)).toBeCloseTo(
+      bps * trace.integral(end + 60),
+      9
+    );
+  });
+
+  it("holds the identity under an irregular tick train (30ms, 1s stalls, 30ms)", () => {
+    // background-tab throttling: some ticks stretch to ~1s mid-glide
+    const gaps = Array.from({ length: GLIDE_STEPS + 1 }, (_, i) =>
+      i === 4 || i === 12 || i === GLIDE_STEPS ? 1.0 : GLIDE_STEP_S
+    );
+    const { clock, trace, bps, end } = runGlide(gaps);
+    expect(clock.currentRate).toBe(TARGET_RATE);
+    // permanently in phase afterwards: both clock and audio hold the target
+    expect(clock.beatsAt(end + 600)).toBeCloseTo(
+      bps * trace.integral(end + 600),
+      9
+    );
+  });
+
+  it("holds the identity when every tick is throttled to ~1s", () => {
+    const { clock, trace, bps, end } = runGlide([1.0]);
+    expect(clock.beatsAt(end + 600)).toBeCloseTo(
+      bps * trace.integral(end + 600),
+      9
+    );
+  });
+
+  it("holds the identity for early ticks that interrupt an in-flight ramp", () => {
+    const { clock, trace, bps, end } = runGlide([0.01]);
+    expect(clock.beatsAt(end + 60)).toBeCloseTo(
+      bps * trace.integral(end + 60),
+      9
+    );
+  });
+});
+
 describe("WebAudioWrapper transport", () => {
   beforeEach(() => {
     vi.stubGlobal("AudioContext", FakeAudioContext);
