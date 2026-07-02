@@ -1,5 +1,6 @@
 import { useContext, useRef, useState, useEffect } from "react";
-import { clamp, lerp } from "../utils/mathUtils";
+import { lerp } from "../utils/mathUtils";
+import { chooseNewValue } from "./effectWalk";
 
 import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
@@ -39,26 +40,6 @@ const LP_WALK_FLOOR = 55;
 // target.
 const GLIDE_STEPS = 20;
 const GLIDE_STEP_S = 0.03;
-
-// The edge-avoidance margin (bounds) and step size (effectSize) were tuned on
-// the full 1-100 range as 35 and 40; they scale with the actual range so a
-// narrowed safe zone (e.g. the background-mode lp walk, 55-100) wanders the same
-// way. With the fixed values, the middle "gentle wander" branch is unreachable
-// in a narrow range and the walk just ratchets between the bounds.
-const chooseNewValue = (prev: number, min = 1, max = 100): number => {
-  const range = max - min;
-  const bounds = (35 / 99) * range;
-  const effectSize = (40 / 99) * range;
-  let newValue: number;
-  if (prev < min + bounds) {
-    newValue = prev + Math.random() * effectSize;
-  } else if (prev > max - bounds) {
-    newValue = prev - Math.random() * effectSize;
-  } else {
-    newValue = prev + (-0.5 + Math.random()) * effectSize;
-  }
-  return clamp(newValue, min, max);
-};
 
 interface Preset {
   timeWarp: number;
