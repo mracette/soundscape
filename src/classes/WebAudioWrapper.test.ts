@@ -175,6 +175,29 @@ describe("Time Warp glide clock/audio identity", () => {
     );
   });
 
+  it("an immediate set pins clock and voices exactly, even from a stranded mid-glide state", () => {
+    // song revisit: EffectsPanel's cleanup can kill a glide before its settle
+    // call, leaving the clock on a segment midpoint while voices hold the
+    // segment target; MusicPlayer's mount reset must pin everything back to 1
+    const { waw, ctx, clock, voice } = makeWaw();
+    ctx.currentTime = 5;
+    waw.setTimeWarpRate(SONG, 0.8, GLIDE_STEP_S);
+    ctx.currentTime = 5.03;
+    waw.setTimeWarpRate(SONG, 0.6, GLIDE_STEP_S); // glide dies here, no settle
+
+    ctx.currentTime = 90; // much later: the revisit's mount reset
+    waw.setTimeWarpRate(SONG, 1);
+    expect(clock.currentRate).toBe(1);
+    expect(voice.playbackRate).toBe(1);
+    expect(voice.rateSets[voice.rateSets.length - 1]).toEqual({
+      rate: 1,
+      atTime: 90,
+      glideSeconds: 0,
+    });
+    // boundaries resolve on the pinned rate-1 grid from here on
+    expect(clock.timeAt(clock.nextBoundaryBeat(4, 90)) - 90).toBeLessThanOrEqual(2);
+  });
+
   it("holds the identity for early ticks that interrupt an in-flight ramp", () => {
     const { clock, trace, bps, end } = runGlide([0.01]);
     expect(clock.beatsAt(end + 60)).toBeCloseTo(
