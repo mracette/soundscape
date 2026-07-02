@@ -36,6 +36,14 @@ def main():
     bakes = bake_bridge.load_bakes(tmp, ["bass"])
     assert bakes["bass"]["frames"][0]["volume"] == 0.5, bakes
 
+    cmd = bake_bridge.build_bake_command("/cli.mjs", band, "/out.json", "node",
+                             snappy={"coef": 0.5, "lead": 2},
+                             onset={"window": 9, "decay": 0.8})
+    assert "--onset-window" in cmd and cmd[cmd.index("--onset-window") + 1] == "9"
+    assert "--onset-decay" in cmd and cmd[cmd.index("--onset-decay") + 1] == "0.8"
+    cmd_no = bake_bridge.build_bake_command("/cli.mjs", band, "/out.json", "node")
+    assert "--onset-window" not in cmd_no
+
     print("OK test_bake_bridge")
 
 

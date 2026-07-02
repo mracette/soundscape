@@ -33,8 +33,15 @@ def main():
     assert cfg["maxFrequency"] == 16500, cfg
     assert set(cfg) == {"power", "smoothingTimeConstant", "minFrequency", "maxFrequency"}, cfg
 
+    assert scene.soundscape_snappy is True, scene.soundscape_snappy
+    assert scene.soundscape_onset_window == 9, scene.soundscape_onset_window
+    assert abs(scene.soundscape_onset_decay - 0.8) < 1e-6, scene.soundscape_onset_decay
+
     addon.unregister()
     assert not hasattr(bpy.types, "SOUNDSCAPE_PT_bands"), "bands panel still registered"
+    assert not hasattr(bpy.types.Scene, "soundscape_snappy"), "soundscape_snappy still registered"
+    assert not hasattr(bpy.types.Scene, "soundscape_onset_window"), "soundscape_onset_window still registered"
+    assert not hasattr(bpy.types.Scene, "soundscape_onset_decay"), "soundscape_onset_decay still registered"
 
     print("OK test_bands")
 

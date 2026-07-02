@@ -89,12 +89,14 @@ class SOUNDSCAPE_OT_bake_bands(bpy.types.Operator):
                 "num_buckets": band.num_buckets,
                 "fps": band.fps,
             }
+            onset = {"window": scene.soundscape_onset_window, "decay": scene.soundscape_onset_decay}
             try:
-                bake_bridge.bake_band(band_dict, out_dir)
+                bake_bridge.bake_band(band_dict, out_dir, onset=onset)
                 bake_bridge.bake_band(
                     band_dict,
                     out_dir,
                     snappy={"coef": scene.soundscape_snappy_coef, "lead": scene.soundscape_snappy_lead},
+                    onset=onset,
                     out_name=f"{band.name}.snappy",
                 )
             except Exception as exc:  # noqa: BLE001
