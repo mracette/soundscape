@@ -1,50 +1,38 @@
-import { useRef, CSSProperties, RefObject } from "react";
-
-import icons from "../assets/svg/iconList.svg";
+import { ComponentType, CSSProperties } from "react";
+import { House, Music, SlidersHorizontal, Plus, Info } from "lucide-react";
 
 import "../styles/components/Icon.css";
+
+const ICONS: Record<string, ComponentType<{ className?: string; style?: CSSProperties }>> = {
+  "icon-home": House,
+  "icon-music": Music,
+  "icon-equalizer": SlidersHorizontal,
+  "icon-plus": Plus,
+  "icon-info": Info,
+};
 
 interface Props {
   name?: string;
   divClassList?: string;
   svgClassList?: string;
-  style?: CSSProperties;
-  link?: string;
-  handleAddIconRef?: (ref: RefObject<SVGUseElement | null>) => void;
 }
 
-export const Icon = (props: Props) => {
-  const iconRef = useRef<SVGUseElement>(null);
+// Lucide icons are stroke-based (fill="none" by default) — .icon-white/.icon-moon
+// set `fill` as well as `stroke` for the old filled-shape sprite artwork, and
+// since fill/stroke are inheritable, that fill would otherwise flow down and
+// solid-fill Lucide's outline paths. Force fill back to none here rather than
+// touching those shared classes, which ToggleButtonView.tsx also depends on.
+const iconStyle: CSSProperties = { fill: "none" };
 
-  if (props.handleAddIconRef) {
-    props.handleAddIconRef(iconRef);
-  }
+export const Icon = (props: Props) => {
+  const IconComponent = props.name ? ICONS[props.name] : null;
+  const content = IconComponent && (
+    <IconComponent className={props.svgClassList} style={iconStyle} />
+  );
 
   return (
     <div className={props.divClassList}>
-      {props.link ? (
-        <a href={props.link}>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlnsXlink="http://www.w3.org/1999/xlink"
-            className={props.svgClassList}
-            style={props.style}
-            id={props.name}
-          >
-            <use ref={iconRef} xlinkHref={`${icons}#${props.name}`} />
-          </svg>
-        </a>
-      ) : (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          xmlnsXlink="http://www.w3.org/1999/xlink"
-          className={props.svgClassList}
-          style={props.style}
-          id={props.name}
-        >
-          <use ref={iconRef} xlinkHref={`${icons}#${props.name}`} />
-        </svg>
-      )}
+      {content}
     </div>
   );
 };
