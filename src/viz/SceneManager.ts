@@ -2,17 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader, GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
 import { FrameTelemetry, TelemetrySnapshot } from "./telemetry";
-
-// Cap the render loop to 60fps. On high-refresh displays (120Hz+) RAF would
-// otherwise render 2x as often — pure heat/battery for an ambient visualizer,
-// with no visible benefit (motion is time-based, not per-frame).
-const TARGET_FPS = 60;
-const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
-// Jitter margin: render when within this of the target interval. Without it, a
-// true 60Hz display (frames arriving a hair under 16.67ms) gets halved to 30fps;
-// the margin sits safely between a 120Hz frame (8.33ms) and a 60Hz one (16.67ms),
-// so 60Hz renders every frame and 120Hz renders every other = 60.
-const FRAME_TOLERANCE_MS = 4;
+import { frameGate } from "./frameGate";
 
 // stats.js has no bundled types — minimal shim for the dynamic import
 interface StatsPanel {
@@ -266,17 +256,10 @@ export class SceneManager {
     if (this.disposed) return;
     this.currentFrame = requestAnimationFrame(this.animate);
 
-    // Frame-rate cap: skip this tick unless ~1/60s (minus a jitter margin) has
-    // elapsed since the last rendered frame. Advance the accumulator by the
-    // exact interval rather than snapping to `now`, so the remainder carries
-    // over — snapping quantizes the rate to refresh/ceil(interval/period),
-    // e.g. 90Hz→45fps, 144Hz→72fps, 165Hz→55fps.
-    const now = performance.now();
-    if (now - this.lastFrameTime < FRAME_INTERVAL_MS - FRAME_TOLERANCE_MS) return;
-    this.lastFrameTime += FRAME_INTERVAL_MS;
-    // Drift clamp: after a stall (hidden tab, long GC pause) the accumulator
-    // sits far in the past and would render every tick to "catch up" — resync.
-    if (now - this.lastFrameTime > 2 * FRAME_INTERVAL_MS) this.lastFrameTime = now;
+    // Frame-rate cap (60fps, remainder-carrying, drift-clamped) — see frameGate.
+    const gate = frameGate(performance.now(), this.lastFrameTime);
+    this.lastFrameTime = gate.lastFrameTime;
+    if (!gate.render) return;
 
     this.showStats && this.helpers.stats?.begin();
     this.telemetry?.beginFrame();
