@@ -15,6 +15,7 @@ import {
   switchControl,
   slider,
   round,
+  toggleGroup,
 } from "../styles/components/EffectsPanel.css";
 import { flexPanel } from "../styles/shared/layout.css";
 import { pillButton } from "../styles/shared/buttons.css";
@@ -234,58 +235,60 @@ export const EffectsPanel = () => {
         </button>
       </div>
 
-      <div className={cx("flex-row", sliderRow)}>
-        <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-          <label className={switchControl}>
-            <input
-              type="checkbox"
-              checked={voicesOn}
-              onChange={(e) => setVoicesBackgroundMode(e.target.checked)}
-            />
-            <span className={cx(slider, round, "slider", "round")}></span>
-          </label>
+      <div className={toggleGroup}>
+        <div className={cx("flex-row", sliderRow)}>
+          <div className="flex-col">
+            <label className={switchControl}>
+              <input
+                type="checkbox"
+                checked={voicesOn}
+                onChange={(e) => setVoicesBackgroundMode(e.target.checked)}
+              />
+              <span className={cx(slider, round, "slider", "round")}></span>
+            </label>
+          </div>
+          <div className="flex-col">
+            <span>
+              <h3 style={{ marginLeft: "1rem" }}>Voices</h3>
+            </span>
+          </div>
         </div>
-        <div className="flex-col">
-          <span>
-            <h3 style={{ marginLeft: "1rem" }}>Voices</h3>
-          </span>
+        <div className={cx("flex-row", sliderRow)}>
+          <div className="flex-col">
+            <label className={switchControl}>
+              <input
+                type="checkbox"
+                checked={backgroundMode}
+                onChange={(e) => setBackgroundMode(e.target.checked)}
+              />
+              <span className={cx(slider, round, "slider", "round")}></span>
+            </label>
+          </div>
+          <div className="flex-col">
+            <span>
+              <h3 style={{ marginLeft: "1rem" }}>Effects</h3>
+            </span>
+          </div>
         </div>
-      </div>
-      <div className={cx("flex-row", sliderRow)}>
-        <div className="flex-col">
-          <label className={switchControl}>
-            <input
-              type="checkbox"
-              checked={backgroundMode}
-              onChange={(e) => setBackgroundMode(e.target.checked)}
-            />
-            <span className={cx(slider, round, "slider", "round")}></span>
-          </label>
-        </div>
-        <div className="flex-col">
-          <span>
-            <h3 style={{ marginLeft: "1rem" }}>Effects</h3>
-          </span>
-        </div>
-      </div>
 
-      <div className={cx("flex-row", sliderRow)}>
-        <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-          <label className={switchControl}>
-            <input
-              type="checkbox"
-              onInput={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                setPauseVisuals(checked);
-              }}
-            />
-            <span className={cx(slider, round, "slider", "round")}></span>
-          </label>
-        </div>
-        <div className="flex-col">
-          <span>
-            <h3 style={{ marginLeft: "1rem" }}>Pause Visuals</h3>
-          </span>
+        <div className={cx("flex-row", sliderRow)}>
+          <div className="flex-col">
+            <label className={switchControl}>
+              <input
+                type="checkbox"
+                onInput={(e) => {
+                  const checked = (e.target as HTMLInputElement).checked;
+                  setPauseVisuals(checked);
+                }}
+              />
+              <span className={cx(slider, round, "slider", "round")}></span>
+            </label>
+          </div>
+          <div className="flex-col">
+            <span>
+              <h3 style={{ marginLeft: "1rem" }}>Pause Visuals</h3>
+            </span>
+          </div>
         </div>
       </div>
 

@@ -11,6 +11,13 @@ export const sliderRow = style({
   paddingBottom: vh(1),
 });
 
+export const toggleGroup = style({
+  borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+  borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+  padding: `${vh(0.5)} 0`,
+  margin: `${vh(1)} 0`,
+});
+
 export const canvasSlider = style({
   padding: 0,
   margin: 0,
