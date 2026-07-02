@@ -1,13 +1,13 @@
 /**
  * Single source of truth for musical time under a variable playback rate.
  *
- * The original grid (`nextSubdivision` in audioUtils) maps wall-clock seconds to
- * beats with a constant BPM. Time Warp changes the rate, so the grid must integrate a
- * rate that can change. This clock does that by re-anchoring on every rate change:
- * between changes the rate is constant, so beats <-> time is a simple linear map,
- * and the accumulated beat count carries across changes for continuity.
+ * The app's original grid mapped wall-clock seconds to beats with a constant
+ * BPM. Time Warp changes the rate, so the grid must integrate a rate that can
+ * change. This clock does that by re-anchoring on every rate change: between
+ * changes the rate is constant, so beats <-> time is a simple linear map, and
+ * the accumulated beat count carries across changes for continuity.
  *
- * At rate 1 anchored at time 0 it is identical to `nextSubdivision`. Times are
+ * At rate 1 anchored at time 0 it reduces to that fixed grid. Times are
  * AudioContext seconds passed in by the caller, which keeps this class pure (no
  * AudioContext reference) and trivially unit-testable.
  */
@@ -81,8 +81,8 @@ export class TempoClock {
 
   /**
    * AudioContext time of the next boundary that is a whole multiple of
-   * `intervalBeats`, strictly after `fromTime`. Time-Warp-aware replacement for
-   * `nextSubdivision`.
+   * `intervalBeats`, strictly after `fromTime`. Time-Warp-aware replacement
+   * for the old constant-BPM boundary math.
    */
   nextBoundary(intervalBeats: number, fromTime: number): number {
     return this.timeAt(this.nextBoundaryBeat(intervalBeats, fromTime));

@@ -19,19 +19,6 @@ export const getPathToAudio = (
   }
 };
 
-export const nextSubdivision = (
-  audioCtx: AudioContext,
-  bpm: number,
-  beats: number
-): number => {
-  const timeElapsed = audioCtx.currentTime;
-  const beatsElapsed = timeElapsed / (60 / bpm);
-  const subdivisionsElapsed = Math.floor(beatsElapsed / beats);
-  const nextSubdivision = (subdivisionsElapsed + 1) * beats * (60 / bpm);
-
-  return nextSubdivision;
-};
-
 export const averageVolume = (fftData: Uint8Array): number =>
   fftData.reduce((sum, v) => sum + v, 0) / fftData.length / 255;
 

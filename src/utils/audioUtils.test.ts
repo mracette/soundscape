@@ -1,45 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { nextSubdivision, loadArrayBuffer, averageVolume } from "./audioUtils";
-
-/** nextSubdivision only reads `currentTime` off the context. */
-const ctxAt = (currentTime: number) =>
-  ({ currentTime } as unknown as AudioContext);
-
-describe("nextSubdivision", () => {
-  it("returns the first boundary after time zero", () => {
-    // 60bpm, 1-beat subdivision -> boundaries every 1s
-    expect(nextSubdivision(ctxAt(0), 60, 1)).toBe(1);
-  });
-
-  it("returns the boundary strictly after the current time when already exactly on one", () => {
-    expect(nextSubdivision(ctxAt(2), 60, 1)).toBe(3);
-  });
-
-  it.each([
-    // [currentTime, bpm, beats, expected]: expected = (floor(elapsed/subdiv)+1) * subdiv
-    [3.1, 120, 4, 4], // 2s subdivisions
-    [1.5, 90, 2, 8 / 3], // 4/3s subdivisions
-    [10.2, 60, 3, 12],
-    [0.4, 140, 1, 60 / 140],
-  ])(
-    "at t=%s with bpm=%s beats=%s returns %s",
-    (currentTime, bpm, beats, expected) => {
-      expect(nextSubdivision(ctxAt(currentTime), bpm, beats)).toBeCloseTo(
-        expected,
-        10
-      );
-    }
-  );
-
-  it("always lands on an exact multiple of the subdivision length", () => {
-    const bpm = 87;
-    const beats = 4;
-    const subdivision = beats * (60 / bpm);
-    const result = nextSubdivision(ctxAt(17.3), bpm, beats);
-    expect(result / subdivision).toBeCloseTo(Math.round(result / subdivision), 10);
-    expect(result).toBeGreaterThan(17.3);
-  });
-});
+import { loadArrayBuffer, averageVolume } from "./audioUtils";
 
 describe("averageVolume", () => {
   it("averages the fft bins and normalizes by 255", () => {
