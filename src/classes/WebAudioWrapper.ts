@@ -72,6 +72,15 @@ interface TransportRequest {
 /** Poll period and commit horizon (seconds) for the boundary transport. */
 const TRANSPORT_TICK = 0.015;
 const TRANSPORT_LOOKAHEAD = 0.04;
+/**
+ * Smallest head start (seconds) a sample-accurate `start(time)` is trusted
+ * with. A boundary can land closer than this to "now" when it falls inside the
+ * first poll tick, or when main-thread jank spans the commit window; Web Audio
+ * would clamp `start(pastTime)` to "now" at buffer offset 0, leaving that loop
+ * permanently out of phase. Such commits join mid-loop instead (see
+ * `tickTransport`).
+ */
+const TRANSPORT_MIN_LEAD = 0.01;
 
 /**
  * Central audio engine. Owns the AudioContext, Scheduler, and the entire WebAudio
@@ -586,8 +595,21 @@ export class WebAudioWrapper {
       const time = req.clock.timeAt(req.targetBeat);
       if (time <= now + TRANSPORT_LOOKAHEAD) {
         if (req.action === "start") {
-          req.player.start(time);
+          if (time >= now + TRANSPORT_MIN_LEAD) {
+            req.player.start(time);
+          } else {
+            // The boundary is already past or too close for the audio thread
+            // to honor sample-accurately. Rather than let Web Audio clamp the
+            // start to "now" at offset 0 (permanently off-grid), start a hair
+            // ahead at the intra-loop position the voice would have reached
+            // had it started exactly on the boundary — it joins mid-loop, in
+            // phase, with no extra bar of silence. The offset converts the
+            // wall-clock overshoot to buffer seconds via the playback rate.
+            const startAt = now + TRANSPORT_MIN_LEAD;
+            req.player.start(startAt, (startAt - time) * req.player.playbackRate);
+          }
         } else {
+          // a past stop time is clamped to "now" — a few ms late, harmless
           req.player.stop(time);
         }
         req.onCommit(time);

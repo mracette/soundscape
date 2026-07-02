@@ -106,6 +106,19 @@ describe("AudioPlayerWrapper", () => {
     expect(initial.started).toHaveLength(0);
   });
 
+  it("maps a start offset modulo the buffer length (mid-loop join)", async () => {
+    // duration is 2s: 5s of elapsed loop playback lands 1s into the cycle
+    const { player, initial } = await makePlayer();
+    player.start(1, 5);
+    expect(initial.started).toEqual([{ when: 1, offset: 1 }]);
+  });
+
+  it("passes offset 0 through unchanged", async () => {
+    const { player, initial } = await makePlayer();
+    player.start(1);
+    expect(initial.started).toEqual([{ when: 1, offset: 0 }]);
+  });
+
   it("seeds the recorded playback rate onto the source at start", async () => {
     const { player, initial } = await makePlayer();
     player.setPlaybackRate(0.575, 0);

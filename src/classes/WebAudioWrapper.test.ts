@@ -66,6 +66,28 @@ describe("WebAudioWrapper transport", () => {
     expect(onCommit).toHaveBeenCalledWith(2);
   });
 
+  it("joins mid-loop in phase when the boundary lands closer than the first tick", () => {
+    const { waw, ctx, clock, voice } = makeWaw();
+    voice.playbackRate = 0.5; // warped: wall-clock overshoot maps to buffer seconds at the rate
+    const onCommit = vi.fn();
+
+    // beat 3.996: the beat-4 boundary (t=2.0) is only 2ms away, but the first
+    // transport tick fires 15ms later — the boundary is past by then
+    ctx.advanceTo(1.998);
+    waw.scheduleAtBoundary("lead", asPlayer(voice), clock, 4, "start", onCommit);
+
+    ctx.advanceTo(2.1);
+    expect(voice.starts).toHaveLength(1);
+    const { time, offset } = voice.starts[0];
+    // tick fired at 1.998 + 0.015; start a hair (TRANSPORT_MIN_LEAD) ahead...
+    expect(time).toBeCloseTo(2.023, 9);
+    // ...at the intra-loop position the voice would have reached had it
+    // started exactly at t=2.0: (startAt - boundary) * playbackRate
+    expect(offset).toBeCloseTo((time - 2.0) * 0.5, 9);
+    // the musical commit is still reported at the boundary
+    expect(onCommit).toHaveBeenCalledWith(2.0);
+  });
+
   it("re-arms and commits after a raw scheduler.clear() (self-healing latch)", () => {
     const { waw, ctx, clock, voice } = makeWaw();
 

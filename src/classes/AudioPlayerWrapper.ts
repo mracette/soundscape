@@ -98,27 +98,32 @@ export class AudioPlayerWrapper {
   }
 
   /**
-   * Start playback at `time` (AudioContext seconds, absolute).
+   * Start playback at `time` (AudioContext seconds, absolute), optionally
+   * `offsetSeconds` into the buffer. The offset is mapped modulo the buffer
+   * length, so the transport can pass "seconds of playback elapsed since the
+   * grid boundary" directly to join a loop mid-cycle, exactly in phase, when
+   * its boundary can no longer be started sample-accurately.
    * If the underlying `BufferSourceNode` has already been started, reloads a
    * fresh one before starting — this is the normal path after the first play.
    * A pristine-but-disconnected source (disconnected on a previous visit's
    * unmount, never played) is also reloaded first: its `start()` would succeed
    * without producing any sound.
    */
-  start(time: number): void {
+  start(time: number, offsetSeconds = 0): void {
     if (!this.connected) {
       this.reload();
     }
+    const offset = offsetSeconds % this.bufferSource.buffer!.duration;
     try {
       // Seed the rate as the source's base value (not an event pinned at `time`),
       // so a Time Warp change between scheduling and `time` still governs the rate the
       // voice comes in at — otherwise it starts at a stale rate (wrong pitch+tempo).
       this.bufferSource.playbackRate.value = this.playbackRate;
-      this.bufferSource.start(time);
+      this.bufferSource.start(time, offset);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       this.reload();
-      this.bufferSource.start(time);
+      this.bufferSource.start(time, offset);
     }
     this.playing = true;
   }
