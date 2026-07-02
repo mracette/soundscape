@@ -36,6 +36,14 @@ export class AudioPlayerWrapper {
   playbackRate = 1;
   /** True from `start()` until `stop()`; gates AudioParam work in `setPlaybackRate`. */
   private playing = false;
+  /**
+   * Whether `bufferSource` is wired to `destination`. Needed because a
+   * never-started source that has been `disconnect()`ed (song unmount cleans up
+   * voices it never played, and the engine singleton keeps the instances for
+   * the next visit) will `start()` successfully but inaudibly — the spec only
+   * throws on reuse — so the throw → reload fallback never engages.
+   */
+  private connected = false;
 
   constructor(context: AudioContext, path: string, options: AudioPlayerOptions) {
     // bind
@@ -75,6 +83,7 @@ export class AudioPlayerWrapper {
           bufferSource.loopEnd = bufferSource.buffer!.duration;
           bufferSource.connect(this.destination);
           this.bufferSource = bufferSource;
+          this.connected = true;
           resolve();
         })
         .catch((err) => {
@@ -85,14 +94,21 @@ export class AudioPlayerWrapper {
 
   disconnect(): void {
     this.bufferSource.disconnect();
+    this.connected = false;
   }
 
   /**
    * Start playback at `time` (AudioContext seconds, absolute).
    * If the underlying `BufferSourceNode` has already been started, reloads a
    * fresh one before starting — this is the normal path after the first play.
+   * A pristine-but-disconnected source (disconnected on a previous visit's
+   * unmount, never played) is also reloaded first: its `start()` would succeed
+   * without producing any sound.
    */
   start(time: number): void {
+    if (!this.connected) {
+      this.reload();
+    }
     try {
       // Seed the rate as the source's base value (not an event pinned at `time`),
       // so a Time Warp change between scheduling and `time` still governs the rate the
@@ -153,5 +169,6 @@ export class AudioPlayerWrapper {
     newSource.connect(this.destination);
 
     this.bufferSource = newSource;
+    this.connected = true;
   }
 }
