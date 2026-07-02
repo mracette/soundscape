@@ -12,7 +12,6 @@ import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 import { lerp } from "../utils/mathUtils";
-import { hotPink, hotPinkGlow, hotGreen, hotGreenGlow, hotBlue, hotBlueGlow, moonYellow, moonYellowGlow } from "../styles/settings";
 
 /*
  * Energy drives the background-mode voice loop, modulating two things: the target
@@ -232,30 +231,22 @@ export const MusicPlayer = () => {
                 id: "home",
                 iconName: "icon-home",
                 content: homePanel,
-                accentColor: hotPink,
-                accentGlow: hotPinkGlow,
               },
               {
                 autoOpen: true,
                 id: "toggles",
                 iconName: "icon-music",
                 content: toggleButtonPanel,
-                accentColor: hotGreen,
-                accentGlow: hotGreenGlow,
               },
               {
                 id: "effects",
                 iconName: "icon-equalizer",
                 content: effectsPanel,
-                accentColor: hotBlue,
-                accentGlow: hotBlueGlow,
               },
               {
                 id: "song-info",
                 iconName: "icon-info",
                 content: songInfoPanel,
-                accentColor: moonYellow,
-                accentGlow: moonYellowGlow,
               },
             ]}
           />
