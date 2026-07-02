@@ -212,6 +212,8 @@ class SOUNDSCAPE_PT_preview(bpy.types.Panel):
         if scene.soundscape_snappy:
             col.prop(scene, "soundscape_snappy_coef")
             col.prop(scene, "soundscape_snappy_lead")
+        col.prop(scene, "soundscape_onset_window")
+        col.prop(scene, "soundscape_onset_decay")
         col.operator("soundscape.bake_bands", icon="RENDER_ANIMATION")
         col.operator("soundscape.preview", icon="PLAY")
 
