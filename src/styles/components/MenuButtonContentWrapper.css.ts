@@ -1,12 +1,15 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { vh } from "../settings";
+import { glassNoiseTexture, panelRadius, vh } from "../settings";
 
 export const menuButtonContent = style({
   visibility: "visible",
-  borderRadius: ".75rem .75rem",
+  borderRadius: `${panelRadius} ${panelRadius}`,
   position: "absolute",
   width: "auto",
-  background: "rgba(255, 255, 255, 0.15)",
+  backgroundImage: `linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02)), ${glassNoiseTexture}`,
+  backgroundBlendMode: "overlay",
+  border: "1px solid rgba(255, 255, 255, 0.14)",
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.35)",
   overflow: "auto",
 });
 
