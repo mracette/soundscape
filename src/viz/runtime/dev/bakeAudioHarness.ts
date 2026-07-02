@@ -1,5 +1,5 @@
 import { bakeSignal, type BakeResult } from "../bake/bakeSignal";
-import { normalizeToPeak, toMono } from "../bake/bakeUtils";
+import { normalizeToPeak, toMono, type OnsetOptions } from "../bake/bakeUtils";
 import { snappifyFrames } from "../bake/snappify";
 
 interface BakeAudioOpts {
@@ -9,6 +9,7 @@ interface BakeAudioOpts {
   band: string;
   sampleRate: number;
   snappy?: { coef: number; leadFrames: number };
+  onset?: OnsetOptions;
 }
 
 declare global {
@@ -32,9 +33,10 @@ window.__bakeAudio = async (b64, opts) => {
     fps: opts.fps,
     numBuckets: opts.numBuckets,
     band: opts.band,
+    onset: opts.onset,
   });
   if (opts.snappy) {
-    result.frames = snappifyFrames(result.frames, opts.snappy);
+    result.frames = snappifyFrames(result.frames, { ...opts.snappy, onset: opts.onset });
   }
   result.frames = normalizeToPeak(result.frames);
   return result;

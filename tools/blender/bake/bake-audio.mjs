@@ -23,7 +23,7 @@ const DEFAULT_CONFIG = {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.audio || !args.out) {
-    throw new Error("usage: bake-audio --audio <path> --out <path> [--fps 30] [--buckets 8] [--band bass] [--sample-rate 44100] [--config <json|path>]");
+    throw new Error("usage: bake-audio --audio <path> --out <path> [--fps 30] [--buckets 8] [--band bass] [--sample-rate 44100] [--config <json|path>] [--snappy-coef <n>] [--snappy-lead <n>] [--onset-window <int>] [--onset-decay <float>]");
   }
   const audioPath = resolve(args.audio);
   if (!existsSync(audioPath)) throw new Error(`audio not found: ${audioPath}`);
@@ -48,6 +48,14 @@ async function main() {
     snappy = { coef: Number(args["snappy-coef"] ?? 0.4), leadFrames: Number(args["snappy-lead"] ?? 0) };
   }
 
+  let onset;
+  if (args["onset-window"] != null || args["onset-decay"] != null) {
+    onset = {
+      windowFrames: Number(args["onset-window"] ?? 9),
+      decayPerFrame: Number(args["onset-decay"] ?? 0.8),
+    };
+  }
+
   const b64 = readFileSync(audioPath).toString("base64");
 
   const server = await createServer({ root: ROOT, server: { port: 0 } });
@@ -63,7 +71,7 @@ async function main() {
     await page.waitForFunction(() => window.__bakeReady === true, undefined, { timeout: 15000 });
     const result = await page.evaluate(
       async ({ b64, opts }) => window.__bakeAudio(b64, opts),
-      { b64, opts: { analyserConfig, fps, numBuckets, band, sampleRate, snappy } }
+      { b64, opts: { analyserConfig, fps, numBuckets, band, sampleRate, snappy, onset } }
     );
     if (pageError) throw pageError;
     writeFileSync(resolve(args.out), JSON.stringify(result));

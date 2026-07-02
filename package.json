@@ -32,7 +32,8 @@
     "format": "prettier --write src",
     "test:e2e": "PLAYWRIGHT_FORCE_ASYNC_LOADER=1 playwright test",
     "test:blender": "for f in tools/blender/tests/test_*.py; do out=$(\"${BLENDER_BIN:-/Applications/Blender.app/Contents/MacOS/Blender}\" --background --python \"$f\" 2>&1); echo \"$out\"; echo \"$out\" | grep -q '^OK ' || { echo \"FAILED: $f\"; exit 1; }; done",
-    "test:bake": "node tools/blender/bake/test-bake-audio.mjs",
+    "bake:song": "node tools/bake-song.mjs",
+    "test:bake": "node tools/blender/bake/test-bake-audio.mjs && node tools/test-bake-song.mjs",
     "test:bridge": "python3 tools/blender/bake/test-bake-bridge.py"
   },
   "devDependencies": {
