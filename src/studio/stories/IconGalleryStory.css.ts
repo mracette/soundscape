@@ -22,11 +22,3 @@ export const iconCell = style({
 });
 
 export const iconCellSvg = style({ width: "5rem", height: "5rem" });
-
-export const iconSection = style({
-  fontSize: "1.6rem",
-  opacity: 0.6,
-  margin: "2.5rem 0 1rem",
-  textTransform: "uppercase",
-  letterSpacing: "0.1em",
-});

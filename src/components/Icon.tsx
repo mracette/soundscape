@@ -15,7 +15,6 @@ interface Props {
   name?: string;
   divClassList?: string;
   svgClassList?: string;
-  link?: string;
 }
 
 export const Icon = (props: Props) => {
