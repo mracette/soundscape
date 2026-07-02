@@ -8,6 +8,22 @@ bl_info = {
     "category": "Object",
 }
 
+import importlib
+import sys
+
+# Reload-safe: when Blender re-runs this module on "Reload Scripts" (F3 → Reload
+# Scripts), re-import our submodules in dependency order so code edits take effect
+# without restarting Blender. On the first load nothing is in sys.modules yet, so
+# this loop is a no-op.
+_SUBMODULES = (
+    "ease", "evaluator", "preview_target", "bake_bridge",
+    "bindings_model", "bands_model", "panel", "preview",
+)
+for _name in _SUBMODULES:
+    _mod = sys.modules.get(f"{__name__}.{_name}")
+    if _mod is not None:
+        importlib.reload(_mod)
+
 from . import bindings_model, panel, bands_model, preview
 
 
