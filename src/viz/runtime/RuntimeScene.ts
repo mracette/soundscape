@@ -66,6 +66,8 @@ export class RuntimeScene {
     this.signalSource = options.signalSource;
     this.renderer = new WebGLRenderer({ canvas, antialias: false });
     applyColorParity(this.renderer);
+    // Cap at 2 (not the legacy scenes' 4) — this host has no perf history yet.
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     this.resize();
     this.onWindowResize = this.handleResize.bind(this);
     this.load(options);
@@ -150,16 +152,17 @@ export class RuntimeScene {
     return camera;
   }
 
+  // resizeMethod is always "fullscreen" (see class doc), so dimensions come
+  // from the window, matching the legacy SceneManager's fullscreen case
+  // (SceneManager.ts setSceneDimensions). The canvas has no CSS width/height
+  // of its own — without this it renders at its 300x150 element default.
   private aspect(): number {
-    const w = this.canvas.clientWidth || this.canvas.width;
-    const h = this.canvas.clientHeight || this.canvas.height;
-    return h > 0 ? w / h : 1;
+    return window.innerWidth / window.innerHeight;
   }
 
   private resize(): void {
-    const w = this.canvas.clientWidth || this.canvas.width;
-    const h = this.canvas.clientHeight || this.canvas.height;
-    this.renderer.setSize(w, h, false);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
   private handleResize(): void {

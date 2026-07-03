@@ -122,12 +122,15 @@ try:
         )
         add_binding(
             ring,
-            target_property="rotation.y",
+            target_property="scale",
             band="melody",
             measure="bucket",
             bucket=2,
-            out_min=0.0,
-            out_max=6.283,
+            out_min=1.0,
+            out_max=1.5,
+            use_smoothing=True,
+            smoothing_attack=0.85,
+            smoothing_release=0.4,
         )
 
         # The three reactive objects sit around Blender (0, 1, 0); aim the camera
@@ -137,7 +140,7 @@ try:
         cam_data = bpy.data.cameras.new("Camera")
         cam = bpy.data.objects.new("Camera", cam_data)
         bpy.context.scene.collection.objects.link(cam)
-        cam.location = (0.0, -8.0, 5.0)
+        cam.location = (0.0, -9.0, 4.0)
         cam_dir = target - mathutils.Vector(cam.location)
         cam.rotation_euler = cam_dir.to_track_quat("-Z", "Y").to_euler()
         bpy.context.scene.camera = cam
