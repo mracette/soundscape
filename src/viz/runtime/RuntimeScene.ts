@@ -11,6 +11,15 @@ import { applyColorParity } from "./colorPipeline";
 import { SceneRuntime } from "./SceneRuntime";
 import type { SignalSource } from "./signal";
 
+declare global {
+  interface Window {
+    /** DEV-only handle for e2e: read a bound object's live emissiveIntensity by name. */
+    __runtimeSceneDebug?: {
+      sample(objectName: string): number;
+    };
+  }
+}
+
 /** Constructor options for {@link RuntimeScene}. */
 export interface RuntimeSceneOptions {
   /** GLB url; loaded with GLTFLoader. */
@@ -58,11 +67,26 @@ export class RuntimeScene {
     this.resize();
     this.onWindowResize = this.handleResize.bind(this);
     this.load(options);
+    if (import.meta.env.DEV) {
+      window.__runtimeSceneDebug = {
+        sample: (objectName) => this.sampleEmissiveIntensity(objectName),
+      };
+    }
   }
 
   /** Look up a loaded object by name (available after `onLoaded`). For harness/tests. */
   getObjectByName(name: string): Object3D | undefined {
     return this.scene?.getObjectByName(name);
+  }
+
+  /** Read the live emissiveIntensity of a named mesh's first material (e2e reaction proof). */
+  private sampleEmissiveIntensity(name: string): number {
+    const mesh = this.getObjectByName(name) as Mesh | undefined;
+    const mat = mesh?.material;
+    const m = Array.isArray(mat) ? mat[0] : mat;
+    return m && "emissiveIntensity" in m
+      ? (m as Material & { emissiveIntensity: number }).emissiveIntensity
+      : NaN;
   }
 
   private load(options: RuntimeSceneOptions): void {
