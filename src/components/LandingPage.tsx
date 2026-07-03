@@ -184,9 +184,11 @@ function LandingPageInner() {
           <Link className={cx(songLink, "song-link")} href="/play/moonrise">
             <MoonriseIcon name="moonrise" onSelect={select} />
           </Link>
-          <Link className={cx(songLink, "song-link")} href="/play/prelude">
-            <PreludeIcon name="prelude" onSelect={select} />
-          </Link>
+          {import.meta.env.DEV && (
+            <Link className={cx(songLink, "song-link")} href="/play/prelude">
+              <PreludeIcon name="prelude" onSelect={select} />
+            </Link>
+          )}
         </div>
       )}
     </>

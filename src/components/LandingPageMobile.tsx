@@ -56,18 +56,20 @@ export const LandingPageMobile = ({ onSelect }: Props) => {
           </div>
         </div>
       </Link>
-      <Link href="/play/prelude" className={songLinkMobile}>
-        <div className="flex-row" style={{ justifyContent: "flex-start" }}>
-          <PreludeIcon name="prelude" onSelect={onSelect} />
-          <div>
-            <span>Prelude</span>
+      {import.meta.env.DEV && (
+        <Link href="/play/prelude" className={songLinkMobile}>
+          <div className="flex-row" style={{ justifyContent: "flex-start" }}>
+            <PreludeIcon name="prelude" onSelect={onSelect} />
             <div>
-              <span>100 bpm</span>&nbsp;|&nbsp;
-              <span>C Major</span>
+              <span>Prelude</span>
+              <div>
+                <span>100 bpm</span>&nbsp;|&nbsp;
+                <span>C Major</span>
+              </div>
             </div>
           </div>
-        </div>
-      </Link>
+        </Link>
+      )}
     </div>
   );
 };

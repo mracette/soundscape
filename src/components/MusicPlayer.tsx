@@ -46,6 +46,9 @@ export const MusicPlayer = () => {
     if (wawLoadStatus && !songLoadStatus) {
       WAW.initSongState(id).then(() => {
         setSongLoadStatus(true);
+      }).catch((err) => {
+        // surface init failures instead of hanging on the loading screen forever
+        console.error(err);
       });
     }
 

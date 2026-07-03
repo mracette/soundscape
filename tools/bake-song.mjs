@@ -26,6 +26,7 @@ function parseArgs(argv) {
 const args = parseArgs(process.argv.slice(2));
 if (!args.songId) {
   console.error("usage: bake-song <songId> [--config src/app-config.json] [--audio-dir public/audio/wav/<songId>] [--out-dir public/bakes/<songId>]");
+  console.error("bakes should be generated from the same WAVs the shipped mp3s are encoded from (mp3 encoder delay shifts content ~26ms; this is why lookup below prefers wav over mp3)");
   process.exit(1);
 }
 const configPath = resolve(args.config ?? join(ROOT, "src/app-config.json"));
