@@ -4,7 +4,7 @@ import { ThemeContext } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 import { flexPanel } from "../../styles/shared/layout.css";
-import { buttonWhite, groupedButtons } from "../../styles/shared/buttons.css";
+import { pillButton, pillButtonAccent } from "../../styles/shared/buttons.css";
 import { cx } from "../../utils/cx";
 
 interface Props {
@@ -35,7 +35,7 @@ export const ToggleButtonPanel = (props: Props) => {
 
       <div className="flex-row">
         <button
-          className={cx(buttonWhite, groupedButtons)}
+          className={cx(pillButton, pillButtonAccent.info)}
           id="toggle-button-panel-reset"
           onClick={props.handleReset}
         >
@@ -44,7 +44,7 @@ export const ToggleButtonPanel = (props: Props) => {
 
         <button
           id="toggle-button-panel-randomize"
-          className={cx(buttonWhite, groupedButtons)}
+          className={cx(pillButton, pillButtonAccent.info)}
           onClick={props.handleRandomize}
         >
           Randomize
@@ -52,7 +52,7 @@ export const ToggleButtonPanel = (props: Props) => {
 
         <button
           id="toggle-button-panel-mute"
-          className={cx(buttonWhite, groupedButtons)}
+          className={cx(pillButton, pillButtonAccent.info)}
           style={
             mute
               ? {

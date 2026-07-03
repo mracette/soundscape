@@ -136,12 +136,5 @@ export const infoSubheader = style({
 
 export const infoPageButton = style({
   fontSize: mSize,
-  borderRadius: "4px",
   width: "140px",
-  selectors: {
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      transitionDuration: "250ms",
-    },
-  },
 });

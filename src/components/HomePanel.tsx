@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 
 import { flexPanel } from "../styles/shared/layout.css";
-import { buttonWhite, groupedButtons } from "../styles/shared/buttons.css";
+import { pillButton, pillButtonAccent } from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
 
 export const HomePanel = () => {
@@ -13,7 +13,7 @@ export const HomePanel = () => {
         <Link href="/">
           <button
             style={{ width: "20rem" }}
-            className={cx(groupedButtons, buttonWhite)}
+            className={cx(pillButton, pillButtonAccent.primary)}
           >
             Proceed
           </button>

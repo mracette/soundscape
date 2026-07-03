@@ -20,7 +20,7 @@ import {
   infoRow,
   infoPageButton,
 } from "../styles/components/LandingPage.css";
-import { buttonWhite } from "../styles/shared/buttons.css";
+import { pillButton, pillButtonAccent } from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
 import { isWeb } from "../utils/runtime";
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
@@ -96,7 +96,7 @@ function InfoPageInner() {
     <div className="flex-col" style={{ alignItems: "center" }}>
       {!isWeb && (
         <Link href="/">
-          <button className={cx(infoPageButton, buttonWhite)}>← Back</button>
+          <button className={cx(infoPageButton, pillButton, pillButtonAccent.info)}>← Back</button>
         </Link>
       )}
       <h3 className={cx(infoSubheader, "info-subheader")}>
@@ -109,7 +109,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className={cx(infoPageButton, buttonWhite)}>
+          <button role="link" className={cx(infoPageButton, pillButton, pillButtonAccent.info)}>
             Join the Discord
           </button>
         </a>
@@ -121,7 +121,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className={cx(infoPageButton, buttonWhite)}>
+          <button role="link" className={cx(infoPageButton, pillButton, pillButtonAccent.info)}>
             View the source
           </button>
         </a>
@@ -133,7 +133,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className={cx(infoPageButton, buttonWhite)}>
+          <button role="link" className={cx(infoPageButton, pillButton, pillButtonAccent.info)}>
             Send an email
           </button>
         </a>
