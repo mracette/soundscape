@@ -10,7 +10,10 @@ import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 import { CanvasSlider } from "./canvas/CanvasSlider";
 
 import {
-  sliderLabel,
+  primarySliderLabel,
+  fineTuneLabel,
+  fineTuneDivider,
+  toggleCluster,
   sliderRow,
   switchControl,
   slider,
@@ -57,7 +60,7 @@ const PRESETS: Record<"work" | "ambient" | "sleep", Preset> = {
 
 export const EffectsPanel = () => {
   const setVoicesBackgroundMode = useMusicPlayerStore(
-    (s) => s.setBackgroundMode
+    (s) => s.setBackgroundMode,
   );
   const setPauseVisuals = useMusicPlayerStore((s) => s.setPauseVisuals);
   const setTimeWarp = useMusicPlayerStore((s) => s.setTimeWarp);
@@ -126,13 +129,13 @@ export const EffectsPanel = () => {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
         WAW.audioCtx.currentTime + 60 / bpm,
         (EFFECT_TICK_BEATS * 60) / bpm,
-        triggerRandomEffects
+        triggerRandomEffects,
       );
       // update event
     } else if (backgroundMode) {
       WAW.scheduler.updateCallback(
         backgroundModeEventRef.current!,
-        triggerRandomEffects
+        triggerRandomEffects,
       );
       // stop event
     } else {
@@ -173,7 +176,8 @@ export const EffectsPanel = () => {
     const targetRate = timeWarpToRate(v);
     const startRate = WAW.getTempoClock(id).currentRate;
     let i = 0;
-    if (timeWarpGlideRef.current) window.clearInterval(timeWarpGlideRef.current);
+    if (timeWarpGlideRef.current)
+      window.clearInterval(timeWarpGlideRef.current);
     timeWarpGlideRef.current = window.setInterval(() => {
       i++;
       if (i <= GLIDE_STEPS) {
@@ -234,63 +238,65 @@ export const EffectsPanel = () => {
         </button>
       </div>
 
-      <div className={cx("flex-row", sliderRow)}>
-        <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-          <label className={switchControl}>
-            <input
-              type="checkbox"
-              checked={voicesOn}
-              onChange={(e) => setVoicesBackgroundMode(e.target.checked)}
-            />
-            <span className={cx(slider, round, "slider", "round")}></span>
-          </label>
+      <div className={toggleCluster}>
+        <div className={cx("flex-row", sliderRow)}>
+          <div className="flex-col" style={{ justifyContent: "flex-end" }}>
+            <label className={switchControl}>
+              <input
+                type="checkbox"
+                checked={voicesOn}
+                onChange={(e) => setVoicesBackgroundMode(e.target.checked)}
+              />
+              <span className={cx(slider, round, "slider", "round")}></span>
+            </label>
+          </div>
+          <div className="flex-col">
+            <span>
+              <h3 style={{ marginLeft: "1rem" }}>Voices</h3>
+            </span>
+          </div>
         </div>
-        <div className="flex-col">
-          <span>
-            <h3 style={{ marginLeft: "1rem" }}>Voices</h3>
-          </span>
+        <div className={cx("flex-row", sliderRow)}>
+          <div className="flex-col" style={{ justifyContent: "flex-end" }}>
+            <label className={switchControl}>
+              <input
+                type="checkbox"
+                checked={backgroundMode}
+                onChange={(e) => setBackgroundMode(e.target.checked)}
+              />
+              <span className={cx(slider, round, "slider", "round")}></span>
+            </label>
+          </div>
+          <div className="flex-col">
+            <span>
+              <h3 style={{ marginLeft: "1rem" }}>Effects</h3>
+            </span>
+          </div>
         </div>
-      </div>
-      <div className={cx("flex-row", sliderRow)}>
-        <div className="flex-col">
-          <label className={switchControl}>
-            <input
-              type="checkbox"
-              checked={backgroundMode}
-              onChange={(e) => setBackgroundMode(e.target.checked)}
-            />
-            <span className={cx(slider, round, "slider", "round")}></span>
-          </label>
-        </div>
-        <div className="flex-col">
-          <span>
-            <h3 style={{ marginLeft: "1rem" }}>Effects</h3>
-          </span>
-        </div>
-      </div>
 
-      <div className={cx("flex-row", sliderRow)}>
-        <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-          <label className={switchControl}>
-            <input
-              type="checkbox"
-              onInput={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                setPauseVisuals(checked);
-              }}
-            />
-            <span className={cx(slider, round, "slider", "round")}></span>
-          </label>
-        </div>
-        <div className="flex-col">
-          <span>
-            <h3 style={{ marginLeft: "1rem" }}>Pause Visuals</h3>
-          </span>
+        <div className={cx("flex-row", sliderRow)}>
+          <div className="flex-col" style={{ justifyContent: "flex-end" }}>
+            <label className={switchControl}>
+              <input
+                type="checkbox"
+                onInput={(e) => {
+                  const checked = (e.target as HTMLInputElement).checked;
+                  setPauseVisuals(checked);
+                }}
+              />
+              <span className={cx(slider, round, "slider", "round")}></span>
+            </label>
+          </div>
+          <div className="flex-col">
+            <span>
+              <h3 style={{ marginLeft: "1rem" }}>Pause Visuals</h3>
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="flex-row">
-        <h3 className={sliderLabel}>time warp</h3>
+        <h3 className={primarySliderLabel}>time warp</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -300,7 +306,7 @@ export const EffectsPanel = () => {
         />
       </div>
       <div className="flex-row">
-        <h3 className={sliderLabel}>energy</h3>
+        <h3 className={primarySliderLabel}>energy</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -311,10 +317,10 @@ export const EffectsPanel = () => {
       </div>
 
       <div className="flex-row">
-        <h3 className={sliderLabel}>— fine tune —</h3>
+        <h3 className={fineTuneDivider}>fine tune</h3>
       </div>
       <div className="flex-row">
-        <h3 className={sliderLabel}>highpass filter</h3>
+        <h3 className={fineTuneLabel}>highpass filter</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -324,7 +330,7 @@ export const EffectsPanel = () => {
         />
       </div>
       <div className="flex-row">
-        <h3 className={sliderLabel}>lowpass filter</h3>
+        <h3 className={fineTuneLabel}>lowpass filter</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
@@ -335,7 +341,7 @@ export const EffectsPanel = () => {
         />
       </div>
       <div className="flex-row">
-        <h3 className={sliderLabel}>ambience</h3>
+        <h3 className={fineTuneLabel}>ambience</h3>
       </div>
       <div className="flex-row">
         <CanvasSlider
