@@ -3,7 +3,10 @@ import { useContext } from "react";
 import { SongContext } from "../contexts/contexts";
 import { InfoContext } from "../contexts/contexts";
 
-import { songInfoPanel } from "../styles/components/SongInfoPanel.css";
+import {
+  creditType,
+  songInfoPanel,
+} from "../styles/components/SongInfoPanel.css";
 
 export const SongInfoPanel = () => {
   const { name } = useContext(SongContext)!;
@@ -15,7 +18,7 @@ export const SongInfoPanel = () => {
       {credits.map((c) => {
         return (
           <p key={c.type}>
-            <span style={{ color: "rgb(0, 225, 158)" }}>{c.type}</span>
+            <span className={creditType}>{c.type}</span>
             &nbsp;
             {c.link ? <a href={c.link}>{c.content}</a> : c.content}
           </p>
