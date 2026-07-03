@@ -30,7 +30,7 @@ export default defineConfig({
     vanillaExtractPlugin(),
     stemsEndpoint(),
   ],
-  server: { port: 3000 },
+  server: { port: Number(process.env.PORT) || 3000 },
   // Expose CRA-style env vars (REACT_APP_*) via import.meta.env.
   envPrefix: "REACT_APP_",
   // Keep CRA's output directory so deploy is unchanged.
