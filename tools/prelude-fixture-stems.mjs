@@ -2,6 +2,11 @@
 /**
  * Deterministic scratch stems for the `prelude` song slot.
  *
+ * SUPERSEDED: real stems now ship in public/audio/vbr/prelude/ (16 voices +
+ * ambient-track.mp3) and app-config's prelude entry references them, not the
+ * bass-a/beat-a/keys-a voices below. This generator is kept only to bootstrap
+ * a CI-less clone that lacks the gitignored real audio.
+ *
  * Writes a 4-bar loop per voice at bpm 100 (4 bars x 4 beats x 0.6 s = 9.6 s)
  * into BOTH:
  *   public/audio/wav/prelude/<voice>.wav

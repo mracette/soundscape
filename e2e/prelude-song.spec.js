@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 import { existsSync } from "node:fs";
 
-// Prelude plays scratch stems; skip when the audio fixtures haven't been generated
-// (fresh clone without `node tools/prelude-fixture-stems.mjs`).
-const HAVE_AUDIO = existsSync("public/audio/vbr/prelude/bass-a.mp3");
+// Prelude plays real stems; skip when the audio isn't present (fresh clone
+// without the gitignored public/audio, or before stems are dropped in).
+const HAVE_AUDIO = existsSync("public/audio/vbr/prelude/bass-one[8].mp3");
 
 test.skip(!HAVE_AUDIO, "prelude fixture stems not generated");
 
@@ -43,15 +43,17 @@ test("prelude loads, plays a voice, and the baked viz reacts", async ({
   );
   expect(baseline).toBeLessThan(0.3);
 
-  // Start the first bass voice (bass-a). With quantizeSamples on it begins at the
-  // next 4m boundary (up to ~9.6s at bpm 100).
+  // Start bass-two[4]. With quantizeSamples on it begins at the next 4m boundary
+  // (up to ~10.4s at bpm 92); its baked bass volume clears 0.5 within ~0.3s of
+  // playing. bass-one[8] would quantize to an 8m (~20.9s) boundary that overruns
+  // the poll below, so toggle the [4] voice — bass-orb reacts to the whole group.
   const bass = page
     .locator(".toggle-button-group")
     .filter({ has: page.locator("h3", { hasText: "bass" }) });
-  await bass.locator(".toggle-button").first().click();
+  await bass.locator(".toggle-button").nth(1).click();
 
-  // Once bass-a is audible the smoothed bass volume drives emissiveIntensity well
-  // above its 0.2 rest. Allow the quantize boundary plus smoothing headroom.
+  // Once bass-two[4] is audible the smoothed bass volume drives emissiveIntensity
+  // well above its 0.2 rest. Allow the quantize boundary plus smoothing headroom.
   await expect
     .poll(
       () => page.evaluate(() => window.__runtimeSceneDebug.sample("bass-orb")),

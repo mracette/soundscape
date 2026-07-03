@@ -63,7 +63,7 @@ export const LandingPageMobile = ({ onSelect }: Props) => {
             <div>
               <span>Prelude</span>
               <div>
-                <span>100 bpm</span>&nbsp;|&nbsp;
+                <span>92 bpm</span>&nbsp;|&nbsp;
                 <span>C Major</span>
               </div>
             </div>

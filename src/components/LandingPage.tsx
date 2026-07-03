@@ -36,7 +36,7 @@ const SONGS: Record<string, Selected> = {
   moonrise: { name: "Moonrise", bpm: "120", key: "G Minor" },
   mornings: { name: "Mornings", bpm: "92", key: "Eb Major" },
   swamp: { name: "Swamp", bpm: "75", key: "Eb Minor" },
-  prelude: { name: "Prelude", bpm: "100", key: "C Major" },
+  prelude: { name: "Prelude", bpm: "92", key: "C Major" },
 };
 
 interface LandingPageProps {

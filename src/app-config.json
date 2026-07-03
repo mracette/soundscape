@@ -562,14 +562,16 @@
         "id": "prelude",
         "audio": {
             "name": "Prelude",
-            "bpm": 100,
+            "bpm": 92,
             "timeSignature": 4,
             "keySignature": "C Major",
-            "ambientTrack": false,
+            "ambientTrack": true,
+            "ambientTrackLength": "8m",
+            "ambientTrackQuantize": false,
             "groups": [
                 {
                     "name": "bass",
-                    "polyphony": 2,
+                    "polyphony": 1,
                     "analyser": {
                         "power": 11,
                         "smoothingTimeConstant": 0,
@@ -590,12 +592,17 @@
                     },
                     "voices": [
                         {
-                            "name": "bass-a",
+                            "name": "bass-one[8]",
+                            "length": "8m",
+                            "quantizeLength": "8m"
+                        },
+                        {
+                            "name": "bass-two[4]",
                             "length": "4m",
                             "quantizeLength": "4m"
                         },
                         {
-                            "name": "bass-b",
+                            "name": "bass-three[4]",
                             "length": "4m",
                             "quantizeLength": "4m"
                         }
@@ -603,6 +610,50 @@
                 },
                 {
                     "name": "rhythm",
+                    "polyphony": -1,
+                    "analyser": {
+                        "power": 11,
+                        "smoothingTimeConstant": 0,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
+                    },
+                    "bake": {
+                        "fps": 30,
+                        "numBuckets": 8,
+                        "snappy": {
+                            "coef": 0.5,
+                            "leadFrames": 2
+                        },
+                        "onset": {
+                            "windowFrames": 9,
+                            "decayPerFrame": 0.8
+                        }
+                    },
+                    "voices": [
+                        {
+                            "name": "rhythm-drums[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "rhythm-kick[8]",
+                            "length": "8m",
+                            "quantizeLength": "8m"
+                        },
+                        {
+                            "name": "rhythm-reverse[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "rhythm-tops[8]",
+                            "length": "8m",
+                            "quantizeLength": "8m"
+                        }
+                    ]
+                },
+                {
+                    "name": "harmony",
                     "polyphony": 2,
                     "analyser": {
                         "power": 11,
@@ -624,12 +675,17 @@
                     },
                     "voices": [
                         {
-                            "name": "beat-a",
+                            "name": "harmony-one[4]",
                             "length": "4m",
                             "quantizeLength": "4m"
                         },
                         {
-                            "name": "beat-b",
+                            "name": "harmony-two[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        },
+                        {
+                            "name": "harmony-three[4]",
                             "length": "4m",
                             "quantizeLength": "4m"
                         }
@@ -637,7 +693,7 @@
                 },
                 {
                     "name": "melody",
-                    "polyphony": 2,
+                    "polyphony": 1,
                     "analyser": {
                         "power": 11,
                         "smoothingTimeConstant": 0,
@@ -658,12 +714,56 @@
                     },
                     "voices": [
                         {
-                            "name": "keys-a",
-                            "length": "4m",
-                            "quantizeLength": "4m"
+                            "name": "melody-one[8]",
+                            "length": "8m",
+                            "quantizeLength": "8m"
                         },
                         {
-                            "name": "keys-b",
+                            "name": "melody-two[8]",
+                            "length": "8m",
+                            "quantizeLength": "8m"
+                        },
+                        {
+                            "name": "melody-three[4]",
+                            "length": "4m",
+                            "quantizeLength": "4m"
+                        }
+                    ]
+                },
+                {
+                    "name": "extra",
+                    "polyphony": 3,
+                    "analyser": {
+                        "power": 11,
+                        "smoothingTimeConstant": 0,
+                        "minDecibels": -100,
+                        "maxDecibels": 0
+                    },
+                    "bake": {
+                        "fps": 30,
+                        "numBuckets": 8,
+                        "snappy": {
+                            "coef": 0.5,
+                            "leadFrames": 2
+                        },
+                        "onset": {
+                            "windowFrames": 9,
+                            "decayPerFrame": 0.8
+                        }
+                    },
+                    "voices": [
+                        {
+                            "name": "extra-jammy[8]",
+                            "length": "8m",
+                            "quantizeLength": "8m"
+                        },
+                        {
+                            "name": "extra-pad[8]",
+                            "length": "8m",
+                            "quantizeLength": "8m"
+                        },
+                        {
+                            "name": "extra-sweep[4]",
                             "length": "4m",
                             "quantizeLength": "4m"
                         }
