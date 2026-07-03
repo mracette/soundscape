@@ -3,60 +3,17 @@ export const offBlack = "#1f262f";
 export const offBlack2 = "#141b24";
 
 /**
- * An accent color and its derived treatments. Derivations trace back to the
- * base hex: glow is the base at 0.45 alpha, the gradient pair shifts
- * lightness only (~+10% / −15%) so hue and saturation stay recognizable.
+ * The accent quartet — the brand signature. Used strictly as accents (text
+ * highlights, live-state labels, the active side of a slider), never as
+ * per-button colors. Interactive glows are always white (`whiteGlow`).
  */
-export interface AccentGroup {
-  base: string;
-  glow: string;
-  gradientFrom: string;
-  gradientTo: string;
-}
+export const hotPink = "rgb(255, 76, 122)";
+export const hotGreen = "rgb(0, 225, 158)";
+export const hotBlue = "rgb(0, 249, 255)";
+export const moonYellow = "#f6f2d5";
 
-/**
- * The UI accent palette ("light show" chrome). Global across scenes — scene
- * identity flows through the veil tint and the WebGL worlds, never through
- * per-scene accent swaps. Roles:
- * - ember: primary action, warmth, default interactive glow
- * - gold:  the lighting color (rims, particles, glow pulses); never a button fill
- * - moss:  affirmative / positive, botanical
- * - dusk:  informational / secondary, moonlit cool
- * - bloom: garden-gate crimson; sparing in-app emphasis
- */
-const rgba = (hex: string, alpha: number) => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-};
-
-const accentGroup = (
-  base: string,
-  gradientFrom: string,
-  gradientTo: string
-): AccentGroup => ({
-  base,
-  glow: rgba(base, 0.45),
-  gradientFrom,
-  gradientTo,
-});
-
-export const accents = {
-  ember: accentGroup("#ff8a5e", "#ffa57e", "#e06f45"),
-  gold: accentGroup("#f4d284", "#f9e0a4", "#d9b568"),
-  moss: accentGroup("#7ee2a4", "#9cebb9", "#5fc487"),
-  dusk: accentGroup("#8fb8ff", "#aecbff", "#6f9be0"),
-  bloom: accentGroup("#e56b8c", "#ee8aa4", "#c94f72"),
-} satisfies Record<string, AccentGroup>;
-
-/**
- * An accent's glow color at a non-default alpha (pressed states, dim pulse
- * phases). Alpha is a real parameter here — never derive variants by editing
- * the baked `glow` string.
- */
-export const accentGlow = (accent: AccentGroup, alpha: number) =>
-  rgba(accent.base, alpha);
+/** The one interactive glow color — every hover/focus glow is white. */
+export const whiteGlow = "rgba(255, 255, 255, 0.45)";
 
 export const textPrimary = "#ffffff";
 export const textSecondary = "rgba(255, 255, 255, 0.65)";

@@ -44,16 +44,10 @@ export const swatch = style({
 });
 
 export const glowChip = style({
-  width: "100%",
+  width: "18rem",
   height: "3rem",
   borderRadius: radii.pill,
   background: surfaces.raised,
-});
-
-export const gradientBar = style({
-  width: "100%",
-  height: "1.5rem",
-  borderRadius: radii.control,
 });
 
 export const label = style({

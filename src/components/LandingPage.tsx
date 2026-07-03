@@ -16,12 +16,11 @@ import {
   landingPageKey,
   songSelectionPanel,
   songLink,
-  songLinkGlow,
   infoSubheader,
   infoRow,
   infoPageButton,
 } from "../styles/components/LandingPage.css";
-import { pillButton, pillButtonAccent } from "../styles/shared/buttons.css";
+import { pillButton } from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
 import { isWeb } from "../utils/runtime";
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
@@ -97,7 +96,7 @@ function InfoPageInner() {
     <div className="flex-col" style={{ alignItems: "center" }}>
       {!isWeb && (
         <Link href="/">
-          <button className={cx(infoPageButton, pillButton, pillButtonAccent.info)}>← Back</button>
+          <button className={cx(infoPageButton, pillButton)}>← Back</button>
         </Link>
       )}
       <h3 className={cx(infoSubheader, "info-subheader")}>
@@ -110,7 +109,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className={cx(infoPageButton, pillButton, pillButtonAccent.info)}>
+          <button role="link" className={cx(infoPageButton, pillButton)}>
             Join the Discord
           </button>
         </a>
@@ -122,7 +121,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className={cx(infoPageButton, pillButton, pillButtonAccent.info)}>
+          <button role="link" className={cx(infoPageButton, pillButton)}>
             View the source
           </button>
         </a>
@@ -134,7 +133,7 @@ function InfoPageInner() {
           target="_blank"
           rel="noreferrer"
         >
-          <button role="link" className={cx(infoPageButton, pillButton, pillButtonAccent.info)}>
+          <button role="link" className={cx(infoPageButton, pillButton)}>
             Send an email
           </button>
         </a>
@@ -182,28 +181,16 @@ function LandingPageInner() {
         <LandingPageMobile onSelect={select} />
       ) : (
         <div id="song-selection-panel" className={songSelectionPanel}>
-          <Link
-            className={cx(songLink, songLinkGlow.swamp, "song-link")}
-            href="/play/swamp"
-          >
+          <Link className={cx(songLink, "song-link")} href="/play/swamp">
             <SwampIcon name="swamp" onSelect={select} />
           </Link>
-          <Link
-            className={cx(songLink, songLinkGlow.mornings, "song-link")}
-            href="/play/mornings"
-          >
+          <Link className={cx(songLink, "song-link")} href="/play/mornings">
             <MorningsIcon name="mornings" onSelect={select} />
           </Link>
-          <Link
-            className={cx(songLink, songLinkGlow.moonrise, "song-link")}
-            href="/play/moonrise"
-          >
+          <Link className={cx(songLink, "song-link")} href="/play/moonrise">
             <MoonriseIcon name="moonrise" onSelect={select} />
           </Link>
-          <Link
-            className={cx(songLink, songLinkGlow["coming-soon"], "song-link")}
-            href="/info"
-          >
+          <Link className={cx(songLink, "song-link")} href="/info">
             <ComingSoonIcon name="coming-soon" onSelect={select} />
           </Link>
         </div>

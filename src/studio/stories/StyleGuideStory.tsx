@@ -1,5 +1,9 @@
 import {
-  accents,
+  hotPink,
+  hotGreen,
+  hotBlue,
+  moonYellow,
+  whiteGlow,
   textPrimary,
   textSecondary,
   radii,
@@ -11,7 +15,12 @@ import {
 } from "../../styles/settings";
 import * as styles from "./StyleGuideStory.css";
 
-const ACCENT_NAMES = Object.keys(accents) as (keyof typeof accents)[];
+const ACCENTS = [
+  { name: "hotPink", value: hotPink },
+  { name: "hotGreen", value: hotGreen },
+  { name: "hotBlue", value: hotBlue },
+  { name: "moonYellow", value: moonYellow },
+];
 
 const TYPE_RAMP = [
   { name: "sSize", size: sSize },
@@ -26,28 +35,23 @@ export const StyleGuideStory = () => (
     <div>
       <div className={styles.sectionTitle}>Accents</div>
       <div className={styles.accentGrid}>
-        {ACCENT_NAMES.map((name) => {
-          const accent = accents[name];
-          return (
-            <div key={name} className={styles.accentCard}>
-              <div className={styles.swatch} style={{ background: accent.base }} />
-              <span className={styles.label}>
-                {name} <span className={styles.sub}>{accent.base}</span>
-              </span>
-              <div
-                className={styles.glowChip}
-                style={{ boxShadow: glowShadow(accent.glow) }}
-              />
-              <div
-                className={styles.gradientBar}
-                style={{
-                  background: `linear-gradient(90deg, ${accent.gradientFrom}, ${accent.gradientTo})`,
-                }}
-              />
-            </div>
-          );
-        })}
+        {ACCENTS.map(({ name, value }) => (
+          <div key={name} className={styles.accentCard}>
+            <div className={styles.swatch} style={{ background: value }} />
+            <span className={styles.label}>
+              {name} <span className={styles.sub}>{value}</span>
+            </span>
+          </div>
+        ))}
       </div>
+    </div>
+
+    <div>
+      <div className={styles.sectionTitle}>Interactive Glow (always white)</div>
+      <div
+        className={styles.glowChip}
+        style={{ boxShadow: glowShadow(whiteGlow) }}
+      />
     </div>
 
     <div>

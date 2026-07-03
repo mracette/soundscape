@@ -17,11 +17,11 @@ import {
 // chroma-js has no bundled types; all chroma calls are typed as any
 import chroma from "chroma-js";
 
-import { accents } from "../../styles/settings";
+import { hotBlue, moonYellow } from "../../styles/settings";
 
-// Starry-night star temperatures: warm gold through white to moonlit blue.
+// Starry-night star temperatures: warm moon-yellow through white to cool blue.
 export const COLOR_SCALE = chroma
-  .scale([accents.gold.base, "#ffffff", accents.dusk.base])
+  .scale([moonYellow, "#ffffff", hotBlue])
   .mode("lrgb");
 
 const COUNT = 3000;

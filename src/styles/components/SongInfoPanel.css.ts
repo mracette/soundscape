@@ -1,6 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 
-import { accents, textPrimary, vh } from "../settings";
+import { hotGreen, textPrimary, vh } from "../settings";
 
 export const songInfoPanel = style({
   color: textPrimary,
@@ -14,7 +14,7 @@ globalStyle(`${songInfoPanel} h2`, {
 });
 
 export const creditType = style({
-  color: accents.moss.base,
+  color: hotGreen,
   fontWeight: 500,
 });
 

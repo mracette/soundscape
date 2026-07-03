@@ -1,8 +1,8 @@
 import { style } from "@vanilla-extract/css";
 
-import { accents } from "../settings";
+import { hotGreen } from "../settings";
 
-/** Live-state indicator ("background mode: on") — earns the moss accent. */
+/** Live-state indicator ("background mode: on"). */
 export const backgroundModeLabel = style({
-  color: accents.moss.base,
+  color: hotGreen,
 });

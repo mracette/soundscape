@@ -20,7 +20,7 @@ import {
   round,
 } from "../styles/components/EffectsPanel.css";
 import { flexPanel } from "../styles/shared/layout.css";
-import { pillButton, pillButtonAccent } from "../styles/shared/buttons.css";
+import { pillButton } from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
 
 // Effect random-walk timing (beats). The interval is both the spacing between new
@@ -216,21 +216,21 @@ export const EffectsPanel = () => {
 
       <div className="flex-row">
         <button
-          className={cx(pillButton, pillButtonAccent.primary)}
+          className={pillButton}
           id="preset-work"
           onClick={() => applyPreset(PRESETS.work)}
         >
           Work
         </button>
         <button
-          className={cx(pillButton, pillButtonAccent.primary)}
+          className={pillButton}
           id="preset-ambient"
           onClick={() => applyPreset(PRESETS.ambient)}
         >
           Ambient
         </button>
         <button
-          className={cx(pillButton, pillButtonAccent.primary)}
+          className={pillButton}
           id="preset-sleep"
           onClick={() => applyPreset(PRESETS.sleep)}
         >
@@ -352,7 +352,7 @@ export const EffectsPanel = () => {
       </div>
       <div className="flex-row">
         <button
-          className={cx(pillButton, pillButtonAccent.info)}
+          className={pillButton}
           id="effects-panel-reset"
           disabled={backgroundMode}
           onClick={() => {
@@ -368,7 +368,7 @@ export const EffectsPanel = () => {
         </button>
 
         <button
-          className={cx(pillButton, pillButtonAccent.info)}
+          className={pillButton}
           id="effects-panel-randomize"
           disabled={backgroundMode}
           onClick={() => {

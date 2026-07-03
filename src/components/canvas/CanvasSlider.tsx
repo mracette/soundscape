@@ -6,12 +6,12 @@ import {
   canvasSlider,
   canvasSliderWrapper,
 } from "../../styles/components/EffectsPanel.css";
-import { accents, textPrimary } from "../../styles/settings";
+import { hotGreen, textPrimary } from "../../styles/settings";
 
 const thumbRadius = 1 / 4;
 const trackHeight = 1 / 12;
-// the filled (active) side of the track — affirmative accent
-const activeTrackColor = accents.moss.base;
+// the filled (active) side of the track
+const activeTrackColor = hotGreen;
 
 interface Props {
   id?: string;

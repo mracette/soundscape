@@ -1,28 +1,26 @@
-import { style, styleVariants } from "@vanilla-extract/css";
+import { style } from "@vanilla-extract/css";
 
-import type { AccentGroup } from "../settings";
 import {
-  accentGlow,
-  accents,
   glowShadow,
   motion,
   radii,
   surfaces,
   textPrimary,
   vh,
+  whiteGlow,
 } from "../settings";
 
 /**
- * The shared pill button: quiet at rest (translucent dark fill, no border),
- * lit when live — hover/focus/active earn an accent glow via
- * `pillButtonAccent`. Pair as cx(pillButton, pillButtonAccent.<role>).
+ * The shared pill button: white outline, translucent dark fill, and a white
+ * glow when live (hover/focus/active). Accent colors are never used on
+ * buttons — they're reserved for accents.
  */
 export const pillButton = style({
   fontSize: vh(1.75),
   fontWeight: 500,
   color: textPrimary,
   background: surfaces.button,
-  border: "none",
+  border: `1px solid ${textPrimary}`,
   borderRadius: radii.pill,
   padding: `${vh(1)} ${vh(2)}`,
   margin: `0 ${vh(0.5)}`,
@@ -33,27 +31,12 @@ export const pillButton = style({
     "&:first-child": { marginLeft: 0 },
     "&:last-child": { marginRight: 0 },
     "&:disabled": { opacity: 0.4, cursor: "default" },
-  },
-});
-
-const accentVariant = (accent: AccentGroup) => ({
-  selectors: {
     "&:hover:not(:disabled), &:focus-visible": {
-      boxShadow: glowShadow(accent.glow),
+      boxShadow: glowShadow(whiteGlow),
       background: surfaces.buttonHover,
     },
     "&:active:not(:disabled)": {
-      boxShadow: glowShadow(accentGlow(accent, 0.6)),
+      boxShadow: glowShadow("rgba(255, 255, 255, 0.6)"),
     },
   },
-});
-
-/**
- * Accent-per-action-role variants. gold and bloom are intentionally absent
- * (gold is the lighting color, bloom is reserved for garden-gate moments),
- * and moss/affirmative waits until an affirmative button actually exists.
- */
-export const pillButtonAccent = styleVariants({
-  primary: accentVariant(accents.ember),
-  info: accentVariant(accents.dusk),
 });

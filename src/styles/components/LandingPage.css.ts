@@ -1,6 +1,8 @@
-import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
+import { globalStyle, style } from "@vanilla-extract/css";
 import {
-  accents,
+  hotBlue,
+  hotGreen,
+  hotPink,
   liveGlowSelectors,
   mSize,
   motion,
@@ -8,6 +10,7 @@ import {
   surfaces,
   textPrimary,
   vw,
+  whiteGlow,
   xxlSize,
 } from "../settings";
 
@@ -31,9 +34,9 @@ export const landingPageTitle = style({
   margin: 0,
   padding: "2rem",
   color: textPrimary,
-  // `background` must come before `background-clip` in this stylesheet.
-  // Ember → gold → bloom: the garden-gate sunset, in the accent palette.
-  background: `linear-gradient(30deg, ${accents.ember.base}, ${accents.gold.base}, ${accents.bloom.base})`,
+  // `background` must come before `background-clip` in this stylesheet
+  background:
+    "linear-gradient(30deg, #feac5e, #f3a280, #e7979b, #db8cb2, #ce80c7, #be8ad4, #aaa6dc, #94bfe4, #7ad4eb, #59e8f2)",
   backgroundClip: "text",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
@@ -65,15 +68,15 @@ export const landingPage = style({
 });
 
 export const landingPageSongTitle = style({
-  color: accents.ember.base,
+  color: hotPink,
 });
 
 export const landingPageBpm = style({
-  color: accents.moss.base,
+  color: hotGreen,
 });
 
 export const landingPageKey = style({
-  color: accents.dusk.base,
+  color: hotBlue,
 });
 
 export const songSelectionPanel = style({
@@ -91,22 +94,7 @@ export const songLink = style({
   borderRadius: "50%",
   background: surfaces.chip,
   transition: `box-shadow ${motion.fast} ${motion.ease}`,
-});
-
-/**
- * Hover/focus glow on each scene selector nods at that scene's color —
- * the one place a per-scene accent is deliberate. The icon canvas artwork
- * itself is untouched.
- */
-const songLinkGlowVariant = (glow: string) => ({
-  selectors: liveGlowSelectors(glow),
-});
-
-export const songLinkGlow = styleVariants({
-  swamp: songLinkGlowVariant(accents.moss.glow),
-  mornings: songLinkGlowVariant(accents.ember.glow),
-  moonrise: songLinkGlowVariant(accents.dusk.glow),
-  "coming-soon": songLinkGlowVariant(accents.gold.glow),
+  selectors: liveGlowSelectors(whiteGlow),
 });
 
 export const songLinkMobile = style({
@@ -118,6 +106,7 @@ export const songLinkMobile = style({
   margin: "1rem 0",
   background: surfaces.chip,
   transition: `box-shadow ${motion.fast} ${motion.ease}`,
+  selectors: liveGlowSelectors(whiteGlow),
 });
 
 globalStyle(`${songLinkMobile}>div`, {

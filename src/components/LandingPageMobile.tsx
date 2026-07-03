@@ -4,11 +4,7 @@ import { SwampIcon } from "./custom-song-icons/SwampIcon";
 import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
 import { Link } from "wouter";
 
-import {
-  songLinkGlow,
-  songLinkMobile,
-} from "../styles/components/LandingPage.css";
-import { cx } from "../utils/cx";
+import { songLinkMobile } from "../styles/components/LandingPage.css";
 
 interface Props {
   onSelect: (id: string | null) => void;
@@ -24,10 +20,7 @@ export const LandingPageMobile = ({ onSelect }: Props) => {
         alignItems: "center",
       }}
     >
-      <Link
-        href="/play/swamp"
-        className={cx(songLinkMobile, songLinkGlow.swamp)}
-      >
+      <Link href="/play/swamp" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <SwampIcon name="swamp" onSelect={onSelect} />
           <div>
@@ -39,10 +32,7 @@ export const LandingPageMobile = ({ onSelect }: Props) => {
           </div>
         </div>
       </Link>
-      <Link
-        href="/play/mornings"
-        className={cx(songLinkMobile, songLinkGlow.mornings)}
-      >
+      <Link href="/play/mornings" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <MorningsIcon name="mornings" onSelect={onSelect} />
           <div>
@@ -54,10 +44,7 @@ export const LandingPageMobile = ({ onSelect }: Props) => {
           </div>
         </div>
       </Link>
-      <Link
-        href="/play/moonrise"
-        className={cx(songLinkMobile, songLinkGlow.moonrise)}
-      >
+      <Link href="/play/moonrise" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <MoonriseIcon name="moonrise" onSelect={onSelect} />
           <div>
@@ -69,10 +56,7 @@ export const LandingPageMobile = ({ onSelect }: Props) => {
           </div>
         </div>
       </Link>
-      <Link
-        href="/info"
-        className={cx(songLinkMobile, songLinkGlow["coming-soon"])}
-      >
+      <Link href="/info" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <div>
             <ComingSoonIcon name="coming-soon" onSelect={onSelect} />

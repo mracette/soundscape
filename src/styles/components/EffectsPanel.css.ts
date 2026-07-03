@@ -1,7 +1,6 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import {
-  accents,
-  glowShadow,
+  hotGreen,
   lightGrey,
   radii,
   surfaces,
@@ -113,8 +112,7 @@ globalStyle(`${slider}:before`, {
 });
 
 globalStyle(`input:checked + ${slider}`, {
-  backgroundColor: accents.moss.base,
-  boxShadow: glowShadow(accents.moss.glow),
+  backgroundColor: hotGreen,
 });
 
 globalStyle(`input:focus-visible + ${slider}`, {

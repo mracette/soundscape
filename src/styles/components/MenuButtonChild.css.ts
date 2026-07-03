@@ -1,12 +1,12 @@
 import { style } from "@vanilla-extract/css";
-import { accents, liveGlowSelectors, motion, surfaces } from "../settings";
+import { liveGlowSelectors, motion, vh, whiteGlow } from "../settings";
 
 export const menuButtonChild = style({
   transitionDuration: motion.base,
   position: "absolute",
   borderRadius: "50%",
-  border: `1px solid ${surfaces.hairline}`,
-  selectors: liveGlowSelectors(accents.dusk.glow),
+  border: `${vh(0.2)} solid white`,
+  selectors: liveGlowSelectors(whiteGlow),
 });
 
 export const arrow = style({
