@@ -71,7 +71,7 @@ export const MenuButtonChild = (props: Props) => {
           <Icon
             divClassList={"icon scale-div"}
             svgClassList={"icon menu-button-icon icon-white"}
-            name={props.iconName}
+            name={props.iconName as string}
           />
         </button>
 

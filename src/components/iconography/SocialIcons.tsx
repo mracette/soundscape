@@ -14,24 +14,27 @@ export const SocialIcons = (props: Props) => {
       id="social-icons"
       className={cx(iconRow, "flex-row", props.divClassList)}
     >
-      <Icon
-        divClassList={iconRowChild}
-        svgClassList={props.svgClassList || "icon-white"}
-        name="icon-envelope"
-        link="mailto:mark@soundscape.world"
-      />
-      <Icon
-        divClassList={iconRowChild}
-        svgClassList={props.svgClassList || "icon-white"}
-        name="icon-twitter"
-        link="https://twitter.com/markracette"
-      />
-      <Icon
-        divClassList={iconRowChild}
-        svgClassList={props.svgClassList || "icon-white"}
-        name="icon-github"
-        link="https://github.com/mracette"
-      />
+      <a href="mailto:mark@soundscape.world">
+        <Icon
+          divClassList={iconRowChild}
+          svgClassList={props.svgClassList || "icon-white"}
+          name="icon-envelope"
+        />
+      </a>
+      <a href="https://twitter.com/markracette">
+        <Icon
+          divClassList={iconRowChild}
+          svgClassList={props.svgClassList || "icon-white"}
+          name="icon-twitter"
+        />
+      </a>
+      <a href="https://github.com/mracette">
+        <Icon
+          divClassList={iconRowChild}
+          svgClassList={props.svgClassList || "icon-white"}
+          name="icon-github"
+        />
+      </a>
     </div>
   );
 };
