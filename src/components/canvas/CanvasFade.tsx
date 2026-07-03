@@ -1,7 +1,5 @@
 import { useRef, useEffect, RefObject } from "react";
 
-import { addWindowListeners, removeWindowListeners } from "../../utils/jsUtils";
-
 const trackParentSize = (child: HTMLCanvasElement, parent: HTMLCanvasElement) => {
   const rect = parent.getBoundingClientRect();
   child.style.top = `${rect.top}px`;
@@ -132,25 +130,26 @@ interface Props {
 
 export const CanvasFade = ({ ref }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const refWidth = ref?.current ? ref.current.width : null;
-  const refHeight = ref?.current ? ref.current.height : null;
   useEffect(() => {
-    if (ref && canvasRef) {
-      const parent = ref.current!;
-      const fade = canvasRef.current!;
+    if (ref?.current && canvasRef.current) {
+      const parent = ref.current;
+      const fade = canvasRef.current;
       const context = fade.getContext("2d")!;
       fade.style.position = "absolute";
       fade.style.zIndex = "1";
-      const listener = () => {
+      const sync = () => {
         trackParentSize(fade, parent);
         drawFade(fade, context);
       };
-      listener();
-      addWindowListeners(listener);
-      return () => {
-        removeWindowListeners(listener);
-      };
+      // A ResizeObserver on the scene canvas fires whenever its layout size
+      // actually changes — including the initial post-mount sizing by the
+      // renderer/cinematicResize, which happens AFTER this child effect runs.
+      // Window events can't cover that, and their firing order relative to
+      // the parent's own resize handlers is not guaranteed.
+      const observer = new ResizeObserver(sync);
+      observer.observe(parent);
+      return () => observer.disconnect();
     }
-  }, [ref, canvasRef, refWidth, refHeight]);
+  }, [ref]);
   return <canvas ref={canvasRef} className="canvas-fade"></canvas>;
 };
