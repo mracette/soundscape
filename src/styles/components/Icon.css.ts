@@ -59,17 +59,3 @@ globalStyle(".scale-div-morph", {
   margin: "auto",
 });
 
-globalStyle("#icon-play3-poly", {
-  transformOrigin: "50% 50%",
-});
-
-globalStyle("#icon-plus", {
-  transitionDuration: "250ms",
-});
-
-globalStyle("#icon-info", {
-  top: "-20%",
-  left: "-20%",
-  height: "140%",
-  width: "140%",
-});

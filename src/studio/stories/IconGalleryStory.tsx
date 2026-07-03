@@ -1,11 +1,8 @@
 import { Icon } from "../../components/Icon";
-import { SocialIcons } from "../../components/iconography/SocialIcons";
-import { SharingIcons } from "../../components/iconography/SharingIcons";
 import * as styles from "./IconGalleryStory.css";
 
 const ICON_NAMES = [
-  "icon-envelope", "icon-equalizer", "icon-github", "icon-home",
-  "icon-info", "icon-music", "icon-plus", "icon-twitter",
+  "icon-home", "icon-music", "icon-equalizer", "icon-plus", "icon-info",
 ];
 
 export const IconGalleryStory = () => (
@@ -22,9 +19,5 @@ export const IconGalleryStory = () => (
         </div>
       ))}
     </div>
-    <div className={styles.iconSection}>Social Icons</div>
-    <SocialIcons />
-    <div className={styles.iconSection}>Sharing Icons</div>
-    <SharingIcons />
   </div>
 );
