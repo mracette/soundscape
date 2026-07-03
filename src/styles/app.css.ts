@@ -1,10 +1,10 @@
 import { globalFontFace, globalStyle } from "@vanilla-extract/css";
 import { hotBlue, hotGreen, hotPink, offBlack2, vh, vw } from "./settings";
 
-globalFontFace("Lato", {
+globalFontFace("Outfit", {
   fontStyle: "normal",
-  fontWeight: 400,
-  src: "local('Lato Regular'), local('Lato-Regular'), url('../fonts/lato-v16-latin-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/lato-v16-latin-regular.woff2') format('woff2'), url('../fonts/lato-v16-latin-regular.woff') format('woff'), url('../fonts/lato-v16-latin-regular.ttf') format('truetype'), url('../fonts/lato-v16-latin-regular.svg#Lato') format('svg')",
+  fontWeight: "100 900",
+  src: "url('../fonts/Outfit-Variable.ttf') format('truetype')",
 });
 
 globalFontFace("Satisfy", {
@@ -18,8 +18,9 @@ globalStyle("html", {
 });
 
 globalStyle("body", {
-  fontFamily: "'Lato', Helvetica, sans-serif",
-  fontWeight: "normal",
+  fontFamily: "'Outfit', Helvetica, sans-serif",
+  fontWeight: 300,
+  letterSpacing: "0.02em",
   backgroundColor: offBlack2,
 });
 
