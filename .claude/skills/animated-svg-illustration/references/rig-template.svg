@@ -1,0 +1,46 @@
+<!-- Animation rig template. Split at the INSERT-BASE64 markers into
+     head/mid/tail parts and assemble with:
+     { tr -d '\n' < head.part; base64 -i layer1.png; tr -d '\n' < mid.part; base64 -i layer2.png; cat tail.part; } > out.svg
+     Adjust viewBox/width/height to the generated layer dimensions. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1376 768">
+  <defs>
+    <!-- warm glow for points of interest; recolor stops per project -->
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#d4506e" stop-opacity="0.5"/>
+      <stop offset="55%" stop-color="#8e2f44" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#8e2f44" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- PREVIEW-ONLY: background rect; delete for transparent production asset -->
+  <rect width="1376" height="768" fill="#141b24"/>
+
+  <!-- one group per layer; pivot the rotation at the element's visual root.
+       Keep angles subtle (±0.5-0.7°) and durations distinct per layer. -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate"
+      values="-0.6 700 770; 0.7 700 770; -0.6 700 770"
+      dur="9s" repeatCount="indefinite" calcMode="spline"
+      keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"/>
+    <image width="1376" height="768" href="data:image/png;base64,INSERT-BASE64-LAYER-1"/>
+    <!-- glow pulses ride inside the group so they track the sway;
+         stagger dur/phase so pulses never sync -->
+    <circle cx="232" cy="235" r="48" fill="url(#glow)">
+      <animate attributeName="opacity" values="0.35;1;0.35" dur="7s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <g>
+    <animateTransform attributeName="transform" type="rotate"
+      values="0.6 720 770; -0.5 720 770; 0.6 720 770"
+      dur="11s" repeatCount="indefinite" calcMode="spline"
+      keySplines="0.45 0 0.55 1; 0.45 0 0.55 1"/>
+    <image width="1376" height="768" href="data:image/png;base64,INSERT-BASE64-LAYER-2"/>
+    <circle cx="990" cy="585" r="50" fill="url(#glow)">
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="7.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <!-- PREVIEW-ONLY: rough stand-ins for the page's real HTML/CSS content,
+       so composition can be judged from a rendered frame; delete for asset -->
+</svg>
