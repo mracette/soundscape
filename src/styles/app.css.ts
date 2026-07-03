@@ -1,5 +1,5 @@
 import { globalFontFace, globalStyle } from "@vanilla-extract/css";
-import { hotBlue, hotGreen, hotPink, offBlack2, vh, vw } from "./settings";
+import { offBlack2, textPrimary, vh, vw } from "./settings";
 
 globalFontFace("Outfit", {
   fontStyle: "normal",
@@ -33,7 +33,7 @@ globalStyle("h1, h2, h3, h4, h5, h6", {
 });
 
 globalStyle("h2, h3", {
-  color: "white",
+  color: textPrimary,
   textTransform: "capitalize",
 });
 
@@ -93,7 +93,7 @@ globalStyle(".fullscreen", {
 });
 
 globalStyle(".transparent", {
-  backgroundColor: "rgba(0,0,0,0)",
+  backgroundColor: "transparent",
 });
 
 globalStyle(".off-black", {
@@ -102,17 +102,5 @@ globalStyle(".off-black", {
 
 globalStyle(".front-most", {
   zIndex: 999,
-});
-
-globalStyle(".hot-pink", {
-  color: hotPink,
-});
-
-globalStyle(".hot-green", {
-  color: hotGreen,
-});
-
-globalStyle(".hot-blue", {
-  color: hotBlue,
 });
 

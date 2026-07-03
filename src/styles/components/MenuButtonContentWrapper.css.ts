@@ -1,5 +1,5 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { vh } from "../settings";
+import { textPrimary, vh } from "../settings";
 import { veil } from "../shared/veil.css";
 
 export const menuButtonContent = style([
@@ -14,7 +14,7 @@ export const menuButtonContent = style([
 
 globalStyle(`${menuButtonContent} *`, {
   willChange: "visibility",
-  color: "white",
+  color: textPrimary,
 });
 
 globalStyle(`${menuButtonContent} p`, {

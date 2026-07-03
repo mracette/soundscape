@@ -1,8 +1,8 @@
 import { style } from "@vanilla-extract/css";
-import { accents, glowShadow } from "../settings";
+import { accents, glowShadow, motion } from "../settings";
 
 export const menuButtonChild = style({
-  transitionDuration: "200ms",
+  transitionDuration: motion.base,
   position: "absolute",
   borderRadius: "50%",
   border: "none",

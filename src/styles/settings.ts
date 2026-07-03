@@ -1,17 +1,6 @@
-export const fontColor = "#ffffff";
 export const lightGrey = "#d8d8d8";
 export const offBlack = "#1f262f";
 export const offBlack2 = "#141b24";
-/** @deprecated removed in the design-system cleanup (Task 12) */
-export const menuContentColor = "rgba(255,255,255,0.2)";
-/** @deprecated removed in the design-system cleanup (Task 12) — use accents.gold */
-export const moonYellow = "#f6f2d5";
-/** @deprecated removed in the design-system cleanup (Task 12) — use accents.bloom */
-export const hotPink = "rgb(255, 76, 122)";
-/** @deprecated removed in the design-system cleanup (Task 12) — use accents.moss */
-export const hotGreen = "rgb(0, 225, 158)";
-/** @deprecated removed in the design-system cleanup (Task 12) — use accents.dusk */
-export const hotBlue = "rgb(0, 249, 255)";
 
 /**
  * An accent color and its derived treatments. Derivations trace back to the
@@ -70,6 +59,19 @@ export const accents = {
 
 export const textPrimary = "#ffffff";
 export const textSecondary = "rgba(255, 255, 255, 0.65)";
+
+/**
+ * Translucent dark fills for atmosphere-first surfaces (charcoal family at
+ * varying weight) plus the shared hairline and raised-cluster treatments.
+ */
+export const surfaces = {
+  veil: "rgba(20, 27, 36, 0.75)",
+  button: "rgba(20, 27, 36, 0.6)",
+  buttonHover: "rgba(31, 38, 47, 0.85)",
+  chip: "rgba(20, 27, 36, 0.45)",
+  raised: "rgba(255, 255, 255, 0.06)",
+  hairline: "rgba(255, 255, 255, 0.15)",
+};
 
 /** pill: buttons/chips/controls; panel: veils/cards/modals; control: small nested surfaces */
 export const radii = {

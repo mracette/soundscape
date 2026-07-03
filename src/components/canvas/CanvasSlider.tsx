@@ -6,10 +6,12 @@ import {
   canvasSlider,
   canvasSliderWrapper,
 } from "../../styles/components/EffectsPanel.css";
+import { accents, textPrimary } from "../../styles/settings";
 
 const thumbRadius = 1 / 4;
 const trackHeight = 1 / 12;
-const hotGreen = "rgb(0, 225, 158)";
+// the filled (active) side of the track — affirmative accent
+const activeTrackColor = accents.moss.base;
 
 interface Props {
   id?: string;
@@ -59,20 +61,20 @@ export const CanvasSlider = (props: Props) => {
       radius +
       ((props.value - minValue) / (maxValue - minValue)) *
         (canvas.width - 2 * radius);
-    context.fillStyle = "white";
+    context.fillStyle = textPrimary;
     context.lineWidth = track;
     context.clearRect(0, 0, canvas.width, canvas.height);
-    context.strokeStyle = !reverse ? hotGreen : "white";
+    context.strokeStyle = !reverse ? activeTrackColor : textPrimary;
     context.beginPath();
     context.moveTo(0, canvas.height / 2);
     context.lineTo(activeValue, canvas.height / 2);
     context.stroke();
-    context.strokeStyle = !reverse ? "white" : hotGreen;
+    context.strokeStyle = !reverse ? textPrimary : activeTrackColor;
     context.beginPath();
     context.moveTo(activeValue, canvas.height / 2);
     context.lineTo(canvas.width, canvas.height / 2);
     context.stroke();
-    context.strokeStyle = "white";
+    context.strokeStyle = textPrimary;
     context.arc(activeValue, canvas.height / 2, radius, 0, Math.PI * 2);
     context.fill();
   };

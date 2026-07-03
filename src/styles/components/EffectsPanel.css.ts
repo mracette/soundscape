@@ -2,7 +2,10 @@ import { globalStyle, style } from "@vanilla-extract/css";
 import {
   accents,
   glowShadow,
+  lightGrey,
   radii,
+  surfaces,
+  textPrimary,
   textSecondary,
   vh,
 } from "../settings";
@@ -42,13 +45,13 @@ export const fineTuneDivider = style({
 globalStyle(`${fineTuneDivider}::before, ${fineTuneDivider}::after`, {
   content: '""',
   flex: "1 1 auto",
-  borderTop: "1px solid rgba(255, 255, 255, 0.15)",
+  borderTop: `1px solid ${surfaces.hairline}`,
 });
 
 /** Groups the three toggle rows so they read as one cluster of settings. */
 export const toggleCluster = style({
   borderRadius: radii.control,
-  background: "rgba(255, 255, 255, 0.06)",
+  background: surfaces.raised,
   padding: `${vh(0.5)} ${vh(1.5)}`,
   margin: `${vh(1)} 0`,
 });
@@ -100,7 +103,7 @@ export const slider = style({
   left: 0,
   right: 0,
   bottom: 0,
-  backgroundColor: "#ccc",
+  backgroundColor: lightGrey,
 });
 
 globalStyle(`${slider}:before`, {
@@ -110,7 +113,7 @@ globalStyle(`${slider}:before`, {
   width: vh(2),
   left: vh(0.5),
   bottom: vh(0.5),
-  backgroundColor: "white",
+  backgroundColor: textPrimary,
 });
 
 globalStyle(`input:checked + ${slider}`, {

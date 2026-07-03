@@ -5,6 +5,7 @@ import { SongContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 import { flexPanel } from "../../styles/shared/layout.css";
 import { pillButton, pillButtonAccent } from "../../styles/shared/buttons.css";
+import { backgroundModeLabel } from "../../styles/components/ToggleButtonPanel.css";
 import { cx } from "../../utils/cx";
 
 interface Props {
@@ -29,7 +30,9 @@ export const ToggleButtonPanel = (props: Props) => {
           <h2>Voices</h2>
         </div>
         <div className="flex-col">
-          {backgroundMode && <p className="hot-green">background mode: on</p>}
+          {backgroundMode && (
+            <p className={backgroundModeLabel}>background mode: on</p>
+          )}
         </div>
       </div>
 

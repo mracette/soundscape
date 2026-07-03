@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css";
 
-import { radii } from "../settings";
+import { radii, surfaces } from "../settings";
 
 /**
  * The atmosphere-first panel surface: a dark translucent "veil" the scene
@@ -11,5 +11,5 @@ import { radii } from "../settings";
  */
 export const veil = style({
   borderRadius: radii.panel,
-  background: "rgba(20, 27, 36, 0.75)",
+  background: surfaces.veil,
 });

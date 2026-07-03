@@ -1,15 +1,15 @@
 import { style } from "@vanilla-extract/css";
-import { vh } from "../settings";
+import { textPrimary, vh } from "../settings";
 
 const soloMuteBase = style({
   fontSize: vh(1.5),
-  color: "white",
+  color: textPrimary,
   padding: 0,
   height: vh(3.25),
   width: vh(3.25),
-  borderColor: "white",
+  borderColor: textPrimary,
   borderStyle: "solid",
-  backgroundColor: "rgba(255, 255, 255, 0)",
+  backgroundColor: "transparent",
 });
 
 export const soloButton = style([

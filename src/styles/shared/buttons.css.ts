@@ -6,6 +6,7 @@ import {
   glowShadow,
   motion,
   radii,
+  surfaces,
   textPrimary,
   vh,
 } from "../settings";
@@ -19,7 +20,7 @@ export const pillButton = style({
   fontSize: vh(1.75),
   fontWeight: 500,
   color: textPrimary,
-  background: "rgba(20, 27, 36, 0.6)",
+  background: surfaces.button,
   border: "none",
   borderRadius: radii.pill,
   padding: `${vh(1)} ${vh(2)}`,
@@ -38,7 +39,7 @@ const accentVariant = (accent: AccentGroup) => ({
   selectors: {
     "&:hover:not(:disabled), &:focus-visible": {
       boxShadow: glowShadow(accent.glow),
-      background: "rgba(31, 38, 47, 0.85)",
+      background: surfaces.buttonHover,
     },
     "&:active:not(:disabled)": {
       boxShadow: glowShadow(accent.glow.replace("0.45", "0.6")),

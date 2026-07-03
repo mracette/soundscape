@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { vh } from "../settings";
+import { textPrimary, vh } from "../settings";
 
 export const toggleButton = style({
   position: "relative",
@@ -7,7 +7,7 @@ export const toggleButton = style({
   border: "none",
   padding: 0,
   overflowWrap: "break-word",
-  backgroundColor: "rgba(255, 255, 255, 0)",
+  backgroundColor: "transparent",
   zIndex: 99,
   marginRight: vh(3),
   cursor: "pointer",
@@ -27,7 +27,7 @@ export const svgCircle = style({
   top: 0,
   left: 0,
   fillOpacity: 0,
-  stroke: "white",
+  stroke: textPrimary,
   strokeLinecap: "round",
   transformOrigin: "50% 50%",
 });

@@ -1,5 +1,5 @@
 import { globalStyle } from "@vanilla-extract/css";
-import { moonYellow } from "../settings";
+import { motion, textPrimary } from "../settings";
 
 globalStyle(".icon", {
   height: "100%",
@@ -23,13 +23,8 @@ globalStyle(".menu-button-icon", {
 });
 
 globalStyle(".icon-white", {
-  fill: "white",
-  stroke: "white",
-});
-
-globalStyle(".icon-moon", {
-  fill: moonYellow,
-  stroke: moonYellow,
+  fill: textPrimary,
+  stroke: textPrimary,
 });
 
 globalStyle(".rotate45", {
@@ -39,7 +34,7 @@ globalStyle(".rotate45", {
 globalStyle(".scale-div", {
   display: "inline-block",
   position: "absolute",
-  transitionDuration: "250ms",
+  transitionDuration: motion.base,
   transformOrigin: "50% 50%",
   top: "25%",
   left: "25%",

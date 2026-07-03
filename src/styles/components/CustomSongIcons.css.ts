@@ -1,12 +1,12 @@
 import { style } from "@vanilla-extract/css";
-import { hotGreen } from "../settings";
+import { accents } from "../settings";
 
 export const newLabel = style({
   position: "absolute",
   top: "15px",
   left: "15px",
   fontSize: "1.6rem",
-  color: hotGreen,
+  color: accents.moss.base,
 });
 
 export const customSongIcon = style({

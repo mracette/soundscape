@@ -1,10 +1,12 @@
 import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
 import {
   accents,
-  fontColor,
   glowShadow,
   mSize,
   motion,
+  radii,
+  surfaces,
+  textPrimary,
   vw,
   xxlSize,
 } from "../settings";
@@ -28,7 +30,7 @@ export const landingPageTitle = style({
   fontWeight: 400,
   margin: 0,
   padding: "2rem",
-  color: fontColor,
+  color: textPrimary,
   // `background` must come before `background-clip` in this stylesheet.
   // Ember → gold → bloom: the garden-gate sunset, in the accent palette.
   background: `linear-gradient(30deg, ${accents.ember.base}, ${accents.gold.base}, ${accents.bloom.base})`,
@@ -44,7 +46,7 @@ export const landingPageTitle = style({
 
 export const landingPageHeader = style({
   fontSize: mSize,
-  color: fontColor,
+  color: textPrimary,
   display: "flex",
   flexDirection: "column",
   width: "100%",
@@ -87,7 +89,7 @@ export const songSelectionPanel = style({
 
 export const songLink = style({
   borderRadius: "50%",
-  background: "rgba(20, 27, 36, 0.45)",
+  background: surfaces.chip,
   transition: `box-shadow ${motion.fast} ${motion.ease}`,
 });
 
@@ -115,10 +117,10 @@ export const songLinkMobile = style({
   textDecoration: "none",
   maxWidth: "320px",
   display: "block",
-  borderRadius: "1rem",
+  borderRadius: radii.panel,
   width: "100%",
   margin: "1rem 0",
-  background: "rgba(20, 27, 36, 0.45)",
+  background: surfaces.chip,
   transition: `box-shadow ${motion.fast} ${motion.ease}`,
 });
 
