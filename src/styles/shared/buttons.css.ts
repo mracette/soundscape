@@ -2,6 +2,7 @@ import { style, styleVariants } from "@vanilla-extract/css";
 
 import type { AccentGroup } from "../settings";
 import {
+  accentGlow,
   accents,
   glowShadow,
   motion,
@@ -42,17 +43,17 @@ const accentVariant = (accent: AccentGroup) => ({
       background: surfaces.buttonHover,
     },
     "&:active:not(:disabled)": {
-      boxShadow: glowShadow(accent.glow.replace("0.45", "0.6")),
+      boxShadow: glowShadow(accentGlow(accent, 0.6)),
     },
   },
 });
 
 /**
- * Accent-per-action-role variants. gold and bloom are intentionally absent:
- * gold is the lighting color, bloom is reserved for garden-gate moments.
+ * Accent-per-action-role variants. gold and bloom are intentionally absent
+ * (gold is the lighting color, bloom is reserved for garden-gate moments),
+ * and moss/affirmative waits until an affirmative button actually exists.
  */
 export const pillButtonAccent = styleVariants({
   primary: accentVariant(accents.ember),
   info: accentVariant(accents.dusk),
-  affirmative: accentVariant(accents.moss),
 });

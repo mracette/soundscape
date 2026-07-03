@@ -1,7 +1,7 @@
 import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
 import {
   accents,
-  glowShadow,
+  liveGlowSelectors,
   mSize,
   motion,
   radii,
@@ -99,11 +99,7 @@ export const songLink = style({
  * itself is untouched.
  */
 const songLinkGlowVariant = (glow: string) => ({
-  selectors: {
-    "&:hover, &:focus-visible": {
-      boxShadow: glowShadow(glow),
-    },
-  },
+  selectors: liveGlowSelectors(glow),
 });
 
 export const songLinkGlow = styleVariants({

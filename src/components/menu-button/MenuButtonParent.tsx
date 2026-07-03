@@ -1,7 +1,7 @@
 import { useState, useContext, type ReactNode } from "react";
 
 import { MenuButtonChild } from "./MenuButtonChild";
-import { Icon } from "./../Icon";
+import { Icon, type IconName } from "./../Icon";
 import { ThemeContext } from "../../contexts/contexts";
 import { LayoutContext } from "../../contexts/contexts";
 import { menuButton, menuButtonParent } from "../../styles/components/MenuButtonParent.css";
@@ -10,7 +10,7 @@ import { cx } from "../../utils/cx";
 interface ChildButtonProp {
   id: string;
   autoOpen?: boolean;
-  iconName?: string;
+  iconName?: IconName;
   icon?: ReactNode;
   content?: ReactNode;
 }
@@ -62,10 +62,12 @@ export const MenuButtonParent = (props: Props) => {
         }}
       >
         <Icon
-          divClassList={`scale-div menu-button-icon icon-white ${
-            isOpen ? "rotate45" : ""
-          }`}
-          svgClassList={"icon menu-button-icon icon-white"}
+          divClassList={cx(
+            "scale-div",
+            "menu-button-icon",
+            isOpen && "rotate45"
+          )}
+          svgClassList={"icon menu-button-icon icon-line"}
           name="icon-plus"
         />
       </button>

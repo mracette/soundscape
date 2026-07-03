@@ -1,16 +1,12 @@
 import { style } from "@vanilla-extract/css";
-import { accents, glowShadow, motion } from "../settings";
+import { accents, liveGlowSelectors, motion, surfaces } from "../settings";
 
 export const menuButtonChild = style({
   transitionDuration: motion.base,
   position: "absolute",
   borderRadius: "50%",
-  border: "none",
-  selectors: {
-    "&:hover, &:focus-visible": {
-      boxShadow: glowShadow(accents.dusk.glow),
-    },
-  },
+  border: `1px solid ${surfaces.hairline}`,
+  selectors: liveGlowSelectors(accents.dusk.glow),
 });
 
 export const arrow = style({

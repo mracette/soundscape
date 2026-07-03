@@ -4,7 +4,8 @@ import { offBlack2, textPrimary, vh, vw } from "./settings";
 globalFontFace("Outfit", {
   fontStyle: "normal",
   fontWeight: "100 900",
-  src: "url('../fonts/Outfit-Variable.ttf') format('truetype')",
+  fontDisplay: "swap",
+  src: "url('../fonts/Outfit-Variable.woff2') format('woff2')",
 });
 
 globalFontFace("Satisfy", {

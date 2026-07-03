@@ -2,12 +2,6 @@ import { House, Music, SlidersHorizontal, Plus, Info } from "lucide-react";
 
 import "../styles/components/Icon.css";
 
-interface Props {
-  name: string;
-  divClassList?: string;
-  svgClassList?: string;
-}
-
 const ICONS = {
   "icon-home": House,
   "icon-music": Music,
@@ -16,8 +10,19 @@ const ICONS = {
   "icon-info": Info,
 };
 
+export type IconName = keyof typeof ICONS;
+
+interface Props {
+  name: IconName;
+  divClassList?: string;
+  svgClassList?: string;
+}
+
 export const Icon = (props: Props) => {
-  const IconComponent = ICONS[props.name as keyof typeof ICONS];
+  const IconComponent = ICONS[props.name];
+
+  // guards config-driven callers that bypass the IconName type at runtime
+  if (!IconComponent) return null;
 
   return (
     <div className={props.divClassList}>

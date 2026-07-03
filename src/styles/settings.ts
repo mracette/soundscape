@@ -24,38 +24,39 @@ export interface AccentGroup {
  * - dusk:  informational / secondary, moonlit cool
  * - bloom: garden-gate crimson; sparing in-app emphasis
  */
+const rgba = (hex: string, alpha: number) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+const accentGroup = (
+  base: string,
+  gradientFrom: string,
+  gradientTo: string
+): AccentGroup => ({
+  base,
+  glow: rgba(base, 0.45),
+  gradientFrom,
+  gradientTo,
+});
+
 export const accents = {
-  ember: {
-    base: "#ff8a5e",
-    glow: "rgba(255, 138, 94, 0.45)",
-    gradientFrom: "#ffa57e",
-    gradientTo: "#e06f45",
-  },
-  gold: {
-    base: "#f4d284",
-    glow: "rgba(244, 210, 132, 0.45)",
-    gradientFrom: "#f9e0a4",
-    gradientTo: "#d9b568",
-  },
-  moss: {
-    base: "#7ee2a4",
-    glow: "rgba(126, 226, 164, 0.45)",
-    gradientFrom: "#9cebb9",
-    gradientTo: "#5fc487",
-  },
-  dusk: {
-    base: "#8fb8ff",
-    glow: "rgba(143, 184, 255, 0.45)",
-    gradientFrom: "#aecbff",
-    gradientTo: "#6f9be0",
-  },
-  bloom: {
-    base: "#e56b8c",
-    glow: "rgba(229, 107, 140, 0.45)",
-    gradientFrom: "#ee8aa4",
-    gradientTo: "#c94f72",
-  },
+  ember: accentGroup("#ff8a5e", "#ffa57e", "#e06f45"),
+  gold: accentGroup("#f4d284", "#f9e0a4", "#d9b568"),
+  moss: accentGroup("#7ee2a4", "#9cebb9", "#5fc487"),
+  dusk: accentGroup("#8fb8ff", "#aecbff", "#6f9be0"),
+  bloom: accentGroup("#e56b8c", "#ee8aa4", "#c94f72"),
 } satisfies Record<string, AccentGroup>;
+
+/**
+ * An accent's glow color at a non-default alpha (pressed states, dim pulse
+ * phases). Alpha is a real parameter here — never derive variants by editing
+ * the baked `glow` string.
+ */
+export const accentGlow = (accent: AccentGroup, alpha: number) =>
+  rgba(accent.base, alpha);
 
 export const textPrimary = "#ffffff";
 export const textSecondary = "rgba(255, 255, 255, 0.65)";
@@ -85,6 +86,11 @@ export const radii = {
  * hover, focus, the open menu button) — resting chrome never glows.
  */
 export const glowShadow = (glow: string) => `0 0 8px ${glow}, 0 0 24px ${glow}`;
+
+/** Selector block for the standard "live element" hover/focus glow. */
+export const liveGlowSelectors = (glow: string) => ({
+  "&:hover, &:focus-visible": { boxShadow: glowShadow(glow) },
+});
 
 /** Durations/easing for UI transitions; slow is the ambient glow-pulse period. */
 export const motion = {

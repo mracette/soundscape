@@ -75,10 +75,6 @@ export const canvasSliderWrapper = style({
   width: "100%",
 });
 
-export const effectsControlsRow = style({
-  marginTop: vh(4),
-});
-
 globalStyle("#effects-panel input", {
   width: "100%",
 });
@@ -121,8 +117,8 @@ globalStyle(`input:checked + ${slider}`, {
   boxShadow: glowShadow(accents.moss.glow),
 });
 
-globalStyle(`input:focus + ${slider}`, {
-  boxShadow: glowShadow(accents.moss.glow),
+globalStyle(`input:focus-visible + ${slider}`, {
+  boxShadow: `0 0 0 2px ${surfaces.hairline}`,
 });
 
 globalStyle(`input:checked + ${slider}:before`, {

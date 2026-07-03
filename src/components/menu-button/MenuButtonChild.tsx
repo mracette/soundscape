@@ -1,7 +1,7 @@
 import { useCallback, useContext, useRef, useState, type ReactNode } from "react";
 
 import { MenuButtonContentWrapper } from "./MenuButtonContentWrapper";
-import { Icon } from "../../components/Icon";
+import { Icon, type IconName } from "../../components/Icon";
 import { ThemeContext } from "../../contexts/contexts";
 import { useOutsideClick } from "../../hooks/useOutsideClick";
 import { menuButtonChild, arrow } from "../../styles/components/MenuButtonChild.css";
@@ -18,7 +18,7 @@ interface Props {
   separation: number;
   index: number;
   zIndex?: number;
-  iconName?: string;
+  iconName?: IconName;
   icon?: ReactNode;
   menuWidth: number;
   content?: ReactNode;
@@ -70,8 +70,8 @@ export const MenuButtonChild = (props: Props) => {
         >
           <Icon
             divClassList={"icon scale-div"}
-            svgClassList={"icon menu-button-icon icon-white"}
-            name={props.iconName as string}
+            svgClassList={"icon menu-button-icon icon-line"}
+            name={props.iconName!}
           />
         </button>
 

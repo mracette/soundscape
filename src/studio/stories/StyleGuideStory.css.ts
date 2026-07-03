@@ -1,5 +1,11 @@
 import { style } from "@vanilla-extract/css";
-import { offBlack2, textPrimary, textSecondary, radii } from "../../styles/settings";
+import {
+  offBlack2,
+  radii,
+  surfaces,
+  textPrimary,
+  textSecondary,
+} from "../../styles/settings";
 
 export const wrap = style({
   width: "100%",
@@ -41,7 +47,7 @@ export const glowChip = style({
   width: "100%",
   height: "3rem",
   borderRadius: radii.pill,
-  background: "rgba(255,255,255,0.05)",
+  background: surfaces.raised,
 });
 
 export const gradientBar = style({
@@ -93,21 +99,21 @@ export const pillSurface = style({
   width: "10rem",
   height: "3rem",
   borderRadius: radii.pill,
-  background: "rgba(255,255,255,0.1)",
+  background: surfaces.raised,
 });
 
 export const panelSurface = style({
   width: "12rem",
   height: "8rem",
   borderRadius: radii.panel,
-  background: "rgba(255,255,255,0.1)",
+  background: surfaces.raised,
 });
 
 export const controlSurface = style({
   width: "8rem",
   height: "5rem",
   borderRadius: radii.control,
-  background: "rgba(255,255,255,0.1)",
+  background: surfaces.raised,
 });
 
 export const typeRamp = style({
