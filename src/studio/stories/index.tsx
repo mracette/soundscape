@@ -4,6 +4,7 @@ import { LoadingStory } from "./LoadingStory";
 import { ToggleStory } from "./ToggleStory";
 import { MenuStory } from "./MenuStory";
 import { IconGalleryStory } from "./IconGalleryStory";
+import { StyleGuideStory } from "./StyleGuideStory";
 
 export interface Story {
   id: string;
@@ -18,4 +19,5 @@ export const stories: Story[] = [
   { id: "toggle", title: "Toggle Button", group: "Buttons", Component: ToggleStory },
   { id: "menu", title: "Menu Button", group: "Buttons", Component: MenuStory },
   { id: "icons", title: "Icon Gallery", group: "Misc", Component: IconGalleryStory },
+  { id: "style-guide", title: "Style Guide", group: "Misc", Component: StyleGuideStory },
 ];
