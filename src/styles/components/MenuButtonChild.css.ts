@@ -1,11 +1,16 @@
 import { style } from "@vanilla-extract/css";
-import { vh } from "../settings";
+import { accents, glowShadow } from "../settings";
 
 export const menuButtonChild = style({
   transitionDuration: "200ms",
   position: "absolute",
   borderRadius: "50%",
-  border: `${vh(0.2)} solid white`,
+  border: "none",
+  selectors: {
+    "&:hover, &:focus-visible": {
+      boxShadow: glowShadow(accents.dusk.glow),
+    },
+  },
 });
 
 export const arrow = style({
