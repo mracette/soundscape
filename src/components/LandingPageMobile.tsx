@@ -1,7 +1,7 @@
 import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
 import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
 import { SwampIcon } from "./custom-song-icons/SwampIcon";
-import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
+import { PreludeIcon } from "./custom-song-icons/PreludeIcon";
 import { Link } from "wouter";
 
 import { songLinkMobile } from "../styles/components/LandingPage.css";
@@ -56,13 +56,15 @@ export const LandingPageMobile = ({ onSelect }: Props) => {
           </div>
         </div>
       </Link>
-      <Link href="/info" className={songLinkMobile}>
+      <Link href="/play/prelude" className={songLinkMobile}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
+          <PreludeIcon name="prelude" onSelect={onSelect} />
           <div>
-            <ComingSoonIcon name="coming-soon" onSelect={onSelect} />
-          </div>
-          <div>
-            <span>Information & Updates</span>
+            <span>Prelude</span>
+            <div>
+              <span>100 bpm</span>&nbsp;|&nbsp;
+              <span>C Major</span>
+            </div>
           </div>
         </div>
       </Link>

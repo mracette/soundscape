@@ -40,6 +40,13 @@ const swampPalette = (n: number): string => {
   }
 };
 
+const preludePalette = (n: number): string => {
+  const teal = chroma("#2DD4BF");
+  const violet = chroma("#8B5CF6");
+  n = clamp(n, 0, 1);
+  return chroma.mix(teal, violet, n, "rgb").hex();
+};
+
 const morningsPaletteDiscrete: string[] = [];
 const moonrisePaletteDiscrete: string[] = [];
 const starsPaletteDiscrete: string[] = [];
@@ -59,6 +66,7 @@ const spectrumFunctions: Record<string, (n: number) => string> = {
   mornings: (n: number) => morningsPaletteDiscrete[Math.round(n * 255)],
   stars: (n: number) => starsPaletteDiscrete[Math.round(n * 255)],
   swamp: swampPalette,
+  prelude: preludePalette,
 };
 
 const webAudioWrapper = new WebAudioWrapper(appConfig);

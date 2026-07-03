@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
 import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
 import { SwampIcon } from "./custom-song-icons/SwampIcon";
-import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
+import { PreludeIcon } from "./custom-song-icons/PreludeIcon";
 import { LayoutContext } from "../contexts/contexts";
 import {
   landingPageCanvas,
@@ -36,6 +36,7 @@ const SONGS: Record<string, Selected> = {
   moonrise: { name: "Moonrise", bpm: "120", key: "G Minor" },
   mornings: { name: "Mornings", bpm: "92", key: "Eb Major" },
   swamp: { name: "Swamp", bpm: "75", key: "Eb Minor" },
+  prelude: { name: "Prelude", bpm: "100", key: "C Major" },
   "coming-soon": { name: "Information & Updates", bpm: null, key: null },
 };
 
@@ -184,8 +185,8 @@ function LandingPageInner() {
           <Link className={cx(songLink, "song-link")} href="/play/moonrise">
             <MoonriseIcon name="moonrise" onSelect={select} />
           </Link>
-          <Link className={cx(songLink, "song-link")} href="/info">
-            <ComingSoonIcon name="coming-soon" onSelect={select} />
+          <Link className={cx(songLink, "song-link")} href="/play/prelude">
+            <PreludeIcon name="prelude" onSelect={select} />
           </Link>
         </div>
       )}
