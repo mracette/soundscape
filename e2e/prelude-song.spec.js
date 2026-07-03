@@ -24,6 +24,18 @@ test("prelude loads, plays a voice, and the baked viz reacts", async ({
     () => typeof window.__runtimeSceneDebug?.sample === "function"
   );
 
+  // The scene must render as more than a black frame the moment it loads, before
+  // any voice starts — a lit, camera-framed scene with visible objects. Sampling
+  // the WebGL framebuffer (render + readPixels) guards against an unrenderable GLB
+  // (no light, black emissive, camera aimed away) that the value-only sample misses.
+  const pixels = await page.evaluate(() =>
+    window.__runtimeSceneDebug.pixelSum()
+  );
+  expect(
+    pixels.nonBlack / pixels.total,
+    `non-black fraction ${pixels.nonBlack}/${pixels.total}`
+  ).toBeGreaterThan(0.1);
+
   // bass-orb's emissiveIntensity is bound to the bass band with outMin 0.2, so it
   // rests at ~0.2 while nothing is playing.
   const baseline = await page.evaluate(() =>

@@ -16,6 +16,8 @@ declare global {
     /** DEV-only handle for e2e: read a bound object's live emissiveIntensity by name. */
     __runtimeSceneDebug?: {
       sample(objectName: string): number;
+      /** Render once and count non-black pixels in a centered region (renderability proof). */
+      pixelSum(): { nonBlack: number; total: number };
     };
   }
 }
@@ -70,6 +72,7 @@ export class RuntimeScene {
     if (import.meta.env.DEV) {
       window.__runtimeSceneDebug = {
         sample: (objectName) => this.sampleEmissiveIntensity(objectName),
+        pixelSum: () => this.samplePixels(),
       };
     }
   }
@@ -87,6 +90,29 @@ export class RuntimeScene {
     return m && "emissiveIntensity" in m
       ? (m as Material & { emissiveIntensity: number }).emissiveIntensity
       : NaN;
+  }
+
+  /**
+   * Render once and count non-black pixels in a centered region. The renderer
+   * has `preserveDrawingBuffer: false`, so the read must happen in the same task
+   * as the render, before the compositor clears the buffer.
+   */
+  private samplePixels(): { nonBlack: number; total: number } {
+    if (!this.scene || !this.camera) return { nonBlack: 0, total: 0 };
+    this.renderer.render(this.scene, this.camera);
+    const gl = this.renderer.getContext();
+    const size = 64;
+    const sw = Math.min(size, gl.drawingBufferWidth);
+    const sh = Math.min(size, gl.drawingBufferHeight);
+    const x = Math.floor((gl.drawingBufferWidth - sw) / 2);
+    const y = Math.floor((gl.drawingBufferHeight - sh) / 2);
+    const px = new Uint8Array(sw * sh * 4);
+    gl.readPixels(x, y, sw, sh, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    let nonBlack = 0;
+    for (let i = 0; i < sw * sh; i++) {
+      if (px[i * 4] + px[i * 4 + 1] + px[i * 4 + 2] > 24) nonBlack++;
+    }
+    return { nonBlack, total: sw * sh };
   }
 
   private load(options: RuntimeSceneOptions): void {
