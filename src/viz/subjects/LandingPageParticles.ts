@@ -17,17 +17,19 @@ import {
 // chroma-js has no bundled types; all chroma calls are typed as any
 import chroma from "chroma-js";
 
+import { accents } from "../../styles/settings";
+
+// Starry-night star temperatures: warm gold through white to moonlit blue.
 export const COLOR_SCALE = chroma
-  .scale(["#FEAC5E", "#C779D0", "#59e8f2"])
+  .scale([accents.gold.base, "#ffffff", accents.dusk.base])
   .mode("lrgb");
 
-export const COLOR_SCALE_STEPS = COLOR_SCALE.colors(10, "hex");
-
 const COUNT = 3000;
-const SPEED = 0.01;
+const SPEED = 0.004;
 const V3 = new Vector3();
 
-const getY = (lifecycle: number): number => Math.pow(lifecycle, 2.75);
+// linear: stars spread evenly across the sky rather than pooling low
+const getY = (lifecycle: number): number => lifecycle;
 
 const positions: number[] = [];
 const lifecycles: number[] = [];
@@ -90,7 +92,7 @@ export class LandingPageParticles {
           transparent: true,
           uniforms: {
             uMap: { value: texture },
-            uSize: { value: 10 * this.renderer.getPixelRatio() },
+            uSize: { value: 7 * this.renderer.getPixelRatio() },
           },
           defines: {
             USE_COLOR: "",
@@ -104,7 +106,11 @@ export class LandingPageParticles {
 
           void main()	{
 
-              float opacity = .6 * (1. - vPosition.y);
+              // twinkle: y drifts slowly each frame, so a high-frequency wave
+              // over y reads as per-star brightness oscillating in time
+              float twinkle = .35 + .65 * abs(sin(vPosition.y * 40.0 + vPosition.x * 7.0));
+
+              float opacity = .6 * twinkle * (1. - .35 * vPosition.y);
 
               vec4 texColor = texture2D( uMap, gl_PointCoord );
 

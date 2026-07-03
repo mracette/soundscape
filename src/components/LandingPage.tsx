@@ -16,6 +16,7 @@ import {
   landingPageKey,
   songSelectionPanel,
   songLink,
+  songLinkGlow,
   infoSubheader,
   infoRow,
   infoPageButton,
@@ -181,16 +182,28 @@ function LandingPageInner() {
         <LandingPageMobile onSelect={select} />
       ) : (
         <div id="song-selection-panel" className={songSelectionPanel}>
-          <Link className={cx(songLink, "song-link")} href="/play/swamp">
+          <Link
+            className={cx(songLink, songLinkGlow.swamp, "song-link")}
+            href="/play/swamp"
+          >
             <SwampIcon name="swamp" onSelect={select} />
           </Link>
-          <Link className={cx(songLink, "song-link")} href="/play/mornings">
+          <Link
+            className={cx(songLink, songLinkGlow.mornings, "song-link")}
+            href="/play/mornings"
+          >
             <MorningsIcon name="mornings" onSelect={select} />
           </Link>
-          <Link className={cx(songLink, "song-link")} href="/play/moonrise">
+          <Link
+            className={cx(songLink, songLinkGlow.moonrise, "song-link")}
+            href="/play/moonrise"
+          >
             <MoonriseIcon name="moonrise" onSelect={select} />
           </Link>
-          <Link className={cx(songLink, "song-link")} href="/info">
+          <Link
+            className={cx(songLink, songLinkGlow["coming-soon"], "song-link")}
+            href="/info"
+          >
             <ComingSoonIcon name="coming-soon" onSelect={select} />
           </Link>
         </div>

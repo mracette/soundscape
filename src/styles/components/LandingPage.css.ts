@@ -1,10 +1,10 @@
-import { globalStyle, style } from "@vanilla-extract/css";
+import { globalStyle, style, styleVariants } from "@vanilla-extract/css";
 import {
+  accents,
   fontColor,
-  hotBlue,
-  hotGreen,
-  hotPink,
+  glowShadow,
   mSize,
+  motion,
   vw,
   xxlSize,
 } from "../settings";
@@ -29,9 +29,9 @@ export const landingPageTitle = style({
   margin: 0,
   padding: "2rem",
   color: fontColor,
-  // `background` must come before `background-clip` in this stylesheet
-  background:
-    "linear-gradient(30deg, #feac5e, #f3a280, #e7979b, #db8cb2, #ce80c7, #be8ad4, #aaa6dc, #94bfe4, #7ad4eb, #59e8f2)",
+  // `background` must come before `background-clip` in this stylesheet.
+  // Ember → gold → bloom: the garden-gate sunset, in the accent palette.
+  background: `linear-gradient(30deg, ${accents.ember.base}, ${accents.gold.base}, ${accents.bloom.base})`,
   backgroundClip: "text",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
@@ -63,15 +63,15 @@ export const landingPage = style({
 });
 
 export const landingPageSongTitle = style({
-  color: hotPink,
+  color: accents.ember.base,
 });
 
 export const landingPageBpm = style({
-  color: hotGreen,
+  color: accents.moss.base,
 });
 
 export const landingPageKey = style({
-  color: hotBlue,
+  color: accents.dusk.base,
 });
 
 export const songSelectionPanel = style({
@@ -87,12 +87,28 @@ export const songSelectionPanel = style({
 
 export const songLink = style({
   borderRadius: "50%",
+  background: "rgba(20, 27, 36, 0.45)",
+  transition: `box-shadow ${motion.fast} ${motion.ease}`,
+});
+
+/**
+ * Hover/focus glow on each scene selector nods at that scene's color —
+ * the one place a per-scene accent is deliberate. The icon canvas artwork
+ * itself is untouched.
+ */
+const songLinkGlowVariant = (glow: string) => ({
   selectors: {
-    "&:hover": {
-      backgroundColor: "rgba(255,255,255,.05)",
-      backdropFilter: "blur(3px)",
+    "&:hover, &:focus-visible": {
+      boxShadow: glowShadow(glow),
     },
   },
+});
+
+export const songLinkGlow = styleVariants({
+  swamp: songLinkGlowVariant(accents.moss.glow),
+  mornings: songLinkGlowVariant(accents.ember.glow),
+  moonrise: songLinkGlowVariant(accents.dusk.glow),
+  "coming-soon": songLinkGlowVariant(accents.gold.glow),
 });
 
 export const songLinkMobile = style({
@@ -102,12 +118,8 @@ export const songLinkMobile = style({
   borderRadius: "1rem",
   width: "100%",
   margin: "1rem 0",
-  selectors: {
-    "&:hover": {
-      backgroundColor: "rgba(255,255,255,.05)",
-      backdropFilter: "blur(3px)",
-    },
-  },
+  background: "rgba(20, 27, 36, 0.45)",
+  transition: `box-shadow ${motion.fast} ${motion.ease}`,
 });
 
 globalStyle(`${songLinkMobile}>div`, {
