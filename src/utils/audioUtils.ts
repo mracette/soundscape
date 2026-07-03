@@ -19,19 +19,6 @@ export const getPathToAudio = (
   }
 };
 
-export const nextSubdivision = (
-  audioCtx: AudioContext,
-  bpm: number,
-  beats: number
-): number => {
-  const timeElapsed = audioCtx.currentTime;
-  const beatsElapsed = timeElapsed / (60 / bpm);
-  const subdivisionsElapsed = Math.floor(beatsElapsed / beats);
-  const nextSubdivision = (subdivisionsElapsed + 1) * beats * (60 / bpm);
-
-  return nextSubdivision;
-};
-
 export const averageVolume = (fftData: Uint8Array): number =>
   fftData.reduce((sum, v) => sum + v, 0) / fftData.length / 255;
 
@@ -88,6 +75,14 @@ export const loadArrayBuffer = (audioFilePath: string): Promise<ArrayBuffer> => 
     request.addEventListener("load", () => {
       if (request.status === 200) {
         resolve(request.response as ArrayBuffer);
+      } else {
+        // 'load' also fires on 404/503 — without this reject the promise
+        // never settles and the loading screen hangs silently
+        reject(
+          new Error(
+            `Failed to load audio (HTTP ${request.status}): ${audioFilePath}`
+          )
+        );
       }
     });
     request.addEventListener("error", (err) => {

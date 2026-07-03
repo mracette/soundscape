@@ -2,6 +2,7 @@ import {
   useRef,
   useState,
   useContext,
+  useEffect,
   useImperativeHandle,
   type Ref,
 } from "react";
@@ -25,6 +26,11 @@ const STOP_PARAMS = {
 
 export interface ToggleButtonViewHandle {
   runAnimation: (type: "start" | "stop", durationMs: number) => void;
+  /**
+   * Rescale any in-flight toggle animation to finish in `remainingMs` — called
+   * when a Time Warp change moves the pending commit's boundary time.
+   */
+  retimeAnimation: (remainingMs: number) => void;
   getButton: () => HTMLButtonElement | null;
 }
 
@@ -51,10 +57,48 @@ export const ToggleButtonView = ({ initialActive, onClick, ref }: Props) => {
   // from under gsap, snapping or flashing the ring instead of letting it animate.
   const [restingActive] = useState(initialActive);
 
+  const circumference = 2 * Math.PI * (buttonRadius - buttonBorder / 2);
+  // Latest geometry for gsap callbacks, which capture values at tween creation.
+  const circumferenceRef = useRef(circumference);
+  // The state the ring rests at once tweens settle — active means full offset.
+  const restingActiveRef = useRef(initialActive);
+
+  // Because gsap owns strokeDashoffset (see restingActive above), React never
+  // rewrites it — but the "active" resting value depends on the circumference,
+  // which changes with the viewport. On resize, rewrite the DOM value to the
+  // new circumference when the ring is resting active; mid-sweep, the start
+  // tween's onComplete settles it instead.
+  useEffect(() => {
+    const prev = circumferenceRef.current;
+    circumferenceRef.current = circumference;
+    const circleSvg = circleRef.current;
+    if (!circleSvg || prev === circumference) return;
+    if (restingActiveRef.current && !gsap.isTweening(circleSvg)) {
+      gsap.set(circleSvg, { strokeDashoffset: circumference });
+    }
+  }, [circumference]);
+
   useImperativeHandle(
     ref,
     () => ({
       getButton: () => buttonRef.current,
+      retimeAnimation: (remainingMs) => {
+        const remaining = Math.max(remainingMs, 1) / 1000;
+        const iconDiv = iconDivRef.current!;
+        const targets = [
+          circleRef.current!,
+          iconPolyRef.current!,
+          iconDiv,
+          ...iconDiv.children,
+          buttonRef.current!,
+        ];
+        // timeScale rescales a tween's remaining local time onto the new real
+        // remaining time, preserving each tween's ease and end values.
+        gsap.getTweensOf(targets).forEach((tween) => {
+          const left = tween.duration() - tween.time();
+          if (left > 0) tween.timeScale(left / remaining);
+        });
+      },
       runAnimation: (type, durationMs) => {
         const seconds = durationMs / 1000;
         const circleSvg = circleRef.current!;
@@ -73,6 +117,8 @@ export const ToggleButtonView = ({ initialActive, onClick, ref }: Props) => {
         let backgroundColor: string;
         let rotateZ: number;
 
+        restingActiveRef.current = type === "start";
+
         if (type === "start") {
           rotateZ = -180;
           backgroundColor = START_PARAMS.backgroundColor;
@@ -86,6 +132,13 @@ export const ToggleButtonView = ({ initialActive, onClick, ref }: Props) => {
               strokeDashoffset: 2 * Math.PI * (buttonRadius - buttonBorder / 2),
               duration: seconds,
               ease: "none",
+              // settle to the latest circumference — a resize mid-sweep would
+              // otherwise leave the ring at the stale pre-resize target
+              onComplete: () => {
+                gsap.set(circleSvg, {
+                  strokeDashoffset: circumferenceRef.current,
+                });
+              },
             }
           );
         } else {

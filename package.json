@@ -7,6 +7,10 @@
     "node": ">=22"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "chroma-js": "2.1.2",
     "color-curves": "0.0.7",
     "d3-color": "3.0.1",
@@ -30,6 +34,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write src",
+    "test:unit": "vitest run",
     "test:e2e": "PLAYWRIGHT_FORCE_ASYNC_LOADER=1 playwright test",
     "test:blender": "for f in tools/blender/tests/test_*.py; do out=$(\"${BLENDER_BIN:-/Applications/Blender.app/Contents/MacOS/Blender}\" --background --python \"$f\" 2>&1); echo \"$out\"; echo \"$out\" | grep -q '^OK ' || { echo \"FAILED: $f\"; exit 1; }; done",
     "bake:song": "node tools/bake-song.mjs",
@@ -60,7 +65,7 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.62.0",
     "vite": "^6.4.3",
-    "vitest": "^4.1.9"
+    "vitest": "4.1.9"
   },
   "packageManager": "pnpm@11.8.0"
 }

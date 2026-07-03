@@ -1,0 +1,22 @@
+appId: world.soundscape.desktop
+productName: Soundscape
+directories:
+  output: dist
+files:
+  - src/**/*
+  - package.json
+extraResources:
+  - from: ../../build
+    to: app
+    filter:
+      - "**/*"
+      - "!audio/wav/{swamp,mornings,moonrise}/**"
+mac:
+  target: dmg
+  category: public.app-category.music
+  identity: null
+win:
+  target: nsis
+linux:
+  target: AppImage
+  category: Audio

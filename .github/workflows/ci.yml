@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [master, 2026-overhaul, quality]
+    branches: [master, dev, next]
   pull_request:
 concurrency:
   group: ci-${{ github.ref }}
@@ -18,8 +18,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
+      - run: pnpm test:unit
+      # Production-build-only breakage (vanilla-extract plugin, env handling)
+      # isn't caught by typecheck or the vite dev server the e2e suite runs on.
+      - run: pnpm build
       - run: pnpm exec eslint src/
-      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright install --with-deps chromium webkit
       - run: pnpm test:e2e
         env:
           # Audio/model assets are gitignored and absent in CI; fetch them from the

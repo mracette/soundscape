@@ -39,9 +39,13 @@ interface MusicPlayerState {
   resetCallbacks: NamedCallback[];
   randomizeCallbacks: NamedCallback[];
   backgroundMode: boolean;
+  timeWarp: number;
+  energy: number;
   pauseVisuals: boolean;
   mute: boolean;
   setBackgroundMode: (v: boolean) => void;
+  setTimeWarp: (v: number) => void;
+  setEnergy: (v: number) => void;
   setPauseVisuals: (v: boolean) => void;
   startMute: () => void;
   stopMute: () => void;
@@ -69,6 +73,8 @@ const initialState = {
   resetCallbacks: [],
   randomizeCallbacks: [],
   backgroundMode: false,
+  timeWarp: 0,
+  energy: 0.5,
   pauseVisuals: false,
   mute: false,
 };
@@ -76,6 +82,8 @@ const initialState = {
 export const useMusicPlayerStore = create<MusicPlayerState>()((set) => ({
   ...initialState,
   setBackgroundMode: (v) => set({ backgroundMode: v }),
+  setTimeWarp: (v) => set({ timeWarp: v }),
+  setEnergy: (v) => set({ energy: v }),
   setPauseVisuals: (v) => set({ pauseVisuals: v }),
   startMute: () => set({ mute: true }),
   stopMute: () => set({ mute: false }),

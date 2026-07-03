@@ -1,0 +1,23 @@
+{
+  "name": "@soundscape/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Soundscape — immersive music visualizer (iOS + Android)",
+  "author": "mracette",
+  "scripts": {
+    "build:web": "pnpm --filter soundscape exec vite build --mode mobile",
+    "bundle:assets": "node ../desktop/scripts/sync-assets.mjs",
+    "prepare:web": "pnpm run build:web && pnpm run bundle:assets",
+    "add:ios": "cap add ios",
+    "add:android": "cap add android",
+    "sync": "cap sync",
+    "copy": "cap copy",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/ios": "^8.0.0",
+    "@capacitor/android": "^8.0.0"
+  }
+}

@@ -37,6 +37,17 @@ export class AudioPlayerWrapper {
    *  through stop() — a scheduled stop leaves the voice audible until the
    *  boundary, and active-set logic lives in the music-player store. */
   startedAt: number | null = null;
+  playbackRate = 1;
+  /** True from `start()` until `stop()`; gates AudioParam work in `setPlaybackRate`. */
+  private playing = false;
+  /**
+   * Whether `bufferSource` is wired to `destination`. Needed because a
+   * never-started source that has been `disconnect()`ed (song unmount cleans up
+   * voices it never played, and the engine singleton keeps the instances for
+   * the next visit) will `start()` successfully but inaudibly — the spec only
+   * throws on reuse — so the throw → reload fallback never engages.
+   */
+  private connected = false;
 
   constructor(context: AudioContext, path: string, options: AudioPlayerOptions) {
     // bind
@@ -76,6 +87,7 @@ export class AudioPlayerWrapper {
           bufferSource.loopEnd = bufferSource.buffer!.duration;
           bufferSource.connect(this.destination);
           this.bufferSource = bufferSource;
+          this.connected = true;
           resolve();
         })
         .catch((err) => {
@@ -86,26 +98,66 @@ export class AudioPlayerWrapper {
 
   disconnect(): void {
     this.bufferSource.disconnect();
+    this.connected = false;
   }
 
   /**
-   * Start playback at `time` (AudioContext seconds, absolute).
+   * Start playback at `time` (AudioContext seconds, absolute), optionally
+   * `offsetSeconds` into the buffer. The offset is mapped modulo the buffer
+   * length, so the transport can pass "seconds of playback elapsed since the
+   * grid boundary" directly to join a loop mid-cycle, exactly in phase, when
+   * its boundary can no longer be started sample-accurately.
    * If the underlying `BufferSourceNode` has already been started, reloads a
    * fresh one before starting — this is the normal path after the first play.
+   * A pristine-but-disconnected source (disconnected on a previous visit's
+   * unmount, never played) is also reloaded first: its `start()` would succeed
+   * without producing any sound.
    */
-  start(time: number): void {
+  start(time: number, offsetSeconds = 0): void {
+    if (!this.connected) {
+      this.reload();
+    }
+    const offset = offsetSeconds % this.bufferSource.buffer!.duration;
     try {
-      this.bufferSource.start(time);
+      // Seed the rate as the source's base value (not an event pinned at `time`),
+      // so a Time Warp change between scheduling and `time` still governs the rate the
+      // voice comes in at — otherwise it starts at a stale rate (wrong pitch+tempo).
+      this.bufferSource.playbackRate.value = this.playbackRate;
+      this.bufferSource.start(time, offset);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       this.reload();
-      this.bufferSource.start(time);
+      this.bufferSource.start(time, offset);
     }
+    this.playing = true;
     this.startedAt = time;
+  }
+
+  /**
+   * Set this voice's playback rate (pitch + tempo) at AudioContext time `atTime`.
+   * With `glideSeconds > 0`, the rate ramps linearly from the param's current
+   * value to `rate` over that window (anchored with setValueAtTime so
+   * consecutive ramps chain continuously instead of zippering).
+   *
+   * The rate is always recorded so a later `start()` seeds the live value, but
+   * AudioParam automation only touches a playing source — automating stopped or
+   * not-yet-started nodes is wasted work (a fresh node is seeded on start).
+   */
+  setPlaybackRate(rate: number, atTime: number, glideSeconds = 0): void {
+    this.playbackRate = rate;
+    if (!this.playing) return;
+    const param = this.bufferSource.playbackRate;
+    if (glideSeconds > 0) {
+      param.setValueAtTime(param.value, atTime);
+      param.linearRampToValueAtTime(rate, atTime + glideSeconds);
+    } else {
+      param.setValueAtTime(rate, atTime);
+    }
   }
 
   /** Stop at `time` (AudioContext seconds). Omit to stop immediately. */
   stop(time?: number): void {
+    this.playing = false;
     try {
       this.bufferSource.stop(time);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -123,9 +175,11 @@ export class AudioPlayerWrapper {
     newSource.loop = this.loop;
     newSource.loopStart = 0;
     newSource.loopEnd = this.bufferSource.buffer!.duration;
+    newSource.playbackRate.value = this.playbackRate;
     newSource.connect(this.destination);
 
     this.bufferSource = newSource;
+    this.connected = true;
   }
 
   /** Loop length in seconds (buffer duration), or null before init resolves. */

@@ -1,5 +1,6 @@
 import { useContext, useRef, useState, useEffect } from "react";
-import { clamp, lerp } from "../utils/mathUtils";
+import { lerp } from "../utils/mathUtils";
+import { chooseNewValue } from "./effectWalk";
 
 import { WebAudioContext } from "../contexts/contexts";
 import { SongContext } from "../contexts/contexts";
@@ -11,7 +12,6 @@ import { CanvasSlider } from "./canvas/CanvasSlider";
 import {
   sliderLabel,
   sliderRow,
-  effectsControlsRow,
   switchControl,
   slider,
   round,
@@ -20,21 +20,39 @@ import { flexPanel } from "../styles/shared/layout.css";
 import { buttonWhite, groupedButtons } from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
 
-const EFFECT_INTERVAL = 4; // in beats
+// Effect random-walk timing (beats). The interval is both the spacing between new
+// targets and the transition length, so Energy scales the modulation: calm = slow
+// and sweeping, lively = quicker. The tick is the lerp update granularity.
+const CALM_EFFECT_BEATS = 128;
+const LIVELY_EFFECT_BEATS = 32;
+const EFFECT_TICK_BEATS = 0.25;
 
-const chooseNewValue = (prev: number): number => {
-  const max = 100;
-  const bounds = 35;
-  const effectSize = 40;
-  let newValue: number;
-  if (prev < bounds) {
-    newValue = prev + Math.random() * effectSize;
-  } else if (prev > max - bounds) {
-    newValue = prev - Math.random() * effectSize;
-  } else {
-    newValue = prev + (-0.5 + Math.random()) * effectSize;
-  }
-  return clamp(newValue, 1, 100);
+// Background-mode safe zone for the effect walk so it can never bury the song:
+// the highpass stays <= ~1 kHz (value 72) and the lowpass >= ~3 kHz (value 55).
+// Manual sliders are unconstrained — only the auto-walk is penned.
+const HP_WALK_CEIL = 72;
+const LP_WALK_FLOOR = 55;
+
+// Manual Time Warp glide: the rate eases to its target over GLIDE_STEPS
+// segments of GLIDE_STEP_S each. Each step ramps the audio linearly across the
+// segment while the clock holds a matching piecewise-constant rate (see
+// WebAudioWrapper.setTimeWarpRate); a final settle tick pins both to the exact
+// target.
+const GLIDE_STEPS = 20;
+const GLIDE_STEP_S = 0.03;
+
+interface Preset {
+  timeWarp: number;
+  energy: number;
+  ambience: number;
+}
+
+// Slider positions (1-100), as a spectrum from present to deeply calm:
+// Work = steady focus bed; Ambient = dreamy and slow; Sleep = slowest and sparsest.
+const PRESETS: Record<"work" | "ambient" | "sleep", Preset> = {
+  work: { timeWarp: 1, energy: 50, ambience: 10 },
+  ambient: { timeWarp: 40, energy: 25, ambience: 45 },
+  sleep: { timeWarp: 85, energy: 8, ambience: 70 },
 };
 
 export const EffectsPanel = () => {
@@ -42,7 +60,10 @@ export const EffectsPanel = () => {
     (s) => s.setBackgroundMode
   );
   const setPauseVisuals = useMusicPlayerStore((s) => s.setPauseVisuals);
-  const { bpm } = useContext(SongContext)!;
+  const setTimeWarp = useMusicPlayerStore((s) => s.setTimeWarp);
+  const setEnergy = useMusicPlayerStore((s) => s.setEnergy);
+  const voicesOn = useMusicPlayerStore((s) => s.backgroundMode);
+  const { bpm, id } = useContext(SongContext)!;
   const { WAW } = useContext(WebAudioContext)!;
 
   const [backgroundMode, setBackgroundMode] = useState(false);
@@ -51,6 +72,9 @@ export const EffectsPanel = () => {
   const [hpValue, setHpValue] = useState(1);
   const [lpValue, setLpValue] = useState(100);
   const [amValue, setAmValue] = useState(1);
+  const [timeWarpValue, setTimeWarpValue] = useState(1);
+  const timeWarpGlideRef = useRef<number | null>(null);
+  const [energyValue, setEnergyValue] = useState(50);
 
   const effectsTargets = useRef<{
     time: number | null;
@@ -65,15 +89,17 @@ export const EffectsPanel = () => {
   });
 
   const triggerRandomEffects = () => {
-    const intervalSeconds = (EFFECT_INTERVAL * 60) / bpm;
+    const energy = (energyValue - 1) / 99;
+    const intervalSeconds =
+      (lerp(CALM_EFFECT_BEATS, LIVELY_EFFECT_BEATS, energy) * 60) / bpm;
     if (
       !effectsTargets.current.time ||
       effectsTargets.current.time < WAW.audioCtx.currentTime - intervalSeconds
     ) {
       // set new targets
       effectsTargets.current.time = WAW.audioCtx.currentTime;
-      effectsTargets.current.hp = chooseNewValue(hpValue);
-      effectsTargets.current.lp = chooseNewValue(lpValue);
+      effectsTargets.current.hp = chooseNewValue(hpValue, 1, HP_WALK_CEIL);
+      effectsTargets.current.lp = chooseNewValue(lpValue, LP_WALK_FLOOR, 100);
       effectsTargets.current.am = chooseNewValue(amValue);
     }
     const progress =
@@ -99,7 +125,7 @@ export const EffectsPanel = () => {
     ) {
       backgroundModeEventRef.current = WAW.scheduler.scheduleRepeating(
         WAW.audioCtx.currentTime + 60 / bpm,
-        (EFFECT_INTERVAL * 60) / bpm / 16,
+        (EFFECT_TICK_BEATS * 60) / bpm,
         triggerRandomEffects
       );
       // update event
@@ -115,6 +141,18 @@ export const EffectsPanel = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [bpm, backgroundMode, triggerRandomEffects]);
 
+  /* Glide Cleanup Hook */
+  // kill an in-flight glide when the song changes or the panel unmounts, so the
+  // interval can't keep firing against a stale song id
+  useEffect(() => {
+    return () => {
+      if (timeWarpGlideRef.current) {
+        window.clearInterval(timeWarpGlideRef.current);
+        timeWarpGlideRef.current = null;
+      }
+    };
+  }, [id]);
+
   /* Effect Value Hooks */
   useEffect(() => {
     WAW.setEffects("hp", hpValue);
@@ -126,6 +164,45 @@ export const EffectsPanel = () => {
     WAW.setEffects("am", amValue);
   }, [WAW, amValue]);
 
+  // slider 1..100 -> rate 1.0..0.5 (one octave / half tempo at the floor)
+  const timeWarpToRate = (v: number) => 1 - ((v - 1) / 99) * 0.5;
+
+  const handleTimeWarp = (v: number) => {
+    setTimeWarpValue(v);
+    setTimeWarp((v - 1) / 99);
+    const targetRate = timeWarpToRate(v);
+    const startRate = WAW.getTempoClock(id).currentRate;
+    let i = 0;
+    if (timeWarpGlideRef.current) window.clearInterval(timeWarpGlideRef.current);
+    timeWarpGlideRef.current = window.setInterval(() => {
+      i++;
+      if (i <= GLIDE_STEPS) {
+        const r = startRate + (targetRate - startRate) * (i / GLIDE_STEPS);
+        WAW.setTimeWarpRate(id, r, GLIDE_STEP_S);
+      } else {
+        // settle: the last ramp segment has landed; pin clock and audio to the
+        // exact target rate
+        WAW.setTimeWarpRate(id, targetRate);
+        window.clearInterval(timeWarpGlideRef.current!);
+        timeWarpGlideRef.current = null;
+      }
+    }, GLIDE_STEP_S * 1000);
+  };
+
+  const handleEnergy = (v: number) => {
+    setEnergyValue(v);
+    setEnergy((v - 1) / 99);
+  };
+
+  const applyPreset = (p: Preset) => {
+    handleTimeWarp(p.timeWarp);
+    handleEnergy(p.energy);
+    setAmValue(p.ambience);
+    WAW.setEffects("am", p.ambience);
+    setVoicesBackgroundMode(true);
+    setBackgroundMode(true);
+  };
+
   return (
     <div id="effects-panel" className={flexPanel}>
       <h2>Background Mode</h2>
@@ -133,15 +210,37 @@ export const EffectsPanel = () => {
         Automatically varies the music over time. Ideal for extended listening.
       </p>
 
+      <div className="flex-row">
+        <button
+          className={cx(buttonWhite, groupedButtons)}
+          id="preset-work"
+          onClick={() => applyPreset(PRESETS.work)}
+        >
+          Work
+        </button>
+        <button
+          className={cx(buttonWhite, groupedButtons)}
+          id="preset-ambient"
+          onClick={() => applyPreset(PRESETS.ambient)}
+        >
+          Ambient
+        </button>
+        <button
+          className={cx(buttonWhite, groupedButtons)}
+          id="preset-sleep"
+          onClick={() => applyPreset(PRESETS.sleep)}
+        >
+          Sleep
+        </button>
+      </div>
+
       <div className={cx("flex-row", sliderRow)}>
         <div className="flex-col" style={{ justifyContent: "flex-end" }}>
           <label className={switchControl}>
             <input
               type="checkbox"
-              onInput={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                setVoicesBackgroundMode(checked);
-              }}
+              checked={voicesOn}
+              onChange={(e) => setVoicesBackgroundMode(e.target.checked)}
             />
             <span className={cx(slider, round, "slider", "round")}></span>
           </label>
@@ -157,10 +256,8 @@ export const EffectsPanel = () => {
           <label className={switchControl}>
             <input
               type="checkbox"
-              onInput={(e) => {
-                const checked = (e.target as HTMLInputElement).checked;
-                setBackgroundMode(checked);
-              }}
+              checked={backgroundMode}
+              onChange={(e) => setBackgroundMode(e.target.checked)}
             />
             <span className={cx(slider, round, "slider", "round")}></span>
           </label>
@@ -171,8 +268,6 @@ export const EffectsPanel = () => {
           </span>
         </div>
       </div>
-      <h2 id="effects-controls-row" className={effectsControlsRow}>Visuals</h2>
-      <p>Pause visuals to improve performance and save power.</p>
 
       <div className={cx("flex-row", sliderRow)}>
         <div className="flex-col" style={{ justifyContent: "flex-end" }}>
@@ -194,54 +289,30 @@ export const EffectsPanel = () => {
         </div>
       </div>
 
-      <div
-        id="effects-controls-row"
-        className={cx("flex-row", effectsControlsRow)}
-        style={{ justifyContent: "space-between" }}
-      >
-        <div className="flex-col">
-          <h2>Effects</h2>
-        </div>
-        <div className="flex-col">
-          {backgroundMode && <p className="hot-green">background mode: on</p>}
-        </div>
+      <div className="flex-row">
+        <h3 className={sliderLabel}>time warp</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider
+          id="time-warp"
+          value={timeWarpValue}
+          handleValue={handleTimeWarp}
+        />
+      </div>
+      <div className="flex-row">
+        <h3 className={sliderLabel}>energy</h3>
+      </div>
+      <div className="flex-row">
+        <CanvasSlider
+          id="energy"
+          value={energyValue}
+          handleValue={handleEnergy}
+        />
       </div>
 
       <div className="flex-row">
-        <button
-          className={cx(buttonWhite, groupedButtons)}
-          id="effects-panel-reset"
-          onClick={() => {
-            setHpValue(1);
-            setLpValue(100);
-            setAmValue(1);
-            WAW.setEffects("hp", 1);
-            WAW.setEffects("lp", 100);
-            WAW.setEffects("am", 1);
-          }}
-        >
-          Reset
-        </button>
-
-        <button
-          className={cx(buttonWhite, groupedButtons)}
-          id="effects-panel-randomize"
-          onClick={() => {
-            const h = 1 + 99 * Math.random();
-            const l = 1 + 99 * Math.random();
-            const a = 1 + 99 * Math.random();
-            setHpValue(h);
-            setLpValue(l);
-            setAmValue(a);
-            WAW.setEffects("hp", h);
-            WAW.setEffects("lp", l);
-            WAW.setEffects("am", a);
-          }}
-        >
-          Randomize
-        </button>
+        <h3 className={sliderLabel}>— fine tune —</h3>
       </div>
-
       <div className="flex-row">
         <h3 className={sliderLabel}>highpass filter</h3>
       </div>
@@ -272,6 +343,42 @@ export const EffectsPanel = () => {
           handleValue={(v) => setAmValue(v)}
           value={amValue}
         />
+      </div>
+      <div className="flex-row">
+        <button
+          className={cx(buttonWhite, groupedButtons)}
+          id="effects-panel-reset"
+          disabled={backgroundMode}
+          onClick={() => {
+            setHpValue(1);
+            setLpValue(100);
+            setAmValue(1);
+            WAW.setEffects("hp", 1);
+            WAW.setEffects("lp", 100);
+            WAW.setEffects("am", 1);
+          }}
+        >
+          Reset
+        </button>
+
+        <button
+          className={cx(buttonWhite, groupedButtons)}
+          id="effects-panel-randomize"
+          disabled={backgroundMode}
+          onClick={() => {
+            const h = 1 + 99 * Math.random();
+            const l = 1 + 99 * Math.random();
+            const a = 1 + 99 * Math.random();
+            setHpValue(h);
+            setLpValue(l);
+            setAmValue(a);
+            WAW.setEffects("hp", h);
+            WAW.setEffects("lp", l);
+            WAW.setEffects("am", a);
+          }}
+        >
+          Randomize
+        </button>
       </div>
     </div>
   );

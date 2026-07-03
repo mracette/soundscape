@@ -2,17 +2,7 @@ import * as THREE from "three-legacy";
 import { GLTFLoader, GLTF } from "three-legacy/examples/jsm/loaders/GLTFLoader";
 import FirstPersonControls from "./controls/FirstPersonControls";
 import { FrameTelemetry, TelemetrySnapshot } from "./telemetry";
-
-// Cap the render loop to 60fps. On high-refresh displays (120Hz+) RAF would
-// otherwise render 2x as often — pure heat/battery for an ambient visualizer,
-// with no visible benefit (motion is time-based, not per-frame).
-const TARGET_FPS = 60;
-const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
-// Jitter margin: render when within this of the target interval. Without it, a
-// true 60Hz display (frames arriving a hair under 16.67ms) gets halved to 30fps;
-// the margin sits safely between a 120Hz frame (8.33ms) and a 60Hz one (16.67ms),
-// so 60Hz renders every frame and 120Hz renders every other = 60.
-const FRAME_TOLERANCE_MS = 4;
+import { frameGate } from "./frameGate";
 
 // stats.js has no bundled types — minimal shim for the dynamic import
 interface StatsPanel {
@@ -86,6 +76,9 @@ export class SceneManager {
   protected fpcControl!: boolean;
   protected telemetry?: FrameTelemetry;
   protected perfPanels?: { cpu: StatsPanel; gpu: StatsPanel };
+  // The object published on window.__perf — kept so dispose() can tell whether
+  // the global still points at this instance before clearing it.
+  protected perfHandle?: { snapshot(): TelemetrySnapshot };
   protected lastFrameTime = 0;
 
   // Fields set by init() and subclasses
@@ -100,6 +93,11 @@ export class SceneManager {
 
   // Animation frame handle
   protected currentFrame!: number;
+
+  // Set by dispose(). Subclasses start the RAF loop from async asset-load
+  // continuations (`Promise.all(...).then(() => super.animate())`) that
+  // dispose() cannot cancel — this flag lets animate() refuse to (re)start.
+  protected disposed = false;
 
   constructor(canvas: HTMLCanvasElement) {
     const opts = {
@@ -116,7 +114,9 @@ export class SceneManager {
         height: null,
       },
       spectrumFunction: (_n: number) => "#FFFFFF",
-      // Perf telemetry + stats overlay opt-in via ?perf=1 (off in production).
+      // Perf telemetry + stats overlay opt-in via ?perf=1. Deliberately works
+      // in production builds (default-off) so real deployments can be profiled
+      // — see docs/superpowers/specs/2026-06-24-perf-telemetry-design.md.
       showStats: new URLSearchParams(window.location.search).has("perf"),
       fpcControl: false,
     };
@@ -144,9 +144,10 @@ export class SceneManager {
       this.telemetry = new FrameTelemetry(
         this.renderer.getContext() as WebGLRenderingContext
       );
-      (window as unknown as { __perf: unknown }).__perf = {
+      this.perfHandle = {
         snapshot: (): TelemetrySnapshot => this.telemetry!.snapshot(),
       };
+      (window as unknown as { __perf: unknown }).__perf = this.perfHandle;
     }
   }
 
@@ -160,7 +161,14 @@ export class SceneManager {
    * dispose the renderer's too — deterministic release rather than waiting for GC.
    */
   dispose() {
+    this.disposed = true;
     this.stop();
+    // ?perf artifacts outlive the scene unless removed here: the stats overlay
+    // is appended to document.body (a new one per scene switch would stack),
+    // and window.__perf would pin this instance's telemetry + GL context.
+    this.helpers.stats?.dom.remove();
+    const w = window as unknown as { __perf?: unknown };
+    if (this.perfHandle && w.__perf === this.perfHandle) delete w.__perf;
     this.disposeAll(this.scene);
     this.renderer.dispose();
   }
@@ -242,13 +250,16 @@ export class SceneManager {
    * `requestAnimationFrame`.
    */
   animate() {
+    // Guards both the pending re-queue after dispose() and a post-dispose loop
+    // start from a scene's async setup — either would pin the disposed
+    // renderer/canvas/GL context in a RAF loop forever.
+    if (this.disposed) return;
     this.currentFrame = requestAnimationFrame(this.animate);
 
-    // Frame-rate cap: skip this tick unless ~1/60s (minus a jitter margin) has
-    // elapsed since the last rendered frame.
-    const now = performance.now();
-    if (now - this.lastFrameTime < FRAME_INTERVAL_MS - FRAME_TOLERANCE_MS) return;
-    this.lastFrameTime = now;
+    // Frame-rate cap (60fps, remainder-carrying, drift-clamped) — see frameGate.
+    const gate = frameGate(performance.now(), this.lastFrameTime);
+    this.lastFrameTime = gate.lastFrameTime;
+    if (!gate.render) return;
 
     this.showStats && this.helpers.stats?.begin();
     this.telemetry?.beginFrame();
@@ -332,6 +343,9 @@ export class SceneManager {
     };
     if (this.showStats) {
       import("stats.js").then((mod) => {
+        // The import can resolve after dispose() — bail so the overlay never
+        // attaches for a scene that's already been torn down.
+        if (this.disposed) return;
         const Stats = mod.default as unknown as {
           new (): StatsInstance;
           Panel: new (name: string, fg: string, bg: string) => StatsPanel;

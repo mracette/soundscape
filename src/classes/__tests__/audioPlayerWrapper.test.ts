@@ -5,6 +5,7 @@ function fakeContext() {
   const makeSource = () => ({
     buffer: { duration: 2.5 },
     loop: true, loopStart: 0, loopEnd: 0,
+    playbackRate: { value: 1, setValueAtTime() {}, linearRampToValueAtTime() {} },
     connect() {}, disconnect() {},
     start() {}, stop() {},
   });

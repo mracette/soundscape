@@ -113,7 +113,12 @@ export const AppWrap = () => {
 
   useEffect(() => {
     const resumeAudio = () => {
-      webAudioWrapper.audioCtx.state === "suspended" &&
+      // Resume on any non-running state, not just "suspended": after a phone
+      // call/Siri/alarm, iOS WebKit parks the context in a non-standard
+      // "interrupted" state (absent from TS's AudioContextState, hence the
+      // cast) and often never returns it to "running" on its own — a strict
+      // "suspended" check would leave the app permanently silent.
+      (webAudioWrapper.audioCtx.state as string) !== "running" &&
         webAudioWrapper.audioCtx.resume();
     };
 

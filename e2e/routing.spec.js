@@ -44,5 +44,10 @@ test("an unknown song id redirects to the landing page", async ({ page }) => {
   await page.goto("/play/bogus", { waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/\/$/);
   await expect(page.locator("#landing-page-canvas")).toBeAttached();
+  // The redirect must replace the bad entry rather than push on top of it —
+  // otherwise Back returns to /play/bogus and re-triggers the redirect forever.
+  // Baseline is 2 (the initial about:blank entry + this navigation); a pushed
+  // redirect would make it 3.
+  expect(await page.evaluate(() => history.length)).toBe(2);
   expect(pageErrors.map((e) => e.message).join("\n")).toBe("");
 });

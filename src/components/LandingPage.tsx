@@ -22,6 +22,7 @@ import {
 } from "../styles/components/LandingPage.css";
 import { buttonWhite } from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
+import { isWeb } from "../utils/runtime";
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
 import { LandingPageMobile } from "./LandingPageMobile";
@@ -81,7 +82,7 @@ export const LandingPage = (props: LandingPageProps) => {
               <InfoPageInner />
             </Route>
             <Route>
-              <Redirect to="/" />
+              <Redirect to="/" replace />
             </Route>
           </Switch>
         </div>
@@ -93,6 +94,11 @@ export const LandingPage = (props: LandingPageProps) => {
 function InfoPageInner() {
   return (
     <div className="flex-col" style={{ alignItems: "center" }}>
+      {!isWeb && (
+        <Link href="/">
+          <button className={cx(infoPageButton, buttonWhite)}>← Back</button>
+        </Link>
+      )}
       <h3 className={cx(infoSubheader, "info-subheader")}>
         The immersive music visualizer that lets you build your own beats
       </h3>
