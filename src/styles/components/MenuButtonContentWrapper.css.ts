@@ -1,14 +1,16 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import { vh } from "../settings";
+import { veil } from "../shared/veil.css";
 
-export const menuButtonContent = style({
-  visibility: "visible",
-  borderRadius: ".75rem .75rem",
-  position: "absolute",
-  width: "auto",
-  background: "rgba(255, 255, 255, 0.15)",
-  overflow: "auto",
-});
+export const menuButtonContent = style([
+  veil,
+  {
+    visibility: "visible",
+    position: "absolute",
+    width: "auto",
+    overflow: "auto",
+  },
+]);
 
 globalStyle(`${menuButtonContent} *`, {
   willChange: "visibility",
