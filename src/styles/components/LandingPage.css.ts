@@ -1,17 +1,11 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import {
-  hotBlue,
-  hotGreen,
-  hotPink,
-  liveGlowSelectors,
+  heroGradientStops,
   mSize,
-  motion,
   radii,
   surfaces,
   textPrimary,
   vw,
-  whiteGlow,
-  xxlSize,
 } from "../settings";
 
 export const landingPageCanvas = style({
@@ -29,14 +23,13 @@ export const landingPageTitleWrapper = style({
 
 export const landingPageTitle = style({
   fontFamily: "'Satisfy'",
-  fontSize: xxlSize,
+  fontSize: "13rem",
   fontWeight: 400,
   margin: 0,
   padding: "2rem",
   color: textPrimary,
   // `background` must come before `background-clip` in this stylesheet
-  background:
-    "linear-gradient(30deg, #feac5e, #f3a280, #e7979b, #db8cb2, #ce80c7, #be8ad4, #aaa6dc, #94bfe4, #7ad4eb, #59e8f2)",
+  background: `linear-gradient(30deg, ${heroGradientStops.join(", ")})`,
   backgroundClip: "text",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
@@ -67,20 +60,10 @@ export const landingPage = style({
   overflow: "auto",
 });
 
-export const landingPageSongTitle = style({
-  color: hotPink,
-});
-
-export const landingPageBpm = style({
-  color: hotGreen,
-});
-
-export const landingPageKey = style({
-  color: hotBlue,
-});
-
-export const songSelectionPanel = style({
-  width: vw(75),
+export const songCardList = style({
+  width: vw(90),
+  // two 300px cards plus the gap: desktop wraps to a 2x2 grid
+  maxWidth: "616px",
   display: "flex",
   flexDirection: "row",
   flexWrap: "wrap",
@@ -88,29 +71,45 @@ export const songSelectionPanel = style({
   alignItems: "flex-start",
   alignContent: "flex-start",
   marginTop: "2rem",
+  gap: 16,
+  "@media": {
+    "screen and (max-width: 670px)": {
+      width: "100%",
+      flexDirection: "column",
+      // wrap + alignContent:flex-start from the base style would pack the
+      // column line to the left, defeating alignItems centering
+      flexWrap: "nowrap",
+      alignItems: "center",
+      marginTop: 0,
+      gap: 0,
+    },
+  },
 });
 
-export const songLink = style({
-  borderRadius: "50%",
-  background: surfaces.chip,
-  transition: `box-shadow ${motion.fast} ${motion.ease}`,
-  selectors: liveGlowSelectors(whiteGlow),
-});
-
-export const songLinkMobile = style({
+export const songCard = style({
   textDecoration: "none",
-  maxWidth: "320px",
   display: "block",
+  width: "300px",
   borderRadius: radii.panel,
-  width: "100%",
-  margin: "1rem 0",
   background: surfaces.chip,
-  transition: `box-shadow ${motion.fast} ${motion.ease}`,
-  selectors: liveGlowSelectors(whiteGlow),
+  selectors: {
+    "&:hover, &:focus-visible": {
+      background: surfaces.buttonHover,
+    },
+  },
+  "@media": {
+    "screen and (max-width: 670px)": {
+      // fixed width clamped by the container: width:100% + maxWidth leaves
+      // zero free space for centering (margins resolve before the clamp)
+      width: "320px",
+      maxWidth: "100%",
+      margin: "1rem 0",
+    },
+  },
 });
 
-globalStyle(`${songLinkMobile}>div`, {
-  flexBasis: "50%",
+export const songCardName = style({
+  fontSize: "2rem",
 });
 
 export const infoRow = style({

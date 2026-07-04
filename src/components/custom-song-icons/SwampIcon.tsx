@@ -1,11 +1,17 @@
 import { boundedSin, TAU, rotatePoint, CanvasCoordinates } from "../../utils/mathUtils";
 
 import { CustomSongIcon } from "./CustomSongIcon";
+import { heroGradientLine } from "./heroGradient";
 
 const bsin = boundedSin(2.5, 0, 1, -1.5);
 const bsinRot = boundedSin(5, 0, 1, -1.5);
 
-const animate = (context: CanvasRenderingContext2D, cycle: number, coords: CanvasCoordinates) => {
+const animate = (
+  context: CanvasRenderingContext2D,
+  cycle: number,
+  coords: CanvasCoordinates,
+  hoverProgress: number
+) => {
   const w = coords.getWidth();
   const h = coords.getHeight()!;
   const eyeWidth = w / 4;
@@ -74,6 +80,18 @@ const animate = (context: CanvasRenderingContext2D, cycle: number, coords: Canva
         rotAgain
       );
 
+      if (hoverProgress > 0) {
+        // hero gradient runs tip-to-tip along each leaf edge
+        context.strokeStyle = heroGradientLine(
+          context,
+          point0Rot.x,
+          point0Rot.y,
+          point1Rot.x,
+          point1Rot.y,
+          hoverProgress
+        );
+      }
+
       context.beginPath();
       context.moveTo(point0Rot.x, point0Rot.y);
       context.quadraticCurveTo(
@@ -90,7 +108,7 @@ const animate = (context: CanvasRenderingContext2D, cycle: number, coords: Canva
 
 interface Props {
   name?: string;
-  onSelect: (id: string | null) => void;
+  onSelect?: (id: string | null) => void;
 }
 
 export const SwampIcon = (props: Props) => {

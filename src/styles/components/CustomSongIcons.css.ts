@@ -12,8 +12,8 @@ export const newLabel = style({
 export const customSongIcon = style({
   display: "block",
   margin: 0,
-  width: "25rem",
-  height: "25rem",
+  width: "12rem",
+  height: "12rem",
 });
 
 export const customSongIconMobile = style({

@@ -69,7 +69,7 @@ export const AppRouter = (props: Props) => {
         </Route>
       )}
       <Route>
-        <LandingPage spectrumFunction={props.spectrumFunctions.stars} />
+        <LandingPage />
       </Route>
     </Switch>
   );

@@ -15,6 +15,32 @@ export const moonYellow = "#f6f2d5";
 /** The one interactive glow color — every hover/focus glow is white. */
 export const whiteGlow = "rgba(255, 255, 255, 0.45)";
 
+/**
+ * Sunset-to-cyan sweep behind the hero wordmark. Also drawn along each
+ * element of the song icons on hover (see heroGradient.ts).
+ */
+export const heroGradientStops = [
+  "#feac5e",
+  "#f3a280",
+  "#e7979b",
+  "#db8cb2",
+  "#ce80c7",
+  "#be8ad4",
+  "#aaa6dc",
+  "#94bfe4",
+  "#7ad4eb",
+  "#59e8f2",
+];
+
+/**
+ * Accents sampled from the hero gradient (warm start, midpoint, cool end)
+ * for text that sits alongside it — e.g. the landing song-meta line, which
+ * reads left-to-right as the same sweep.
+ */
+export const heroWarm = heroGradientStops[0];
+export const heroMid = heroGradientStops[Math.floor(heroGradientStops.length / 2)];
+export const heroCool = heroGradientStops[heroGradientStops.length - 1];
+
 export const textPrimary = "#ffffff";
 export const textSecondary = "rgba(255, 255, 255, 0.65)";
 
