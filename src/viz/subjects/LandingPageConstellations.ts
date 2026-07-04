@@ -237,10 +237,12 @@ interface Figure {
 
 interface Constellation {
   group: Group;
-  /** Upward drift in px/s, derived from the field speed at this depth. */
+  /** Drift in px/s (applied to x and y equally: a 45-degree track). */
   speed: number;
   /** y at which the figure has fully exited the top of the viewport. */
   yMax: number;
+  /** x at which the figure has fully exited the right edge; wraps to -xMax. */
+  xMax: number;
   /** Horizontal slot index; respawned figures stay in their lane. */
   slot: number;
 }
@@ -440,12 +442,14 @@ export class LandingPageConstellations {
     const yMax = this.viewHeight / 2 + figure.halfHeight + EDGE_MARGIN;
     group.position.y = -yMax;
 
+    const xMax = this.viewWidth / 2 + figure.halfWidth + EDGE_MARGIN;
+
     // same drift math as the field, pinned to far-field depth so figures
     // move with the slowest stars; the field plane spans 1.05 * viewHeight
     const zFactor = lerp(Z_FACTOR_MIN, 1, Math.random());
     const speed = FIELD_SPEED * (1 / zFactor) * 1.05 * this.viewHeight;
 
-    return { group, speed, yMax, slot };
+    return { group, speed, yMax, xMax, slot };
   }
 
   private buildStars(figure: Figure): Points {
@@ -498,7 +502,12 @@ export class LandingPageConstellations {
 
     for (let i = 0; i < this.constellations.length; i++) {
       const constellation = this.constellations[i];
+      // 45-degree drift, matching the star field; x wraps around the sides
       constellation.group.position.y += constellation.speed * delta;
+      constellation.group.position.x += constellation.speed * delta;
+      if (constellation.group.position.x > constellation.xMax) {
+        constellation.group.position.x = -constellation.xMax;
+      }
       if (constellation.group.position.y > constellation.yMax) {
         // fully off the top: replace with a fresh figure below the viewport
         this.scene.remove(constellation.group);

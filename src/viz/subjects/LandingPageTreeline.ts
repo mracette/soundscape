@@ -20,7 +20,11 @@ import treelineUrl from "../img/landing/treeline.svg";
  * bitmap variants.
  */
 
-/** Source SVG dimensions, and the band of rows the trees actually occupy. */
+/**
+ * Source SVG dimensions, and the band of rows the trees actually occupy.
+ * Produced by scripts/vectorize-treeline.sh — re-run it to get fresh values
+ * when swapping the silhouette asset.
+ */
 const SVG_WIDTH = 1584;
 const SVG_HEIGHT = 672;
 const BAND_TOP = 213;

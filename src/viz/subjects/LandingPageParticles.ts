@@ -58,6 +58,7 @@ const getY = (lifecycle: number): number => lifecycle;
 
 const positions: number[] = [];
 const lifecycles: number[] = [];
+const xOrigins: number[] = [];
 const colors: number[] = [];
 const magnitudes: number[] = [];
 const twinkles: number[] = [];
@@ -66,6 +67,7 @@ for (let i = 0; i < COUNT; i++) {
   V3.set(Math.random(), Math.random(), Math.random());
   const lifeCycle = Math.random();
   lifecycles.push(lifeCycle);
+  xOrigins.push(V3.x);
   positions.push(V3.x, getY(lifeCycle), V3.z);
   // pow skews the field dim: most stars are small and faint, a few bright
   magnitudes.push(Math.pow(Math.random(), 2.5));
@@ -84,6 +86,7 @@ export class LandingPageParticles {
   renderer: WebGLRenderer;
   object: Points;
   private time = 0;
+  private aspect = 1;
 
   constructor(scene: Scene, camera: Camera, renderer: WebGLRenderer) {
     this.scene = scene;
@@ -193,6 +196,9 @@ export class LandingPageParticles {
     );
     this.object.scale.copy(planeDimensions);
     this.object.position.copy(planeDimensions.clone().multiplyScalar(-0.5));
+    // plane-unit x per plane-unit y for a 45-degree drift in screen px;
+    // the plane is stretched to the viewport, so unit axes aren't square
+    this.aspect = planeDimensions.y / planeDimensions.x;
   };
 
   update = (delta: number): void => {
@@ -209,6 +215,8 @@ export class LandingPageParticles {
       const lifecycleNext = lifecycles[i] + delta * SPEED * (1 / zFactor);
       lifecycles[i] = lifecycleNext % 1;
       position.setY(i, getY(lifecycles[i]));
+      // x advances in lockstep with y: a 45-degree up-right drift
+      position.setX(i, (xOrigins[i] + lifecycles[i] * this.aspect) % 1);
     }
     (geom.attributes.position as BufferAttribute).needsUpdate = true;
   };
