@@ -9,6 +9,7 @@ import {
   WebGLRenderer,
 } from "three";
 
+import { treelineTint } from "../../styles/settings";
 import treelineUrl from "../img/landing/treeline.svg";
 
 /**
@@ -62,7 +63,7 @@ interface TreelineLayer {
 const LAYERS: TreelineLayer[] = [
   {
     scale: 0.8,
-    tint: "#0b1119",
+    tint: treelineTint,
     blur: 0,
     lift: 0.2,
     offset: 0,
@@ -71,7 +72,7 @@ const LAYERS: TreelineLayer[] = [
   },
   {
     scale: 0.35,
-    tint: "#0b1119",
+    tint: treelineTint,
     blur: 2,
     lift: 0.35,
     offset: 0.5,

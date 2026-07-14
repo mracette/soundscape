@@ -40,6 +40,22 @@ export const landingPageTitle = style({
   },
 });
 
+export const landingPageTitleHero = style({
+  position: "relative",
+  display: "inline-flex",
+});
+
+export const landingPageTitleSpill = style({
+  position: "absolute",
+  top: "65%",
+  left: "50%",
+  transform: "translate(-50%, -50%) rotate(17deg) scale(1.2)",
+  width: "135%",
+  maxWidth: "none",
+  opacity: 0.55,
+  pointerEvents: "none",
+});
+
 export const landingPageHeader = style({
   fontSize: mSize,
   color: textPrimary,
@@ -49,7 +65,6 @@ export const landingPageHeader = style({
   height: "100%",
   justifyContent: "flex-start",
   alignItems: "center",
-  gap: "0.5rem",
 });
 
 globalStyle(`${landingPageHeader} .flex-row`, {
@@ -135,4 +150,12 @@ export const infoSubheader = style({
 export const infoPageButton = style({
   fontSize: mSize,
   width: "140px",
+});
+
+export const innerLandingPage = style({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "1rem",
 });

@@ -2,6 +2,9 @@ export const lightGrey = "#d8d8d8";
 export const offBlack = "#1f262f";
 export const offBlack2 = "#141b24";
 
+/** Near-black silhouette tint of the landing-page treeline layers. */
+export const treelineTint = "rgb(11, 17, 25)";
+
 /**
  * The accent quartet — the brand signature. Used strictly as accents (text
  * highlights, live-state labels, the active side of a slider), never as
@@ -38,7 +41,8 @@ export const heroGradientStops = [
  * reads left-to-right as the same sweep.
  */
 export const heroWarm = heroGradientStops[0];
-export const heroMid = heroGradientStops[Math.floor(heroGradientStops.length / 2)];
+export const heroMid =
+  heroGradientStops[Math.floor(heroGradientStops.length / 2)];
 export const heroCool = heroGradientStops[heroGradientStops.length - 1];
 
 export const textPrimary = "#ffffff";
