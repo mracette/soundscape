@@ -29,9 +29,9 @@ export const LandingPage = () => {
     }
 
     return () => {
-      scene!.stop();
-      scene!.disposeAll(scene!.scene);
-      removeWindowListeners(scene!.onWindowResize);
+      if (!scene) return;
+      scene.dispose();
+      removeWindowListeners(scene.onWindowResize);
     };
   }, []);
 

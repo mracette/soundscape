@@ -56,30 +56,6 @@ const V3 = new Vector3();
 // linear: stars spread evenly across the sky rather than pooling low
 const getY = (lifecycle: number): number => lifecycle;
 
-const positions: number[] = [];
-const lifecycles: number[] = [];
-const xOrigins: number[] = [];
-const colors: number[] = [];
-const magnitudes: number[] = [];
-const twinkles: number[] = [];
-
-for (let i = 0; i < COUNT; i++) {
-  V3.set(Math.random(), Math.random(), Math.random());
-  const lifeCycle = Math.random();
-  lifecycles.push(lifeCycle);
-  xOrigins.push(V3.x);
-  positions.push(V3.x, getY(lifeCycle), V3.z);
-  // pow skews the field dim: most stars are small and faint, a few bright
-  magnitudes.push(Math.pow(Math.random(), 2.5));
-  // per-star twinkle phase and rate, so shimmer is unsynchronized
-  twinkles.push(Math.random() * TAU, lerp(0.5, 2.5, Math.random()));
-  // sqrt biases sampling toward the white/blue end of the scale, leaving
-  // moonYellow as the occasional warm star rather than the field default
-  // chroma(...).gl() returns [r, g, b, a] as number[]; typed any due to missing chroma types
-  const chroma = COLOR_SCALE(Math.sqrt(Math.random())).gl();
-  colors.push(chroma[0], chroma[1], chroma[2]);
-}
-
 export class LandingPageParticles {
   scene: Scene;
   camera: Camera;
@@ -87,11 +63,37 @@ export class LandingPageParticles {
   object: Points;
   private time = 0;
   private aspect = 1;
+  // per-star drift state, mutated every frame in update(); instance-owned so
+  // a remount starts from the same seed as its position attribute
+  private lifecycles: number[] = [];
+  private xOrigins: number[] = [];
 
   constructor(scene: Scene, camera: Camera, renderer: WebGLRenderer) {
     this.scene = scene;
     this.camera = camera;
     this.renderer = renderer;
+
+    const positions: number[] = [];
+    const colors: number[] = [];
+    const magnitudes: number[] = [];
+    const twinkles: number[] = [];
+
+    for (let i = 0; i < COUNT; i++) {
+      V3.set(Math.random(), Math.random(), Math.random());
+      const lifeCycle = Math.random();
+      this.lifecycles.push(lifeCycle);
+      this.xOrigins.push(V3.x);
+      positions.push(V3.x, getY(lifeCycle), V3.z);
+      // pow skews the field dim: most stars are small and faint, a few bright
+      magnitudes.push(Math.pow(Math.random(), 2.5));
+      // per-star twinkle phase and rate, so shimmer is unsynchronized
+      twinkles.push(Math.random() * TAU, lerp(0.5, 2.5, Math.random()));
+      // sqrt biases sampling toward the white/blue end of the scale, leaving
+      // moonYellow as the occasional warm star rather than the field default
+      // chroma(...).gl() returns [r, g, b, a] as number[]; typed any due to missing chroma types
+      const chroma = COLOR_SCALE(Math.sqrt(Math.random())).gl();
+      colors.push(chroma[0], chroma[1], chroma[2]);
+    }
 
     const geometry = new BufferGeometry();
 
@@ -101,7 +103,7 @@ export class LandingPageParticles {
     );
 
     geometry.attributes.lifecycle = new BufferAttribute(
-      new Float32Array(lifecycles),
+      new Float32Array(this.lifecycles),
       1
     );
 
@@ -212,11 +214,11 @@ export class LandingPageParticles {
     for (let i = 0; i < COUNT; i++) {
       // far stars (z near 1) drift slower than near ones (z near 0)
       const zFactor = lerp(0.5, 1, position.getZ(i));
-      const lifecycleNext = lifecycles[i] + delta * SPEED * (1 / zFactor);
-      lifecycles[i] = lifecycleNext % 1;
-      position.setY(i, getY(lifecycles[i]));
+      const lifecycleNext = this.lifecycles[i] + delta * SPEED * (1 / zFactor);
+      this.lifecycles[i] = lifecycleNext % 1;
+      position.setY(i, getY(this.lifecycles[i]));
       // x advances in lockstep with y: a 45-degree up-right drift
-      position.setX(i, (xOrigins[i] + lifecycles[i] * this.aspect) % 1);
+      position.setX(i, (this.xOrigins[i] + this.lifecycles[i] * this.aspect) % 1);
     }
     (geom.attributes.position as BufferAttribute).needsUpdate = true;
   };

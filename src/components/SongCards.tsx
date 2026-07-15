@@ -8,6 +8,7 @@ import {
   songCardList,
   songCardName,
 } from "../styles/components/LandingPage.css";
+import { cx } from "../utils/cx";
 
 const SONGS = [
   { href: "/play/swamp", name: "Swamp", bpm: "75 bpm", songKey: "Eb Minor", Icon: SwampIcon, iconName: "swamp" },
@@ -17,8 +18,9 @@ const SONGS = [
 
 export const SongCards = () => (
   <div id="song-selection-panel" className={songCardList}>
+    {/* "song-link" is a test hook selected by e2e/routing.spec.js */}
     {SONGS.map(({ href, name, bpm, songKey, Icon, iconName }) => (
-      <Link key={href} href={href} className={songCard}>
+      <Link key={href} href={href} className={cx(songCard, "song-link")}>
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <Icon name={iconName} />
           <div>

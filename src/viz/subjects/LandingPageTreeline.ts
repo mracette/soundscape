@@ -93,6 +93,7 @@ export class LandingPageTreeline {
   private svgText?: string;
   private rebuildTimer?: number;
   private buildToken = 0;
+  private disposed = false;
 
   constructor(scene: Scene, renderer: WebGLRenderer) {
     this.scene = scene;
@@ -128,7 +129,10 @@ export class LandingPageTreeline {
 
     const height = Math.round(layer.scale * nearHeight);
     const tileWidth = Math.round(height / BAND_ASPECT);
-    const width = Math.max(viewWidth, tileWidth) + layer.offset * tileWidth;
+    // the mesh is a centered plane, so a phase-shifted layer needs the shift's
+    // worth of extra width on BOTH sides — otherwise the right edge lands
+    // offset·tileWidth/2 short of the viewport edge
+    const width = Math.max(viewWidth, tileWidth) + 2 * layer.offset * tileWidth;
     const x = -layer.offset * tileWidth;
     // the lift gap below the tree band is part of the mesh, filled with
     // solid tint at raster time, so every layer runs unbroken to the
@@ -278,9 +282,22 @@ export class LandingPageTreeline {
     this.rebuildTimer = window.setTimeout(this.rebuild, 250);
   };
 
+  /**
+   * Stop future rebuilds. The debounced resize timer and the initial SVG
+   * fetch both resolve into `rebuild()`, which would otherwise re-rasterize
+   * and add meshes to a scene that has already been torn down. Mesh/texture
+   * disposal itself is the scene's `disposeAll`'s job.
+   */
+  dispose(): void {
+    this.disposed = true;
+    window.clearTimeout(this.rebuildTimer);
+    // invalidate any rasterization already in flight (token check in rebuild)
+    this.buildToken++;
+  }
+
   /** Re-rasterize every layer at the current viewport size and swap meshes. */
   private rebuild = (): void => {
-    if (!this.svgText) return;
+    if (!this.svgText || this.disposed) return;
     const token = ++this.buildToken;
 
     Promise.all(

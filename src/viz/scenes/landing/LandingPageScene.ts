@@ -58,6 +58,14 @@ export class LandingPageScene extends SceneManager {
     return subjects;
   }
 
+  dispose() {
+    // the treeline schedules async rebuilds (debounce timer, SVG fetch) that
+    // must not fire into a disposed scene; the base dispose only frees what
+    // is already in the graph
+    (this.subjects.treeline as LandingPageTreeline).dispose();
+    super.dispose();
+  }
+
   onWindowResize() {
     super.onWindowResize();
     // base resize only updates perspective fields; this scene's camera is

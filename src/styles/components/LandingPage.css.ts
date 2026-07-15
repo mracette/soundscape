@@ -72,7 +72,11 @@ globalStyle(`${landingPageHeader} .flex-row`, {
 });
 
 export const landingPage = style({
-  overflow: "auto",
+  // x stays hidden regardless of which overflow rule wins the cascade against
+  // `.fullscreen`: the title spill overhangs the title by design and must
+  // never create horizontal scroll
+  overflowX: "hidden",
+  overflowY: "auto",
 });
 
 export const songCardList = style({
