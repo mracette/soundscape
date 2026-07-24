@@ -79,12 +79,21 @@ const TREE_ASPECTS = [
  * Bank depth rows, far first (painter's order). t is channel depth: 0 at
  * the frame bottom, 1 at the horizon.
  */
-const BANK_ROWS = [0.88, 0.72, 0.55, 0.38, 0.22, 0.08];
-/** Bank tree heights (viewport fraction) at t = 0 / t = 1. */
-const BANK_NEAR_HEIGHT = 0.3;
-const BANK_FAR_HEIGHT = 0.045;
+const BANK_ROWS = [0.9, 0.75, 0.6, 0.45, 0.3, 0.15, 0.05];
+/**
+ * Bank tree heights (viewport fraction) at t = 0 / t = 1, interpolated
+ * exponentially: the nearest trees tower in the corners and the sizes drop
+ * off fast downstream — a linear ramp reads as a flat colonnade, not depth.
+ */
+const BANK_NEAR_HEIGHT = 0.5;
+const BANK_FAR_HEIGHT = 0.03;
 /** Distant rows fade toward this haze tone (aerial perspective). */
 const BANK_HAZE = "#1d2735";
+/**
+ * The banks are hillsides: tree bases climb as they march outward from the
+ * shoreline, damped with depth so the far rows stay level at the horizon.
+ */
+const HILL_RISE = 0.5;
 /** The bare deciduous tree: an occasional accent, not a winter forest. */
 const BARE_TREE = 7;
 const BARE_TREE_CHANCE = 0.12;
@@ -93,8 +102,6 @@ const TEXTURE_MAX_WIDTH = 4096;
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
-
-const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
 
 /**
  * Deterministic PRNG: tree placement must survive a resize rebuild without
@@ -257,7 +264,7 @@ export class LandingPageTreeline {
     // rasterize each tree once at the tallest size it will be drawn, then
     // scale down per row — the down-scale softness disappears under the
     // depth blur
-    const maxHeight = Math.ceil(BANK_NEAR_HEIGHT * 1.15 * viewHeight * dpr);
+    const maxHeight = Math.ceil(BANK_NEAR_HEIGHT * 1.35 * viewHeight * dpr);
     const treeImages = await Promise.all(
       this.treeTexts!.map((text, i) =>
         this.loadAtSize(text, maxHeight * TREE_ASPECTS[i], maxHeight),
@@ -280,22 +287,29 @@ export class LandingPageTreeline {
       sctx.clearRect(0, 0, scratch.width, scratch.height);
 
       const { center, halfWidth } = channelAt(t);
-      const rowHeight = lerp(BANK_NEAR_HEIGHT, BANK_FAR_HEIGHT, Math.pow(t, 0.8)) * viewHeight;
+      const rowHeight =
+        BANK_NEAR_HEIGHT *
+        Math.pow(BANK_FAR_HEIGHT / BANK_NEAR_HEIGHT, t) *
+        viewHeight;
       const shoreY = t * horizon;
 
       for (const dir of [-1, 1]) {
-        let x = (center + dir * halfWidth) * viewWidth;
+        const shoreX = (center + dir * halfWidth) * viewWidth;
+        let x = shoreX;
         while (x > -rowHeight && x < viewWidth + rowHeight) {
           let pick = Math.floor(rand() * treeImages.length);
           if (pick === BARE_TREE && rand() > BARE_TREE_CHANCE) {
             pick = (pick + 1 + Math.floor(rand() * 8)) % 9;
           }
-          const h = rowHeight * (0.85 + 0.3 * rand());
+          const h = rowHeight * (0.7 + 0.6 * rand());
           const w = h * TREE_ASPECTS[pick];
           // trunks sink slightly below the shoreline, so bases sit in the
           // water's shore feather instead of on a straight line
           const sink = (0.06 + 0.12 * rand()) * rowHeight;
-          const baseY = shoreY - sink + (rand() - 0.5) * 0.1 * rowHeight;
+          const hill =
+            (Math.abs(x - shoreX) / viewWidth) * HILL_RISE * (1 - t) * viewHeight;
+          const baseY =
+            shoreY + hill - sink + (rand() - 0.5) * 0.1 * rowHeight;
           const drawY = (viewHeight - baseY - h) * dpr;
           const mirror = rand() < 0.5;
 
@@ -309,13 +323,32 @@ export class LandingPageTreeline {
         }
       }
 
+      // hero trees: one guaranteed giant anchoring each frame edge, so the
+      // corner framing never depends on placement luck
+      if (t === BANK_ROWS[BANK_ROWS.length - 1]) {
+        for (const [anchorX, pick] of [
+          [0.05, 0],
+          [0.95, 6],
+        ] as const) {
+          const h = rowHeight * 1.3;
+          const w = h * TREE_ASPECTS[pick];
+          sctx.drawImage(
+            treeImages[pick],
+            (anchorX * viewWidth - w / 2) * dpr,
+            (viewHeight - h + 0.03 * viewHeight) * dpr,
+            w * dpr,
+            h * dpr,
+          );
+        }
+      }
+
       sctx.globalCompositeOperation = "source-in";
       sctx.fillStyle = chroma
-        .mix(treelineTint, BANK_HAZE, Math.pow(t, 1.2) * 0.7)
+        .mix(treelineTint, BANK_HAZE, Math.pow(t, 1.2) * 0.55)
         .css();
       sctx.fillRect(0, 0, scratch.width, scratch.height);
 
-      ctx.filter = t > 0.3 ? `blur(${t * 1.4 * dpr}px)` : "none";
+      ctx.filter = t > 0.45 ? `blur(${t * 0.9 * dpr}px)` : "none";
       ctx.drawImage(scratch, 0, 0);
       ctx.filter = "none";
     }

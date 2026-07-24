@@ -30,7 +30,7 @@ const FRONT_HEIGHT_VH = 0.26;
 const GLOW_CENTER = new Vector2(0.56, 0.22);
 /** Fog strengths; the front mist only wraps the tree tops. */
 const BACK_INTENSITY = 0.2;
-const FRONT_INTENSITY = 0.09;
+const FRONT_INTENSITY = 0.06;
 /**
  * Vertical brightness band per layer (in quad UV): the mist peaks around the
  * tree tops and fades toward both the sky and the horizon.

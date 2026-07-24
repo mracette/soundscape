@@ -29,7 +29,7 @@ const CHANNEL_DRIFT = 0.08;
 /** S-curve swing of the centerline, damped toward the horizon. */
 const MEANDER = 0.13;
 /** Channel half-widths (viewport-x fraction) at the frame bottom / horizon. */
-const HALF_NEAR = 0.36;
+const HALF_NEAR = 0.28;
 const HALF_FAR = 0.03;
 /** Perspective exponent: how quickly the channel narrows with depth. */
 const NARROWING = 1.4;
@@ -126,8 +126,11 @@ void main() {
     float pv = 1. / (1.12 - vUv.y);
 
     // night water reflects the sky: blue, brightening toward the horizon
+    // and again gently toward the viewer, so the near silhouettes always
+    // have luminous water to read against
     vec3 col = mix(uDeep, uShallow, pow(vUv.y, 1.3));
     col += uSheen * .05 * pow(vUv.y, 2.4);
+    col += uSheen * .09 * pow(1. - vUv.y, 1.8);
 
     // the cross coordinate undulates so every edge in the water — the bank
     // reflections, the light lane — has a wavy waterline, never a ruled line
@@ -136,8 +139,10 @@ void main() {
 
     // dark mirror of the banks along both shorelines — the signature that
     // makes the surface read as water rather than ground
+    // stronger in the distance, gentler up close: the foreground water
+    // stays luminous so the giant corner trees always silhouette against it
     float bankRefl = smoothstep(.45, 1., abs(uw));
-    col = mix(col, uDeep * .75, bankRefl * .7);
+    col = mix(col, uDeep * .75, bankRefl * (.2 + .35 * vUv.y));
 
     // thin bright waterline sliver where each bank meets its reflection —
     // the tonal break that separates land from water
@@ -167,7 +172,7 @@ void main() {
     float iso = abs(fract(swirl * 3.) - .5);
     float swirlLines = smoothstep(.1, .0, iso) * smoothstep(.35, .6, swirl);
     col += mix(vec3(.75, .85, 1.), uGlint, min(light * 1.5, 1.))
-        * swirlLines * .12 * (.4 + light + bankRefl * .3);
+        * swirlLines * .16 * (.5 + light + bankRefl * .4);
 
     // glints ride the swirls: sparkles cluster where the current runs
     float dust = glints(vec2(uw * 3.6, pv * 1.4 - uTime * .02));
