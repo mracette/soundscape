@@ -1,12 +1,5 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import {
-  heroGradientStops,
-  mSize,
-  radii,
-  surfaces,
-  textPrimary,
-  vw,
-} from "../settings";
+import { mSize, radii, surfaces, textPrimary, vw } from "../settings";
 
 export const landingPageCanvas = style({
   zIndex: -1,
@@ -22,38 +15,23 @@ export const landingPageTitleWrapper = style({
 });
 
 export const landingPageTitle = style({
-  fontFamily: "'Satisfy'",
-  fontSize: "13rem",
-  fontWeight: 400,
   margin: 0,
   padding: "2rem",
-  color: textPrimary,
-  // `background` must come before `background-clip` in this stylesheet
-  background: `linear-gradient(30deg, ${heroGradientStops.join(", ")})`,
-  backgroundClip: "text",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
+  lineHeight: 0,
+});
+
+export const landingPageTitleArt = style({
+  display: "block",
+  width: "95rem",
+  maxWidth: "92vw",
+  // the art lives on a solid black plate; screen blending drops the plate
+  // into the night sky while letting stars show through its dark regions
+  mixBlendMode: "screen",
   "@media": {
     "screen and (max-width: 670px)": {
-      fontSize: "7.5rem",
+      width: "54rem",
     },
   },
-});
-
-export const landingPageTitleHero = style({
-  position: "relative",
-  display: "inline-flex",
-});
-
-export const landingPageTitleSpill = style({
-  position: "absolute",
-  top: "65%",
-  left: "50%",
-  transform: "translate(-50%, -50%) rotate(17deg) scale(1.2)",
-  width: "135%",
-  maxWidth: "none",
-  opacity: 0.55,
-  pointerEvents: "none",
 });
 
 export const landingPageHeader = style({
@@ -73,8 +51,8 @@ globalStyle(`${landingPageHeader} .flex-row`, {
 
 export const landingPage = style({
   // x stays hidden regardless of which overflow rule wins the cascade against
-  // `.fullscreen`: the title spill overhangs the title by design and must
-  // never create horizontal scroll
+  // `.fullscreen`: the page only ever scrolls vertically, and sub-pixel
+  // overhang from the near-full-width title art must not add a horizontal bar
   overflowX: "hidden",
   overflowY: "auto",
 });

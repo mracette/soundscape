@@ -2,6 +2,7 @@ import { LoadingIcon } from "../components/custom-song-icons/LoadingIcon";
 import {
   landingPageHeader,
   landingPageTitle,
+  landingPageTitleArt,
 } from "../styles/components/LandingPage.css";
 
 export const LoadingScreen = () => {
@@ -13,7 +14,13 @@ export const LoadingScreen = () => {
     >
       <div className={landingPageHeader}>
         <div className="flex-row">
-          <h1 id="landing-page-soundscape-title" className={landingPageTitle}>Soundscape</h1>
+          <h1 id="landing-page-soundscape-title" className={landingPageTitle}>
+            <img
+              src="/img/hero-title.webp"
+              alt="Soundscape"
+              className={landingPageTitleArt}
+            />
+          </h1>
         </div>
         <div className="flex-row">
           <span>Loading...</span>

@@ -5,8 +5,7 @@ import {
   landingPageHeader,
   landingPageTitleWrapper,
   landingPageTitle,
-  landingPageTitleHero,
-  landingPageTitleSpill,
+  landingPageTitleArt,
   innerLandingPage,
 } from "../styles/components/LandingPage.css";
 import { cx } from "../utils/cx";
@@ -51,19 +50,13 @@ export const LandingPage = () => {
             className={cx("flex-row", landingPageTitleWrapper)}
             id="landing-page-soundscape-title-wrapper"
           >
-            <div className={landingPageTitleHero}>
+            <h1 id="landing-page-soundscape-title" className={landingPageTitle}>
               <img
-                src="/img/hero-spill.webp"
-                alt=""
-                className={landingPageTitleSpill}
+                src="/img/hero-title.webp"
+                alt="Soundscape"
+                className={landingPageTitleArt}
               />
-              <h1
-                id="landing-page-soundscape-title"
-                className={landingPageTitle}
-              >
-                Soundscape
-              </h1>
-            </div>
+            </h1>
           </div>
           <Switch>
             <Route path="/">

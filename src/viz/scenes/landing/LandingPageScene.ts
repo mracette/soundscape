@@ -4,6 +4,7 @@ import { LandingPageParticles } from "../../subjects/LandingPageParticles";
 import { LandingPageConstellations } from "../../subjects/LandingPageConstellations";
 import { LandingPageTreeline } from "../../subjects/LandingPageTreeline";
 import { LandingPageFog } from "../../subjects/LandingPageFog";
+import { LandingPageWater } from "../../subjects/LandingPageWater";
 
 export class LandingPageScene extends SceneManager {
   constructor(canvas: HTMLCanvasElement) {
@@ -55,6 +56,7 @@ export class LandingPageScene extends SceneManager {
     );
     subjects.treeline = new LandingPageTreeline(this.scene, this.renderer);
     subjects.fog = new LandingPageFog(this.scene, this.renderer);
+    subjects.water = new LandingPageWater(this.scene, this.renderer);
     return subjects;
   }
 
@@ -81,6 +83,7 @@ export class LandingPageScene extends SceneManager {
     (this.subjects.constellations as LandingPageConstellations).resize();
     (this.subjects.treeline as LandingPageTreeline).resize();
     (this.subjects.fog as LandingPageFog).resize();
+    (this.subjects.water as LandingPageWater).resize();
     this.render();
   }
 
@@ -93,6 +96,7 @@ export class LandingPageScene extends SceneManager {
     (this.subjects.particles as LandingPageParticles).update(delta);
     (this.subjects.constellations as LandingPageConstellations).update(delta);
     (this.subjects.fog as LandingPageFog).update(delta);
+    (this.subjects.water as LandingPageWater).update(delta);
     this.renderer.render(this.scene, this.camera);
   }
 }

@@ -11,6 +11,7 @@ import {
 
 import { treelineTint } from "../../styles/settings";
 import treelineUrl from "../img/landing/treeline.svg";
+import { WATERLINE_VH } from "./LandingPageWater";
 
 /**
  * Layered forest treeline along the bottom of the landing page: one vector
@@ -139,7 +140,10 @@ export class LandingPageTreeline {
     // viewport bottom no matter what renders in front of it
     const pad = Math.round(layer.lift * nearHeight);
     const meshHeight = height + pad;
-    const y = -viewHeight / 2 + meshHeight / 2;
+    // the forest stands on the waterline, not the frame bottom; the water
+    // quad fills the band below
+    const waterHeight = Math.round(WATERLINE_VH * viewHeight);
+    const y = -viewHeight / 2 + waterHeight + meshHeight / 2;
     return { height, pad, meshHeight, tileWidth, width, x, y };
   }
 
