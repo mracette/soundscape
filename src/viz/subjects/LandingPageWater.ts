@@ -4,36 +4,61 @@ import {
   PlaneBufferGeometry,
   Scene,
   ShaderMaterial,
-  Vector3,
   Vector4,
   WebGLRenderer,
 } from "three";
 
 /**
- * Still water along the bottom of the landing page, entirely shader-drawn:
- * a near-black basin that catches the light coming out of the forest above
- * it. Three visual systems share one quad — vertical reflection streaks
- * under each forest glow pocket, expanding elliptical ripple rings, and
- * sparse twinkling glints — all animated in the fragment shader.
+ * The water of the landing page: a channel that sweeps across the frame
+ * bottom and recedes between the forested banks toward a glowing vanishing
+ * point, inviting the viewer in. Entirely shader-drawn and animated: warm
+ * light spilling from the channel mouth, a dashed reflection lane running
+ * down the centerline, perspective-compressed ripple shimmer, and currents
+ * of stardust drifting toward the viewer.
+ *
+ * This file also owns the channel geometry (centerline + width by depth),
+ * shared with the treeline (bank placement) and the fog (shore mist) so
+ * land, water, and atmosphere agree about where the shoreline is.
  */
 
-/** Height of the water band as a fraction of the viewport. */
-export const WATERLINE_VH = 0.16;
+/** Top of the water — the channel's horizon — as a viewport fraction. */
+export const HORIZON_VH = 0.3;
+
+/** How far right of frame center the channel mouth sits at the horizon. */
+const CHANNEL_DRIFT = 0.08;
+/** S-curve swing of the centerline, damped toward the horizon. */
+const MEANDER = 0.13;
+/** Channel half-widths (viewport-x fraction) at the frame bottom / horizon. */
+const HALF_NEAR = 0.36;
+const HALF_FAR = 0.03;
+/** Perspective exponent: how quickly the channel narrows with depth. */
+const NARROWING = 1.4;
 
 /**
- * Horizontal centers (viewport-x fraction) of the forest glow pockets. The
- * fog's glow quad and the water's reflection streaks both read these, so
- * every light in the trees has its reflection directly below it.
+ * Channel centerline and half-width at depth t (0 = frame bottom,
+ * 1 = horizon), in viewport-x fractions.
  */
-export const GLOW_POCKET_XS = [0.24, 0.58, 0.82];
+export const channelAt = (t: number) => ({
+  center: 0.5 + CHANNEL_DRIFT * t + MEANDER * Math.sin(5 * t) * (1 - t),
+  halfWidth: HALF_FAR + (HALF_NEAR - HALF_FAR) * Math.pow(1 - t, NARROWING),
+});
 
-const DEEP_COLOR = new Color("#04070c");
-const SHALLOW_COLOR = new Color("#0e1622");
+/** GLSL mirror of `channelAt` — keep the two in lockstep. */
+export const CHANNEL_GLSL = `
+vec2 channelAt(float t) {
+    float center = .5 + ${CHANNEL_DRIFT} * t + ${MEANDER} * sin(5. * t) * (1. - t);
+    float halfWidth = ${HALF_FAR} + ${HALF_NEAR - HALF_FAR} * pow(1. - t, ${NARROWING});
+    return vec2(center, halfWidth);
+}
+`;
+
+const DEEP_COLOR = new Color("#050b14");
+const SHALLOW_COLOR = new Color("#142033");
 
 /**
- * Warm lamplight tone shared by the forest glow pockets and everything they
- * light up in the water. Deeper gold than the star-field `moonYellow`: at
- * these low intensities a near-white cream reads gray, not warm.
+ * Warm lamplight tone shared by the channel-mouth glow and everything it
+ * lights up. Deeper gold than the star-field `moonYellow`: at these low
+ * intensities a near-white cream reads gray, not warm.
  */
 export const GLOW_WARM = "#ffdf9e";
 const GLINT_COLOR = new Color(GLOW_WARM);
@@ -47,7 +72,6 @@ uniform float uTime;
 // quad width over quad height: converts uv.x into height units so
 // distances read the same on both axes
 uniform float uAspect;
-uniform vec3 uGlowXs;
 uniform vec3 uDeep;
 uniform vec3 uShallow;
 uniform vec3 uGlint;
@@ -79,81 +103,83 @@ float fbm(vec2 p) {
     return value;
 }
 
-// reflection path below one glow pocket: brightest at the waterline,
-// dissolving downward, wobbling sideways, and — critically — broken into
-// horizontal dashes by wave crests; a smooth solid column reads as a
-// cartoon light beam, a dashed one reads as light on water
-float streak(float glowX) {
-    float wobble = (noise(vec2(vUv.y * 7. - uTime * .18, glowX * 43.)) - .5)
-        * .06 * (1.3 - vUv.y);
-    float d = (vUv.x - glowX + wobble) * uAspect;
-    float column = exp(-d * d * 14.);
-    float fall = pow(vUv.y, 1.7);
-    float dashes = .35 + .65 * noise(vec2(glowX * 61. + d * 2., vUv.y * 26. - uTime * .3));
-    return column * fall * dashes;
-}
+${CHANNEL_GLSL}
 
-// one expanding ripple ring, heavily squashed vertically (the water plane
-// is seen edge-on) and broken up around its circumference by noise so it
-// reads as catching light rather than drawn with a compass
-float ripple(vec2 p, vec2 center, float seed) {
-    vec2 d = p - center;
-    float dist = length(vec2(d.x, d.y * 4.));
-    // each ring runs its own slow cycle: born small, expands, fades out
-    float cycle = fract(uTime * .045 + seed);
-    float radius = .08 + cycle * 1.1;
-    float ring = exp(-pow((dist - radius) * 22., 2.));
-    // a fainter trailing ring makes the swirl read concentric
-    float inner = .5 * exp(-pow((dist - radius * .55) * 26., 2.));
-    float life = smoothstep(0., .15, cycle) * (1. - cycle) * (1. - cycle);
-    // a full circle reads as a drawn stroke; keep only the arcs that would
-    // catch the light, and dust them with grain so they sparkle
-    float arc = smoothstep(.3, .75, noise(vec2(atan(d.y, d.x) * 1.6, seed * 23. + cycle * 2.)));
-    float grain = .25 + .75 * noise(p * 46. + seed * 29.);
-    return (ring + inner) * life * arc * grain;
-}
-
-// sparse star-like glints drifting through their own twinkle cycles
+// sparse star-like glints in flow space, drifting slowly toward the viewer
+// through their own twinkle cycles
 float glints(vec2 p) {
-    vec2 cell = floor(p * 26.);
+    vec2 cell = floor(p * 10.);
     float h = hash(cell);
-    if (h < .9) return 0.;
-    vec2 center = (cell + .5 + .35 * (vec2(hash(cell + 7.), hash(cell + 13.)) - .5)) / 26.;
-    float d = length((p - center) * vec2(1., 2.5)) * 15.;
-    float point = smoothstep(.5, 0., d);
+    if (h < .82) return 0.;
+    vec2 center = (cell + .5 + .35 * (vec2(hash(cell + 7.), hash(cell + 13.)) - .5)) / 10.;
+    float d = length(p - center) * 10.;
+    float point = smoothstep(.45, 0., d);
     float twinkle = pow(.5 + .5 * sin(uTime * (.6 + h * 1.8) + h * 40.), 3.);
     return point * twinkle;
 }
 
 void main() {
-    // height-unit space: y in [0, 1], x scaled to match
-    vec2 p = vec2(vUv.x * uAspect, vUv.y);
+    vec2 ch = channelAt(vUv.y);
+    // cross-channel coordinate: 0 on the centerline, ±1 at the shorelines
+    float u = (vUv.x - ch.x) / ch.y;
+    // perspective depth: rows of water compress toward the horizon
+    float pv = 1. / (1.12 - vUv.y);
 
-    vec3 col = mix(uDeep, uShallow, pow(vUv.y, 2.2));
+    // night water reflects the sky: blue, brightening toward the horizon
+    vec3 col = mix(uDeep, uShallow, pow(vUv.y, 1.3));
+    col += uSheen * .05 * pow(vUv.y, 2.4);
 
-    float light = streak(uGlowXs.x) + streak(uGlowXs.y) + streak(uGlowXs.z);
+    // the cross coordinate undulates so every edge in the water — the bank
+    // reflections, the light lane — has a wavy waterline, never a ruled line
+    float wob = (noise(vec2(pv * 2.2 - uTime * .07, u * 1.5)) - .5) * .3;
+    float uw = u + wob * (1. - vUv.y * .5);
 
-    // ripples live only where light falls — a ring in black water reads as
-    // a stain, a ring inside a light path reads as the water moving
-    float rings =
-        ripple(p, vec2(uGlowXs.x * uAspect, .42), .0) +
-        ripple(p, vec2(uGlowXs.y * uAspect, .3), .37) +
-        ripple(p, vec2(uGlowXs.z * uAspect, .5), .61);
+    // dark mirror of the banks along both shorelines — the signature that
+    // makes the surface read as water rather than ground
+    float bankRefl = smoothstep(.45, 1., abs(uw));
+    col = mix(col, uDeep * .75, bankRefl * .7);
 
-    // light paths blow out toward white at their core so the warm tone
-    // reads as brightness, not beige paint
-    col += mix(uGlint, vec3(1.), min(light, 1.) * .28) * light * .85;
-    col += uGlint * rings * (.3 + .6 * light);
+    // thin bright waterline sliver where each bank meets its reflection —
+    // the tonal break that separates land from water
+    float sliver = smoothstep(.09, .0, abs(abs(uw) - 1.05));
+    col += uSheen * sliver * .3 * (1. - vUv.y * .4);
 
-    // faint cool sheen drifting across the whole surface ties the lit paths
-    // to the dark stretches between them
-    float sheen = fbm(vec2(p.x * .7 - uTime * .02, vUv.y * 3.));
-    col += uSheen * sheen * pow(vUv.y, 2.) * .09;
+    float inChannel = smoothstep(1.12, .92, abs(uw));
 
-    // a thin bright meniscus where the water meets the forest
-    col += uGlint * .18 * exp(-(1. - vUv.y) * 34.) * (.4 + light);
+    // warm light spilling broadly out of the channel mouth, and its lane
+    // of reflection running down the centerline, broken by waves
+    float mouth = exp(-uw * uw * .25) * pow(vUv.y, 2.8);
+    float dashes = .45 + .55 * noise(vec2(uw * 2., pv * 5. - uTime * .22));
+    float lane = exp(-uw * uw * 3.5) * (.25 + .75 * vUv.y) * dashes;
+    float light = (mouth * .45 + lane * .5) * inChannel;
 
-    col += uGlint * glints(p) * (.55 + 1.6 * light);
+    col += mix(uGlint, vec3(1.), min(light, 1.) * .15) * light;
+
+    // uniform ripple shimmer across the whole surface — horizontal bands,
+    // perspective-compressed, brighter where the water is lit
+    float rip = noise(vec2(vUv.x * uAspect * .6, pv * 7. - uTime * .1)) - .5;
+    float ripFine = noise(vec2(vUv.x * uAspect * 1.7, pv * 14. - uTime * .16)) - .5;
+    col *= 1. + (rip * .3 + ripFine * .15) * (.4 + light);
+
+    // stardust swirls: thin glowing isolines of a drifting noise field,
+    // flowing over the whole surface like currents of dust on the water
+    float swirl = fbm(vec2(uw * 1.8, pv * 1.1 - uTime * .02));
+    float iso = abs(fract(swirl * 3.) - .5);
+    float swirlLines = smoothstep(.1, .0, iso) * smoothstep(.35, .6, swirl);
+    col += mix(vec3(.75, .85, 1.), uGlint, min(light * 1.5, 1.))
+        * swirlLines * .12 * (.4 + light + bankRefl * .3);
+
+    // glints ride the swirls: sparkles cluster where the current runs
+    float dust = glints(vec2(uw * 3.6, pv * 1.4 - uTime * .02));
+    vec3 dustColor = mix(vec3(.75, .85, 1.), uGlint, min(light * 1.5, 1.));
+    col += dustColor * dust * (.15 + 1.1 * swirlLines + .5 * light);
+
+    // faint cool sheen keeps the dark stretches alive
+    float sheen = fbm(vec2(vUv.x * uAspect * .7 - uTime * .02, pv * 2.));
+    col += uSheen * sheen * .05;
+
+    // warm meniscus where the water disappears into the woods
+    col += uGlint * exp(-(1. - vUv.y) * 26.) * exp(-u * u * 1.2) * .25;
 
     gl_FragColor = vec4(col, 1.);
 }
@@ -184,7 +210,6 @@ export class LandingPageWater {
       uniforms: {
         uTime: { value: 0 },
         uAspect: { value: 1 },
-        uGlowXs: { value: new Vector3(...GLOW_POCKET_XS) },
         uDeep: { value: DEEP_COLOR },
         uShallow: { value: SHALLOW_COLOR },
         uGlint: { value: GLINT_COLOR },
@@ -195,7 +220,9 @@ export class LandingPageWater {
     });
 
     this.mesh = new Mesh(new PlaneBufferGeometry(1, 1), this.material);
-    this.mesh.renderOrder = 6;
+    // opaque: draws in the opaque pass, under every transparent layer —
+    // the banks and mist composite over it
+    this.mesh.renderOrder = 0;
     this.scene.add(this.mesh);
     this.resize();
   }
@@ -203,7 +230,7 @@ export class LandingPageWater {
   resize = (): void => {
     const viewport = new Vector4();
     this.renderer.getViewport(viewport);
-    const height = Math.round(WATERLINE_VH * viewport.w);
+    const height = Math.round(HORIZON_VH * viewport.w);
     this.mesh.scale.set(viewport.z, height, 1);
     this.mesh.position.set(0, -viewport.w / 2 + height / 2, 0);
     this.material.uniforms.uAspect.value = viewport.z / height;

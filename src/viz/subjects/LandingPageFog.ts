@@ -5,60 +5,51 @@ import {
   Scene,
   ShaderMaterial,
   Vector2,
-  Vector3,
   Vector4,
   WebGLRenderer,
 } from "three";
 
-import { GLOW_POCKET_XS, GLOW_WARM, WATERLINE_VH } from "./LandingPageWater";
+import { CHANNEL_GLSL, GLOW_WARM, HORIZON_VH } from "./LandingPageWater";
 
 /**
- * Atmosphere for the landing page: a sky quad (top-of-frame darkening plus a
- * corner vignette, so the scene reads cinematic rather than flat), two fog
- * quads anchored to the waterline — one behind the near treeline carrying
- * the moonlit glow, one in front at low strength so the mist wraps the tree
- * tops instead of stopping behind them — and a strip of warm glow pockets
- * pooling low between the trunks, as if something luminous lives in the
- * woods. Everything is shader-driven, with slowly drifting fbm noise so it
- * reads as alive rather than a gradient.
+ * Atmosphere for the landing page: a sky quad (top-of-frame darkening plus
+ * a corner vignette, so the scene reads cinematic rather than flat), two
+ * fog quads standing on the channel horizon — one behind the treeline
+ * carrying the moonlit glow, one in front at low strength so the mist
+ * wraps the tree tops — a warm ember of light at the channel mouth that
+ * filters through the far trees, and a channel-aware mist that pools along
+ * the shorelines and the horizon so land and water dissolve into each
+ * other instead of meeting at a line. Everything is shader-driven, with
+ * slowly drifting fbm noise so it reads as alive rather than a gradient.
  */
 
 /** Fog quad heights as fractions of the viewport. */
-const BACK_HEIGHT_VH = 0.5;
-const FRONT_HEIGHT_VH = 0.32;
-/** Glow center in quad UV space; x slightly off-center, y near the treetops. */
-const GLOW_CENTER = new Vector2(0.52, 0.25);
+const BACK_HEIGHT_VH = 0.42;
+const FRONT_HEIGHT_VH = 0.26;
+/** Glow center in quad UV space: over the channel mouth, near the trees. */
+const GLOW_CENTER = new Vector2(0.56, 0.22);
 /** Fog strengths; the front mist only wraps the tree tops. */
-const BACK_INTENSITY = 0.32;
+const BACK_INTENSITY = 0.2;
 const FRONT_INTENSITY = 0.09;
 /**
  * Vertical brightness band per layer (in quad UV): the mist peaks around the
- * tree tops and fades toward both the sky and the frame bottom — the bottom
- * of the reference scene reads dark, not washed.
+ * tree tops and fades toward both the sky and the horizon.
  */
 const BACK_BAND = new Vector2(0.3, 0.2);
-const FRONT_BAND = new Vector2(0.7, 0.25);
+const FRONT_BAND = new Vector2(0.55, 0.25);
 
 const FOG_COLOR = new Color("#b9cadf");
 const SKY_COLOR = new Color("#030609");
 
-/** Glow-pocket strip height as a fraction of the viewport. */
-const POCKET_HEIGHT_VH = 0.3;
-const POCKET_COLOR = new Color(GLOW_WARM);
-const POCKET_INTENSITY = 0.65;
-/** Shore-haze strip height as a fraction of the viewport. */
-const SHORE_HEIGHT_VH = 0.12;
-const SHORE_INTENSITY = 0.24;
+/** Ember quad height as a fraction of the viewport. */
+const EMBER_HEIGHT_VH = 0.2;
+const EMBER_COLOR = new Color(GLOW_WARM);
+const EMBER_INTENSITY = 0.4;
 
-const FOG_FRAGMENT = `
-varying vec2 vUv;
+/** Shore/horizon mist strength. */
+const MIST_INTENSITY = 0.15;
 
-uniform float uTime;
-uniform float uIntensity;
-uniform vec3 uColor;
-uniform vec2 uGlowCenter;
-uniform vec2 uBand;
-
+const NOISE_GLSL = `
 float hash(vec2 p) {
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
 }
@@ -84,9 +75,21 @@ float fbm(vec2 p) {
     }
     return value;
 }
+`;
+
+const FOG_FRAGMENT = `
+varying vec2 vUv;
+
+uniform float uTime;
+uniform float uIntensity;
+uniform vec3 uColor;
+uniform vec2 uGlowCenter;
+uniform vec2 uBand;
+
+${NOISE_GLSL}
 
 void main() {
-    // brightness band: peaks at uBand.x, fades toward sky and frame bottom
+    // brightness band: peaks at uBand.x, fades toward sky and quad bottom
     float bandOffset = (vUv.y - uBand.x) / uBand.y;
     float band = exp(-bandOffset * bandOffset);
 
@@ -107,101 +110,56 @@ void main() {
 }
 `;
 
-const POCKET_FRAGMENT = `
+const EMBER_FRAGMENT = `
 varying vec2 vUv;
 
 uniform float uTime;
 uniform float uAspect;
 uniform float uIntensity;
 uniform vec3 uColor;
-uniform vec3 uXs;
 
-float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
-float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3. - 2. * f);
-    return mix(
-        mix(hash(i), hash(i + vec2(1., 0.)), u.x),
-        mix(hash(i + vec2(0., 1.)), hash(i + vec2(1., 1.)), u.x),
-        u.y
-    );
-}
-
-float fbm(vec2 p) {
-    float value = 0.;
-    float amplitude = .5;
-    for (int i = 0; i < 4; i++) {
-        value += amplitude * noise(p);
-        p *= 2.03;
-        amplitude *= .5;
-    }
-    return value;
-}
-
-// one pool of light deep in the woods: a soft ellipse the near treeline
-// silhouettes against, slowly breathing, its edge eaten into by drifting
-// noise so the light seems to filter through the canopy
-float pocket(float x, float phase) {
-    vec2 d = vec2((vUv.x - x) * uAspect * 1.5, (vUv.y - .35) * 2.);
-    float glow = exp(-dot(d, d) * 4.);
-    float breathe = .8 + .2 * sin(uTime * .12 + phase);
-    float filtered = .45 + .55 * fbm(vec2(vUv.x * uAspect * 3. - uTime * .01, vUv.y * 4.) + phase);
-    return glow * breathe * filtered;
-}
+${NOISE_GLSL}
 
 void main() {
-    float alpha = pocket(uXs.x, 0.)
-        + pocket(uXs.y, 2.1)
-        + pocket(uXs.z, 4.4);
-    gl_FragColor = vec4(uColor, alpha * uIntensity);
+    // warm light deep in the woods at the channel mouth, breathing slowly,
+    // its edge eaten into by drifting noise so it seems to filter through
+    // the canopy
+    vec2 d = vec2((vUv.x - .56) * uAspect * .7, (vUv.y - .3) * 1.4);
+    float glow = exp(-dot(d, d) * 4.);
+    float breathe = .8 + .2 * sin(uTime * .12);
+    float filtered = .5 + .5 * fbm(vec2(vUv.x * uAspect * 3. - uTime * .01, vUv.y * 4.));
+    gl_FragColor = vec4(uColor, glow * breathe * filtered * uIntensity);
 }
 `;
 
-const SHORE_FRAGMENT = `
+const MIST_FRAGMENT = `
 varying vec2 vUv;
 
 uniform float uTime;
 uniform float uAspect;
 uniform float uIntensity;
 uniform vec3 uColor;
-uniform vec3 uXs;
 
-float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
-float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3. - 2. * f);
-    return mix(
-        mix(hash(i), hash(i + vec2(1., 0.)), u.x),
-        mix(hash(i + vec2(0., 1.)), hash(i + vec2(1., 1.)), u.x),
-        u.y
-    );
-}
-
-// warm haze hugging the ground under one glow pocket, scattering the light
-// that filters out of the woods down to the waterline — without it the
-// solid base of the treeline forms a dead black bar between the lit forest
-// and its reflection
-float shore(float x, float phase) {
-    float d = (vUv.x - x) * uAspect * .38;
-    float column = exp(-d * d * 6.);
-    float ground = exp(-vUv.y * 3.5);
-    float wisp = .55 + .45 * noise(vec2(vUv.x * uAspect * 2. + phase, vUv.y * 5. - uTime * .02));
-    return column * ground * wisp;
-}
+${NOISE_GLSL}
+${CHANNEL_GLSL}
 
 void main() {
-    float alpha = shore(uXs.x, 0.)
-        + shore(uXs.y, 2.1)
-        + shore(uXs.z, 4.4);
-    gl_FragColor = vec4(uColor, alpha * uIntensity);
+    vec2 ch = channelAt(vUv.y);
+    float u = (vUv.x - ch.x) / ch.y;
+
+    // mist pools along both shorelines (|u| near 1), veiling the junction
+    // where tree bases meet their reflections
+    float shoreline = exp(-pow((abs(u) - 1.) * 3.5, 2.)) * (1. - vUv.y * .5);
+
+    // and gathers around the channel mouth at the horizon — weighted
+    // toward the channel so it dissolves the far junction without drawing
+    // a new straight pale stripe across the frame
+    float horizon = smoothstep(.72, 1., vUv.y) * (.35 + .65 * exp(-u * u * .7));
+
+    float drift = .6 + .4 * fbm(vec2(vUv.x * uAspect * 1.5 + uTime * .012, vUv.y * 3.));
+
+    float alpha = (shoreline * .6 + horizon * .7) * drift * uIntensity;
+    gl_FragColor = vec4(uColor, alpha);
 }
 `;
 
@@ -237,8 +195,8 @@ export class LandingPageFog {
   private skyMesh: Mesh;
   private backMesh: Mesh;
   private frontMesh: Mesh;
-  private pocketMesh: Mesh;
-  private shoreMesh: Mesh;
+  private emberMesh: Mesh;
+  private mistMesh: Mesh;
   private animatedMaterials: ShaderMaterial[];
   private time = 0;
 
@@ -261,6 +219,24 @@ export class LandingPageFog {
         fragmentShader: FOG_FRAGMENT,
       });
 
+    const glowMaterial = (
+      intensity: number,
+      color: Color,
+      fragment: string,
+    ) =>
+      new ShaderMaterial({
+        transparent: true,
+        depthTest: false,
+        uniforms: {
+          uTime: { value: 0 },
+          uAspect: { value: 1 },
+          uIntensity: { value: intensity },
+          uColor: { value: color },
+        },
+        vertexShader: VERTEX,
+        fragmentShader: fragment,
+      });
+
     const skyMaterial = new ShaderMaterial({
       transparent: true,
       depthTest: false,
@@ -271,41 +247,19 @@ export class LandingPageFog {
       fragmentShader: SKY_FRAGMENT,
     });
 
-    const pocketMaterial = new ShaderMaterial({
-      transparent: true,
-      depthTest: false,
-      uniforms: {
-        uTime: { value: 0 },
-        uAspect: { value: 1 },
-        uIntensity: { value: POCKET_INTENSITY },
-        uColor: { value: POCKET_COLOR },
-        uXs: { value: new Vector3(...GLOW_POCKET_XS) },
-      },
-      vertexShader: VERTEX,
-      fragmentShader: POCKET_FRAGMENT,
-    });
-
-    const shoreMaterial = new ShaderMaterial({
-      transparent: true,
-      depthTest: false,
-      uniforms: {
-        uTime: { value: 0 },
-        uAspect: { value: 1 },
-        uIntensity: { value: SHORE_INTENSITY },
-        uColor: { value: POCKET_COLOR },
-        uXs: { value: new Vector3(...GLOW_POCKET_XS) },
-      },
-      vertexShader: VERTEX,
-      fragmentShader: SHORE_FRAGMENT,
-    });
-
     const backMaterial = fogMaterial(BACK_INTENSITY, BACK_BAND);
     const frontMaterial = fogMaterial(FRONT_INTENSITY, FRONT_BAND);
+    const emberMaterial = glowMaterial(
+      EMBER_INTENSITY,
+      EMBER_COLOR,
+      EMBER_FRAGMENT,
+    );
+    const mistMaterial = glowMaterial(MIST_INTENSITY, FOG_COLOR, MIST_FRAGMENT);
     this.animatedMaterials = [
       backMaterial,
       frontMaterial,
-      pocketMaterial,
-      shoreMaterial,
+      emberMaterial,
+      mistMaterial,
     ];
 
     this.skyMesh = new Mesh(new PlaneBufferGeometry(1, 1), skyMaterial);
@@ -317,22 +271,20 @@ export class LandingPageFog {
     this.frontMesh = new Mesh(new PlaneBufferGeometry(1, 1), frontMaterial);
     this.frontMesh.renderOrder = 5;
 
-    // behind the near treeline (4), in front of the far one (3): the near
-    // spires silhouette against the light, so it reads as coming from deep
-    // inside the woods rather than painted onto them
-    this.pocketMesh = new Mesh(new PlaneBufferGeometry(1, 1), pocketMaterial);
-    this.pocketMesh.renderOrder = 3.5;
+    // behind the backdrop strip (2.6): the light filters through the far trees
+    this.emberMesh = new Mesh(new PlaneBufferGeometry(1, 1), emberMaterial);
+    this.emberMesh.renderOrder = 2.55;
 
-    // in front of the near treeline: scattered light at the foot of the trees
-    this.shoreMesh = new Mesh(new PlaneBufferGeometry(1, 1), shoreMaterial);
-    this.shoreMesh.renderOrder = 4.6;
+    // over the banks (4): mist reads as hanging in front of the trees
+    this.mistMesh = new Mesh(new PlaneBufferGeometry(1, 1), mistMaterial);
+    this.mistMesh.renderOrder = 5.5;
 
     this.scene.add(
       this.skyMesh,
       this.backMesh,
       this.frontMesh,
-      this.pocketMesh,
-      this.shoreMesh,
+      this.emberMesh,
+      this.mistMesh,
     );
     this.resize();
   }
@@ -340,31 +292,34 @@ export class LandingPageFog {
   resize = (): void => {
     const viewport = new Vector4();
     this.renderer.getViewport(viewport);
-    // the fog and glow strips sit on the water, not the frame bottom
-    const waterline = -viewport.w / 2 + Math.round(WATERLINE_VH * viewport.w);
+    const bottom = -viewport.w / 2;
+    // the fog banks stand on the channel horizon, not the frame bottom
+    const horizon = bottom + Math.round(HORIZON_VH * viewport.w);
 
     this.skyMesh.scale.set(viewport.z, viewport.w, 1);
     this.skyMesh.position.set(0, 0, 0);
 
     const backHeight = BACK_HEIGHT_VH * viewport.w;
     this.backMesh.scale.set(viewport.z, backHeight, 1);
-    this.backMesh.position.set(0, waterline + backHeight / 2, 0);
+    this.backMesh.position.set(0, horizon + backHeight / 2, 0);
 
     const frontHeight = FRONT_HEIGHT_VH * viewport.w;
     this.frontMesh.scale.set(viewport.z, frontHeight, 1);
-    this.frontMesh.position.set(0, waterline + frontHeight / 2, 0);
+    this.frontMesh.position.set(0, horizon + frontHeight / 2, 0);
 
-    const pocketHeight = POCKET_HEIGHT_VH * viewport.w;
-    this.pocketMesh.scale.set(viewport.z, pocketHeight, 1);
-    this.pocketMesh.position.set(0, waterline + pocketHeight / 2, 0);
-    (this.pocketMesh.material as ShaderMaterial).uniforms.uAspect.value =
-      viewport.z / pocketHeight;
+    const emberHeight = EMBER_HEIGHT_VH * viewport.w;
+    this.emberMesh.scale.set(viewport.z, emberHeight, 1);
+    // straddles the horizon: the glow reaches both the far trees above it
+    // and the top of the water below it
+    this.emberMesh.position.set(0, horizon + emberHeight / 4, 0);
+    (this.emberMesh.material as ShaderMaterial).uniforms.uAspect.value =
+      viewport.z / emberHeight;
 
-    const shoreHeight = SHORE_HEIGHT_VH * viewport.w;
-    this.shoreMesh.scale.set(viewport.z, shoreHeight, 1);
-    this.shoreMesh.position.set(0, waterline + shoreHeight / 2, 0);
-    (this.shoreMesh.material as ShaderMaterial).uniforms.uAspect.value =
-      viewport.z / shoreHeight;
+    const mistHeight = Math.round(HORIZON_VH * viewport.w);
+    this.mistMesh.scale.set(viewport.z, mistHeight, 1);
+    this.mistMesh.position.set(0, bottom + mistHeight / 2, 0);
+    (this.mistMesh.material as ShaderMaterial).uniforms.uAspect.value =
+      viewport.z / mistHeight;
   };
 
   update = (delta: number): void => {
