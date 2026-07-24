@@ -23,20 +23,20 @@ import { CHANNEL_GLSL, GLOW_WARM, HORIZON_VH } from "./LandingPageWater";
  * slowly drifting fbm noise so it reads as alive rather than a gradient.
  */
 
-/** Fog quad heights as fractions of the viewport. */
+/** Fog quad height as a fraction of the viewport. */
 const BACK_HEIGHT_VH = 0.42;
-const FRONT_HEIGHT_VH = 0.26;
-/** Glow center in quad UV space: over the channel mouth, near the trees. */
-const GLOW_CENTER = new Vector2(0.56, 0.22);
-/** Fog strengths; the front mist only wraps the tree tops. */
-const BACK_INTENSITY = 0.2;
-const FRONT_INTENSITY = 0.06;
 /**
- * Vertical brightness band per layer (in quad UV): the mist peaks around the
- * tree tops and fades toward both the sky and the horizon.
+ * Glow center in quad UV space: over the channel mouth, hugging the tree
+ * tops — the bright zone must stay below the song cards, or their
+ * translucent chips catch it and read as a pale panel.
  */
-const BACK_BAND = new Vector2(0.3, 0.2);
-const FRONT_BAND = new Vector2(0.55, 0.25);
+const GLOW_CENTER = new Vector2(0.56, 0.12);
+const BACK_INTENSITY = 0.18;
+/**
+ * Vertical brightness band (in quad UV): the mist peaks around the tree
+ * tops and fades toward both the sky and the horizon.
+ */
+const BACK_BAND = new Vector2(0.16, 0.15);
 
 const FOG_COLOR = new Color("#b9cadf");
 const SKY_COLOR = new Color("#030609");
@@ -190,10 +190,10 @@ void main() {
     // where tree bases meet their reflections
     float shoreline = exp(-pow((abs(u) - 1.) * 3.5, 2.)) * (1. - vUv.y * .5);
 
-    // and gathers around the channel mouth at the horizon — weighted
-    // toward the channel so it dissolves the far junction without drawing
-    // a new straight pale stripe across the frame
-    float horizon = smoothstep(.72, 1., vUv.y) * (.35 + .65 * exp(-u * u * .7));
+    // and gathers around the channel mouth at the horizon — confined to
+    // the channel so it dissolves the far junction without laying a pale
+    // rectangle across the frame
+    float horizon = smoothstep(.72, 1., vUv.y) * exp(-u * u * .7);
 
     float drift = .6 + .4 * fbm(vec2(vUv.x * uAspect * 1.5 + uTime * .012, vUv.y * 3.));
 
@@ -233,7 +233,6 @@ export class LandingPageFog {
   renderer: WebGLRenderer;
   private skyMesh: Mesh;
   private backMesh: Mesh;
-  private frontMesh: Mesh;
   private emberMesh: Mesh;
   private pocketMesh: Mesh;
   private mistMesh: Mesh;
@@ -288,7 +287,6 @@ export class LandingPageFog {
     });
 
     const backMaterial = fogMaterial(BACK_INTENSITY, BACK_BAND);
-    const frontMaterial = fogMaterial(FRONT_INTENSITY, FRONT_BAND);
     const emberMaterial = glowMaterial(
       EMBER_INTENSITY,
       EMBER_COLOR,
@@ -303,7 +301,6 @@ export class LandingPageFog {
     const mistMaterial = glowMaterial(MIST_INTENSITY, FOG_COLOR, MIST_FRAGMENT);
     this.animatedMaterials = [
       backMaterial,
-      frontMaterial,
       emberMaterial,
       pocketMaterial,
       mistMaterial,
@@ -314,9 +311,6 @@ export class LandingPageFog {
 
     this.backMesh = new Mesh(new PlaneBufferGeometry(1, 1), backMaterial);
     this.backMesh.renderOrder = 2;
-
-    this.frontMesh = new Mesh(new PlaneBufferGeometry(1, 1), frontMaterial);
-    this.frontMesh.renderOrder = 5;
 
     // behind the backdrop strip (2.6): the light filters through the far trees
     this.emberMesh = new Mesh(new PlaneBufferGeometry(1, 1), emberMaterial);
@@ -334,7 +328,6 @@ export class LandingPageFog {
     this.scene.add(
       this.skyMesh,
       this.backMesh,
-      this.frontMesh,
       this.emberMesh,
       this.pocketMesh,
       this.mistMesh,
@@ -355,10 +348,6 @@ export class LandingPageFog {
     const backHeight = BACK_HEIGHT_VH * viewport.w;
     this.backMesh.scale.set(viewport.z, backHeight, 1);
     this.backMesh.position.set(0, horizon + backHeight / 2, 0);
-
-    const frontHeight = FRONT_HEIGHT_VH * viewport.w;
-    this.frontMesh.scale.set(viewport.z, frontHeight, 1);
-    this.frontMesh.position.set(0, horizon + frontHeight / 2, 0);
 
     const emberHeight = EMBER_HEIGHT_VH * viewport.w;
     this.emberMesh.scale.set(viewport.z, emberHeight, 1);

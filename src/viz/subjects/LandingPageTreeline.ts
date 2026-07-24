@@ -97,15 +97,6 @@ const BANK_HAZE = "#1d2735";
  * shoreline, damped with depth so the far rows stay level at the horizon.
  */
 const HILL_RISE = 0.5;
-/**
- * Land spits in the channel, as (depth, cross-channel) positions — the
- * river bends around them, so it reads as running past land rather than
- * flooding straight through the trees.
- */
-const ISLANDS = [
-  { t: 0.62, u: -0.5 },
-  { t: 0.34, u: 0.45 },
-];
 /** The bare deciduous tree: an occasional accent, not a winter forest. */
 const BARE_TREE = 7;
 const BARE_TREE_CHANCE = 0.12;
@@ -330,31 +321,6 @@ export class LandingPageTreeline {
       ctx.filter = "none";
     };
 
-    /** A hump of land poking above the waterline (rocks, a mossy spit). */
-    const drawMound = (
-      x: number,
-      waterY: number,
-      rx: number,
-      ry: number,
-      t: number,
-    ) => {
-      const blur = blurAt(t);
-      ctx.filter = blur ? `blur(${blur}px)` : "none";
-      ctx.fillStyle = tintAt(t);
-      ctx.beginPath();
-      ctx.ellipse(
-        x * dpr,
-        (viewHeight - waterY + ry * 0.45) * dpr,
-        rx * dpr,
-        ry * dpr,
-        0,
-        0,
-        2 * Math.PI,
-      );
-      ctx.fill();
-      ctx.filter = "none";
-    };
-
     const pickTree = () => {
       let pick = Math.floor(rand() * treeImages.length);
       if (pick === BARE_TREE && rand() > BARE_TREE_CHANCE) {
@@ -363,31 +329,7 @@ export class LandingPageTreeline {
       return pick;
     };
 
-    const drawIsland = (islandT: number, islandU: number) => {
-      const { center, halfWidth } = channelAt(islandT);
-      const x = (center + islandU * halfWidth) * viewWidth;
-      const waterY = islandT * horizon;
-      const h = heightAt(islandT);
-      drawMound(x, waterY, h * 0.4, h * 0.1, islandT);
-      drawMound(x + h * 0.3, waterY, h * 0.25, h * 0.07, islandT);
-      const count = 3;
-      for (let i = 0; i < count; i++) {
-        drawTree(
-          pickTree(),
-          x + (i - (count - 1) / 2) * h * 0.3 * (0.7 + 0.6 * rand()),
-          waterY + h * 0.03,
-          h * (0.8 + 0.4 * rand()),
-          rand() < 0.5,
-          islandT,
-        );
-      }
-    };
-
     for (const tBand of BAND_TS) {
-      for (const island of ISLANDS) {
-        if (Math.abs(island.t - tBand) < 0.04) drawIsland(island.t, island.u);
-      }
-
       const { center, halfWidth } = channelAt(tBand);
       const bandHeight = heightAt(tBand);
 
@@ -398,7 +340,6 @@ export class LandingPageTreeline {
           const t = clamp(tBand + (rand() - 0.5) * BAND_JITTER, 0.02, 0.96);
           const treeHeight = heightAt(t);
           const h = treeHeight * (0.7 + 0.6 * rand());
-          const w = h * TREE_ASPECTS[0];
           // trunks sink to varied depths below the shoreline, so bases sit
           // in the water's shore feather instead of on a straight line
           const sink = (0.06 + 0.12 * rand()) * treeHeight;
@@ -408,17 +349,6 @@ export class LandingPageTreeline {
             (1 - t) *
             viewHeight;
           const baseY = t * horizon + hill - sink + (rand() - 0.5) * 0.1 * treeHeight;
-
-          // rocks poking above the water under the first trees at the edge
-          if (Math.abs(x - shoreX) < 2 * w && rand() < 0.35) {
-            drawMound(
-              x + (rand() - 0.5) * w,
-              t * horizon,
-              w * (0.25 + 0.35 * rand()),
-              h * (0.04 + 0.05 * rand()),
-              t,
-            );
-          }
 
           drawTree(pickTree(), x, baseY, h, rand() < 0.5, t);
           x += dir * h * TREE_ASPECTS[0] * (0.45 + 0.35 * rand());
