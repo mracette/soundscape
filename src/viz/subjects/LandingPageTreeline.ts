@@ -76,10 +76,13 @@ const TREE_ASPECTS = [
 ];
 
 /**
- * Bank depth rows, far first (painter's order). t is channel depth: 0 at
- * the frame bottom, 1 at the horizon.
+ * Bank depth bands, far first (painter's order). t is channel depth: 0 at
+ * the frame bottom, 1 at the horizon. Bands only order the painting; every
+ * tree jitters its own depth within the band, so bases, sizes, and tints
+ * vary continuously — aligned rows read as horizontal seams.
  */
-const BANK_ROWS = [0.9, 0.75, 0.6, 0.45, 0.3, 0.15, 0.05];
+const BAND_TS = [0.94, 0.86, 0.78, 0.7, 0.62, 0.54, 0.46, 0.38, 0.3, 0.22, 0.14, 0.06];
+const BAND_JITTER = 0.07;
 /**
  * Bank tree heights (viewport fraction) at t = 0 / t = 1, interpolated
  * exponentially: the nearest trees tower in the corners and the sizes drop
@@ -94,6 +97,15 @@ const BANK_HAZE = "#1d2735";
  * shoreline, damped with depth so the far rows stay level at the horizon.
  */
 const HILL_RISE = 0.5;
+/**
+ * Land spits in the channel, as (depth, cross-channel) positions — the
+ * river bends around them, so it reads as running past land rather than
+ * flooding straight through the trees.
+ */
+const ISLANDS = [
+  { t: 0.62, u: -0.5 },
+  { t: 0.34, u: 0.45 },
+];
 /** The bare deciduous tree: an occasional accent, not a winter forest. */
 const BARE_TREE = 7;
 const BARE_TREE_CHANCE = 0.12;
@@ -248,10 +260,10 @@ export class LandingPageTreeline {
   }
 
   /**
-   * Rasterize the banks: rows of individual trees planted along both
-   * shorelines, far rows first so near rows paint over them. Each row is
-   * drawn black on a scratch canvas, tinted, then composited with a blur
-   * that grows with depth.
+   * Rasterize the banks: trees planted along both shorelines plus land
+   * under them, painted far to near. Every tree carries its own jittered
+   * depth — its own size, tint, blur, and base height — so nothing lines
+   * up into horizontal seams.
    */
   private async rasterizeBanks(): Promise<HTMLCanvasElement> {
     const { viewWidth, viewHeight } = this.viewSize();
@@ -262,7 +274,7 @@ export class LandingPageTreeline {
     const horizon = HORIZON_VH * viewHeight;
 
     // rasterize each tree once at the tallest size it will be drawn, then
-    // scale down per row — the down-scale softness disappears under the
+    // scale down per draw — the down-scale softness disappears under the
     // depth blur
     const maxHeight = Math.ceil(BANK_NEAR_HEIGHT * 1.35 * viewHeight * dpr);
     const treeImages = await Promise.all(
@@ -276,82 +288,149 @@ export class LandingPageTreeline {
     canvas.height = Math.round(viewHeight * dpr);
     const ctx = canvas.getContext("2d")!;
 
+    // reusable scratch, tree-sized, for per-tree tinting
     const scratch = document.createElement("canvas");
-    scratch.width = canvas.width;
-    scratch.height = canvas.height;
+    scratch.width = Math.ceil(maxHeight * 0.55);
+    scratch.height = maxHeight;
     const sctx = scratch.getContext("2d")!;
 
     const rand = mulberry32(7);
-    for (const t of BANK_ROWS) {
-      sctx.globalCompositeOperation = "source-over";
-      sctx.clearRect(0, 0, scratch.width, scratch.height);
 
-      const { center, halfWidth } = channelAt(t);
-      const rowHeight =
-        BANK_NEAR_HEIGHT *
-        Math.pow(BANK_FAR_HEIGHT / BANK_NEAR_HEIGHT, t) *
-        viewHeight;
-      const shoreY = t * horizon;
+    const heightAt = (t: number) =>
+      BANK_NEAR_HEIGHT *
+      Math.pow(BANK_FAR_HEIGHT / BANK_NEAR_HEIGHT, t) *
+      viewHeight;
+    const tintAt = (t: number) =>
+      chroma.mix(treelineTint, BANK_HAZE, Math.pow(t, 1.2) * 0.55).css();
+    const blurAt = (t: number) => (t > 0.45 ? t * 0.9 * dpr : 0);
+
+    const drawTree = (
+      pick: number,
+      x: number,
+      baseY: number,
+      h: number,
+      mirror: boolean,
+      t: number,
+    ) => {
+      const w = h * TREE_ASPECTS[pick];
+      sctx.globalCompositeOperation = "source-over";
+      sctx.clearRect(0, 0, w * dpr + 2, h * dpr + 2);
+      sctx.drawImage(treeImages[pick], 0, 0, w * dpr, h * dpr);
+      sctx.globalCompositeOperation = "source-in";
+      sctx.fillStyle = tintAt(t);
+      sctx.fillRect(0, 0, w * dpr + 2, h * dpr + 2);
+
+      const blur = blurAt(t);
+      ctx.filter = blur ? `blur(${blur}px)` : "none";
+      ctx.save();
+      ctx.translate((x + (mirror ? w / 2 : -w / 2)) * dpr, (viewHeight - baseY - h) * dpr);
+      if (mirror) ctx.scale(-1, 1);
+      ctx.drawImage(scratch, 0, 0, w * dpr, h * dpr, 0, 0, w * dpr, h * dpr);
+      ctx.restore();
+      ctx.filter = "none";
+    };
+
+    /** A hump of land poking above the waterline (rocks, a mossy spit). */
+    const drawMound = (
+      x: number,
+      waterY: number,
+      rx: number,
+      ry: number,
+      t: number,
+    ) => {
+      const blur = blurAt(t);
+      ctx.filter = blur ? `blur(${blur}px)` : "none";
+      ctx.fillStyle = tintAt(t);
+      ctx.beginPath();
+      ctx.ellipse(
+        x * dpr,
+        (viewHeight - waterY + ry * 0.45) * dpr,
+        rx * dpr,
+        ry * dpr,
+        0,
+        0,
+        2 * Math.PI,
+      );
+      ctx.fill();
+      ctx.filter = "none";
+    };
+
+    const pickTree = () => {
+      let pick = Math.floor(rand() * treeImages.length);
+      if (pick === BARE_TREE && rand() > BARE_TREE_CHANCE) {
+        pick = (pick + 1 + Math.floor(rand() * 8)) % 9;
+      }
+      return pick;
+    };
+
+    const drawIsland = (islandT: number, islandU: number) => {
+      const { center, halfWidth } = channelAt(islandT);
+      const x = (center + islandU * halfWidth) * viewWidth;
+      const waterY = islandT * horizon;
+      const h = heightAt(islandT);
+      drawMound(x, waterY, h * 0.4, h * 0.1, islandT);
+      drawMound(x + h * 0.3, waterY, h * 0.25, h * 0.07, islandT);
+      const count = 3;
+      for (let i = 0; i < count; i++) {
+        drawTree(
+          pickTree(),
+          x + (i - (count - 1) / 2) * h * 0.3 * (0.7 + 0.6 * rand()),
+          waterY + h * 0.03,
+          h * (0.8 + 0.4 * rand()),
+          rand() < 0.5,
+          islandT,
+        );
+      }
+    };
+
+    for (const tBand of BAND_TS) {
+      for (const island of ISLANDS) {
+        if (Math.abs(island.t - tBand) < 0.04) drawIsland(island.t, island.u);
+      }
+
+      const { center, halfWidth } = channelAt(tBand);
+      const bandHeight = heightAt(tBand);
 
       for (const dir of [-1, 1]) {
         const shoreX = (center + dir * halfWidth) * viewWidth;
         let x = shoreX;
-        while (x > -rowHeight && x < viewWidth + rowHeight) {
-          let pick = Math.floor(rand() * treeImages.length);
-          if (pick === BARE_TREE && rand() > BARE_TREE_CHANCE) {
-            pick = (pick + 1 + Math.floor(rand() * 8)) % 9;
-          }
-          const h = rowHeight * (0.7 + 0.6 * rand());
-          const w = h * TREE_ASPECTS[pick];
-          // trunks sink slightly below the shoreline, so bases sit in the
-          // water's shore feather instead of on a straight line
-          const sink = (0.06 + 0.12 * rand()) * rowHeight;
+        while (x > -bandHeight && x < viewWidth + bandHeight) {
+          const t = clamp(tBand + (rand() - 0.5) * BAND_JITTER, 0.02, 0.96);
+          const treeHeight = heightAt(t);
+          const h = treeHeight * (0.7 + 0.6 * rand());
+          const w = h * TREE_ASPECTS[0];
+          // trunks sink to varied depths below the shoreline, so bases sit
+          // in the water's shore feather instead of on a straight line
+          const sink = (0.06 + 0.12 * rand()) * treeHeight;
           const hill =
-            (Math.abs(x - shoreX) / viewWidth) * HILL_RISE * (1 - t) * viewHeight;
-          const baseY =
-            shoreY + hill - sink + (rand() - 0.5) * 0.1 * rowHeight;
-          const drawY = (viewHeight - baseY - h) * dpr;
-          const mirror = rand() < 0.5;
+            (Math.abs(x - shoreX) / viewWidth) *
+            HILL_RISE *
+            (1 - t) *
+            viewHeight;
+          const baseY = t * horizon + hill - sink + (rand() - 0.5) * 0.1 * treeHeight;
 
-          sctx.save();
-          sctx.translate((x + (mirror ? w / 2 : -w / 2)) * dpr, drawY);
-          if (mirror) sctx.scale(-1, 1);
-          sctx.drawImage(treeImages[pick], 0, 0, w * dpr, h * dpr);
-          sctx.restore();
+          // rocks poking above the water under the first trees at the edge
+          if (Math.abs(x - shoreX) < 2 * w && rand() < 0.35) {
+            drawMound(
+              x + (rand() - 0.5) * w,
+              t * horizon,
+              w * (0.25 + 0.35 * rand()),
+              h * (0.04 + 0.05 * rand()),
+              t,
+            );
+          }
 
-          x += dir * w * (0.45 + 0.35 * rand());
+          drawTree(pickTree(), x, baseY, h, rand() < 0.5, t);
+          x += dir * h * TREE_ASPECTS[0] * (0.45 + 0.35 * rand());
         }
       }
-
-      // hero trees: one guaranteed giant anchoring each frame edge, so the
-      // corner framing never depends on placement luck
-      if (t === BANK_ROWS[BANK_ROWS.length - 1]) {
-        for (const [anchorX, pick] of [
-          [0.05, 0],
-          [0.95, 6],
-        ] as const) {
-          const h = rowHeight * 1.3;
-          const w = h * TREE_ASPECTS[pick];
-          sctx.drawImage(
-            treeImages[pick],
-            (anchorX * viewWidth - w / 2) * dpr,
-            (viewHeight - h + 0.03 * viewHeight) * dpr,
-            w * dpr,
-            h * dpr,
-          );
-        }
-      }
-
-      sctx.globalCompositeOperation = "source-in";
-      sctx.fillStyle = chroma
-        .mix(treelineTint, BANK_HAZE, Math.pow(t, 1.2) * 0.55)
-        .css();
-      sctx.fillRect(0, 0, scratch.width, scratch.height);
-
-      ctx.filter = t > 0.45 ? `blur(${t * 0.9 * dpr}px)` : "none";
-      ctx.drawImage(scratch, 0, 0);
-      ctx.filter = "none";
     }
+
+    // hero trees: one guaranteed giant anchoring each frame edge, so the
+    // corner framing never depends on placement luck
+    const heroHeight = heightAt(0.03) * 1.3;
+    drawTree(0, 0.05 * viewWidth, -0.03 * viewHeight, heroHeight, false, 0.03);
+    drawTree(6, 0.95 * viewWidth, -0.03 * viewHeight, heroHeight, false, 0.03);
 
     return canvas;
   }

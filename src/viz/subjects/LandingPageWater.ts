@@ -186,6 +186,10 @@ void main() {
     // warm meniscus where the water disappears into the woods
     col += uGlint * exp(-(1. - vUv.y) * 26.) * exp(-u * u * 1.2) * .25;
 
+    // sub-LSB dither: the smooth glow falloffs over dark water band
+    // visibly in 8-bit output without it
+    col += (hash(gl_FragCoord.xy) - .5) / 128.;
+
     gl_FragColor = vec4(col, 1.);
 }
 `;

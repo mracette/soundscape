@@ -46,6 +46,11 @@ const EMBER_HEIGHT_VH = 0.2;
 const EMBER_COLOR = new Color(GLOW_WARM);
 const EMBER_INTENSITY = 0.4;
 
+/** Warm glow pockets deep in the bank forests (viewport-x fractions). */
+const POCKET_XS = new Vector2(0.16, 0.84);
+const POCKET_HEIGHT_VH = 0.32;
+const POCKET_INTENSITY = 0.5;
+
 /** Shore/horizon mist strength. */
 const MIST_INTENSITY = 0.15;
 
@@ -74,6 +79,12 @@ float fbm(vec2 p) {
         amplitude *= .5;
     }
     return value;
+}
+
+// sub-LSB noise: smooth alpha gradients over the near-black scene band
+// visibly in 8-bit output without it
+float dither() {
+    return (hash(gl_FragCoord.xy) - .5) / 128.;
 }
 `;
 
@@ -106,7 +117,7 @@ void main() {
     float density = .75 + .18 * drift + .07 * billow;
 
     float alpha = band * (.05 + .95 * glow) * density * uIntensity;
-    gl_FragColor = vec4(uColor, alpha);
+    gl_FragColor = vec4(uColor, alpha + dither());
 }
 `;
 
@@ -128,7 +139,35 @@ void main() {
     float glow = exp(-dot(d, d) * 4.);
     float breathe = .8 + .2 * sin(uTime * .12);
     float filtered = .5 + .5 * fbm(vec2(vUv.x * uAspect * 3. - uTime * .01, vUv.y * 4.));
-    gl_FragColor = vec4(uColor, glow * breathe * filtered * uIntensity);
+    gl_FragColor = vec4(uColor, glow * breathe * filtered * uIntensity + dither());
+}
+`;
+
+const POCKET_FRAGMENT = `
+varying vec2 vUv;
+
+uniform float uTime;
+uniform float uAspect;
+uniform float uIntensity;
+uniform vec3 uColor;
+uniform vec2 uXs;
+
+${NOISE_GLSL}
+
+// warm pools of light deep in the bank forests, breathing slowly out of
+// phase, their edges eaten into by drifting noise so the light seems to
+// filter through the canopy
+float pocket(float x, float phase) {
+    vec2 d = vec2((vUv.x - x) * uAspect * .8, (vUv.y - .4) * 1.6);
+    float glow = exp(-dot(d, d) * 4.);
+    float breathe = .75 + .25 * sin(uTime * .1 + phase);
+    float filtered = .5 + .5 * fbm(vec2(vUv.x * uAspect * 3. + uTime * .008, vUv.y * 4.) + phase);
+    return glow * breathe * filtered;
+}
+
+void main() {
+    float alpha = pocket(uXs.x, 0.) + pocket(uXs.y, 2.6);
+    gl_FragColor = vec4(uColor, alpha * uIntensity + dither());
 }
 `;
 
@@ -159,7 +198,7 @@ void main() {
     float drift = .6 + .4 * fbm(vec2(vUv.x * uAspect * 1.5 + uTime * .012, vUv.y * 3.));
 
     float alpha = (shoreline * .6 + horizon * .7) * drift * uIntensity;
-    gl_FragColor = vec4(uColor, alpha);
+    gl_FragColor = vec4(uColor, alpha + dither());
 }
 `;
 
@@ -196,6 +235,7 @@ export class LandingPageFog {
   private backMesh: Mesh;
   private frontMesh: Mesh;
   private emberMesh: Mesh;
+  private pocketMesh: Mesh;
   private mistMesh: Mesh;
   private animatedMaterials: ShaderMaterial[];
   private time = 0;
@@ -254,11 +294,18 @@ export class LandingPageFog {
       EMBER_COLOR,
       EMBER_FRAGMENT,
     );
+    const pocketMaterial = glowMaterial(
+      POCKET_INTENSITY,
+      EMBER_COLOR,
+      POCKET_FRAGMENT,
+    );
+    pocketMaterial.uniforms.uXs = { value: POCKET_XS };
     const mistMaterial = glowMaterial(MIST_INTENSITY, FOG_COLOR, MIST_FRAGMENT);
     this.animatedMaterials = [
       backMaterial,
       frontMaterial,
       emberMaterial,
+      pocketMaterial,
       mistMaterial,
     ];
 
@@ -275,6 +322,11 @@ export class LandingPageFog {
     this.emberMesh = new Mesh(new PlaneBufferGeometry(1, 1), emberMaterial);
     this.emberMesh.renderOrder = 2.55;
 
+    // behind the bank trees (4): the pockets backlight the forest, so the
+    // light reads as coming from within the woods
+    this.pocketMesh = new Mesh(new PlaneBufferGeometry(1, 1), pocketMaterial);
+    this.pocketMesh.renderOrder = 3;
+
     // over the banks (4): mist reads as hanging in front of the trees
     this.mistMesh = new Mesh(new PlaneBufferGeometry(1, 1), mistMaterial);
     this.mistMesh.renderOrder = 5.5;
@@ -284,6 +336,7 @@ export class LandingPageFog {
       this.backMesh,
       this.frontMesh,
       this.emberMesh,
+      this.pocketMesh,
       this.mistMesh,
     );
     this.resize();
@@ -314,6 +367,12 @@ export class LandingPageFog {
     this.emberMesh.position.set(0, horizon + emberHeight / 4, 0);
     (this.emberMesh.material as ShaderMaterial).uniforms.uAspect.value =
       viewport.z / emberHeight;
+
+    const pocketHeight = POCKET_HEIGHT_VH * viewport.w;
+    this.pocketMesh.scale.set(viewport.z, pocketHeight, 1);
+    this.pocketMesh.position.set(0, horizon - 0.12 * viewport.w + pocketHeight / 2, 0);
+    (this.pocketMesh.material as ShaderMaterial).uniforms.uAspect.value =
+      viewport.z / pocketHeight;
 
     const mistHeight = Math.round(HORIZON_VH * viewport.w);
     this.mistMesh.scale.set(viewport.z, mistHeight, 1);
