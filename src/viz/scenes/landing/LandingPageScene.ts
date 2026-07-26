@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { SceneManager } from "../../SceneManager";
 import { LandingPageParticles } from "../../subjects/LandingPageParticles";
 import { LandingPageConstellations } from "../../subjects/LandingPageConstellations";
-import { LandingPageTreeline } from "../../subjects/LandingPageTreeline";
 import { LandingPageFog } from "../../subjects/LandingPageFog";
 
 export class LandingPageScene extends SceneManager {
@@ -53,17 +52,8 @@ export class LandingPageScene extends SceneManager {
       this.scene,
       this.renderer
     );
-    subjects.treeline = new LandingPageTreeline(this.scene, this.renderer);
     subjects.fog = new LandingPageFog(this.scene, this.renderer);
     return subjects;
-  }
-
-  dispose() {
-    // the treeline schedules async rebuilds (debounce timer, SVG fetch) that
-    // must not fire into a disposed scene; the base dispose only frees what
-    // is already in the graph
-    (this.subjects.treeline as LandingPageTreeline).dispose();
-    super.dispose();
   }
 
   onWindowResize() {
@@ -79,7 +69,6 @@ export class LandingPageScene extends SceneManager {
     camera.updateProjectionMatrix();
     (this.subjects.particles as LandingPageParticles).resize();
     (this.subjects.constellations as LandingPageConstellations).resize();
-    (this.subjects.treeline as LandingPageTreeline).resize();
     (this.subjects.fog as LandingPageFog).resize();
     this.render();
   }

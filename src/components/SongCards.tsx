@@ -6,8 +6,10 @@ import { ComingSoonIcon } from "./custom-song-icons/ComingSoonIcon";
 import {
   songCard,
   songCardList,
+  songCardMeta,
   songCardName,
 } from "../styles/components/LandingPage.css";
+import { glass, glassHover, heroRimHover } from "../styles/shared/glass.css";
 import { cx } from "../utils/cx";
 
 const SONGS = [
@@ -18,14 +20,18 @@ const SONGS = [
 
 export const SongCards = () => (
   <div id="song-selection-panel" className={songCardList}>
-    {/* "song-link" is a test hook selected by e2e/routing.spec.js */}
     {SONGS.map(({ href, name, bpm, songKey, Icon, iconName }) => (
-      <Link key={href} href={href} className={cx(songCard, "song-link")}>
+      <Link
+        key={href}
+        href={href}
+        className={cx(glass, glassHover, heroRimHover, songCard)}
+        data-testid="song-link"
+      >
         <div className="flex-row" style={{ justifyContent: "flex-start" }}>
           <Icon name={iconName} />
           <div>
             <span className={songCardName}>{name}</span>
-            <div>
+            <div className={songCardMeta}>
               <span>{bpm}</span>&nbsp;|&nbsp;
               <span>{songKey}</span>
             </div>
@@ -33,7 +39,7 @@ export const SongCards = () => (
         </div>
       </Link>
     ))}
-    <Link href="/info" className={songCard}>
+    <Link href="/info" className={cx(glass, glassHover, heroRimHover, songCard)}>
       <div className="flex-row" style={{ justifyContent: "flex-start" }}>
         <ComingSoonIcon name="coming-soon" />
         <div>

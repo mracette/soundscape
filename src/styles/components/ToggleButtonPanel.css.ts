@@ -1,8 +1,7 @@
 import { style } from "@vanilla-extract/css";
+import { vh } from "../settings";
 
-import { hotGreen } from "../settings";
-
-/** Live-state indicator ("background mode: on"). */
-export const backgroundModeLabel = style({
-  color: hotGreen,
+/** breathing room between the panel's button row and the first voice group */
+export const panelButtonRow = style({
+  marginBottom: vh(1.2),
 });

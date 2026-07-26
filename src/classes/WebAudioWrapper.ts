@@ -213,8 +213,8 @@ export class WebAudioWrapper {
   }
 
   /**
-   * Lazily builds per-song nodes: group GainNodes, per-group analysers (one for 3D
-   * visualizations, one for oscilloscopes), and voice AudioPlayerWrappers. The
+   * Lazily builds per-song nodes: group GainNodes, per-group analysers for 3D
+   * visualizations, and voice AudioPlayerWrappers. The
    * `status[id]` guard prevents re-initialization on repeat visits to the same song.
    */
   async initSongState(id: SongId): Promise<boolean> {
@@ -400,18 +400,6 @@ export class WebAudioWrapper {
             {
               id: `${id}-${group.name}-analyser`,
               ...group.analyser,
-            }
-          );
-          // one analyser for oscilloscopes
-          groupAnalysers[group.name + "-osc"] = new Analyser(
-            this.audioCtx,
-            songEffects.groupNodes[group.name],
-            {
-              id: `${id}-${group.name}-analyser-osc`,
-              power: 5,
-              minDecibels: -120,
-              maxDecibels: 0,
-              smoothingTimeConstant: 0,
             }
           );
         });

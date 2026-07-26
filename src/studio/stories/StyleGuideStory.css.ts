@@ -43,13 +43,6 @@ export const swatch = style({
   borderRadius: radii.control,
 });
 
-export const glowChip = style({
-  width: "18rem",
-  height: "3rem",
-  borderRadius: radii.pill,
-  background: surfaces.raised,
-});
-
 export const label = style({
   fontSize: "1.3rem",
   opacity: 0.85,

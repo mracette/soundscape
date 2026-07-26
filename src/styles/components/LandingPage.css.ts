@@ -1,10 +1,10 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import {
-  heroGradientStops,
-  mSize,
   radii,
-  surfaces,
   textPrimary,
+  textSecondary,
+  typeRamp,
+  vh,
   vw,
 } from "../settings";
 
@@ -13,7 +13,9 @@ export const landingPageCanvas = style({
 });
 
 export const landingPageTitleWrapper = style({
-  paddingTop: "10rem",
+  // proportional so the block sits near optical centre on a tall desktop
+  // window without being driven off the fold on a short one
+  paddingTop: vh(15),
   "@media": {
     "screen and (max-width: 670px)": {
       paddingTop: "3rem",
@@ -22,47 +24,27 @@ export const landingPageTitleWrapper = style({
 });
 
 export const landingPageTitle = style({
-  fontFamily: "'Satisfy'",
-  fontSize: "13rem",
+  fontFamily: "'Kaushan Script'",
+  // "Soundscape" in Kaushan sets about 4.75x its font size wide, so a fixed
+  // 13rem clips on the narrowest phones. The vw term keeps the wordmark inside
+  // the frame until the 13rem cap takes over above ~610px.
+  fontSize: `min(13rem, ${vw(18)})`,
   fontWeight: 400,
   margin: 0,
   padding: "2rem",
   color: textPrimary,
-  // `background` must come before `background-clip` in this stylesheet
-  background: `linear-gradient(30deg, ${heroGradientStops.join(", ")})`,
-  backgroundClip: "text",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  "@media": {
-    "screen and (max-width: 670px)": {
-      fontSize: "7.5rem",
-    },
-  },
-});
-
-export const landingPageTitleHero = style({
-  position: "relative",
-  display: "inline-flex",
-});
-
-export const landingPageTitleSpill = style({
-  position: "absolute",
-  top: "65%",
-  left: "50%",
-  transform: "translate(-50%, -50%) rotate(17deg) scale(1.2)",
-  width: "135%",
-  maxWidth: "none",
-  opacity: 0.55,
-  pointerEvents: "none",
 });
 
 export const landingPageHeader = style({
-  fontSize: mSize,
+  fontSize: typeRamp.bodyCompact.fontSize,
   color: textPrimary,
   display: "flex",
   flexDirection: "column",
   width: "100%",
-  height: "100%",
+  // min rather than a fixed height: on a short viewport the cards run past the
+  // fold, and only a header that grows with them gives the scroller something
+  // taller than itself to scroll
+  minHeight: "100%",
   justifyContent: "flex-start",
   alignItems: "center",
 });
@@ -71,18 +53,25 @@ globalStyle(`${landingPageHeader} .flex-row`, {
   justifyContent: "center",
 });
 
+/**
+ * Fills the viewport itself instead of borrowing `.fullscreen`, whose
+ * `overflow: hidden` is emitted after this rule and would win, leaving the
+ * page unscrollable. x stays hidden so nothing can scroll sideways.
+ */
 export const landingPage = style({
-  // x stays hidden regardless of which overflow rule wins the cascade against
-  // `.fullscreen`: the title spill overhangs the title by design and must
-  // never create horizontal scroll
-  overflowX: "hidden",
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: vw(100),
+  height: vh(100),
   overflowY: "auto",
+  overflowX: "hidden",
 });
 
 export const songCardList = style({
   width: vw(90),
-  // two 300px cards plus the gap: desktop wraps to a 2x2 grid
-  maxWidth: "616px",
+  // two cards plus the gap: desktop wraps to a 2x2 grid
+  maxWidth: "656px",
   display: "flex",
   flexDirection: "row",
   flexWrap: "wrap",
@@ -108,27 +97,28 @@ export const songCardList = style({
 export const songCard = style({
   textDecoration: "none",
   display: "block",
-  width: "300px",
+  // one card size everywhere: the desktop grid used to run narrower than the
+  // phone layout, which left the cards looking undersized on a big screen
+  // fixed width clamped by the container: width:100% + maxWidth leaves
+  // zero free space for centering (margins resolve before the clamp)
+  width: "320px",
+  maxWidth: "100%",
   borderRadius: radii.panel,
-  background: surfaces.chip,
-  selectors: {
-    "&:hover, &:focus-visible": {
-      background: surfaces.buttonHover,
-    },
-  },
   "@media": {
     "screen and (max-width: 670px)": {
-      // fixed width clamped by the container: width:100% + maxWidth leaves
-      // zero free space for centering (margins resolve before the clamp)
-      width: "320px",
-      maxWidth: "100%",
       margin: "1rem 0",
     },
   },
 });
 
 export const songCardName = style({
-  fontSize: "2rem",
+  fontSize: typeRamp.cardTitle.fontSize,
+  fontWeight: typeRamp.cardTitle.fontWeight,
+});
+
+export const songCardMeta = style({
+  ...typeRamp.caption,
+  color: textSecondary,
 });
 
 export const infoRow = style({
@@ -143,7 +133,8 @@ globalStyle(`${infoRow}>p`, {
 });
 
 export const infoSubheader = style({
-  fontSize: "3rem",
+  fontSize: typeRamp.display.fontSize,
+  fontWeight: typeRamp.display.fontWeight,
   marginBottom: "4rem",
   textTransform: "none",
   maxWidth: "375px",
@@ -152,7 +143,7 @@ export const infoSubheader = style({
 });
 
 export const infoPageButton = style({
-  fontSize: mSize,
+  fontSize: typeRamp.bodyCompact.fontSize,
   width: "140px",
 });
 
@@ -162,4 +153,15 @@ export const innerLandingPage = style({
   alignItems: "center",
   justifyContent: "center",
   gap: "1rem",
+  // keeps the last card clear of the bottom edge once the page scrolls
+  paddingBottom: "4rem",
+});
+
+// the global span/p rule sets the reading size, which is a step small for the
+// one line introducing the page. Centred because it wraps on narrow viewports,
+// where the flex centring alone leaves a ragged left edge.
+globalStyle(`${innerLandingPage}>p`, {
+  fontSize: typeRamp.lede.fontSize,
+  fontWeight: typeRamp.lede.fontWeight,
+  textAlign: "center",
 });

@@ -1,6 +1,6 @@
 import { style } from "@vanilla-extract/css";
 
-import { vh } from "../settings";
+import { glassOrb, glassHover } from "../shared/glass.css";
 
 export const menuButton = style({
   position: "absolute",
@@ -9,8 +9,12 @@ export const menuButton = style({
   width: "auto",
 });
 
-export const menuButtonParent = style({
-  position: "relative",
-  border: `${vh(0.2)} solid white`,
-  borderRadius: "50%",
-});
+export const menuButtonParent = style([
+  glassOrb,
+  glassHover,
+  {
+    position: "relative",
+    border: "none",
+    borderRadius: "50%",
+  },
+]);

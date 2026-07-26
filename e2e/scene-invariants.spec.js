@@ -19,18 +19,18 @@ for (const song of SONGS) {
     expect(await webglContextCount(page, "canvas-viz")).toBe(1);
 
     // Toggle a voice -> the scene must NOT re-initialize (the regression).
-    await page.locator(".toggle-button").first().click();
+    await page.getByTestId("toggle-button").first().click();
     await page.waitForTimeout(1500);
     expect(await webglContextCount(page, "canvas-viz")).toBe(1);
 
     // Open another menu panel (effects) and the home panel.
-    await page.locator(".menu-button-child").nth(2).click(); // effects
-    await page.locator(".menu-button-child").nth(0).click(); // home
+    await page.getByTestId("menu-button-child").nth(2).click(); // effects
+    await page.getByTestId("menu-button-child").nth(0).click(); // home
     await page.waitForTimeout(500);
     expect(await webglContextCount(page, "canvas-viz")).toBe(1);
 
     // Randomize then reset.
-    await page.locator(".menu-button-child").nth(1).click(); // toggles
+    await page.getByTestId("menu-button-child").nth(1).click(); // toggles
     await page.locator("#toggle-button-panel-randomize").click();
     await page.waitForTimeout(1000);
     await page.locator("#toggle-button-panel-reset").click();

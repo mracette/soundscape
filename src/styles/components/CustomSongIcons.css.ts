@@ -1,24 +1,35 @@
 import { style } from "@vanilla-extract/css";
-import { hotGreen } from "../settings";
+import { hotGreen, typeRamp } from "../settings";
 
 export const newLabel = style({
+  ...typeRamp.bodyCompact,
   position: "absolute",
   top: "15px",
   left: "15px",
-  fontSize: "1.6rem",
   color: hotGreen,
 });
 
 export const customSongIcon = style({
   display: "block",
   margin: 0,
-  width: "12rem",
-  height: "12rem",
+  width: "16.5rem",
+  height: "16.5rem",
 });
 
-export const customSongIconMobile = style({
+/**
+ * The loading icon carries the landing page on its own rather than sitting
+ * beside a song name, so it runs at twice the song-card size.
+ */
+export const loadingIcon = style({
   display: "block",
   margin: 0,
-  width: "15rem",
-  height: "15rem",
+  width: "26rem",
+  height: "26rem",
+});
+
+export const loadingIconMobile = style({
+  display: "block",
+  margin: 0,
+  width: "33rem",
+  height: "33rem",
 });

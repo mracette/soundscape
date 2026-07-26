@@ -5,7 +5,6 @@ import { Canvas } from "../canvas/Canvas";
 import {
   newLabel,
   customSongIcon,
-  customSongIconMobile,
 } from "../../styles/components/CustomSongIcons.css";
 
 import { LayoutContext } from "../../contexts/contexts";
@@ -25,6 +24,8 @@ interface Props {
   isNew?: boolean;
   onSelect?: (id: string | null) => void;
   setCustomStyles?: (ctx: CanvasRenderingContext2D) => void;
+  /** Size classes, desktop and mobile. Defaults to the song-card size. */
+  sizeClasses?: { base: string; mobile: string };
 }
 
 export function CustomSongIcon(props: Props) {
@@ -38,9 +39,13 @@ export function CustomSongIcon(props: Props) {
   const hoverProgressRef = useRef(0);
   const runningRef = useRef(false);
 
-  const { animate, id, listen, setCustomStyles, onSelect, isNew } = props;
+  const { animate, id, listen, setCustomStyles, onSelect, isNew, sizeClasses } =
+    props;
 
   const { isMobile } = useContext(LayoutContext)!;
+
+  const sizeClass =
+    (isMobile ? sizeClasses?.mobile : sizeClasses?.base) ?? customSongIcon;
 
   useEffect(() => {
     const updateCanvas = (time: number, loop: boolean, reset?: boolean) => {
@@ -159,9 +164,9 @@ export function CustomSongIcon(props: Props) {
         hoverTarget.removeEventListener("mouseout", handleUnsetSelected);
       }
     };
-    // isMobile: crossing the breakpoint makes Canvas reset the drawing-buffer
-    // size, which wipes the bitmap — re-run to rebuild coords and repaint
-  }, [onSelect, props.name, animate, listen, setCustomStyles, isMobile]);
+    // sizeClass: a size change makes Canvas reset the drawing-buffer size,
+    // which wipes the bitmap — re-run to rebuild coords and repaint
+  }, [onSelect, props.name, animate, listen, setCustomStyles, sizeClass]);
 
   return useMemo(() => {
     return (
@@ -174,11 +179,11 @@ export function CustomSongIcon(props: Props) {
         {isNew && <span className={newLabel}>New!</span>}
         <Canvas
           id={id}
-          className={isMobile ? customSongIconMobile : customSongIcon}
+          className={sizeClass}
           onLoad={(canvas) => (canvasRef.current = canvas)}
           resize={false}
         />
       </div>
     );
-  }, [id, isNew, isMobile]);
+  }, [id, isNew, sizeClass]);
 }

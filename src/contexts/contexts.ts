@@ -25,9 +25,6 @@ export interface ThemeContextValue {
   spectrumFunction: (n: number) => string;
   canvasFade: boolean;
   resizeType: string;
-  buttonColor: string;
-  openButtonColor: string;
-  contentPanelColor: string;
   panelResetButton: string;
   panelRandomizeButton: string;
   panelMuteButton: string;
@@ -97,9 +94,6 @@ export interface WebAudioContextValue {
 export interface SongThemes {
   canvasFade: boolean;
   resizeType?: string;
-  buttonColor: string;
-  openButtonColor: string;
-  contentPanelColor: string;
   contentPanelText?: string;
   panelResetButton: string;
   panelRandomizeButton: string;

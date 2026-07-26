@@ -14,13 +14,19 @@ export const SongInfoPanel = () => {
 
   return (
     <div id="song-info-panel" className={songInfoPanel}>
-      <h2>"{name}"</h2>
+      <h2>{name}</h2>
       {credits.map((c) => {
         return (
           <p key={c.type}>
             <span className={creditType}>{c.type}</span>
             &nbsp;
-            {c.link ? <a href={c.link}>{c.content}</a> : c.content}
+            {c.link ? (
+              <a href={c.link} target="_blank" rel="noreferrer">
+                {c.content}
+              </a>
+            ) : (
+              c.content
+            )}
           </p>
         );
       })}

@@ -12,24 +12,24 @@ import {
 /**
  * Atmosphere for the landing page: a sky quad (top-of-frame darkening plus a
  * corner vignette, so the scene reads cinematic rather than flat), and two
- * fog quads anchored to the bottom — one behind the near treeline carrying
- * the moonlit glow, one in front at low strength so the mist wraps the tree
- * tops instead of stopping behind them. Fog is entirely shader-driven, with
+ * fog quads anchored to the bottom — a taller one carrying the moonlit glow
+ * and a shorter one at low strength layered over it, so the mist reads with
+ * depth rather than as a single wash. Fog is entirely shader-driven, with
  * slowly drifting fbm noise so it reads as alive rather than a gradient.
  */
 
 /** Fog quad heights as fractions of the viewport. */
 const BACK_HEIGHT_VH = 0.5;
 const FRONT_HEIGHT_VH = 0.32;
-/** Glow center in quad UV space; x slightly off-center, y near the treetops. */
+/** Glow center in quad UV space; x slightly off-center, y near the horizon. */
 const GLOW_CENTER = new Vector2(0.52, 0.25);
-/** Fog strengths; the front mist only wraps the tree tops. */
+/** Fog strengths; the front mist is a faint overlay on the back layer. */
 const BACK_INTENSITY = 0.32;
 const FRONT_INTENSITY = 0.09;
 /**
- * Vertical brightness band per layer (in quad UV): the mist peaks around the
- * tree tops and fades toward both the sky and the frame bottom — the bottom
- * of the reference scene reads dark, not washed.
+ * Vertical brightness band per layer (in quad UV): the mist peaks near the
+ * horizon and fades toward both the sky and the frame bottom — the bottom of
+ * the frame reads dark, not washed.
  */
 const BACK_BAND = new Vector2(0.3, 0.2);
 const FRONT_BAND = new Vector2(0.7, 0.25);
@@ -77,7 +77,7 @@ void main() {
     float bandOffset = (vUv.y - uBand.x) / uBand.y;
     float band = exp(-bandOffset * bandOffset);
 
-    // soft elliptical glow, like a moon behind the trees; falls off firmly
+    // soft elliptical glow, like a moon below the horizon; falls off firmly
     // to the sides so the mist never reads as a full-width stripe
     vec2 d = (vUv - uGlowCenter) * vec2(2.4, 2.4);
     float glow = exp(-dot(d, d) * 2.);

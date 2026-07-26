@@ -1,5 +1,5 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { textPrimary, vh } from "../settings";
+import { textPrimary, typeRamp } from "../settings";
 import { veil } from "../shared/veil.css";
 
 export const menuButtonContent = style([
@@ -17,8 +17,12 @@ globalStyle(`${menuButtonContent} *`, {
   color: textPrimary,
 });
 
+// rows never wrap on desktop-width panels; on narrow screens wrapping keeps
+// pill rows and control clusters inside the panel instead of clipping
+globalStyle(`${menuButtonContent} .flex-row`, {
+  flexWrap: "wrap",
+});
+
 globalStyle(`${menuButtonContent} p`, {
-  margin: `${vh(0.5)} 0 ${vh(0.5)} 0`,
-  display: "inline-block",
-  fontSize: vh(1.75),
+  fontSize: typeRamp.panelBody.fontSize,
 });

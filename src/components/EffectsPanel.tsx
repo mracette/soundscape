@@ -7,20 +7,31 @@ import { SongContext } from "../contexts/contexts";
 
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 
-import { CanvasSlider } from "./canvas/CanvasSlider";
+import { Slider } from "./Slider";
 
 import {
+  effectsPanel,
   primarySliderLabel,
-  fineTuneLabel,
-  fineTuneDivider,
+  moreFxToggle,
+  moreFxCaret,
+  moreFxCaretOpen,
+  moreFxCluster,
   toggleCluster,
   sliderRow,
   switchControl,
-  slider,
-  round,
+  switchTrack,
+  switchFill,
+  switchKnob,
+  switchRow,
+  switchLabel,
 } from "../styles/components/EffectsPanel.css";
 import { flexPanel } from "../styles/shared/layout.css";
-import { pillButton } from "../styles/shared/buttons.css";
+import {
+  pillButton,
+  pillButtonActive,
+  pillButtonEven,
+  pillRow,
+} from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
 
 // Effect random-walk timing (beats). The interval is both the spacing between new
@@ -58,6 +69,8 @@ const PRESETS: Record<"work" | "ambient" | "sleep", Preset> = {
   sleep: { timeWarp: 85, energy: 8, ambience: 70 },
 };
 
+type PresetName = keyof typeof PRESETS;
+
 export const EffectsPanel = () => {
   const setVoicesBackgroundMode = useMusicPlayerStore(
     (s) => s.setBackgroundMode,
@@ -71,6 +84,8 @@ export const EffectsPanel = () => {
 
   const [backgroundMode, setBackgroundMode] = useState(false);
   const backgroundModeEventRef = useRef<number | null>(null);
+  const [showMoreFx, setShowMoreFx] = useState(false);
+  const [activePreset, setActivePreset] = useState<PresetName | null>(null);
 
   const [hpValue, setHpValue] = useState(1);
   const [lpValue, setLpValue] = useState(100);
@@ -198,164 +213,217 @@ export const EffectsPanel = () => {
     setEnergy((v - 1) / 99);
   };
 
-  const applyPreset = (p: Preset) => {
+  const applyPreset = (name: PresetName) => {
+    const p = PRESETS[name];
     handleTimeWarp(p.timeWarp);
     handleEnergy(p.energy);
     setAmValue(p.ambience);
     WAW.setEffects("am", p.ambience);
     setVoicesBackgroundMode(true);
     setBackgroundMode(true);
+    setActivePreset(name);
   };
 
+  // A preset stays lit while the panel still reflects it, so touching a control
+  // that defines it — either headline slider or either background-mode switch —
+  // drops the selection. More FX is exempt: the walk is already moving those
+  // three values, so a hand nudge among them reads as the preset running rather
+  // than a departure from it.
+  const clearPreset = () => setActivePreset(null);
+
   return (
-    <div id="effects-panel" className={flexPanel}>
+    <div id="effects-panel" className={cx(flexPanel, effectsPanel)}>
       <h2>Background Mode</h2>
       <p>
         Automatically varies the music over time. Ideal for extended listening.
       </p>
 
-      <div className="flex-row">
+      <div className={pillRow}>
         <button
-          className={pillButton}
+          className={cx(
+            pillButton,
+            pillButtonEven,
+            activePreset === "work" && pillButtonActive,
+          )}
           id="preset-work"
-          onClick={() => applyPreset(PRESETS.work)}
+          aria-pressed={activePreset === "work"}
+          onClick={() => applyPreset("work")}
         >
           Work
         </button>
         <button
-          className={pillButton}
+          className={cx(
+            pillButton,
+            pillButtonEven,
+            activePreset === "ambient" && pillButtonActive,
+          )}
           id="preset-ambient"
-          onClick={() => applyPreset(PRESETS.ambient)}
+          aria-pressed={activePreset === "ambient"}
+          onClick={() => applyPreset("ambient")}
         >
           Ambient
         </button>
         <button
-          className={pillButton}
+          className={cx(
+            pillButton,
+            pillButtonEven,
+            activePreset === "sleep" && pillButtonActive,
+          )}
           id="preset-sleep"
-          onClick={() => applyPreset(PRESETS.sleep)}
+          aria-pressed={activePreset === "sleep"}
+          onClick={() => applyPreset("sleep")}
         >
           Sleep
         </button>
       </div>
 
       <div className={toggleCluster}>
-        <div className={cx("flex-row", sliderRow)}>
-          <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-            <label className={switchControl}>
-              <input
-                type="checkbox"
-                checked={voicesOn}
-                onChange={(e) => setVoicesBackgroundMode(e.target.checked)}
-              />
-              <span className={cx(slider, round, "slider", "round")}></span>
-            </label>
-          </div>
-          <div className="flex-col">
-            <span>
-              <h3 style={{ marginLeft: "1rem" }}>Voices</h3>
+        <label className={cx("flex-row", sliderRow, switchRow)}>
+          <span className={switchControl}>
+            <input
+              type="checkbox"
+              checked={voicesOn}
+              onChange={(e) => {
+                clearPreset();
+                setVoicesBackgroundMode(e.target.checked);
+              }}
+            />
+            <span className={switchTrack} data-testid="switch">
+              <span className={switchFill} />
+              <span className={switchKnob} />
             </span>
-          </div>
-        </div>
-        <div className={cx("flex-row", sliderRow)}>
-          <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-            <label className={switchControl}>
-              <input
-                type="checkbox"
-                checked={backgroundMode}
-                onChange={(e) => setBackgroundMode(e.target.checked)}
-              />
-              <span className={cx(slider, round, "slider", "round")}></span>
-            </label>
-          </div>
-          <div className="flex-col">
-            <span>
-              <h3 style={{ marginLeft: "1rem" }}>Effects</h3>
+          </span>
+          <span className={switchLabel}>Voices</span>
+        </label>
+        <label className={cx("flex-row", sliderRow, switchRow)}>
+          <span className={switchControl}>
+            <input
+              type="checkbox"
+              checked={backgroundMode}
+              onChange={(e) => {
+                clearPreset();
+                setBackgroundMode(e.target.checked);
+              }}
+            />
+            <span className={switchTrack} data-testid="switch">
+              <span className={switchFill} />
+              <span className={switchKnob} />
             </span>
-          </div>
-        </div>
+          </span>
+          <span className={switchLabel}>Effects</span>
+        </label>
 
-        <div className={cx("flex-row", sliderRow)}>
-          <div className="flex-col" style={{ justifyContent: "flex-end" }}>
-            <label className={switchControl}>
-              <input
-                type="checkbox"
-                onInput={(e) => {
-                  const checked = (e.target as HTMLInputElement).checked;
-                  setPauseVisuals(checked);
-                }}
-              />
-              <span className={cx(slider, round, "slider", "round")}></span>
-            </label>
-          </div>
-          <div className="flex-col">
-            <span>
-              <h3 style={{ marginLeft: "1rem" }}>Pause Visuals</h3>
+        <label className={cx("flex-row", sliderRow, switchRow)}>
+          <span className={switchControl}>
+            <input
+              type="checkbox"
+              onInput={(e) => {
+                const checked = (e.target as HTMLInputElement).checked;
+                setPauseVisuals(checked);
+              }}
+            />
+            <span className={switchTrack} data-testid="switch">
+              <span className={switchFill} />
+              <span className={switchKnob} />
             </span>
-          </div>
-        </div>
+          </span>
+          <span className={switchLabel}>Pause Visuals</span>
+        </label>
       </div>
 
       <div className="flex-row">
         <h3 className={primarySliderLabel}>time warp</h3>
       </div>
       <div className="flex-row">
-        <CanvasSlider
+        <Slider
           id="time-warp"
+          label="time warp"
           value={timeWarpValue}
-          handleValue={handleTimeWarp}
+          handleValue={(v) => {
+            clearPreset();
+            handleTimeWarp(v);
+          }}
         />
       </div>
       <div className="flex-row">
         <h3 className={primarySliderLabel}>energy</h3>
       </div>
       <div className="flex-row">
-        <CanvasSlider
+        <Slider
           id="energy"
+          label="energy"
           value={energyValue}
-          handleValue={handleEnergy}
+          handleValue={(v) => {
+            clearPreset();
+            handleEnergy(v);
+          }}
         />
       </div>
 
       <div className="flex-row">
-        <h3 className={fineTuneDivider}>fine tune</h3>
-      </div>
-      <div className="flex-row">
-        <h3 className={fineTuneLabel}>highpass filter</h3>
-      </div>
-      <div className="flex-row">
-        <CanvasSlider
-          id="hp-filter"
-          value={hpValue}
-          handleValue={(v) => setHpValue(v)}
-        />
-      </div>
-      <div className="flex-row">
-        <h3 className={fineTuneLabel}>lowpass filter</h3>
-      </div>
-      <div className="flex-row">
-        <CanvasSlider
-          id="lp-filter"
-          value={lpValue}
-          handleValue={(v) => setLpValue(v)}
-          reverse={true}
-        />
-      </div>
-      <div className="flex-row">
-        <h3 className={fineTuneLabel}>ambience</h3>
-      </div>
-      <div className="flex-row">
-        <CanvasSlider
-          id="ambience"
-          handleValue={(v) => setAmValue(v)}
-          value={amValue}
-        />
-      </div>
-      <div className="flex-row">
         <button
-          className={pillButton}
+          className={moreFxToggle}
+          id="more-fx-toggle"
+          aria-expanded={showMoreFx}
+          onClick={() => setShowMoreFx(!showMoreFx)}
+        >
+          <span className={cx(moreFxCaret, showMoreFx && moreFxCaretOpen)}>
+            ▸
+          </span>
+          More FX
+        </button>
+      </div>
+      {showMoreFx && (
+        <div className={cx(toggleCluster, moreFxCluster)}>
+          <div className="flex-row">
+            <h3 className={primarySliderLabel}>highpass filter</h3>
+          </div>
+          <div className="flex-row">
+            <Slider
+              id="hp-filter"
+              label="highpass filter"
+              compact
+              value={hpValue}
+              handleValue={(v) => setHpValue(v)}
+            />
+          </div>
+          <div className="flex-row">
+            <h3 className={primarySliderLabel}>lowpass filter</h3>
+          </div>
+          <div className="flex-row">
+            <Slider
+              id="lp-filter"
+              label="lowpass filter"
+              compact
+              value={lpValue}
+              handleValue={(v) => setLpValue(v)}
+              reverse={true}
+            />
+          </div>
+          <div className="flex-row">
+            <h3 className={primarySliderLabel}>ambience</h3>
+          </div>
+          <div className="flex-row">
+            <Slider
+              id="ambience"
+              label="ambience"
+              compact
+              handleValue={(v) => setAmValue(v)}
+              value={amValue}
+            />
+          </div>
+        </div>
+      )}
+      <div className={pillRow}>
+        <button
+          className={cx(pillButton, pillButtonEven)}
           id="effects-panel-reset"
-          disabled={backgroundMode}
           onClick={() => {
+            clearPreset();
+            setVoicesBackgroundMode(false);
+            setBackgroundMode(false);
+            handleTimeWarp(1);
+            handleEnergy(50);
             setHpValue(1);
             setLpValue(100);
             setAmValue(1);
@@ -366,12 +434,13 @@ export const EffectsPanel = () => {
         >
           Reset
         </button>
-
         <button
-          className={pillButton}
+          className={cx(pillButton, pillButtonEven)}
           id="effects-panel-randomize"
-          disabled={backgroundMode}
           onClick={() => {
+            clearPreset();
+            setVoicesBackgroundMode(false);
+            setBackgroundMode(false);
             const h = 1 + 99 * Math.random();
             const l = 1 + 99 * Math.random();
             const a = 1 + 99 * Math.random();

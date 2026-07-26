@@ -38,7 +38,7 @@ float starSpriteAlpha(vec2 pointCoord) {
 `;
 
 /**
- * Shared horizon fade: sky elements sink into the treeline fog near the
+ * Shared horizon fade: sky elements sink into the horizon fog near the
  * bottom of the viewport (normalizedY = 0) and reach full brightness in the
  * upper sky. Used by the star field and the constellations so both obey the
  * same atmosphere.

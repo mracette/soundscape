@@ -6,17 +6,17 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("each menu panel opens and renders its content", async ({ page }) => {
-  // DOM order of .menu-button-child: home, toggles, effects, song-info.
+  // DOM order of the menu buttons: home, toggles, effects, song-info.
   // The toggles panel auto-opens; assert it is already visible.
   await expect(page.locator("#toggle-button-panel")).toBeVisible();
 
-  await page.locator(".menu-button-child").nth(0).click(); // home
+  await page.getByTestId("menu-button-child").nth(0).click(); // home
   await expect(page.locator("#home-panel")).toBeVisible();
 
-  await page.locator(".menu-button-child").nth(2).click(); // effects
+  await page.getByTestId("menu-button-child").nth(2).click(); // effects
   await expect(page.locator("#effects-panel")).toBeVisible();
 
-  await page.locator(".menu-button-child").nth(3).click(); // song-info
+  await page.getByTestId("menu-button-child").nth(3).click(); // song-info
   await expect(page.locator("#song-info-panel")).toBeVisible();
 });
 
@@ -30,12 +30,12 @@ test("effects sliders are present and toggling them does not error", async ({
 }) => {
   const pageErrors = [];
   page.on("pageerror", (err) => pageErrors.push(err));
-  await page.locator(".menu-button-child").nth(2).click(); // effects
+  await page.getByTestId("menu-button-child").nth(2).click(); // effects
   const checkboxes = page.locator('#effects-panel input[type="checkbox"]');
   expect(await checkboxes.count()).toBeGreaterThan(0);
   // The checkbox inputs are visually hidden (opacity:0;width:0;height:0);
-  // click the visible .slider.round label span that wraps each one instead.
-  const toggles = page.locator("#effects-panel .slider.round");
+  // click the visible switch track span that wraps each one instead.
+  const toggles = page.locator("#effects-panel").getByTestId("switch");
   const n = await toggles.count();
   for (let i = 0; i < n; i++) {
     await toggles.nth(i).click();

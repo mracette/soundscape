@@ -1,6 +1,5 @@
 import { ThemeContext, type ThemeContextValue } from "../../contexts/contexts";
 import { MenuButtonParent } from "../../components/menu-button/MenuButtonParent";
-import { surfaces } from "../../styles/settings";
 import { flexPanel } from "../../styles/shared/layout.css";
 import * as styles from "./MenuStory.css";
 
@@ -12,9 +11,6 @@ const mockTheme: ThemeContextValue = {
   spectrumFunction: () => "#ffffff",
   canvasFade: false,
   resizeType: "",
-  buttonColor: "rgba(31, 38, 47, 1)",
-  openButtonColor: "rgba(255, 255, 255, 0.15)",
-  contentPanelColor: surfaces.veil,
   panelResetButton: "",
   panelRandomizeButton: "",
   panelMuteButton: "",

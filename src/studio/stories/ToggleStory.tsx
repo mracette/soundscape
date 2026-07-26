@@ -11,10 +11,13 @@ export const ToggleStory = () => {
     <ToggleButtonView
       ref={viewRef}
       initialActive={false}
+      active={active}
       onClick={() => {
         const next = !active;
-        setActive(next);
         viewRef.current?.runAnimation(next ? "start" : "stop", 600);
+        // mirror the app's boundary-commit semantics: the class flips when
+        // the fade lands, not when the animation is queued
+        setTimeout(() => setActive(next), 600);
       }}
     />
   );

@@ -3,15 +3,10 @@ import {
   hotGreen,
   hotBlue,
   moonYellow,
-  whiteGlow,
   textPrimary,
   textSecondary,
   radii,
-  glowShadow,
-  sSize,
-  mSize,
-  lSize,
-  xlSize,
+  typeRamp,
 } from "../../styles/settings";
 import * as styles from "./StyleGuideStory.css";
 
@@ -22,12 +17,10 @@ const ACCENTS = [
   { name: "moonYellow", value: moonYellow },
 ];
 
-const TYPE_RAMP = [
-  { name: "sSize", size: sSize },
-  { name: "mSize", size: mSize },
-  { name: "lSize", size: lSize },
-  { name: "xlSize", size: xlSize },
-];
+const TYPE_RAMP = Object.entries(typeRamp).map(([name, role]) => ({
+  name,
+  ...role,
+}));
 
 /** Renders the accent/text/radii/type-scale token sheet so the palette can be calibrated visually. */
 export const StyleGuideStory = () => (
@@ -44,14 +37,6 @@ export const StyleGuideStory = () => (
           </div>
         ))}
       </div>
-    </div>
-
-    <div>
-      <div className={styles.sectionTitle}>Interactive Glow (always white)</div>
-      <div
-        className={styles.glowChip}
-        style={{ boxShadow: glowShadow(whiteGlow) }}
-      />
     </div>
 
     <div>
@@ -83,9 +68,9 @@ export const StyleGuideStory = () => (
     <div>
       <div className={styles.sectionTitle}>Type Ramp</div>
       <div className={styles.typeRamp}>
-        {TYPE_RAMP.map(({ name, size }) => (
-          <span key={name} style={{ fontSize: size }}>
-            {name} — {size}
+        {TYPE_RAMP.map(({ name, ...role }) => (
+          <span key={name} style={role}>
+            {name} — {role.fontSize} / {role.fontWeight}
           </span>
         ))}
       </div>

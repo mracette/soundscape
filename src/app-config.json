@@ -161,9 +161,6 @@
         "themes": {
             "canvasFade": false,
             "resizeType": "fullscreen",
-            "buttonColor": "rgba(31, 38, 47, 1)",
-            "openButtonColor": "rgba(255, 255, 255, 0.15)",
-            "contentPanelColor": "rgba(22, 28, 40, 0.75)",
             "panelResetButton": "rgba(255, 255, 255, 0.3)",
             "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
             "panelMuteButton": "rgba(255, 255, 255, 0.3)",
@@ -174,11 +171,8 @@
             "credits": [
                 {
                     "type": "Music, Art & Development:",
+                    "link": "https://markracette.com",
                     "content": "Mark Racette"
-                },
-                {
-                    "type": "Technology:",
-                    "content": "React, Three.js, Anime.js, ColorCurves, Ableton Live, Yamaha P-125"
                 }
             ]
         }
@@ -347,9 +341,6 @@
         "themes": {
             "canvasFade": false,
             "resizeType": "fullscreen",
-            "buttonColor": "rgba(55, 55, 55, 0.45)",
-            "openButtonColor": "rgba(255, 255, 255, 0.15)",
-            "contentPanelColor": "rgba(40, 34, 30, 0.72)",
             "contentPanelText": "rgba(0, 0, 0, 1)",
             "panelResetButton": "rgba(255, 255, 255, 0.3)",
             "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
@@ -361,19 +352,12 @@
             "credits": [
                 {
                     "type": "Music, Art & Development:",
+                    "link": "https://markracette.com",
                     "content": "Mark Racette"
-                },
-                {
-                    "type": "Additional 3D Assets:",
-                    "content": "Don Carson, Tiff Eidmann, Poly by Google"
                 },
                 {
                     "type": "Paintings:",
                     "content": "Kurt Vonnegut, Vincent Van Gogh"
-                },
-                {
-                    "type": "Technology:",
-                    "content": "React, Three.js, Anime.js, ColorCurves, Ableton Live, Yamaha P-125"
                 }
             ]
         }
@@ -531,9 +515,6 @@
         },
         "themes": {
             "canvasFade": true,
-            "buttonColor": "rgba(0, 0, 0, 0.25)",
-            "openButtonColor": "rgba(255, 255, 255, 0.25)",
-            "contentPanelColor": "rgba(16, 26, 20, 0.72)",
             "panelResetButton": "rgba(255, 255, 255, 0.3)",
             "panelRandomizeButton": "rgba(255, 255, 255, 0.3)",
             "panelMuteButton": "rgba(255, 255, 255, 0.3)",
@@ -544,16 +525,13 @@
             "credits": [
                 {
                     "type": "Music & Development:",
+                    "link": "https://markracette.com",
                     "content": "Mark Racette"
                 },
                 {
                     "type": "Art & 3D Modeling:",
                     "link": "https://www.alanaguidry.com/",
                     "content": "Alana Guidry"
-                },
-                {
-                    "type": "Technology:",
-                    "content": "React, Three.js, Anime.js, ColorCurves, Ableton Live, Yamaha P-125"
                 }
             ]
         }

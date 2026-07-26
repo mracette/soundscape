@@ -143,6 +143,9 @@ export const ToggleButton = (props: Props) => {
     <ToggleButtonView
       ref={viewRef}
       initialActive={playerState === "active"}
+      // flips only at the boundary commit: during pending-start gsap alone
+      // owns the fill so the countdown fade is never preempted by the class
+      active={playerState === "active" || playerState === "pending-stop"}
       onClick={() => {
         switch (playerState) {
           case "stopped": // start if stopped

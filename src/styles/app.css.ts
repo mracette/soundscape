@@ -1,17 +1,18 @@
 import { globalFontFace, globalStyle } from "@vanilla-extract/css";
-import { offBlack2, textPrimary, vh, vw } from "./settings";
+import { fontBody, offBlack2, textPrimary, typeRamp, vh, vw } from "./settings";
 
-globalFontFace("Outfit", {
+globalFontFace("Quicksand", {
   fontStyle: "normal",
-  fontWeight: "100 900",
+  fontWeight: "300 700",
   fontDisplay: "swap",
-  src: "url('../fonts/Outfit-Variable.woff2') format('woff2')",
+  src: "url('../fonts/Quicksand-Variable.woff2') format('woff2')",
 });
 
-globalFontFace("Satisfy", {
+globalFontFace("Kaushan Script", {
   fontStyle: "normal",
   fontWeight: 400,
-  src: "local('Satisfy Regular'), local('Satisfy-Regular'), url('../fonts/satisfy-v10-latin-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/satisfy-v10-latin-regular.woff2') format('woff2'), url('../fonts/satisfy-v10-latin-regular.woff') format('woff'), url('../fonts/satisfy-v10-latin-regular.ttf') format('truetype'), url('../fonts/satisfy-v10-latin-regular.svg#Satisfy') format('svg')",
+  fontDisplay: "swap",
+  src: "url('../fonts/KaushanScript-Regular.woff2') format('woff2')",
 });
 
 globalStyle("html", {
@@ -19,8 +20,8 @@ globalStyle("html", {
 });
 
 globalStyle("body", {
-  fontFamily: "'Outfit', Helvetica, sans-serif",
-  fontWeight: 300,
+  fontFamily: fontBody,
+  fontWeight: typeRamp.body.fontWeight,
   letterSpacing: "0.02em",
   backgroundColor: offBlack2,
 });
@@ -39,12 +40,14 @@ globalStyle("h2, h3", {
 });
 
 globalStyle("h2", {
-  fontSize: vh(3),
+  fontSize: typeRamp.panelTitle.fontSize,
+  fontWeight: typeRamp.panelTitle.fontWeight,
   margin: `0 0 ${vh(1)} 0`,
 });
 
 globalStyle("h3", {
-  fontSize: vh(2.25),
+  fontSize: typeRamp.sectionHeading.fontSize,
+  fontWeight: typeRamp.sectionHeading.fontWeight,
   margin: 0,
   padding: `0 ${vh(1)} 0 0`,
   flex: "0 0 content",
@@ -56,7 +59,12 @@ globalStyle("a", {
 });
 
 globalStyle("span, p", {
-  fontSize: "1.75rem",
+  marginBlockStart: vh(0),
+  marginBottom: vh(1.5),
+});
+
+globalStyle("span, p", {
+  fontSize: typeRamp.body.fontSize,
 });
 
 globalStyle("button, .button", {
@@ -104,4 +112,3 @@ globalStyle(".off-black", {
 globalStyle(".front-most", {
   zIndex: 999,
 });
-

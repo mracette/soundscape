@@ -12,7 +12,7 @@ export function InfoPage() {
           <button className={cx(infoPageButton, pillButton)}>← Back</button>
         </Link>
       )}
-      <h3 className={cx(infoSubheader, "info-subheader")}>
+      <h3 className={infoSubheader} data-testid="info-subheader">
         The immersive music visualizer that lets you build your own beats
       </h3>
       <div className={infoRow}>

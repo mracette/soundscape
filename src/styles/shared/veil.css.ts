@@ -1,15 +1,16 @@
 import { style } from "@vanilla-extract/css";
 
-import { radii, surfaces } from "../settings";
+import { radii } from "../settings";
+import { glassSubtle } from "./glass.css";
 
 /**
- * The atmosphere-first panel surface: a dark translucent "veil" the scene
- * stays visible through. No border, no glow — resting chrome stays quiet.
- * The background here is a fallback; the per-scene tint (ThemeContext
- * contentPanelColor) is applied inline by consumers and wins over it.
- * Legibility is tuned via the tint's opacity/color, never font weight.
+ * The atmosphere-first panel surface: backdrop-tier glass the scene stays
+ * visible through — the same white-tint material as the controls, with
+ * legibility carried by the deeper blur rather than a dark fill.
  */
-export const veil = style({
-  borderRadius: radii.panel,
-  background: surfaces.veil,
-});
+export const veil = style([
+  glassSubtle,
+  {
+    borderRadius: radii.panel,
+  },
+]);
