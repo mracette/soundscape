@@ -5,8 +5,6 @@ import {
   landingPageHeader,
   landingPageTitleWrapper,
   landingPageTitle,
-  landingPageTitleHero,
-  landingPageTitleSpill,
   innerLandingPage,
 } from "../styles/components/LandingPage.css";
 import { cx } from "../utils/cx";
@@ -14,6 +12,7 @@ import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
 import { SongCards } from "./SongCards";
 import { InfoPage } from "./InfoPage";
+import { SoundscapeWordmark } from "./SoundscapeWordmark";
 
 import { Route, Switch, Redirect } from "wouter";
 
@@ -51,19 +50,9 @@ export const LandingPage = () => {
             className={cx("flex-row", landingPageTitleWrapper)}
             id="landing-page-soundscape-title-wrapper"
           >
-            <div className={landingPageTitleHero}>
-              <img
-                src="/img/hero-spill.webp"
-                alt=""
-                className={landingPageTitleSpill}
-              />
-              <h1
-                id="landing-page-soundscape-title"
-                className={landingPageTitle}
-              >
-                Soundscape
-              </h1>
-            </div>
+            <h1 id="landing-page-soundscape-title" className={landingPageTitle}>
+              <SoundscapeWordmark />
+            </h1>
           </div>
           <Switch>
             <Route path="/">

@@ -8,12 +8,6 @@ globalFontFace("Outfit", {
   src: "url('../fonts/Outfit-Variable.woff2') format('woff2')",
 });
 
-globalFontFace("Satisfy", {
-  fontStyle: "normal",
-  fontWeight: 400,
-  src: "local('Satisfy Regular'), local('Satisfy-Regular'), url('../fonts/satisfy-v10-latin-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/satisfy-v10-latin-regular.woff2') format('woff2'), url('../fonts/satisfy-v10-latin-regular.woff') format('woff'), url('../fonts/satisfy-v10-latin-regular.ttf') format('truetype'), url('../fonts/satisfy-v10-latin-regular.svg#Satisfy') format('svg')",
-});
-
 globalStyle("html", {
   fontSize: "52.5%",
 });

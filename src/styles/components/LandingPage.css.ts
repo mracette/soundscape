@@ -1,6 +1,5 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import {
-  heroGradientStops,
   mSize,
   radii,
   surfaces,
@@ -22,37 +21,57 @@ export const landingPageTitleWrapper = style({
 });
 
 export const landingPageTitle = style({
-  fontFamily: "'Satisfy'",
-  fontSize: "13rem",
-  fontWeight: 400,
   margin: 0,
   padding: "2rem",
   color: textPrimary,
-  // `background` must come before `background-clip` in this stylesheet
-  background: `linear-gradient(30deg, ${heroGradientStops.join(", ")})`,
-  backgroundClip: "text",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
+  boxSizing: "border-box",
+  width: "72rem",
+  maxWidth: "94vw",
   "@media": {
     "screen and (max-width: 670px)": {
-      fontSize: "7.5rem",
+      width: "44rem",
     },
   },
 });
 
-export const landingPageTitleHero = style({
+// the artwork is a mask, so the mark takes its colour from here; its facet
+// shading and a close-in bloom are already in the mask's alpha
+const WORDMARK = "url('/img/soundscape-wordmark.webp')";
+
+export const landingPageWordmarkStage = style({
   position: "relative",
-  display: "inline-flex",
+  width: "100%",
+  aspectRatio: "1531 / 651",
 });
 
-export const landingPageTitleSpill = style({
+export const landingPageWordmark = style({
   position: "absolute",
-  top: "65%",
-  left: "50%",
-  transform: "translate(-50%, -50%) rotate(17deg) scale(1.2)",
-  width: "135%",
-  maxWidth: "none",
-  opacity: 0.55,
+  inset: 0,
+  backgroundColor: "currentColor",
+  maskImage: WORDMARK,
+  maskSize: "contain",
+  maskRepeat: "no-repeat",
+  maskPosition: "center",
+  WebkitMaskImage: WORDMARK,
+  WebkitMaskSize: "contain",
+  WebkitMaskRepeat: "no-repeat",
+  WebkitMaskPosition: "center",
+  // the baked bloom only carries a few pixels; these widen it into a halo that
+  // reaches the sky. Stacked so the core stays tight while the falloff is long
+  filter: [
+    "drop-shadow(0 0 6px rgba(255, 255, 255, 0.5))",
+    "drop-shadow(0 0 22px rgba(226, 244, 255, 0.4))",
+    "drop-shadow(0 0 70px rgba(190, 225, 255, 0.28))",
+    "drop-shadow(0 0 150px rgba(160, 205, 245, 0.2))",
+  ].join(" "),
+});
+
+// sits under the mark so motes read as drifting out from behind the sigil
+export const landingPageWordmarkParticles = style({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
   pointerEvents: "none",
 });
 
