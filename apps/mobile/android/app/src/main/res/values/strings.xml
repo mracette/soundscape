@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Soundscape</string>
+    <string name="title_activity_main">Soundscape</string>
+    <string name="package_name">world.soundscape.mobile</string>
+    <string name="custom_url_scheme">world.soundscape.mobile</string>
+</resources>
