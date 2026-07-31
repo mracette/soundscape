@@ -9,17 +9,24 @@ import {
 import { gsap } from "gsap";
 import { LayoutContext } from "../../contexts/contexts";
 import "../../styles/components/Icon.css";
-import { toggleButton, svgCircle } from "../../styles/components/ToggleButton.css";
+import {
+  toggleButton,
+  toggleButtonActive,
+  svgCircle,
+} from "../../styles/components/ToggleButton.css";
+import { glassLight } from "../../styles/settings";
 import { cx } from "../../utils/cx";
 
 const START_PARAMS = {
-  backgroundColor: "rgba(255, 255, 255, .3)",
+  backgroundColor: glassLight.tintActive,
   points:
     "6.69872981 6.69872981 93.01270188 6.69872981 93.01270188 50 93.01270188 93.01270188 6.69872981 93.01270188",
 };
 
 const STOP_PARAMS = {
-  backgroundColor: "rgba(255, 255, 255, 0)",
+  // resting stopped fill matches the class's glass tint so gsap's inline
+  // value never strips the resting look
+  backgroundColor: glassLight.tint,
   points:
     "6.69872981 0 6.69872981 0 93.01270188 50 6.69872981 100 6.69872981 100",
 };
@@ -36,19 +43,27 @@ export interface ToggleButtonViewHandle {
 
 interface Props {
   initialActive: boolean;
+  /** committed live state — drives the glassy-white active treatment */
+  active: boolean;
   onClick: () => void;
   ref?: Ref<ToggleButtonViewHandle>;
 }
 
-export const ToggleButtonView = ({ initialActive, onClick, ref }: Props) => {
+export const ToggleButtonView = ({
+  initialActive,
+  active,
+  onClick,
+  ref,
+}: Props) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const circleRef = useRef<SVGSVGElement>(null);
   const iconDivRef = useRef<HTMLDivElement>(null);
   const iconPolyRef = useRef<SVGPolygonElement>(null);
 
   const { vh } = useContext(LayoutContext)!;
-  const buttonRadius = vh ? vh * 3.5 : 0;
-  const buttonBorder = vh ? (vh * 3.5) / 15 : 0;
+  // 6vh diameter, matching the radial-menu child buttons
+  const buttonRadius = vh ? vh * 3 : 0;
+  const buttonBorder = vh ? (vh * 3) / 15 : 0;
 
   // The ring's resting offset is seeded once from initialActive; gsap owns
   // strokeDashoffset thereafter (each animation ends at the correct resting
@@ -180,7 +195,8 @@ export const ToggleButtonView = ({ initialActive, onClick, ref }: Props) => {
 
   return (
     <button
-      className={cx(toggleButton, "toggle-button")}
+      className={cx(toggleButton, active && toggleButtonActive)}
+      data-testid="toggle-button"
       ref={buttonRef}
       onClick={onClick}
       style={{

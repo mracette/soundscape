@@ -1,12 +1,12 @@
 import { style } from "@vanilla-extract/css";
-import { offBlack2, fontColor } from "../styles/settings";
+import { offBlack2, textPrimary } from "../styles/settings";
 
 export const root = style({
   display: "flex",
   flexDirection: "column",
   position: "fixed",
   inset: 0,
-  color: fontColor,
+  color: textPrimary,
   background: offBlack2,
 });
 

@@ -36,7 +36,7 @@ async function gotoScene(page, song) {
 
 function getGroup(page, name) {
   return page
-    .locator(".toggle-button-group")
+    .getByTestId("toggle-button-group")
     .filter({ has: page.locator("h3", { hasText: name }) });
 }
 

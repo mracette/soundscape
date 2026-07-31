@@ -1,12 +1,11 @@
 import { globalStyle, style } from "@vanilla-extract/css";
 import {
-  fontColor,
-  hotBlue,
-  hotGreen,
-  hotPink,
-  mSize,
+  radii,
+  textPrimary,
+  textSecondary,
+  typeRamp,
+  vh,
   vw,
-  xxlSize,
 } from "../settings";
 
 export const landingPageCanvas = style({
@@ -14,7 +13,9 @@ export const landingPageCanvas = style({
 });
 
 export const landingPageTitleWrapper = style({
-  paddingTop: "10rem",
+  // proportional so the block sits near optical centre on a tall desktop
+  // window without being driven off the fold on a short one
+  paddingTop: vh(15),
   "@media": {
     "screen and (max-width: 670px)": {
       paddingTop: "3rem",
@@ -23,59 +24,54 @@ export const landingPageTitleWrapper = style({
 });
 
 export const landingPageTitle = style({
-  fontFamily: "'Satisfy'",
-  fontSize: xxlSize,
+  fontFamily: "'Kaushan Script'",
+  // "Soundscape" in Kaushan sets about 4.75x its font size wide, so a fixed
+  // 13rem clips on the narrowest phones. The vw term keeps the wordmark inside
+  // the frame until the 13rem cap takes over above ~610px.
+  fontSize: `min(13rem, ${vw(18)})`,
   fontWeight: 400,
   margin: 0,
   padding: "2rem",
-  color: fontColor,
-  // `background` must come before `background-clip` in this stylesheet
-  background:
-    "linear-gradient(30deg, #feac5e, #f3a280, #e7979b, #db8cb2, #ce80c7, #be8ad4, #aaa6dc, #94bfe4, #7ad4eb, #59e8f2)",
-  backgroundClip: "text",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
-  "@media": {
-    "screen and (max-width: 670px)": {
-      fontSize: "7.5rem",
-    },
-  },
+  color: textPrimary,
 });
 
 export const landingPageHeader = style({
-  fontSize: mSize,
-  color: fontColor,
+  fontSize: typeRamp.bodyCompact.fontSize,
+  color: textPrimary,
   display: "flex",
   flexDirection: "column",
   width: "100%",
-  height: "100%",
+  // min rather than a fixed height: on a short viewport the cards run past the
+  // fold, and only a header that grows with them gives the scroller something
+  // taller than itself to scroll
+  minHeight: "100%",
   justifyContent: "flex-start",
   alignItems: "center",
-  gap: "0.5rem",
 });
 
 globalStyle(`${landingPageHeader} .flex-row`, {
   justifyContent: "center",
 });
 
+/**
+ * Fills the viewport itself instead of borrowing `.fullscreen`, whose
+ * `overflow: hidden` is emitted after this rule and would win, leaving the
+ * page unscrollable. x stays hidden so nothing can scroll sideways.
+ */
 export const landingPage = style({
-  overflow: "auto",
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: vw(100),
+  height: vh(100),
+  overflowY: "auto",
+  overflowX: "hidden",
 });
 
-export const landingPageSongTitle = style({
-  color: hotPink,
-});
-
-export const landingPageBpm = style({
-  color: hotGreen,
-});
-
-export const landingPageKey = style({
-  color: hotBlue,
-});
-
-export const songSelectionPanel = style({
-  width: vw(75),
+export const songCardList = style({
+  width: vw(90),
+  // two cards plus the gap: desktop wraps to a 2x2 grid
+  maxWidth: "656px",
   display: "flex",
   flexDirection: "row",
   flexWrap: "wrap",
@@ -83,35 +79,46 @@ export const songSelectionPanel = style({
   alignItems: "flex-start",
   alignContent: "flex-start",
   marginTop: "2rem",
-});
-
-export const songLink = style({
-  borderRadius: "50%",
-  selectors: {
-    "&:hover": {
-      backgroundColor: "rgba(255,255,255,.05)",
-      backdropFilter: "blur(3px)",
+  gap: 16,
+  "@media": {
+    "screen and (max-width: 670px)": {
+      width: "100%",
+      flexDirection: "column",
+      // wrap + alignContent:flex-start from the base style would pack the
+      // column line to the left, defeating alignItems centering
+      flexWrap: "nowrap",
+      alignItems: "center",
+      marginTop: 0,
+      gap: 0,
     },
   },
 });
 
-export const songLinkMobile = style({
+export const songCard = style({
   textDecoration: "none",
-  maxWidth: "320px",
   display: "block",
-  borderRadius: "1rem",
-  width: "100%",
-  margin: "1rem 0",
-  selectors: {
-    "&:hover": {
-      backgroundColor: "rgba(255,255,255,.05)",
-      backdropFilter: "blur(3px)",
+  // one card size everywhere: the desktop grid used to run narrower than the
+  // phone layout, which left the cards looking undersized on a big screen
+  // fixed width clamped by the container: width:100% + maxWidth leaves
+  // zero free space for centering (margins resolve before the clamp)
+  width: "320px",
+  maxWidth: "100%",
+  borderRadius: radii.panel,
+  "@media": {
+    "screen and (max-width: 670px)": {
+      margin: "1rem 0",
     },
   },
 });
 
-globalStyle(`${songLinkMobile}>div`, {
-  flexBasis: "50%",
+export const songCardName = style({
+  fontSize: typeRamp.cardTitle.fontSize,
+  fontWeight: typeRamp.cardTitle.fontWeight,
+});
+
+export const songCardMeta = style({
+  ...typeRamp.caption,
+  color: textSecondary,
 });
 
 export const infoRow = style({
@@ -126,7 +133,8 @@ globalStyle(`${infoRow}>p`, {
 });
 
 export const infoSubheader = style({
-  fontSize: "3rem",
+  fontSize: typeRamp.display.fontSize,
+  fontWeight: typeRamp.display.fontWeight,
   marginBottom: "4rem",
   textTransform: "none",
   maxWidth: "375px",
@@ -135,13 +143,25 @@ export const infoSubheader = style({
 });
 
 export const infoPageButton = style({
-  fontSize: mSize,
-  borderRadius: "4px",
+  fontSize: typeRamp.bodyCompact.fontSize,
   width: "140px",
-  selectors: {
-    "&:hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.1)",
-      transitionDuration: "250ms",
-    },
-  },
+});
+
+export const innerLandingPage = style({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "1rem",
+  // keeps the last card clear of the bottom edge once the page scrolls
+  paddingBottom: "4rem",
+});
+
+// the global span/p rule sets the reading size, which is a step small for the
+// one line introducing the page. Centred because it wraps on narrow viewports,
+// where the flex centring alone leaves a ragged left edge.
+globalStyle(`${innerLandingPage}>p`, {
+  fontSize: typeRamp.lede.fontSize,
+  fontWeight: typeRamp.lede.fontWeight,
+  textAlign: "center",
 });

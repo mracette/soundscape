@@ -3,25 +3,23 @@ import { MorningsIcon } from "../../components/custom-song-icons/MorningsIcon";
 import { MoonriseIcon } from "../../components/custom-song-icons/MoonriseIcon";
 import { ComingSoonIcon } from "../../components/custom-song-icons/ComingSoonIcon";
 import {
-  songSelectionPanel,
-  songLink,
+  songCard,
+  songCardList,
 } from "../../styles/components/LandingPage.css";
 
-const noop = () => {};
-
 export const SongIconsStory = () => (
-  <div className={songSelectionPanel}>
-    <div className={songLink}>
-      <SwampIcon name="swamp" onSelect={noop} />
+  <div className={songCardList}>
+    <div className={songCard}>
+      <SwampIcon name="swamp" />
     </div>
-    <div className={songLink}>
-      <MorningsIcon name="mornings" onSelect={noop} />
+    <div className={songCard}>
+      <MorningsIcon name="mornings" />
     </div>
-    <div className={songLink}>
-      <MoonriseIcon name="moonrise" onSelect={noop} />
+    <div className={songCard}>
+      <MoonriseIcon name="moonrise" />
     </div>
-    <div className={songLink}>
-      <ComingSoonIcon name="coming-soon" onSelect={noop} />
+    <div className={songCard}>
+      <ComingSoonIcon name="coming-soon" />
     </div>
   </div>
 );
