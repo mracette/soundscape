@@ -14,14 +14,14 @@ function fetchStub(byUrl: Record<string, unknown>) {
 
 describe("loadSongBakes", () => {
   test("fetches <base>bakes/<song>/<voice>.json per voice", async () => {
-    const f = fetchStub({ "/bakes/prelude/kick.json": BAKE });
-    const bakes = await loadSongBakes("/", "prelude", ["kick"], f);
+    const f = fetchStub({ "/bakes/demo/kick.json": BAKE });
+    const bakes = await loadSongBakes("/", "demo", ["kick"], f);
     expect(bakes.kick.durationSec).toBe(2);
   });
   test("missing file warns and omits, others still load", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const f = fetchStub({ "/bakes/prelude/kick.json": BAKE });
-    const bakes = await loadSongBakes("/", "prelude", ["kick", "ghost"], f);
+    const f = fetchStub({ "/bakes/demo/kick.json": BAKE });
+    const bakes = await loadSongBakes("/", "demo", ["kick", "ghost"], f);
     expect(Object.keys(bakes)).toEqual(["kick"]);
     expect(warn).toHaveBeenCalled();
     warn.mockRestore();

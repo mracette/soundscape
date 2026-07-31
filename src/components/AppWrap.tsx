@@ -32,13 +32,6 @@ const swampPalette = (n: number): string => {
   }
 };
 
-const preludePalette = (n: number): string => {
-  const teal = chroma("#2DD4BF");
-  const violet = chroma("#8B5CF6");
-  n = clamp(n, 0, 1);
-  return chroma.mix(teal, violet, n, "rgb").hex();
-};
-
 const morningsPaletteDiscrete: string[] = [];
 
 // instead of querying the full palettes, use a discrete, in-memory versions to save compute
@@ -50,7 +43,6 @@ for (let i = 0; i <= 255; i++) {
 const spectrumFunctions: Record<string, (n: number) => string> = {
   mornings: (n: number) => morningsPaletteDiscrete[Math.round(n * 255)],
   swamp: swampPalette,
-  prelude: preludePalette,
 };
 
 const webAudioWrapper = new WebAudioWrapper(appConfig);
