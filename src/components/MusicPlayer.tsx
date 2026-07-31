@@ -1,12 +1,10 @@
 import { useContext, useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { CanvasViz } from "./canvas/CanvasViz";
 import { EffectsPanel } from "./EffectsPanel";
-import { FreqBands } from "./FreqBands";
 import { MenuButtonParent } from "./menu-button/MenuButtonParent";
 import { SongInfoPanel } from "./SongInfoPanel";
 import { ToggleButtonPanel } from "./toggle-button/ToggleButtonPanel";
 import { HomePanel } from "./HomePanel";
-import { LoadingScreen } from "../components/LoadingScreen";
 import { SongContext } from "../contexts/contexts";
 import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
@@ -50,12 +48,23 @@ export const MusicPlayer = () => {
   // a useEffect would run after children register and wipe them.
   useState(() => useMusicPlayerStore.getState().reset());
   
+  const setPlayerReady = useMusicPlayerStore((s) => s.setPlayerReady);
   const resetCallbacks = useMusicPlayerStore((s) => s.resetCallbacks);
   const randomizeCallbacks = useMusicPlayerStore((s) => s.randomizeCallbacks);
   const voices = useMusicPlayerStore((s) => s.voices);
   const backgroundMode = useMusicPlayerStore((s) => s.backgroundMode);
   const energy = useMusicPlayerStore((s) => s.energy);
   const mute = useMusicPlayerStore((s) => s.mute);
+
+  // The landing page covers the player until every piece is live, then hands
+  // the screen over; leaving takes the flag back down so the next song starts
+  // from the loading state again.
+  const ready = canvasLoadStatus && wawLoadStatus && songLoadStatus;
+  useEffect(() => {
+    if (!ready) return;
+    setPlayerReady(true);
+    return () => setPlayerReady(false);
+  }, [ready, setPlayerReady]);
 
   useEffect(() => {
     if (wawLoadStatus && !songLoadStatus) {
@@ -224,7 +233,6 @@ export const MusicPlayer = () => {
     <>
       {songLoadStatus && (
         <>
-          <FreqBands animate={false} />
           <MenuButtonParent
             childButtonProps={[
               {
@@ -252,9 +260,6 @@ export const MusicPlayer = () => {
           />
           <CanvasViz songLoadStatus={songLoadStatus} handleSetCanvasLoadStatus={handleSetCanvasLoadStatus} />
         </>
-      )}
-      {(!canvasLoadStatus || !wawLoadStatus || !songLoadStatus) && (
-        <LoadingScreen />
       )}
     </>
   );

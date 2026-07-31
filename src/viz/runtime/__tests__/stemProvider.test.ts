@@ -10,8 +10,8 @@ function deps(over: Partial<StemProviderDeps> = {}): StemProviderDeps {
     groups: [{ name: "bass", voices: ["kick", "sub"] }],
     bakes: { kick: BAKE("bass"), sub: BAKE("bass") },
     players: {
-      kick: { startedAt: 5, loopDuration: 2 },
-      sub: { startedAt: null, loopDuration: 2 },
+      kick: { startedAt: 5, startOffset: 0, playbackRate: 1, loopDuration: 2 },
+      sub: { startedAt: null, startOffset: 0, playbackRate: 1, loopDuration: 2 },
     },
     groupGain: () => 1,
     activeVoices: () => [{ id: "kick", group: "bass", voiceState: "active" }],
@@ -38,8 +38,23 @@ describe("createStemProvider", () => {
     expect(stems.bass.map((s) => s.bake.band)).toEqual(["bass"]);
   });
   test("a scheduled-but-future start yields negative position (source excludes it)", () => {
-    const d = deps({ players: { kick: { startedAt: 11, loopDuration: 2 }, sub: { startedAt: null, loopDuration: 2 } } });
+    const d = deps({
+      players: {
+        kick: { startedAt: 11, startOffset: 0, playbackRate: 1, loopDuration: 2 },
+        sub: { startedAt: null, startOffset: 0, playbackRate: 1, loopDuration: 2 },
+      },
+    });
     expect(createStemProvider(d)().bass[0].positionSec).toBeLessThan(0);
+  });
+  test("start offset and playback rate shift and scale the position", () => {
+    const d = deps({
+      players: {
+        kick: { startedAt: 5, startOffset: 0.5, playbackRate: 1.25, loopDuration: 2 },
+        sub: { startedAt: null, startOffset: 0, playbackRate: 1, loopDuration: 2 },
+      },
+    });
+    // (0.5 + (10 - 5) * 1.25 - 0.02) mod 2 = 6.73 mod 2 = 0.73
+    expect(createStemProvider(d)().bass[0].positionSec).toBeCloseTo(0.73, 10);
   });
   test("missing bake or unstarted player is skipped without throwing", () => {
     const d = deps({ bakes: {}, activeVoices: () => [{ id: "kick", group: "bass", voiceState: "active" }] });

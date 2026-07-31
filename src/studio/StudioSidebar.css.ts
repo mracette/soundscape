@@ -1,5 +1,5 @@
 import { style } from "@vanilla-extract/css";
-import { fontColor } from "../styles/settings";
+import { textPrimary } from "../styles/settings";
 
 export const sidebar = style({
   width: "20rem",
@@ -22,7 +22,7 @@ export const navLink = style({
   padding: "0.6rem 0.8rem",
   marginBottom: "0.2rem",
   borderRadius: "0.5rem",
-  color: fontColor,
+  color: textPrimary,
   textDecoration: "none",
   fontSize: "1.8rem",
   ":hover": { background: "rgba(255,255,255,0.08)" },

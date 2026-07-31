@@ -1,6 +1,4 @@
 import { useState, useEffect, useLayoutEffect } from "react";
-import * as d3Chromatic from "d3-scale-chromatic";
-import * as d3Color from "d3-color";
 import { ColorPalette } from "color-curves";
 import chroma from "chroma-js";
 import { clamp } from "../utils/mathUtils";
@@ -15,12 +13,6 @@ import _appConfig from "../app-config.json";
 import { installTestHooks } from "../testHooks";
 
 const appConfig = _appConfig as unknown as AppConfigEntry[];
-
-const starsPalette = new ColorPalette(
-  '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.182,"y":-0.138},"scale":{"x":1,"y":1},"rotation":0,"angleStart":2.105,"angleEnd":6.283,"angleOffset":0,"radius":0.5}',
-  '{"type":"linear","overflow":"clamp","reverse":false,"translation":{"x":-0.003,"y":0.758},"scale":{"x":1.053,"y":-0.13},"rotation":0}',
-  '{"start":0,"end":1}'
-);
 
 const morningsPalette = new ColorPalette(
   '{"type":"arc","overflow":"clamp","reverse":false,"translation":{"x":-0.125,"y":-0.081},"scale":{"x":1,"y":1},"rotation":0,"angleStart":0,"angleEnd":3.142,"angleOffset":5.781,"radius":0.5}',
@@ -48,23 +40,15 @@ const preludePalette = (n: number): string => {
 };
 
 const morningsPaletteDiscrete: string[] = [];
-const moonrisePaletteDiscrete: string[] = [];
-const starsPaletteDiscrete: string[] = [];
 
 // instead of querying the full palettes, use a discrete, in-memory versions to save compute
 for (let i = 0; i <= 255; i++) {
   morningsPaletteDiscrete.push(morningsPalette.rgbValueAt(i / 255));
-  moonrisePaletteDiscrete.push(
-    d3Color.color(d3Chromatic.interpolateViridis(i / 255))!.brighter(1.5).toString()
-  );
-  starsPaletteDiscrete.push(starsPalette.rgbValueAt(i / 255));
 }
 
 // define spectrum functions here since they don't do well in json
 const spectrumFunctions: Record<string, (n: number) => string> = {
-  moonrise: (n: number) => moonrisePaletteDiscrete[Math.round(n * 255)],
   mornings: (n: number) => morningsPaletteDiscrete[Math.round(n * 255)],
-  stars: (n: number) => starsPaletteDiscrete[Math.round(n * 255)],
   swamp: swampPalette,
   prelude: preludePalette,
 };

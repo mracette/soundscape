@@ -1,8 +1,7 @@
 import { useState, useContext, type ReactNode } from "react";
 
 import { MenuButtonChild } from "./MenuButtonChild";
-import { Icon } from "./../Icon";
-import { ThemeContext } from "../../contexts/contexts";
+import { Icon, type IconName } from "./../Icon";
 import { LayoutContext } from "../../contexts/contexts";
 import { menuButton, menuButtonParent } from "../../styles/components/MenuButtonParent.css";
 import { cx } from "../../utils/cx";
@@ -10,7 +9,7 @@ import { cx } from "../../utils/cx";
 interface ChildButtonProp {
   id: string;
   autoOpen?: boolean;
-  iconName?: string;
+  iconName?: IconName;
   icon?: ReactNode;
   content?: ReactNode;
 }
@@ -20,18 +19,16 @@ interface Props {
 }
 
 export const MenuButtonParent = (props: Props) => {
-  const { vh } = useContext(LayoutContext)!;
-  const { buttonColor } = useContext(ThemeContext)!;
+  const { vw, vh, isMobile } = useContext(LayoutContext)!;
 
   // parent button dimensions
   const height = 7 * vh;
   const width = height;
 
-  // div position
-  const top = 2.5 * vh;
-  const left = top;
+  // div position: top-left on desktop, bottom-center on mobile (thumb reach)
+  const inset = 2.5 * vh;
 
-  const childHeight = 0.7 * height;
+  const childHeight = 6 * vh;
   const childWidth = childHeight;
 
   const separation = childWidth;
@@ -40,21 +37,46 @@ export const MenuButtonParent = (props: Props) => {
   const [isOpen, setIsOpen] = useState(true);
   const numOfChildren = props.childButtonProps.length;
 
+  // mobile: children fan out radially above the parent. The radius scales with
+  // the viewport but is capped so the formation never feels sparse, and is
+  // width-bound so the outermost orbs always stay on screen.
+  const radius = Math.min(9 * vh, (100 * vw) / 2 - childWidth / 2 - inset);
+
+  // center-to-center offset from the parent for each expanded child:
+  // a horizontal row on desktop, an arc from due-left to due-right on mobile
+  const childOffset = (index: number) => {
+    if (!isMobile) {
+      return {
+        x: (width + childWidth) / 2 + separation + 2 * separation * index,
+        y: 0,
+      };
+    }
+    const angle =
+      Math.PI * (numOfChildren === 1 ? 0.5 : 1 - index / (numOfChildren - 1));
+    return { x: radius * Math.cos(angle), y: -radius * Math.sin(angle) };
+  };
+
+  // distance from the cluster's anchored edge to the panel's near edge; on
+  // mobile the panel opens upward and must clear the radial fan
+  const contentOffset = isMobile
+    ? height / 2 + radius + childHeight / 2 + 1.5 * vh
+    : childHeight / 2 + childHeight + (height - childHeight) / 2;
+
   return (
     <div
       className={menuButton}
-      style={{
-        top,
-        left,
-      }}
+      style={
+        isMobile
+          ? { bottom: inset, left: "50%", marginLeft: -width / 2 }
+          : { top: inset, left: inset }
+      }
     >
       <button
-        className={cx(menuButtonParent, isOpen && "menu-button-parent-open")}
+        className={menuButtonParent}
         style={{
           zIndex: numOfChildren + 1,
           width,
           height,
-          background: buttonColor,
         }}
         onClick={(e) => {
           e.preventDefault();
@@ -62,10 +84,12 @@ export const MenuButtonParent = (props: Props) => {
         }}
       >
         <Icon
-          divClassList={`scale-div menu-button-icon icon-white ${
-            isOpen ? "rotate45" : ""
-          }`}
-          svgClassList={"icon menu-button-icon icon-white"}
+          divClassList={cx(
+            "scale-div",
+            "menu-button-icon",
+            isOpen && "rotate45"
+          )}
+          svgClassList={"icon menu-button-icon icon-line"}
           name="icon-plus"
         />
       </button>
@@ -77,14 +101,14 @@ export const MenuButtonParent = (props: Props) => {
           key={child.id}
           content={props.childButtonProps[index].content}
           // button behavior
-          index={index + 1}
           parentIsOpen={isOpen}
           autoOpen={child.autoOpen}
           // button appearance
           iconName={child.iconName}
           icon={child.icon}
           zIndex={numOfChildren - index}
-          separation={separation}
+          openOffset={childOffset(index)}
+          contentOffset={contentOffset}
           width={childWidth}
           height={childHeight}
           parentWidth={width}

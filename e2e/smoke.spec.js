@@ -34,7 +34,7 @@ test("/info renders without uncaught errors", async ({ page }) => {
   await page.goto("/info", { waitUntil: "domcontentloaded" });
   // Assert on info-specific content, not just a non-empty #app (which is true
   // the instant the surrounding LandingPage renders).
-  await expect(page.locator(".info-subheader")).toBeVisible();
+  await expect(page.getByTestId("info-subheader")).toBeVisible();
 
   expect(
     pageErrors,

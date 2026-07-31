@@ -1,22 +1,28 @@
 import { globalStyle, style } from "@vanilla-extract/css";
-import { vh } from "../settings";
+import { textPrimary, typeRamp } from "../settings";
+import { veil } from "../shared/veil.css";
 
-export const menuButtonContent = style({
-  visibility: "visible",
-  borderRadius: ".75rem .75rem",
-  position: "absolute",
-  width: "auto",
-  background: "rgba(255, 255, 255, 0.15)",
-  overflow: "auto",
-});
+export const menuButtonContent = style([
+  veil,
+  {
+    visibility: "visible",
+    position: "absolute",
+    width: "auto",
+    overflow: "auto",
+  },
+]);
 
 globalStyle(`${menuButtonContent} *`, {
   willChange: "visibility",
-  color: "white",
+  color: textPrimary,
+});
+
+// rows never wrap on desktop-width panels; on narrow screens wrapping keeps
+// pill rows and control clusters inside the panel instead of clipping
+globalStyle(`${menuButtonContent} .flex-row`, {
+  flexWrap: "wrap",
 });
 
 globalStyle(`${menuButtonContent} p`, {
-  margin: `${vh(0.5)} 0 ${vh(0.5)} 0`,
-  display: "inline-block",
-  fontSize: vh(1.75),
+  fontSize: typeRamp.panelBody.fontSize,
 });

@@ -8,7 +8,15 @@ export interface StemProviderDeps {
   outputLatency: () => number;
   groups: { name: string; voices: string[] }[];
   bakes: Record<string, BakeResult>;
-  players: Record<string, { startedAt: number | null; loopDuration: number | null }>;
+  players: Record<
+    string,
+    {
+      startedAt: number | null;
+      startOffset: number;
+      playbackRate: number;
+      loopDuration: number | null;
+    }
+  >;
   groupGain: (group: string) => number;
   activeVoices: () => { id: string; group: string; voiceState: string }[];
 }
@@ -35,10 +43,14 @@ export function createStemProvider(deps: StemProviderDeps): StemProvider {
         const bake = deps.bakes[voice];
         const player = deps.players[voice];
         if (!bake || !player || player.startedAt === null || !player.loopDuration) continue;
-        const elapsed = t - player.startedAt - latency;
+        // Buffer time advances at playbackRate, and the voice may have joined
+        // its loop mid-cycle (startOffset). Rate glides are short; treating the
+        // rate as constant since start is within a frame of exact.
+        const elapsed = (t - player.startedAt) * player.playbackRate - latency;
         // negative elapsed = start is scheduled but hasn't hit yet; keep it
         // negative so BakedSignalSource excludes the stem until it's audible
-        const positionSec = elapsed < 0 ? elapsed : elapsed % player.loopDuration;
+        const positionSec =
+          elapsed < 0 ? elapsed : (player.startOffset + elapsed) % player.loopDuration;
         stems.push({ bake, positionSec, weight: deps.groupGain(group.name) });
       }
       out[group.name] = stems;

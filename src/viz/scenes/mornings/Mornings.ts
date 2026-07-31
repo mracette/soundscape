@@ -545,7 +545,6 @@ export class Mornings extends SceneManager {
           this.subjects.books as THREE.Mesh[][][],
           this.rhythmAnalyser,
           {
-            spectrumFunction: this.spectrumFunction,
             beats: this.elapsedBeats,
           }
         );

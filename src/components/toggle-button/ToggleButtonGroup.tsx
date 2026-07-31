@@ -6,12 +6,12 @@ import {
   useMemo,
 } from "react";
 import { ToggleButton } from "./ToggleButton";
-import { Oscilloscope } from "../Oscilloscope";
 import { ThemeContext, VoiceConfig } from "../../contexts/contexts";
 import { SongContext } from "../../contexts/contexts";
 import { WebAudioContext } from "../../contexts/contexts";
 import { useMusicPlayerStore } from "../../stores/musicPlayerStore";
 import {
+  groupHeaderSpacer,
   soloButton,
   muteButton,
   toggleButtonGroup,
@@ -21,8 +21,6 @@ import { cx } from "../../utils/cx";
 
 interface Props {
   name: string;
-  index: number;
-  groupCount: number;
   polyphony: number;
   voices: VoiceConfig[];
 }
@@ -87,6 +85,7 @@ export const ToggleButtonGroup = (props: Props) => {
   /* Reset & Randomize Callbacks and Effects */
   useEffect(() => {
     const handleReset = () => {
+      setMute(false);
       const current = useMusicPlayerStore
         .getState()
         .voices.filter((v) => v.group === name);
@@ -138,7 +137,10 @@ export const ToggleButtonGroup = (props: Props) => {
   }, [solo, removeGroupSolo, addGroupSolo, name]);
 
   return (
-    <div className={cx(toggleButtonGroup, "toggle-button-group", "flex-col")}>
+    <div
+      className={cx(toggleButtonGroup, "flex-col")}
+      data-testid="toggle-button-group"
+    >
       <div className="flex-row">
         <h3>
           {name} ({polyphony} /{" "}
@@ -146,16 +148,11 @@ export const ToggleButtonGroup = (props: Props) => {
           )
         </h3>
 
-        <Oscilloscope
-          index={props.index}
-          groupCount={props.groupCount}
-          gradient={true}
-          name={name}
-          animate={false}
-        />
+        <div className={groupHeaderSpacer} />
 
         <button
-          className={cx(soloButton, "solo-button")}
+          className={soloButton}
+          data-testid="solo-button"
           style={
             solo
               ? {
@@ -163,13 +160,15 @@ export const ToggleButtonGroup = (props: Props) => {
                 }
               : undefined
           }
+          aria-pressed={solo}
           onClick={handleToggleSolo}
         >
           S
         </button>
 
         <button
-          className={cx(muteButton, "mute-button")}
+          className={muteButton}
+          data-testid="mute-button"
           style={
             mute
               ? {
@@ -177,6 +176,7 @@ export const ToggleButtonGroup = (props: Props) => {
                 }
               : undefined
           }
+          aria-pressed={mute}
           onClick={() => setMute(!mute)}
         >
           M

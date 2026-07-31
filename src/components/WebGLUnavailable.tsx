@@ -7,7 +7,11 @@ export const WebGLUnavailable = () => {
     <div>
       <p>
         Your {unsupportedType} does not seem to support{" "}
-        <a href="http://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation">
+        <a
+          href="https://khronos.org/webgl/wiki/Getting_a_WebGL_Implementation"
+          target="_blank"
+          rel="noreferrer"
+        >
           WebGL
         </a>
         .

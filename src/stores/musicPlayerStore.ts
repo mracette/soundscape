@@ -59,6 +59,15 @@ interface MusicPlayerState {
   addResetCallback: (cb: NamedCallback) => void;
   addRandomizeCallback: (cb: NamedCallback) => void;
   reset: () => void;
+  /**
+   * True once audio and visuals are both live. The landing page reads this to
+   * know when to hand the screen over — until then it stays mounted as the
+   * loading state. Deliberately outside `initialState`: `reset()` runs during
+   * the player's render, and clearing a flag the router subscribes to mid-render
+   * would update the router while a child is rendering.
+   */
+  playerReady: boolean;
+  setPlayerReady: (v: boolean) => void;
 }
 
 const upsertByName = (
@@ -81,6 +90,8 @@ const initialState = {
 
 export const useMusicPlayerStore = create<MusicPlayerState>()((set) => ({
   ...initialState,
+  playerReady: false,
+  setPlayerReady: (v) => set({ playerReady: v }),
   setBackgroundMode: (v) => set({ backgroundMode: v }),
   setTimeWarp: (v) => set({ timeWarp: v }),
   setEnergy: (v) => set({ energy: v }),

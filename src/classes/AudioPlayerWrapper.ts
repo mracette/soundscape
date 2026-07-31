@@ -37,6 +37,10 @@ export class AudioPlayerWrapper {
    *  through stop() — a scheduled stop leaves the voice audible until the
    *  boundary, and active-set logic lives in the music-player store. */
   startedAt: number | null = null;
+  /** Buffer offset (seconds, already wrapped modulo the loop) passed to the
+   *  last start() — the transport starts voices mid-loop when a toggle lands
+   *  inside the lookahead window. Kept through stop(), like startedAt. */
+  startOffset = 0;
   playbackRate = 1;
   /** True from `start()` until `stop()`; gates AudioParam work in `setPlaybackRate`. */
   private playing = false;
@@ -131,6 +135,7 @@ export class AudioPlayerWrapper {
     }
     this.playing = true;
     this.startedAt = time;
+    this.startOffset = offset;
   }
 
   /**

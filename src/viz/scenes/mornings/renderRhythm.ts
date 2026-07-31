@@ -7,7 +7,6 @@ const bSin = boundedSin(period, 0.2, 0.3);
 
 interface RhythmExtras {
   beats: number;
-  spectrumFunction: (n: number) => string;
 }
 
 export const renderRhythm = (

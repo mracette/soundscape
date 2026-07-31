@@ -5,7 +5,9 @@ test("/ renders the landing page with song links", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(page.locator("#landing-page-canvas")).toBeAttached();
   for (const song of SONGS) {
-    await expect(page.locator(`a.song-link[href="/play/${song}"]`)).toBeVisible();
+    await expect(
+      page.locator(`a[data-testid="song-link"][href="/play/${song}"]`)
+    ).toBeVisible();
   }
 });
 
@@ -21,12 +23,12 @@ for (const song of SONGS) {
 
 test("/info shows info content", async ({ page }) => {
   await page.goto("/info", { waitUntil: "domcontentloaded" });
-  await expect(page.locator(".info-subheader")).toBeVisible();
+  await expect(page.getByTestId("info-subheader")).toBeVisible();
 });
 
 test("clicking a landing song link navigates to that scene", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await page.locator('a.song-link[href="/play/swamp"]').click();
+  await page.locator('a[data-testid="song-link"][href="/play/swamp"]').click();
   await expect(page).toHaveURL(/\/play\/swamp$/);
   await expect(page.locator("#canvas-viz")).toBeAttached({ timeout: 30_000 });
 });

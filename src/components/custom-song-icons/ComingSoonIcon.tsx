@@ -1,10 +1,16 @@
 import { rotatePoint, TAU, CanvasCoordinates } from "../../utils/mathUtils";
 
 import { CustomSongIcon } from "./CustomSongIcon";
+import { heroGradientAt } from "./heroGradient";
 
 const addPad = 0.8;
 
-const animate = (context: CanvasRenderingContext2D, cycle: number, coords: CanvasCoordinates) => {
+const animate = (
+  context: CanvasRenderingContext2D,
+  cycle: number,
+  coords: CanvasCoordinates,
+  hoverProgress: number
+) => {
   const count = 3;
   const rows = 3;
   const rect = coords.getWidth() / 2.5;
@@ -14,13 +20,19 @@ const animate = (context: CanvasRenderingContext2D, cycle: number, coords: Canva
       const y = (1 - addPad) * -1 + ((1 - addPad) * 2 * (r + 0.5)) / rows;
       const mod = 1 - 2 * ((i + r) % 2);
       const rot = rotatePoint(x, y, 0, 0, 0 + mod * cycle + TAU);
+      const cx = coords.nx(rot.x);
+      const cy = coords.ny(rot.y)!;
+      if (hoverProgress > 0) {
+        context.strokeStyle = heroGradientAt(
+          context,
+          cx,
+          cy,
+          (rect / 2) * Math.SQRT2,
+          hoverProgress
+        );
+      }
       context.beginPath();
-      context.rect(
-        coords.nx(rot.x) - rect / 2,
-        coords.ny(rot.y)! - rect / 2,
-        rect,
-        rect
-      );
+      context.rect(cx - rect / 2, cy - rect / 2, rect, rect);
       context.stroke();
     }
   }
@@ -28,7 +40,7 @@ const animate = (context: CanvasRenderingContext2D, cycle: number, coords: Canva
 
 interface Props {
   name?: string;
-  onSelect: (id: string | null) => void;
+  onSelect?: (id: string | null) => void;
 }
 
 export function ComingSoonIcon(props: Props) {

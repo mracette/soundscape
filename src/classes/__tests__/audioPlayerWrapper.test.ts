@@ -28,6 +28,14 @@ describe("AudioPlayerWrapper start bookkeeping", () => {
     p.stop(16);
     expect(p.startedAt).toBe(12.5); // pending-stop voices stay audible; store drives exclusion
   });
+  test("records the wrapped start offset and keeps it across stop", () => {
+    const p = player();
+    expect(p.startOffset).toBe(0);
+    p.start(12.5, 6);
+    expect(p.startOffset).toBe(6 % 2.5);
+    p.stop(16);
+    expect(p.startOffset).toBe(6 % 2.5);
+  });
   test("startedAt survives the reload fallback path", () => {
     const p = player();
     (p as unknown as { bufferSource: { start: () => void } }).bufferSource.start = () => { throw new Error("used"); };

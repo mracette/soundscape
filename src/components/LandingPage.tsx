@@ -1,85 +1,75 @@
-import { useRef, useEffect, useContext, useState } from "react";
-import { Link } from "wouter";
-import { MoonriseIcon } from "./custom-song-icons/MoonriseIcon";
-import { MorningsIcon } from "./custom-song-icons/MorningsIcon";
-import { SwampIcon } from "./custom-song-icons/SwampIcon";
-import { PreludeIcon } from "./custom-song-icons/PreludeIcon";
-import { LayoutContext } from "../contexts/contexts";
+import { useRef, useEffect } from "react";
 import {
   landingPageCanvas,
   landingPage,
   landingPageHeader,
   landingPageTitleWrapper,
   landingPageTitle,
-  landingPageSongTitle,
-  landingPageBpm,
-  landingPageKey,
-  songSelectionPanel,
-  songLink,
-  infoSubheader,
-  infoRow,
-  infoPageButton,
+  innerLandingPage,
 } from "../styles/components/LandingPage.css";
-import { buttonWhite } from "../styles/shared/buttons.css";
 import { cx } from "../utils/cx";
-import { isWeb } from "../utils/runtime";
 import { addWindowListeners, removeWindowListeners } from "../utils/jsUtils";
 import { LandingPageScene } from "../viz/scenes/landing/LandingPageScene";
-import { LandingPageMobile } from "./LandingPageMobile";
+import { LoadingIcon } from "./custom-song-icons/LoadingIcon";
+import { SongCards } from "./SongCards";
+import { InfoPage } from "./InfoPage";
 
 import { Route, Switch, Redirect } from "wouter";
 
-type Selected = { name: string | null; bpm: string | null; key: string | null };
-
-const NONE: Selected = { name: null, bpm: null, key: null };
-
-const SONGS: Record<string, Selected> = {
-  moonrise: { name: "Moonrise", bpm: "120", key: "G Minor" },
-  mornings: { name: "Mornings", bpm: "92", key: "Eb Major" },
-  swamp: { name: "Swamp", bpm: "75", key: "Eb Minor" },
-  prelude: { name: "Prelude", bpm: "92", key: "C Major" },
-};
-
-interface LandingPageProps {
-  spectrumFunction: (n: number) => unknown;
-}
-
-export const LandingPage = (props: LandingPageProps) => {
-  const { spectrumFunction } = props;
-
+/**
+ * The app's entry shell. Everything before a song is playing — the picker, the
+ * info page, and the loading state a song passes through — is a route inside
+ * this one component, so the sky scene behind them is built once and survives
+ * every transition. AppRouter keeps it mounted through `/play` until the
+ * player reports ready; it sits above the mounting player on the way there.
+ */
+export const LandingPage = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     let scene: LandingPageScene | undefined;
 
     if (canvasRef.current) {
-      scene = new LandingPageScene(canvasRef.current, {
-        spectrumFunction: spectrumFunction as (n: number) => string,
-      });
+      scene = new LandingPageScene(canvasRef.current);
       addWindowListeners(scene.onWindowResize);
     }
 
     return () => {
-      scene!.stop();
-      scene!.disposeAll(scene!.scene);
-      removeWindowListeners(scene!.onWindowResize);
+      if (!scene) return;
+      scene.dispose();
+      removeWindowListeners(scene.onWindowResize);
     };
-  }, [spectrumFunction]);
+  }, []);
 
   return (
-    <>
-      <canvas id="landing-page-canvas" className={cx(landingPageCanvas, "fullscreen")} ref={canvasRef} />
-      <div id="landing-page" className={cx(landingPage, "fullscreen", "transparent")}>
+    <div className={cx("fullscreen", "front-most", "off-black")}>
+      <canvas
+        id="landing-page-canvas"
+        className={cx(landingPageCanvas, "fullscreen")}
+        ref={canvasRef}
+      />
+      <div
+        id="landing-page"
+        className={cx(landingPage, "transparent")}
+      >
         <div className={landingPageHeader}>
-          <div className={cx("flex-row", landingPageTitleWrapper)} id="landing-page-soundscape-title-wrapper">
-            <h1 id="landing-page-soundscape-title" className={landingPageTitle}>Soundscape</h1>
+          <div
+            className={cx("flex-row", landingPageTitleWrapper)}
+            id="landing-page-soundscape-title-wrapper"
+          >
+            <h1 id="landing-page-soundscape-title" className={landingPageTitle}>
+              Soundscape
+            </h1>
           </div>
           <Switch>
             <Route path="/">
               <LandingPageInner />
             </Route>
             <Route path="/info">
-              <InfoPageInner />
+              <InfoPage />
+            </Route>
+            <Route path="/play/:songId">
+              <LandingPageLoading />
             </Route>
             <Route>
               <Redirect to="/" replace />
@@ -87,116 +77,25 @@ export const LandingPage = (props: LandingPageProps) => {
           </Switch>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-function InfoPageInner() {
+function LandingPageInner() {
   return (
-    <div className="flex-col" style={{ alignItems: "center" }}>
-      {!isWeb && (
-        <Link href="/">
-          <button className={cx(infoPageButton, buttonWhite)}>← Back</button>
-        </Link>
-      )}
-      <h3 className={cx(infoSubheader, "info-subheader")}>
-        The immersive music visualizer that lets you build your own beats
-      </h3>
-      <div className={infoRow}>
-        <p>Join the Discord for updates on new content</p>
-        <a
-          href="https://discord.gg/7u7e4ZbeQk"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button role="link" className={cx(infoPageButton, buttonWhite)}>
-            Join the Discord
-          </button>
-        </a>
-      </div>
-      <div className={infoRow}>
-        <p>View the source code for Soundscape</p>
-        <a
-          href="https://github.com/mracette/soundscape"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button role="link" className={cx(infoPageButton, buttonWhite)}>
-            View the source
-          </button>
-        </a>
-      </div>
-      <div className={infoRow}>
-        <p>Questions or comments?</p>
-        <a
-          href="mailto:markracette+soundscape@gmail.com"
-          target="_blank"
-          rel="noreferrer"
-        >
-          <button role="link" className={cx(infoPageButton, buttonWhite)}>
-            Send an email
-          </button>
-        </a>
-      </div>
+    <div className={cx(innerLandingPage)}>
+      <p>This application uses audio. Choose a song to begin. </p>
+      <SongCards />
     </div>
   );
 }
 
-function LandingPageInner() {
-  const { isMobile } = useContext(LayoutContext)!;
-  const [selected, setSelected] = useState<Selected>(NONE);
-  const select = (id: string | null) => setSelected(id ? SONGS[id] ?? NONE : NONE);
+function LandingPageLoading() {
   return (
-    <>
-      <div className="flex-row">
-        <span>This application uses audio</span>
-      </div>
-      <div className="flex-row">
-        {isMobile ? (
-          <span id="choose-a-song">Choose a song to begin</span>
-        ) : (
-          <>
-            <span
-              id={selected.name ? "landing-page-song-title" : "choose-a-song"}
-              className={cx(selected.name && landingPageSongTitle)}
-            >
-              {selected.name || "Choose a song to begin"}
-            </span>
-            {selected.bpm && (
-              <>
-                <span>&nbsp;|&nbsp;</span>{" "}
-                <span id="landing-page-bpm" className={landingPageBpm}>{` ${selected.bpm} bpm`}</span>
-              </>
-            )}
-            {selected.key && (
-              <>
-                <span>&nbsp;|&nbsp;</span>{" "}
-                <span id="landing-page-key" className={landingPageKey}>{selected.key}</span>
-              </>
-            )}
-          </>
-        )}
-      </div>
-      {isMobile ? (
-        <LandingPageMobile onSelect={select} />
-      ) : (
-        <div id="song-selection-panel" className={songSelectionPanel}>
-          <Link className={cx(songLink, "song-link")} href="/play/swamp">
-            <SwampIcon name="swamp" onSelect={select} />
-          </Link>
-          <Link className={cx(songLink, "song-link")} href="/play/mornings">
-            <MorningsIcon name="mornings" onSelect={select} />
-          </Link>
-          <Link className={cx(songLink, "song-link")} href="/play/moonrise">
-            <MoonriseIcon name="moonrise" onSelect={select} />
-          </Link>
-          {import.meta.env.DEV && (
-            <Link className={cx(songLink, "song-link")} href="/play/prelude">
-              <PreludeIcon name="prelude" onSelect={select} />
-            </Link>
-          )}
-        </div>
-      )}
-    </>
+    // "loading-screen" is a test hook selected by e2e/helpers.js
+    <div id="loading-screen" className={cx(innerLandingPage)}>
+      <p>Loading...</p>
+      <LoadingIcon />
+    </div>
   );
 }

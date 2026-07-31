@@ -1,5 +1,5 @@
 import { globalStyle } from "@vanilla-extract/css";
-import { moonYellow } from "../settings";
+import { motion, textPrimary } from "../settings";
 
 globalStyle(".icon", {
   height: "100%",
@@ -23,13 +23,18 @@ globalStyle(".menu-button-icon", {
 });
 
 globalStyle(".icon-white", {
-  fill: "white",
-  stroke: "white",
+  fill: textPrimary,
+  stroke: textPrimary,
 });
 
-globalStyle(".icon-moon", {
-  fill: moonYellow,
-  stroke: moonYellow,
+/**
+ * For stroke-drawn (Lucide) icons: forcing `fill` white would override their
+ * fill="none" and render solid blobs, so this class colors the stroke only.
+ * `.icon-white` stays for the fill-drawn toggle icons in ToggleButtonView.
+ */
+globalStyle(".icon-line", {
+  fill: "none",
+  stroke: textPrimary,
 });
 
 globalStyle(".rotate45", {
@@ -39,7 +44,7 @@ globalStyle(".rotate45", {
 globalStyle(".scale-div", {
   display: "inline-block",
   position: "absolute",
-  transitionDuration: "250ms",
+  transitionDuration: motion.base,
   transformOrigin: "50% 50%",
   top: "25%",
   left: "25%",
@@ -59,17 +64,3 @@ globalStyle(".scale-div-morph", {
   margin: "auto",
 });
 
-globalStyle("#icon-play3-poly", {
-  transformOrigin: "50% 50%",
-});
-
-globalStyle("#icon-plus", {
-  transitionDuration: "250ms",
-});
-
-globalStyle("#icon-info", {
-  top: "-20%",
-  left: "-20%",
-  height: "140%",
-  width: "140%",
-});
