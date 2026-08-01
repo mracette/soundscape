@@ -73,8 +73,14 @@ export const loadArrayBuffer = (audioFilePath: string): Promise<ArrayBuffer> => 
     const request = new XMLHttpRequest();
     request.responseType = "arraybuffer";
     request.addEventListener("load", () => {
-      if (request.status === 200) {
-        resolve(request.response as ArrayBuffer);
+      const body = request.response as ArrayBuffer | null;
+      // Custom schemes (capacitor:// in the native shells) report status 0 on
+      // success, so a bare 200 check would reject every bundled asset.
+      if (
+        request.status === 200 ||
+        (request.status === 0 && body && body.byteLength > 0)
+      ) {
+        resolve(body as ArrayBuffer);
       } else {
         // 'load' also fires on 404/503 — without this reject the promise
         // never settles and the loading screen hangs silently
