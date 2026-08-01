@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import { SceneManager } from "../../SceneManager";
 import FirstPersonControls from "../../controls/FirstPersonControls";
 import { lerp, normalize } from "../../../utils/mathUtils";

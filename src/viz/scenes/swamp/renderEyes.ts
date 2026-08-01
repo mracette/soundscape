@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import chroma from "chroma-js";
 import { COLORS } from "./Swamp";
 import { Analyser } from "../../../classes/Analyser";

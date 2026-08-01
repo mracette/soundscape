@@ -1,5 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const port = process.env.PORT || 3000;
+
 export default defineConfig({
   testDir: "./e2e",
   // CI fetches all audio/model assets from the CDN over the network, so scene-load
@@ -9,7 +11,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: process.env.CI ? 2 : 0,
   reporter: "list",
-  use: { baseURL: "http://localhost:3000" },
+  use: { baseURL: `http://localhost:${port}` },
   projects: [
     {
       name: "chromium",
@@ -25,8 +27,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "pnpm start",
-    url: "http://localhost:3000",
+    command: `pnpm start --port ${port} --strictPort`,
+    url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },

@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import { Analyser } from "../../../classes/Analyser";
 import { boundedSin } from "../../../utils/mathUtils";
 import { averageVolume } from "../../../utils/audioUtils";

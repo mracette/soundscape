@@ -33,6 +33,14 @@ export class AudioPlayerWrapper {
   fadeLength!: number;
   loop!: boolean;
   bufferSource!: AudioBufferSourceNode;
+  /** AudioContext time passed to the last start(); null until first start. Kept
+   *  through stop() — a scheduled stop leaves the voice audible until the
+   *  boundary, and active-set logic lives in the music-player store. */
+  startedAt: number | null = null;
+  /** Buffer offset (seconds, already wrapped modulo the loop) passed to the
+   *  last start() — the transport starts voices mid-loop when a toggle lands
+   *  inside the lookahead window. Kept through stop(), like startedAt. */
+  startOffset = 0;
   playbackRate = 1;
   /** True from `start()` until `stop()`; gates AudioParam work in `setPlaybackRate`. */
   private playing = false;
@@ -126,6 +134,8 @@ export class AudioPlayerWrapper {
       this.bufferSource.start(time, offset);
     }
     this.playing = true;
+    this.startedAt = time;
+    this.startOffset = offset;
   }
 
   /**
@@ -139,6 +149,21 @@ export class AudioPlayerWrapper {
    * not-yet-started nodes is wasted work (a fresh node is seeded on start).
    */
   setPlaybackRate(rate: number, atTime: number, glideSeconds = 0): void {
+    // Buffer position is the integral of rate over time, so consumers that
+    // compute it as (now − startedAt) · playbackRate (stemProvider) are only
+    // correct if the clock re-bases at every rate change: fold the segment
+    // played at the old rate into startOffset and restart the clock at atTime.
+    // A not-yet-started voice (atTime ≤ startedAt) needs no re-base — the new
+    // rate simply applies from the start. Glides make this piecewise-constant
+    // bookkeeping approximate, but only within the short glide window.
+    if (this.playing && this.startedAt !== null && atTime > this.startedAt) {
+      const duration = this.bufferSource.buffer?.duration;
+      if (duration) {
+        this.startOffset =
+          (this.startOffset + (atTime - this.startedAt) * this.playbackRate) % duration;
+        this.startedAt = atTime;
+      }
+    }
     this.playbackRate = rate;
     if (!this.playing) return;
     const param = this.bufferSource.playbackRate;
@@ -175,5 +200,10 @@ export class AudioPlayerWrapper {
 
     this.bufferSource = newSource;
     this.connected = true;
+  }
+
+  /** Loop length in seconds (buffer duration), or null before init resolves. */
+  get loopDuration(): number | null {
+    return (this.bufferSource as AudioBufferSourceNode | undefined)?.buffer?.duration ?? null;
   }
 }

@@ -1,0 +1,827 @@
+{
+  "measures": [
+    "volume",
+    "bucket",
+    "onset"
+  ],
+  "ease": [
+    {
+      "name": "linear",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "linear",
+      "t": 0.1,
+      "expected": 0.1
+    },
+    {
+      "name": "linear",
+      "t": 0.25,
+      "expected": 0.25
+    },
+    {
+      "name": "linear",
+      "t": 0.5,
+      "expected": 0.5
+    },
+    {
+      "name": "linear",
+      "t": 0.75,
+      "expected": 0.75
+    },
+    {
+      "name": "linear",
+      "t": 0.9,
+      "expected": 0.9
+    },
+    {
+      "name": "linear",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "quadIn",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "quadIn",
+      "t": 0.1,
+      "expected": 0.010000000000000002
+    },
+    {
+      "name": "quadIn",
+      "t": 0.25,
+      "expected": 0.0625
+    },
+    {
+      "name": "quadIn",
+      "t": 0.5,
+      "expected": 0.25
+    },
+    {
+      "name": "quadIn",
+      "t": 0.75,
+      "expected": 0.5625
+    },
+    {
+      "name": "quadIn",
+      "t": 0.9,
+      "expected": 0.81
+    },
+    {
+      "name": "quadIn",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "quadOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "quadOut",
+      "t": 0.1,
+      "expected": 0.19
+    },
+    {
+      "name": "quadOut",
+      "t": 0.25,
+      "expected": 0.4375
+    },
+    {
+      "name": "quadOut",
+      "t": 0.5,
+      "expected": 0.75
+    },
+    {
+      "name": "quadOut",
+      "t": 0.75,
+      "expected": 0.9375
+    },
+    {
+      "name": "quadOut",
+      "t": 0.9,
+      "expected": 0.9900000000000001
+    },
+    {
+      "name": "quadOut",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "quadInOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "quadInOut",
+      "t": 0.1,
+      "expected": 0.020000000000000004
+    },
+    {
+      "name": "quadInOut",
+      "t": 0.25,
+      "expected": 0.125
+    },
+    {
+      "name": "quadInOut",
+      "t": 0.5,
+      "expected": 0.5
+    },
+    {
+      "name": "quadInOut",
+      "t": 0.75,
+      "expected": 0.875
+    },
+    {
+      "name": "quadInOut",
+      "t": 0.9,
+      "expected": 0.98
+    },
+    {
+      "name": "quadInOut",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "cubicIn",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "cubicIn",
+      "t": 0.1,
+      "expected": 0.0010000000000000002
+    },
+    {
+      "name": "cubicIn",
+      "t": 0.25,
+      "expected": 0.015625
+    },
+    {
+      "name": "cubicIn",
+      "t": 0.5,
+      "expected": 0.125
+    },
+    {
+      "name": "cubicIn",
+      "t": 0.75,
+      "expected": 0.421875
+    },
+    {
+      "name": "cubicIn",
+      "t": 0.9,
+      "expected": 0.7290000000000001
+    },
+    {
+      "name": "cubicIn",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "cubicOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "cubicOut",
+      "t": 0.1,
+      "expected": 0.2709999999999999
+    },
+    {
+      "name": "cubicOut",
+      "t": 0.25,
+      "expected": 0.578125
+    },
+    {
+      "name": "cubicOut",
+      "t": 0.5,
+      "expected": 0.875
+    },
+    {
+      "name": "cubicOut",
+      "t": 0.75,
+      "expected": 0.984375
+    },
+    {
+      "name": "cubicOut",
+      "t": 0.9,
+      "expected": 0.999
+    },
+    {
+      "name": "cubicOut",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "cubicInOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "cubicInOut",
+      "t": 0.1,
+      "expected": 0.004000000000000001
+    },
+    {
+      "name": "cubicInOut",
+      "t": 0.25,
+      "expected": 0.0625
+    },
+    {
+      "name": "cubicInOut",
+      "t": 0.5,
+      "expected": 0.5
+    },
+    {
+      "name": "cubicInOut",
+      "t": 0.75,
+      "expected": 0.9375
+    },
+    {
+      "name": "cubicInOut",
+      "t": 0.9,
+      "expected": 0.996
+    },
+    {
+      "name": "cubicInOut",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "sinIn",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "sinIn",
+      "t": 0.1,
+      "expected": 0.01231165940486223
+    },
+    {
+      "name": "sinIn",
+      "t": 0.25,
+      "expected": 0.07612046748871326
+    },
+    {
+      "name": "sinIn",
+      "t": 0.5,
+      "expected": 0.2928932188134524
+    },
+    {
+      "name": "sinIn",
+      "t": 0.75,
+      "expected": 0.6173165676349102
+    },
+    {
+      "name": "sinIn",
+      "t": 0.9,
+      "expected": 0.843565534959769
+    },
+    {
+      "name": "sinIn",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "sinOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "sinOut",
+      "t": 0.1,
+      "expected": 0.15643446504023087
+    },
+    {
+      "name": "sinOut",
+      "t": 0.25,
+      "expected": 0.3826834323650898
+    },
+    {
+      "name": "sinOut",
+      "t": 0.5,
+      "expected": 0.7071067811865475
+    },
+    {
+      "name": "sinOut",
+      "t": 0.75,
+      "expected": 0.9238795325112867
+    },
+    {
+      "name": "sinOut",
+      "t": 0.9,
+      "expected": 0.9876883405951378
+    },
+    {
+      "name": "sinOut",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "sinInOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "sinInOut",
+      "t": 0.1,
+      "expected": 0.024471741852423234
+    },
+    {
+      "name": "sinInOut",
+      "t": 0.25,
+      "expected": 0.1464466094067262
+    },
+    {
+      "name": "sinInOut",
+      "t": 0.5,
+      "expected": 0.49999999999999994
+    },
+    {
+      "name": "sinInOut",
+      "t": 0.75,
+      "expected": 0.8535533905932737
+    },
+    {
+      "name": "sinInOut",
+      "t": 0.9,
+      "expected": 0.9755282581475768
+    },
+    {
+      "name": "sinInOut",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "expIn",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "expIn",
+      "t": 0.1,
+      "expected": 0.0009775171065493646
+    },
+    {
+      "name": "expIn",
+      "t": 0.25,
+      "expected": 0.004552154691585904
+    },
+    {
+      "name": "expIn",
+      "t": 0.5,
+      "expected": 0.030303030303030304
+    },
+    {
+      "name": "expIn",
+      "t": 0.75,
+      "expected": 0.17597198043377923
+    },
+    {
+      "name": "expIn",
+      "t": 0.9,
+      "expected": 0.49951124144672543
+    },
+    {
+      "name": "expIn",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "expOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "expOut",
+      "t": 0.1,
+      "expected": 0.5004887585532747
+    },
+    {
+      "name": "expOut",
+      "t": 0.25,
+      "expected": 0.8240280195662207
+    },
+    {
+      "name": "expOut",
+      "t": 0.5,
+      "expected": 0.9696969696969697
+    },
+    {
+      "name": "expOut",
+      "t": 0.75,
+      "expected": 0.9954478453084141
+    },
+    {
+      "name": "expOut",
+      "t": 0.9,
+      "expected": 0.9990224828934506
+    },
+    {
+      "name": "expOut",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "expInOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "expInOut",
+      "t": 0.1,
+      "expected": 0.001466275659824047
+    },
+    {
+      "name": "expInOut",
+      "t": 0.25,
+      "expected": 0.015151515151515152
+    },
+    {
+      "name": "expInOut",
+      "t": 0.5,
+      "expected": 0.5
+    },
+    {
+      "name": "expInOut",
+      "t": 0.75,
+      "expected": 0.9848484848484849
+    },
+    {
+      "name": "expInOut",
+      "t": 0.9,
+      "expected": 0.998533724340176
+    },
+    {
+      "name": "expInOut",
+      "t": 1,
+      "expected": 1
+    },
+    {
+      "name": "backOut",
+      "t": 0,
+      "expected": 0
+    },
+    {
+      "name": "backOut",
+      "t": 0.1,
+      "expected": 0.40882797999999987
+    },
+    {
+      "name": "backOut",
+      "t": 0.25,
+      "expected": 0.8174096875
+    },
+    {
+      "name": "backOut",
+      "t": 0.5,
+      "expected": 1.0876975
+    },
+    {
+      "name": "backOut",
+      "t": 0.75,
+      "expected": 1.0641365625
+    },
+    {
+      "name": "backOut",
+      "t": 0.9,
+      "expected": 1.01431422
+    },
+    {
+      "name": "backOut",
+      "t": 1,
+      "expected": 1
+    }
+  ],
+  "evaluator": [
+    {
+      "label": "minimal",
+      "binding": {
+        "target": {
+          "property": "emissiveIntensity"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "exponent",
+      "binding": {
+        "target": {
+          "property": "scale"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "exponent": 2
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.25,
+        1,
+        1,
+        0.09,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "ease-cubicOut",
+      "binding": {
+        "target": {
+          "property": "scale"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "ease": "cubicOut"
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.875,
+        1,
+        1,
+        0.657,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "ease-backOut-clamped",
+      "binding": {
+        "target": {
+          "property": "scale"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "ease": "backOut"
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        1,
+        1,
+        1,
+        0.90713226,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "smoothing",
+      "binding": {
+        "target": {
+          "property": "opacity"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "smoothing": {
+            "attack": 0.8,
+            "release": 0.2
+          }
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.4,
+        0.88,
+        0.976,
+        0.8408,
+        0.67264,
+        0.538112
+      ]
+    },
+    {
+      "label": "inverted-range",
+      "binding": {
+        "target": {
+          "property": "position.y"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 1,
+          "outMax": 0
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        1,
+        0.5,
+        0,
+        0,
+        0.7,
+        1,
+        1
+      ]
+    },
+    {
+      "label": "gate",
+      "binding": {
+        "target": {
+          "property": "emissiveIntensity"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "gate": 0.25
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.3333333333333333,
+        1,
+        1,
+        0.06666666666666665,
+        0,
+        0
+      ]
+    },
+    {
+      "label": "gate-smoothing",
+      "binding": {
+        "target": {
+          "property": "emissiveIntensity"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": 0,
+          "outMax": 1,
+          "gate": 0.4,
+          "smoothing": {
+            "attack": 0.9,
+            "release": 0.25
+          }
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        0,
+        0.14999999999999997,
+        0.915,
+        0.9915,
+        0.743625,
+        0.55771875,
+        0.41828906250000003
+      ]
+    },
+    {
+      "label": "combined",
+      "binding": {
+        "target": {
+          "property": "position.y"
+        },
+        "source": {
+          "band": "b",
+          "measure": "volume"
+        },
+        "transform": {
+          "outMin": -2,
+          "outMax": 3,
+          "gate": 0.1,
+          "exponent": 1.5,
+          "ease": "quadInOut",
+          "smoothing": {
+            "attack": 0.6,
+            "release": 0.3
+          }
+        }
+      },
+      "signals": [
+        0,
+        0.5,
+        1,
+        1,
+        0.3,
+        0,
+        0
+      ],
+      "expected": [
+        -2,
+        -1.8103703703703704,
+        1.3520338598757937,
+        2.708507028615725,
+        1.1195559073366197,
+        -0.8997840850092564,
+        -1.622625941158175
+      ]
+    }
+  ]
+}

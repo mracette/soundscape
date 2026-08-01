@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://soundscape.dev/bindings/binding.schema.json",
+  "title": "Soundscape audio-reactive bindings",
+  "$ref": "#/definitions/userData",
+  "definitions": {
+    "targetProperty": {
+      "enum": [
+        "emissiveIntensity",
+        "opacity",
+        "scale",
+        "scale.x",
+        "scale.y",
+        "scale.z",
+        "rotation.x",
+        "rotation.y",
+        "rotation.z",
+        "position.x",
+        "position.y",
+        "position.z"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["band", "measure"],
+      "properties": {
+        "band": { "type": "string", "minLength": 1 },
+        "measure": { "enum": ["volume", "bucket", "onset"] },
+        "bucket": { "type": "integer", "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["measure"], "properties": { "measure": { "const": "bucket" } } },
+          "then": { "required": ["bucket"] },
+          "else": { "not": { "required": ["bucket"] } }
+        }
+      ]
+    },
+    "smoothing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attack", "release"],
+      "properties": {
+        "attack": { "type": "number", "minimum": 0, "maximum": 1 },
+        "release": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outMin", "outMax"],
+      "properties": {
+        "gate": { "type": "number", "minimum": 0, "exclusiveMaximum": 1 },
+        "exponent": { "type": "number", "exclusiveMinimum": 0 },
+        "ease": { "type": "string", "minLength": 1 },
+        "smoothing": { "$ref": "#/definitions/smoothing" },
+        "outMin": { "type": "number" },
+        "outMax": { "type": "number" }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target", "source", "transform"],
+      "properties": {
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["property"],
+          "properties": { "property": { "$ref": "#/definitions/targetProperty" } }
+        },
+        "source": { "$ref": "#/definitions/source" },
+        "transform": { "$ref": "#/definitions/transform" }
+      }
+    },
+    "userData": {
+      "type": "object",
+      "required": ["bindings"],
+      "properties": {
+        "bindings": { "type": "array", "items": { "$ref": "#/definitions/binding" } }
+      }
+    }
+  }
+}

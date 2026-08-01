@@ -1,5 +1,5 @@
 import * as d3 from "d3-ease";
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import { Analyser } from "../../../classes/Analyser";
 
 const VOL_COEF = 0.0003;

@@ -10,7 +10,7 @@ import {
   Vector2,
   Vector4,
   WebGLRenderer,
-} from "three";
+} from "three-legacy";
 
 import { lerp, TAU } from "../../utils/mathUtils";
 import { HORIZON_FADE_GLSL, STAR_SPRITE_GLSL } from "./LandingPageParticles";

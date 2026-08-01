@@ -11,7 +11,7 @@ import {
   WebGLRenderer,
   Scene,
   AdditiveBlending,
-} from "three";
+} from "three-legacy";
 
 // chroma-js has no bundled types; all chroma calls are typed as any
 import chroma from "chroma-js";

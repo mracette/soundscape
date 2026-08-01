@@ -7,7 +7,7 @@ import {
   Vector2,
   Vector4,
   WebGLRenderer,
-} from "three";
+} from "three-legacy";
 
 /**
  * Atmosphere for the landing page: a sky quad (top-of-frame darkening plus a

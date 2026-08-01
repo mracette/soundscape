@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import { SceneManager } from "../../SceneManager";
 import { LandingPageParticles } from "../../subjects/LandingPageParticles";
 import { LandingPageConstellations } from "../../subjects/LandingPageConstellations";

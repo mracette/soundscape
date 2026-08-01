@@ -62,6 +62,7 @@ export const CanvasViz = (props: Props) => {
     let newScene: SceneManager | undefined;
     // spectrumFunction is typed (n: number) => unknown in ThemeContext but scenes require (n: number) => string
     const specFn = spectrumFunction as (n: number) => string;
+
     switch (id) {
       case "moonrise":
         if (flags.showVisuals) {

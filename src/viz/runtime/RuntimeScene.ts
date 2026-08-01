@@ -1,0 +1,214 @@
+import {
+  Clock,
+  PerspectiveCamera,
+  WebGLRenderer,
+  type Material,
+  type Mesh,
+  type Object3D,
+} from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { applyColorParity } from "./colorPipeline";
+import { SceneRuntime } from "./SceneRuntime";
+import type { SignalSource } from "./signal";
+
+declare global {
+  interface Window {
+    /** DEV-only handle for e2e: read a bound object's live emissiveIntensity by name. */
+    __runtimeSceneDebug?: {
+      sample(objectName: string): number;
+      /** Render once and count non-black pixels in a centered region (renderability proof). */
+      pixelSum(): { nonBlack: number; total: number };
+    };
+  }
+}
+
+/** Constructor options for {@link RuntimeScene}. */
+export interface RuntimeSceneOptions {
+  /** GLB url; loaded with GLTFLoader. */
+  url: string;
+  signalSource: SignalSource;
+  /** Invoked once after the GLB loads and the RAF loop starts (CanvasViz load gate). */
+  onLoaded: () => void;
+}
+
+/**
+ * Host for a new-runtime scene, mirroring the small duck-typed surface
+ * `CanvasViz` touches on legacy scenes: it loads a GLB, drives it with a
+ * {@link SceneRuntime}, and owns its own renderer/RAF loop. Unlike the legacy
+ * scenes (classes on `three-legacy`) this runs on the latest `three`.
+ *
+ * The camera comes from the GLB when it ships one, else a default framing the
+ * origin. A GLB load failure is logged and still resolves the load gate
+ * (`onLoaded`) so a bad asset can never wedge the app's loading state.
+ */
+export class RuntimeScene {
+  /** Set by CanvasViz; when true the RAF loop skips update + render. */
+  pauseVisuals = false;
+  /** Set by CanvasViz; unused internally (the signal source gates itself). */
+  playerState: Record<string, boolean> | undefined;
+  /** CanvasViz only special-cases "cinematic"; everything else is fullscreen. */
+  resizeMethod = "fullscreen";
+  /** Bound so CanvasViz can add/remove it as a window listener detached. */
+  readonly onWindowResize: () => void;
+
+  private readonly canvas: HTMLCanvasElement;
+  private readonly signalSource: SignalSource;
+  private readonly renderer: WebGLRenderer;
+  private camera!: PerspectiveCamera;
+  private scene: Object3D | null = null;
+  private runtime: SceneRuntime | null = null;
+  private readonly clock = new Clock();
+  private raf = 0;
+  private disposed = false;
+  private debugHandle: Window["__runtimeSceneDebug"];
+
+  constructor(canvas: HTMLCanvasElement, options: RuntimeSceneOptions) {
+    this.canvas = canvas;
+    this.signalSource = options.signalSource;
+    this.renderer = new WebGLRenderer({ canvas, antialias: false });
+    applyColorParity(this.renderer);
+    // Cap at 2 (not the legacy scenes' 4) — this host has no perf history yet.
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.resize();
+    this.onWindowResize = this.handleResize.bind(this);
+    this.load(options);
+    if (import.meta.env.DEV) {
+      this.debugHandle = {
+        sample: (objectName) => this.sampleEmissiveIntensity(objectName),
+        pixelSum: () => this.samplePixels(),
+      };
+      window.__runtimeSceneDebug = this.debugHandle;
+    }
+  }
+
+  /** Look up a loaded object by name (available after `onLoaded`). For harness/tests. */
+  getObjectByName(name: string): Object3D | undefined {
+    return this.scene?.getObjectByName(name);
+  }
+
+  /** Read the live emissiveIntensity of a named mesh's first material (e2e reaction proof). */
+  private sampleEmissiveIntensity(name: string): number {
+    const mesh = this.getObjectByName(name) as Mesh | undefined;
+    const mat = mesh?.material;
+    const m = Array.isArray(mat) ? mat[0] : mat;
+    return m && "emissiveIntensity" in m
+      ? (m as Material & { emissiveIntensity: number }).emissiveIntensity
+      : NaN;
+  }
+
+  /**
+   * Render once and count non-black pixels in a centered region. The renderer
+   * has `preserveDrawingBuffer: false`, so the read must happen in the same task
+   * as the render, before the compositor clears the buffer.
+   */
+  private samplePixels(): { nonBlack: number; total: number } {
+    if (!this.scene || !this.camera) return { nonBlack: 0, total: 0 };
+    this.renderer.render(this.scene, this.camera);
+    const gl = this.renderer.getContext();
+    const size = 64;
+    const sw = Math.min(size, gl.drawingBufferWidth);
+    const sh = Math.min(size, gl.drawingBufferHeight);
+    const x = Math.floor((gl.drawingBufferWidth - sw) / 2);
+    const y = Math.floor((gl.drawingBufferHeight - sh) / 2);
+    const px = new Uint8Array(sw * sh * 4);
+    gl.readPixels(x, y, sw, sh, gl.RGBA, gl.UNSIGNED_BYTE, px);
+    let nonBlack = 0;
+    for (let i = 0; i < sw * sh; i++) {
+      if (px[i * 4] + px[i * 4 + 1] + px[i * 4 + 2] > 24) nonBlack++;
+    }
+    return { nonBlack, total: sw * sh };
+  }
+
+  private load(options: RuntimeSceneOptions): void {
+    new GLTFLoader().load(
+      options.url,
+      (gltf) => {
+        if (this.disposed) return;
+        this.scene = gltf.scene;
+        const gltfCamera = gltf.cameras[0];
+        this.camera =
+          gltfCamera instanceof PerspectiveCamera
+            ? gltfCamera
+            : this.defaultCamera();
+        this.runtime = new SceneRuntime({
+          scene: this.scene,
+          animations: gltf.animations,
+          signalSource: this.signalSource,
+        });
+        this.handleResize();
+        this.animate();
+        options.onLoaded();
+      },
+      undefined,
+      (err) => {
+        if (this.disposed) return;
+        console.error("RuntimeScene: GLB load failed", err);
+        options.onLoaded();
+      }
+    );
+  }
+
+  private defaultCamera(): PerspectiveCamera {
+    const camera = new PerspectiveCamera(50, this.aspect(), 0.1, 100);
+    camera.position.set(0, 1.5, 6);
+    camera.lookAt(0, 0, 0);
+    return camera;
+  }
+
+  // resizeMethod is always "fullscreen" (see class doc), so dimensions come
+  // from the window, matching the legacy SceneManager's fullscreen case
+  // (SceneManager.ts setSceneDimensions). The canvas has no CSS width/height
+  // of its own — without this it renders at its 300x150 element default.
+  private aspect(): number {
+    return window.innerWidth / window.innerHeight;
+  }
+
+  private resize(): void {
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  private handleResize(): void {
+    this.resize();
+    if (!this.camera) return;
+    this.camera.aspect = this.aspect();
+    this.camera.updateProjectionMatrix();
+  }
+
+  private animate = (): void => {
+    if (this.disposed) return;
+    this.raf = requestAnimationFrame(this.animate);
+    if (this.pauseVisuals || !this.runtime || !this.scene) return;
+    this.runtime.update(this.clock.getDelta());
+    this.renderer.render(this.scene, this.camera);
+  };
+
+  /** Cancel the RAF loop and release renderer + scene GPU resources. */
+  dispose(): void {
+    this.disposed = true;
+    cancelAnimationFrame(this.raf);
+    // the debug handle would pin this instance's scene graph + GL context
+    // (same rule as SceneManager's window.__perf)
+    if (this.debugHandle && window.__runtimeSceneDebug === this.debugHandle) {
+      delete window.__runtimeSceneDebug;
+    }
+    this.scene?.traverse((object) => {
+      const mesh = object as Mesh;
+      mesh.geometry?.dispose();
+      const material = mesh.material;
+      const materials = Array.isArray(material) ? material : material ? [material] : [];
+      materials.forEach((m: Material) => {
+        // Material.dispose() does not free textures; walk the material's
+        // properties for anything disposable (map, normalMap, envMap ...),
+        // matching SceneManager.disposeAll
+        Object.values(m).forEach((value) => {
+          if (value && value !== m && typeof value.dispose === "function") {
+            value.dispose();
+          }
+        });
+        m.dispose();
+      });
+    });
+    this.renderer.dispose();
+  }
+}

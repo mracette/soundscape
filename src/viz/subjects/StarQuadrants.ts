@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 
 interface StarQuadrantsParams {
   colorPalette: (t: number) => string | number;

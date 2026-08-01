@@ -3,7 +3,7 @@ import { boundedSin, clamp } from "../../../utils/mathUtils";
 import { averageVolume } from "../../../utils/audioUtils";
 import { COLORS } from "./Swamp";
 import { Analyser } from "../../../classes/Analyser";
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 
 const bSin = boundedSin(8, 0, 1);
 const intense = 1.25;

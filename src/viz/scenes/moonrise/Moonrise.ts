@@ -1,4 +1,4 @@
-import * as THREE from "three";
+import * as THREE from "three-legacy";
 import * as d3Chromatic from "d3-scale-chromatic";
 import { linToLog } from "../../../utils/mathUtils";
 import { regularPolygon } from "../../../utils/mathUtils";
