@@ -60,6 +60,7 @@ export class RuntimeScene {
   private readonly clock = new Clock();
   private raf = 0;
   private disposed = false;
+  private debugHandle: Window["__runtimeSceneDebug"];
 
   constructor(canvas: HTMLCanvasElement, options: RuntimeSceneOptions) {
     this.canvas = canvas;
@@ -72,10 +73,11 @@ export class RuntimeScene {
     this.onWindowResize = this.handleResize.bind(this);
     this.load(options);
     if (import.meta.env.DEV) {
-      window.__runtimeSceneDebug = {
+      this.debugHandle = {
         sample: (objectName) => this.sampleEmissiveIntensity(objectName),
         pixelSum: () => this.samplePixels(),
       };
+      window.__runtimeSceneDebug = this.debugHandle;
     }
   }
 
@@ -139,6 +141,7 @@ export class RuntimeScene {
       },
       undefined,
       (err) => {
+        if (this.disposed) return;
         console.error("RuntimeScene: GLB load failed", err);
         options.onLoaded();
       }
@@ -184,15 +187,27 @@ export class RuntimeScene {
   dispose(): void {
     this.disposed = true;
     cancelAnimationFrame(this.raf);
+    // the debug handle would pin this instance's scene graph + GL context
+    // (same rule as SceneManager's window.__perf)
+    if (this.debugHandle && window.__runtimeSceneDebug === this.debugHandle) {
+      delete window.__runtimeSceneDebug;
+    }
     this.scene?.traverse((object) => {
       const mesh = object as Mesh;
       mesh.geometry?.dispose();
       const material = mesh.material;
-      if (Array.isArray(material)) {
-        material.forEach((m: Material) => m.dispose());
-      } else {
-        material?.dispose();
-      }
+      const materials = Array.isArray(material) ? material : material ? [material] : [];
+      materials.forEach((m: Material) => {
+        // Material.dispose() does not free textures; walk the material's
+        // properties for anything disposable (map, normalMap, envMap ...),
+        // matching SceneManager.disposeAll
+        Object.values(m).forEach((value) => {
+          if (value && value !== m && typeof value.dispose === "function") {
+            value.dispose();
+          }
+        });
+        m.dispose();
+      });
     });
     this.renderer.dispose();
   }

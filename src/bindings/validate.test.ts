@@ -9,7 +9,7 @@ const valid: SoundscapeUserData = {
       source: { band: "melody", measure: "bucket", bucket: 3 },
       transform: {
         exponent: 2,
-        ease: "easeCubicOut",
+        ease: "cubicOut",
         smoothing: { attack: 0.6, release: 0.2 },
         outMin: 0,
         outMax: 1.5,

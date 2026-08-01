@@ -24,6 +24,10 @@ jobs:
       - run: pnpm build
       - run: pnpm exec eslint src/
       - run: pnpm exec playwright install --with-deps chromium webkit
+      # Bake round-trips need only node + the Chromium installed above; the
+      # Blender-native suite (test:blender) can't run here and stays local.
+      - run: pnpm test:bake
+      - run: pnpm test:bridge
       - run: pnpm test:e2e
         env:
           # Audio/model assets are gitignored and absent in CI; fetch them from the

@@ -36,6 +36,25 @@ describe("AudioPlayerWrapper start bookkeeping", () => {
     p.stop(16);
     expect(p.startOffset).toBe(6 % 2.5);
   });
+  test("a mid-playback rate change re-bases the position clock", () => {
+    const p = player();
+    p.start(10);
+    // 11s at rate 1 folds into the offset: 11 % 2.5 = 1.0
+    p.setPlaybackRate(0.5, 21);
+    expect(p.startedAt).toBe(21);
+    expect(p.startOffset).toBeCloseTo(1.0, 10);
+    // a second change folds the 0.5-rate segment: 1.0 + 1 * 0.5 = 1.5
+    p.setPlaybackRate(2, 22);
+    expect(p.startedAt).toBe(22);
+    expect(p.startOffset).toBeCloseTo(1.5, 10);
+  });
+  test("a rate change before a scheduled start leaves the clock anchored", () => {
+    const p = player();
+    p.start(30);
+    p.setPlaybackRate(0.5, 25);
+    expect(p.startedAt).toBe(30);
+    expect(p.startOffset).toBe(0);
+  });
   test("startedAt survives the reload fallback path", () => {
     const p = player();
     (p as unknown as { bufferSource: { start: () => void } }).bufferSource.start = () => { throw new Error("used"); };

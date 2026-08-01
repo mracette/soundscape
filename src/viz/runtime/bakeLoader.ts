@@ -18,7 +18,14 @@ export async function loadSongBakes(
           console.warn(`bake missing for "${name}" (${res.status} ${url}); band will read 0 for it`);
           return;
         }
-        out[name] = (await res.json()) as BakeResult;
+        const json = (await res.json()) as BakeResult;
+        // a 200 with the wrong shape (truncated bake, CDN error envelope)
+        // must be omitted like a missing file, not crash the render loop
+        if (!Array.isArray(json.frames)) {
+          console.warn(`bake malformed for "${name}" (${url}); band will read 0 for it`);
+          return;
+        }
+        out[name] = json;
       } catch (err) {
         console.warn(`bake fetch failed for "${name}" (${url}):`, err);
       }
