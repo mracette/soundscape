@@ -17,7 +17,9 @@ const DEFAULT_BAKE = {
 };
 
 function parseArgs(argv) {
-  const [songId, ...rest] = argv;
+  // npm strips the first "--" before argv reaches us, but pnpm/direct node
+  // invocations pass it through; it's a separator, not an argument
+  const [songId, ...rest] = argv.filter((t) => t !== "--");
   const a = { songId };
   for (let i = 0; i < rest.length; i += 2) a[rest[i].replace(/^--/, "")] = rest[i + 1];
   return a;
