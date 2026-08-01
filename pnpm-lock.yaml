@@ -135,6 +135,19 @@ importers:
         version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
 
   apps/mobile:
+    dependencies:
+      '@capacitor/app':
+        specifier: ^8.1.0
+        version: 8.1.0(@capacitor/core@8.4.1)
+      '@capacitor/core':
+        specifier: ^8.4.1
+        version: 8.4.1
+      '@capacitor/splash-screen':
+        specifier: ^8.0.1
+        version: 8.0.1(@capacitor/core@8.4.1)
+      '@capacitor/status-bar':
+        specifier: ^8.0.2
+        version: 8.0.2(@capacitor/core@8.4.1)
     devDependencies:
       '@capacitor/android':
         specifier: ^8.0.0

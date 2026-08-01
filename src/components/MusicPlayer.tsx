@@ -10,6 +10,11 @@ import { TestingContext } from "../contexts/contexts";
 import { WebAudioContext } from "../contexts/contexts";
 import { useMusicPlayerStore } from "../stores/musicPlayerStore";
 import { lerp } from "../utils/mathUtils";
+import {
+  publishNowPlaying,
+  setNowPlayingState,
+  clearNowPlaying,
+} from "../utils/mediaSession";
 
 /*
  * Energy drives the background-mode voice loop, modulating two things: the target
@@ -27,7 +32,7 @@ const LIVELY_SWAP_BEATS = 48; // ...and at highest Energy
 
 export const MusicPlayer = () => {
   const { flags } = useContext(TestingContext)!;
-  const { id, bpm, ambientTrack, ambientTrackQuantize } =
+  const { id, name, bpm, ambientTrack, ambientTrackQuantize } =
     useContext(SongContext)!;
   const { WAW, wawLoadStatus } = useContext(WebAudioContext)!;
 
@@ -63,8 +68,21 @@ export const MusicPlayer = () => {
   useEffect(() => {
     if (!ready) return;
     setPlayerReady(true);
-    return () => setPlayerReady(false);
-  }, [ready, setPlayerReady]);
+    publishNowPlaying(name, {
+      onPlay: () => {
+        WAW.audioCtx.resume();
+        setNowPlayingState("playing");
+      },
+      onPause: () => {
+        WAW.audioCtx.suspend();
+        setNowPlayingState("paused");
+      },
+    });
+    return () => {
+      setPlayerReady(false);
+      clearNowPlaying();
+    };
+  }, [ready, setPlayerReady, WAW, name]);
 
   useEffect(() => {
     if (wawLoadStatus && !songLoadStatus) {

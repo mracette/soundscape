@@ -26,6 +26,7 @@
   },
   "scripts": {
     "start": "vite",
+    "tunnel": "cloudflared tunnel --url http://localhost:3000",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint src/ --fix",

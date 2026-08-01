@@ -59,6 +59,30 @@ describe("loadArrayBuffer", () => {
     await expect(promise).resolves.toBe(body);
   });
 
+  it("resolves on status 0 with a non-empty body (custom schemes like capacitor://)", async () => {
+    const promise = loadArrayBuffer("audio/test.mp3");
+    const xhr = FakeXHR.latest;
+
+    const body = new ArrayBuffer(8);
+    xhr.status = 0;
+    xhr.response = body;
+    xhr.emit("load");
+
+    await expect(promise).resolves.toBe(body);
+  });
+
+  it("rejects on status 0 with an empty body", async () => {
+    const promise = loadArrayBuffer("audio/missing.mp3");
+    const xhr = FakeXHR.latest;
+    xhr.status = 0;
+    xhr.response = new ArrayBuffer(0);
+    xhr.emit("load");
+
+    await expect(promise).rejects.toThrow(
+      "Failed to load audio (HTTP 0): audio/missing.mp3"
+    );
+  });
+
   it("rejects on a non-200 'load' (404) instead of hanging forever", async () => {
     const promise = loadArrayBuffer("audio/missing.mp3");
     const xhr = FakeXHR.latest;
