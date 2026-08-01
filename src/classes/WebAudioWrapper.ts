@@ -167,6 +167,17 @@ export class WebAudioWrapper {
       status: {} as Record<SongId, boolean>,
     };
 
+    // iOS mutes Web Audio behind the ringer/silent switch unless the page
+    // declares its audio session as deliberate media playback — the same
+    // category music apps use. Supported by WebKit (Safari 16.4+ and the
+    // Capacitor shell's WKWebView); undefined elsewhere, so guard it.
+    const audioSession = (
+      navigator as Navigator & { audioSession?: { type: string } }
+    ).audioSession;
+    if (audioSession) {
+      audioSession.type = "playback";
+    }
+
     const audioCtx = new AudioContext({
       latencyHint: "balanced",
     });
